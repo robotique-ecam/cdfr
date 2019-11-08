@@ -3,8 +3,8 @@
 
 import rclpy
 import socket
-from sensors import VL53L1X
 from struct import unpack
+from sensors import VL53L1X, TinyHCSR04
 
 
 localIP = "192.168.2.1"
@@ -22,12 +22,13 @@ UDPServerSocket.bind((localIP, localPort))
 def main(args=None):
     rclpy.init(args=args)
 
-    sensor = VL53L1X()
+    sensor = TinyHCSR04()
 
     # Listen for incoming datagrams
     while(True):
-        range, = unpack('<L', UDPServerSocket.recvfrom(bufferSize)[0])
-        range /= 1000
+        print(UDPServerSocket.recvfrom(bufferSize))
+        range, = UDPServerSocket.recvfrom(bufferSize)[0]
+        range /= 100
         sensor.pushlish_range(range)
 
     # Destroy the node explicitly

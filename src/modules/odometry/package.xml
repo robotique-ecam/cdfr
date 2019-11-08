@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>odometry</name>
+  <version>0.0.1</version>
+  <description>Odometry common stack</description>
+  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
+  <license>Club Robotique ECAM :: CDFR 2020 :: Equipe 1</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>mbridge</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
