@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 
-<robot name="Asterix">
+<robot name="Asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <material name="RRBOT/black">
     <color rgba="0.0 0.0 0.0 1.0"/>
@@ -35,6 +35,12 @@
   </material>
 
   <link name="robotbase" />
+    <visual>
+      <geometry>
+        <cylinder length="0.6" radius="0.2"/>
+      </geometry>
+    </visual>
+
   <link name="roue1" />
   <link name="roue2" />
 
