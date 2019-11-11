@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+
+<robot name="Asterix">
+
+  <material name="RRBOT/black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+
+  <material name="RRBOT/blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+
+  <material name="RRBOT/green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+
+  <material name="RRBOT/grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+
+  <material name="RRBOT/orange">
+    <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+  </material>
+
+  <material name="RRBOT/brown">
+    <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+  </material>
+
+  <material name="RRBOT/red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+
+  <material name="RRBOT/white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+
+  <link name="robotbase" />
+  <link name="roue1" />
+  <link name="roue2" />
+
+  <joint name="joint1" type="continuous">
+    <parent link="robotbase"/>
+    <child link="roue1"/>
+    <origin xyz="125 32 0" rpy="0 0 0" />
+    <axis xyz="1 0 0" />
+  </joint>
+
+  <joint name="joint2" type="continuous">
+    <parent link="robotbase"/>
+    <child link="roue2"/>
+    <origin xyz="-125 32 0" rpy="0 0 0" />
+    <axis xyz="1 0 0" />
+  </joint>
+</robot>
