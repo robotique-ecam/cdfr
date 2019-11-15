@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
-project(odometry)
+project(drive)
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -12,6 +12,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(serial REQUIRED)
 find_package(rclcpp REQUIRED)
 
 if(BUILD_TESTING)
@@ -26,10 +27,10 @@ if(BUILD_TESTING)
 endif()
 
 
-add_executable(odometry src/odometry.cpp)
-ament_target_dependencies(odometry rclcpp)
+add_executable(drive src/drive.cpp)
+ament_target_dependencies(drive rclcpp serial)
 
 install(TARGETS
-    odometry
+    drive
     DESTINATION lib/${PROJECT_NAME}
 )
