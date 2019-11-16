@@ -1,0 +1,13 @@
+drive_node:
+  ros__parameters:
+    wheels:
+      separation: 0.160
+      radius: 0.033
+
+    serial:
+      port: "/dev/ACM0"
+      baudrate: 115200
+
+    joint_states_frame: "asterix_base_footprint"
+    odom_frame: "asterix_odom"
+    base_frame: "asterix_base_footprint"

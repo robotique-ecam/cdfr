@@ -10,27 +10,71 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+################################################################################
+# Find and load build settings from external packages
+################################################################################
 find_package(ament_cmake REQUIRED)
-find_package(serial REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_msgs REQUIRED)
+find_package(serial REQUIRED)
 
 
-add_executable(drive src/drive.cpp)
-ament_target_dependencies(drive rclcpp serial)
-
-install(TARGETS
-    drive
-    DESTINATION lib/${PROJECT_NAME}
+################################################################################
+# Build
+################################################################################
+include_directories(
+  include
 )
+
+set(dependencies
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "sensor_msgs"
+  "tf2"
+  "tf2_msgs"
+  "turtlebot3_msgs"
+  "serial"
+)
+
+set(EXEC_NAME "drive")
+
+add_executable(${EXEC_NAME}
+  src/drive_node.cpp
+  src/drive.cpp
+)
+
+ament_target_dependencies(${EXEC_NAME} ${dependencies})
+
+################################################################################
+# Install
+################################################################################
+install(TARGETS ${EXEC_NAME}
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY param
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
+
+################################################################################
+# Macro for ament package
+################################################################################
+ament_export_include_directories(include)
+ament_export_dependencies(geometry_msgs)
+ament_export_dependencies(nav_msgs)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(sensor_msgs)
+ament_export_dependencies(tf2)
+ament_export_dependencies(tf2_msgs)
+ament_export_dependencies(turtlebot3_msgs)
+ament_export_dependencies(serial)
+ament_package()
