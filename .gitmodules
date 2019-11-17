@@ -1,0 +1,12 @@
+[submodule "src/thirdparty/aruco"]
+	path = src/thirdparty/aruco
+	url = https://github.com/Kapernikov/aruco.git
+[submodule "src/thirdparty/vision_opencv"]
+	path = src/thirdparty/vision_opencv
+	url = https://github.com/ros-perception/vision_opencv.git
+[submodule "src/thirdparty/image_common"]
+	path = src/thirdparty/image_common
+	url = https://github.com/ros-perception/image_common.git
+[submodule "src/thirdparty/serial-ros2"]
+	path = src/thirdparty/serial-ros2
+	url = https://github.com/RoverRobotics-forks/serial-ros2.git
