@@ -7,6 +7,6 @@
 [submodule "src/thirdparty/image_common"]
 	path = src/thirdparty/image_common
 	url = https://github.com/ros-perception/image_common.git
-[submodule "src/thirdparty/serial-ros2"]
-	path = src/thirdparty/serial-ros2
+[submodule "src/thirdparty/serial"]
+	path = src/thirdparty/serial
 	url = https://github.com/RoverRobotics-forks/serial-ros2.git
