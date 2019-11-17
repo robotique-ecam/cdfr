@@ -34,7 +34,7 @@ void Drive::init_parameters() {
   this->declare_parameter("wheels.radius");
 
   // Get parameters from yaml
-  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/cu.usbserial-AI04Y24G");
+  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ACM0");
   this->get_parameter_or<uint32_t>("serial.baudrate", serial_baudrate_, 115200);
 
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
@@ -81,4 +81,9 @@ void Drive::steps_returned_callback(TinyData steps_returned) {
     instantaneous_speed_.angular = instantaneous_move_.angular / dt;
     instantaneous_speed_.linear = instantaneous_move_.linear / dt;
   }
+}
+
+
+Drive::~Drive() {
+  RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
 }

@@ -16,7 +16,7 @@ using namespace rclcpp;
 class Drive : public rclcpp::Node {
 public:
   Drive();
-  // ~Drive();
+  ~Drive();
 
 private:
   struct TinyData {
