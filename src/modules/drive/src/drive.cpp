@@ -46,10 +46,39 @@ void Drive::init_parameters() {
 
 
 void Drive::init_variables() {
-
+  /* Compute initial values */
+  steps_per_turn_ = 200 * 16;
+  mm_per_turn_ = 2 * M_PI * wheel_radius_;
+  mm_per_step_ = mm_per_turn_ / steps_per_turn_;
 }
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
 
+}
+
+
+void Drive::steps_returned_callback(TinyData steps_returned) {
+  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e3;
+
+  differential_move_.left = mm_per_step_ * steps_returned.left;
+  differential_move_.right = mm_per_step_ * steps_returned.right;
+
+  differential_speed_.left = differential_move_.left / dt;
+  differential_speed_.right = differential_move_.right / dt;
+
+  if (steps_returned.left == steps_returned.right) {
+
+  } else if (steps_returned.left == -steps_returned.right) {
+
+  } else {
+    trajectory_radius_left = wheel_separation_ * differential_move_.left / (differential_move_.right - differential_move_.left);
+    trajectory_radius = 2 * trajectory_radius_left + wheel_separation_;
+
+    instantaneous_move_.angular = differential_move_.left / trajectory_radius_left;
+    instantaneous_move_.linear = wheel_radius_ * sqrt(2 - 2 * cos(instantaneous_move_.angular));
+
+    instantaneous_speed_.angular = instantaneous_move_.angular / dt;
+    instantaneous_speed_.linear = instantaneous_move_.linear / dt;
+  }
 }

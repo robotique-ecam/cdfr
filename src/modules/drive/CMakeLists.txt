@@ -30,6 +30,10 @@ include_directories(
   include
 )
 
+add_library(${PROJECT_NAME}_lib
+  "include/drive/drive.cpp"
+)
+
 set(dependencies
   "geometry_msgs"
   "nav_msgs"
@@ -49,6 +53,7 @@ add_executable(${EXEC_NAME}
 )
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
+
 
 ################################################################################
 # Install
