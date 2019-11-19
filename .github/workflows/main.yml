@@ -14,7 +14,6 @@ jobs:
       - name: Setup ROS2 environment
         run: |
           sudo apt-get update
-          sudo apt-get upgrade
           sudo apt-get install -y curl gnupg2 lsb-release && \
           curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
           export DEBIAN_FRONTEND=noninteractive && \
