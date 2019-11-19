@@ -11,4 +11,4 @@ jobs:
     - name: Setup ROS2 environment
       uses: ros-tooling/setup-ros2@0.0.6
     - name: Test all CDR packages
-      run: colcon-build
+      run: colcon build
