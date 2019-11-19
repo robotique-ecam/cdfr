@@ -14,11 +14,10 @@ jobs:
       - name: Setup ROS2 environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl gnupg2 lsb-release && \
-          curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
-          export DEBIAN_FRONTEND=noninteractive && \
-          mkdir -p /etc/apt-get/sources.list.d/ && \
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl gnupg2 lsb-release && \
+          curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+          sudo mkdir -p /etc/apt-get/sources.list.d/ && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
-          sudo apt-get update && sudo apt-get install -y ros-dashing-ros-base
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-dashing-ros-base
       - name: Test all CDR packages
         run: . /opt/ros/dashing/setup.bash && colcon build
