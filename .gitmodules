@@ -10,3 +10,6 @@
 [submodule "src/thirdparty/serial"]
 	path = src/thirdparty/serial
 	url = https://github.com/RoverRobotics-forks/serial-ros2.git
+[submodule "src/thirdparty/DynamixelSDK"]
+	path = src/thirdparty/DynamixelSDK
+	url = https://github.com/ROBOTIS-GIT/DynamixelSDK.git
