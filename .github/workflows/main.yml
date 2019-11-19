@@ -19,6 +19,6 @@ jobs:
           sudo mkdir -p /etc/apt-get/sources.list.d/ && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-dashing-ros-base python3-colcon-common-extensions \
-          libopencv-dev libboost-dev libboost-python-dev ros-dashing-cmake-modules
+          libopencv-dev libboost-dev libboost-python-dev ros-dashing-yaml-cpp-vendor
       - name: Test all CDR packages
         run: . /opt/ros/dashing/setup.bash && colcon build
