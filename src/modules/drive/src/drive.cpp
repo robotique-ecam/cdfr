@@ -9,7 +9,12 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
   /* Open UART connection */
-  serial::Serial serial_interface(this->serial_port_, this->serial_baudrate_);
+  try {
+    serial::Serial serial_interface(this->serial_port_, this->serial_baudrate_);
+  } catch (serial::IOException) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
+    exit(1);
+  }
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -54,7 +59,7 @@ void Drive::init_variables() {
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  
+
 }
 
 

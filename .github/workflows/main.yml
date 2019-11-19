@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          fetch-depth: 3
+          submodules: recursive
       - name: Setup ROS2 environment
         run: |
           sudo apt-get update
