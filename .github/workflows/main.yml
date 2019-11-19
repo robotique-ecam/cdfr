@@ -18,6 +18,6 @@ jobs:
           curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
           sudo mkdir -p /etc/apt-get/sources.list.d/ && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-dashing-ros-base
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-dashing-ros-base python3-colcon-common-extensions
       - name: Test all CDR packages
         run: . /opt/ros/dashing/setup.bash && colcon build
