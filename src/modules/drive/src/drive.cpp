@@ -10,13 +10,13 @@ Drive::Drive() : Node("drive_node") {
 
   /* Open UART connection */
   try {
-    serial::Serial serial_interface(this->serial_port_, this->serial_baudrate_);
+    serial_interface_ = std::make_shared<serial::Serial>(this->serial_port_, this->serial_baudrate_);
   } catch (serial::IOException) {
     RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
     exit(1);
   }
   // Test the timeout at 2ms
-  serial_interface_.setTimeout(serial::Timeout::max(), 0, 2, 0, 2);
+  // serial_interface_.setTimeout(serial::Timeout::max(), 0, 2, 0, 2);
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -41,7 +41,7 @@ void Drive::init_parameters() {
   this->declare_parameter("wheels.radius");
 
   // Get parameters from yaml
-  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ACM0");
+  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ttyUSB0");
   this->get_parameter_or<uint32_t>("serial.baudrate", serial_baudrate_, 115200);
 
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
@@ -69,8 +69,8 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   differential_speed_cmd_.right[0] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[0]) & 1;
 
   /* Send speed commands */
-  this->serial_interface_.write((const uint8_t*) differential_speed_cmd_.left, 2);
-  this->serial_interface_.write((const uint8_t*) differential_speed_cmd_.right, 2);
+  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, 2);
+  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, 2);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();

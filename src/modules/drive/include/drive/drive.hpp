@@ -56,7 +56,7 @@ private:
   };
 
   // For communicating with ATTiny85 over UART
-  serial::Serial serial_interface_;
+  std::shared_ptr<serial::Serial> serial_interface_;
   std::string serial_port_;
   uint32_t serial_baudrate_;
 
