@@ -5,6 +5,15 @@
 
 
 from setuptools import setup, find_packages
+from distutils.command import build as build_module
+from components.map.map import creamapbleu,creamapjaune
+
+
+class build(build_module.build):
+  def run(self):
+    creamapbleu()
+    creamapjaune()
+    build_module.build.run(self)
 
 
 package_name = 'assurancetourix'
@@ -32,5 +41,8 @@ setup(
             'leds = assurancetourix.led_indicators:main',
             'controller = assurancetourix.controller:main',
         ],
+    },
+    cmdclass = {
+      'build': build,
     },
 )
