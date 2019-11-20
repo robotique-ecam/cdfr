@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
 
   RCLCPP_INFO(drive_node->get_logger(), "Hello drive !");
 
+  rclcpp::spin(drive_node);
   rclcpp::shutdown();
   return 0;
 }

@@ -2,12 +2,18 @@
 #define DRIVE_NODE_HPP
 
 
+#include <thread>
 #include <math.h>
 #include <serial/serial.h>
 #include <rclcpp/rclcpp.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
+
+
+#define LEFT 0
+#define RIGHT 1
 
 
 using namespace rclcpp;
@@ -19,6 +25,12 @@ public:
   ~Drive();
 
 private:
+  struct TinyCMD {
+    /* Speed order for ATTiny going through UART */
+    int8_t left[2] = {1 << 4, 0};
+    int8_t right[2]= {2 << 4, 0};
+  };
+
   struct TinyData {
     /* Speed order for ATTiny going through UART */
     int16_t left = 0;
@@ -35,6 +47,12 @@ private:
     /* Computed values */
     double linear = 0;
     double angular = 0;
+  };
+
+  struct OdometricPose {
+    double x = 0;
+    double y = 0;
+    double thetha = 0;
   };
 
   // For communicating with ATTiny85 over UART
@@ -74,6 +92,8 @@ private:
 
   TinyData attiny_speed_cmd_;
   TinyData attiny_steps_returned_;
+  TinyCMD differential_speed_cmd_;
+  OdometricPose odom_pose_;
   Differential differential_speed_;
   Differential differential_move_;
   Instantaneous instantaneous_speed_;
@@ -81,7 +101,10 @@ private:
 
   void init_parameters();
   void init_variables();
-  void steps_returned_callback(TinyData steps_returned);
+  void update_tf();
+  void update_joint_states();
+  void update_odometry();
+  void compute_pose_velocity(TinyData steps_returned);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
 
 };

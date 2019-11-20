@@ -6,14 +6,15 @@
 
 from setuptools import setup, find_packages
 from distutils.command import build as build_module
-from components.map.map import creamapbleu,creamapjaune
+from assurancetourix.map.map import creamapbleu, creamapjaune
 
 
 class build(build_module.build):
-  def run(self):
-    creamapbleu()
-    creamapjaune()
-    build_module.build.run(self)
+    """Overloaded build module to run custom commands at build."""
+    def run(self):
+        creamapbleu()
+        creamapjaune()
+        build_module.build.run(self)
 
 
 package_name = 'assurancetourix'
@@ -42,7 +43,5 @@ setup(
             'controller = assurancetourix.controller:main',
         ],
     },
-    cmdclass = {
-      'build': build,
-    },
+    cmdclass={'build': build},
 )
