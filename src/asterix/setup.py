@@ -15,7 +15,7 @@ setup(
     version='0.2.0',
     packages=[package_name],
     data_files=[
-        ('share/' + package_name, ['package.xml', 'launch/launch.py']),
+        ('share/' + package_name, ['package.xml', 'launch/launch.py', 'robot/asterix.urdf']),
     ],
     zip_safe=True,
     install_requires=['setuptools'],
