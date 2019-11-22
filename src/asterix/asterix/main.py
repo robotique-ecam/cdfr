@@ -2,3 +2,7 @@
 
 
 """Asterix ROS2."""
+
+
+def main():
+    pass

@@ -4,7 +4,7 @@
   <version>0.0.2</version>
   <description>Assurancetourix RO2 System</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
+
   <license>Funtech Makers :: CDFR 2020 :: Equipe 1</license>
 
   <exec_depend>rclpy</exec_depend>

@@ -74,8 +74,6 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();
-
-
 }
 
 
