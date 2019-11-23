@@ -39,6 +39,8 @@ void Drive::init_parameters() {
   this->declare_parameter("base_frame");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
+  this->declare_parameter("microcontroler.max_steps_frequency");
+  this->declare_parameter("microcontroler.speedramp_resolution");
 
   // Get parameters from yaml
   this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ttyUSB0");
@@ -47,8 +49,10 @@ void Drive::init_parameters() {
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
-  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.0);
-  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.0);
+  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
+  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
+  this->get_parameter_or<double>("microcontroler.max_steps_frequency", max_freq_, 10e3);
+  this->get_parameter_or<double>("microcontroler.speedramp_resolution", speed_resolution_, 254);
 }
 
 
@@ -57,22 +61,41 @@ void Drive::init_variables() {
   steps_per_turn_ = 200 * 16;
   mm_per_turn_ = 2 * M_PI * wheel_radius_;
   mm_per_step_ = mm_per_turn_ / steps_per_turn_;
+
+
+  speed_multiplier_ = max_freq_ / speed_resolution_;
+  max_speed_ = max_freq_ * mm_per_step_;
+  min_speed_ = speed_multiplier_ * mm_per_step_;
+}
+
+
+uint8_t Drive::compute_velocity_cmd(double velocity) {
+  /* Compute absolute velocity command to be sent to microcontroler */
+  velocity = abs(velocity);
+  if (velocity >= max_speed_) {
+    return speed_resolution_ - 1;
+  } else if (velocity < min_speed_) {
+    return 0;
+  } else {
+    return (uint8_t) round(velocity / (mm_per_step_ * speed_resolution_));
+  }
 }
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  int16_t differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  int16_t differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
+
+  differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
+  differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  differential_speed_cmd_.left[2] = abs(differential_speed_left);
-  differential_speed_cmd_.right[2] = abs(differential_speed_right);
   differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
-  differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[1]) & 1;
+  differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
+  this->serial_interface_->write(differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
+  this->serial_interface_->write(differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();

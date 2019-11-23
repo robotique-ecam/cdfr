@@ -79,11 +79,16 @@ private:
 
   double wheel_separation_;
   double wheel_radius_;
+  double max_freq_;
+  double speed_resolution_;
 
   /* Computed values */
   uint16_t steps_per_turn_;
   double mm_per_turn_;
   double mm_per_step_;
+  double speed_multiplier_;
+  double max_speed_;
+  double min_speed_;
 
   /* Temporary values */
   double dt = 1; /* us */
@@ -106,6 +111,7 @@ private:
   void update_odometry();
   void compute_pose_velocity(TinyData steps_returned);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
+  uint8_t compute_velocity_cmd(double velocity);
 
 };
 
