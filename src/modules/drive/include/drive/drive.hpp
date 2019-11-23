@@ -32,7 +32,7 @@ private:
   };
 
   struct TinyData {
-    /* Speed order for ATTiny going through UART */
+    /* ATTiny steps from UART */
     int16_t left = 0;
     int16_t right = 0;
   };
