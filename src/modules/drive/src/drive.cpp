@@ -89,6 +89,8 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
   differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
+  std::cout << differential_speed_cmd_.left[2] << std::endl;
+  std::cout << differential_speed_cmd_.right[2] << std::endl;
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
   differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
   differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
