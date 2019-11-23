@@ -79,8 +79,8 @@ private:
 
   double wheel_separation_;
   double wheel_radius_;
-  double max_freq_;
-  double speed_resolution_;
+  int max_freq_;
+  int speed_resolution_;
 
   /* Computed values */
   uint16_t steps_per_turn_;

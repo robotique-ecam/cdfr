@@ -51,8 +51,8 @@ void Drive::init_parameters() {
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
   this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
-  this->get_parameter_or<double>("microcontroler.max_steps_frequency", max_freq_, 10e3);
-  this->get_parameter_or<double>("microcontroler.speedramp_resolution", speed_resolution_, 254);
+  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10e3);
+  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 254);
 }
 
 
