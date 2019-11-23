@@ -65,12 +65,12 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   differential_speed_cmd_.right[1] = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  differential_speed_cmd_.left[0] ^= (-signbit(differential_speed_cmd_.left[1]) ^ differential_speed_cmd_.left[0]) & 1;
-  differential_speed_cmd_.right[0] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[0]) & 1;
+  differential_speed_cmd_.left[3] ^= (signbit(differential_speed_cmd_.left[1]) ^ differential_speed_cmd_.left[0]) & 1;
+  differential_speed_cmd_.right[3] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[0]) & 1;
 
   /* Send speed commands */
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, 2);
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, 2);
+  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
+  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();

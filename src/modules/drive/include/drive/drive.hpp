@@ -27,8 +27,8 @@ public:
 private:
   struct TinyCMD {
     /* Speed order for ATTiny going through UART */
-    int8_t left[2] = {1 << 4, 0};
-    int8_t right[2]= {2 << 4, 0};
+    uint8_t left[4] = {0xFF, 0xFF, 1 << 4, 0};
+    uint8_t right[4]= {0xFF, 0xFF, 2 << 4, 0};
   };
 
   struct TinyData {
