@@ -51,7 +51,7 @@ void Drive::init_parameters() {
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
   this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
-  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10e3);
+  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
   this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 254);
 }
 
@@ -89,8 +89,8 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
   differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
-  std::cout << differential_speed_cmd_.left[2] << std::endl;
-  std::cout << differential_speed_cmd_.right[2] << std::endl;
+  std::cout << std::hex << static_cast<int>(differential_speed_cmd_.left[2]) << std::endl;
+  std::cout << std::hex << static_cast<int>(differential_speed_cmd_.right[2]) << std::endl;
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
   differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
   differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;

@@ -5,7 +5,7 @@ drive_node:
       radius: 0.0405
 
     microcontroler:
-      max_steps_frequency: 10e3
+      max_steps_frequency: 10000
       speedramp_resolution: 254
 
     serial:
