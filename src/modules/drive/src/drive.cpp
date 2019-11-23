@@ -77,7 +77,7 @@ uint8_t Drive::compute_velocity_cmd(double velocity) {
   } else if (velocity < min_speed_) {
     return 0;
   } else {
-    return (uint8_t) round(velocity / (mm_per_step_ * speed_resolution_));
+    return (uint8_t) round(velocity * (speed_resolution_ - 1) / max_speed_);
   }
 }
 
