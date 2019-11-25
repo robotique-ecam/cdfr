@@ -1,23 +1,25 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
-
-#include <thread>
-#include <math.h>
-#include <serial/serial.h>
-#include <rclcpp/rclcpp.hpp>
-#include <tf2/LinearMath/Quaternion.h>
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
-
+#include "tiny_uart.hpp"
+#include <chrono>
+#include <math.h>
+#include <rclcpp/rclcpp.hpp>
+#include <serial/serial.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <thread>
 
 #define LEFT 0
 #define RIGHT 1
 
+#define STEPPER_LEFT 1
+#define STEPPER_RIGHT 2
 
 using namespace rclcpp;
-
+using namespace std::chrono;
 
 class Drive : public rclcpp::Node {
 public:
@@ -27,14 +29,14 @@ public:
 private:
   struct TinyCMD {
     /* Speed order for ATTiny going through UART */
-    uint8_t left[4] = {0xFF, 1 << 4, 0, 0xFE};
-    uint8_t right[4]= {0xFF, 2 << 4, 0, 0xFE};
+    uint8_t left[4] = {0xFF, STEPPER_LEFT << 4, 0, 0xFE};
+    uint8_t right[4] = {0xFF, STEPPER_RIGHT << 4, 0, 0xFE};
   };
 
   struct TinyData {
     /* ATTiny steps from UART */
-    int16_t left = 0;
-    int16_t right = 0;
+    int32_t left = 0;
+    int32_t right = 0;
   };
 
   struct Differential {
@@ -59,6 +61,7 @@ private:
   std::shared_ptr<serial::Serial> serial_interface_;
   std::string serial_port_;
   uint32_t serial_baudrate_;
+  TinyUART tiny_uart;
 
   // ROS time
   rclcpp::Time time_since_last_sync_;
@@ -95,6 +98,9 @@ private:
   double trajectory_radius = 0;
   double trajectory_radius_left = 0;
 
+  bool received_steps_left;
+  bool received_steps_right;
+
   TinyData attiny_speed_cmd_;
   TinyData attiny_steps_returned_;
   TinyCMD differential_speed_cmd_;
@@ -103,13 +109,16 @@ private:
   Differential differential_move_;
   Instantaneous instantaneous_speed_;
   Instantaneous instantaneous_move_;
+  rclcpp::TimerBase::SharedPtr serial_read_timer_;
 
   void init_parameters();
   void init_variables();
   void update_tf();
   void update_joint_states();
   void update_odometry();
+  void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
+  void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   uint8_t compute_velocity_cmd(double velocity);
 

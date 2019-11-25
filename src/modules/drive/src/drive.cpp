@@ -15,8 +15,11 @@ Drive::Drive() : Node("drive_node") {
     RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
     exit(1);
   }
-  // Test the timeout at 2ms
-  // serial_interface_.setTimeout(serial::Timeout::max(), 0, 2, 0, 2);
+
+  tiny_uart.set_steps_callback(std::bind(&Drive::steps_received_callback, this,
+                                         std::placeholders::_1,
+                                         std::placeholders::_2));
+  serial_read_timer_ = this->create_wall_timer(1ms, std::bind(&Drive::read_from_serial, this));
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -68,6 +71,32 @@ void Drive::init_variables() {
   min_speed_ = speed_multiplier_ * mm_per_step_;
 }
 
+void Drive::read_from_serial() {
+  if (serial_interface_->available()) {
+    std::vector<uint8_t> read_data;
+    serial_interface_->read(read_data);
+    tiny_uart.update(&read_data);
+  }
+}
+
+void Drive::steps_received_callback(int32_t steps, uint8_t id) {
+  switch (id) {
+  case STEPPER_LEFT:
+    attiny_steps_returned_.left = steps;
+    received_steps_left = true;
+
+  case STEPPER_RIGHT:
+    attiny_steps_returned_.right = steps;
+    received_steps_right = true;
+
+  default:
+    if (received_steps_left && received_steps_right) {
+      received_steps_left = false;
+      received_steps_right = false;
+      compute_pose_velocity(attiny_steps_returned_);
+    }
+  }
+}
 
 uint8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
@@ -89,8 +118,10 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
   differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
-  std::cout << std::hex << static_cast<int>(differential_speed_cmd_.left[2]) << std::endl;
-  std::cout << std::hex << static_cast<int>(differential_speed_cmd_.right[2]) << std::endl;
+  std::cout << "Left: 0x" << std::hex
+            << static_cast<int>(differential_speed_cmd_.left[2]) << std::endl;
+  std::cout << "Right: 0x" << std::hex
+            << static_cast<int>(differential_speed_cmd_.right[2]) << std::endl;
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
   differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
   differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;

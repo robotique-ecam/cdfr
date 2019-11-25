@@ -3,6 +3,8 @@
 *install/*
 *log/*
 *DS_Store
+*.gch
+*.ppm
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
