@@ -1,6 +1,9 @@
 #include <drive/drive.hpp>
 
 
+#define DEBUG
+
+
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
   init_parameters();
@@ -16,6 +19,7 @@ Drive::Drive() : Node("drive_node") {
     exit(1);
   }
 
+  serial_interface_->setTimeout(0, 2, 0, 2, 0);
   tiny_uart.set_steps_callback(std::bind(&Drive::steps_received_callback, this,
                                          std::placeholders::_1,
                                          std::placeholders::_2));
@@ -75,26 +79,30 @@ void Drive::read_from_serial() {
   if (serial_interface_->available()) {
     std::vector<uint8_t> read_data;
     serial_interface_->read(read_data);
+    #ifdef DEBUG
+      print(read_data);
+    #endif
     tiny_uart.update(&read_data);
   }
 }
 
 void Drive::steps_received_callback(int32_t steps, uint8_t id) {
   switch (id) {
-  case STEPPER_LEFT:
-    attiny_steps_returned_.left = steps;
-    received_steps_left = true;
+    [[fallthrough]];
+    case STEPPER_LEFT:
+      attiny_steps_returned_.left = steps;
+      received_steps_left = true;
 
-  case STEPPER_RIGHT:
-    attiny_steps_returned_.right = steps;
-    received_steps_right = true;
+    case STEPPER_RIGHT:
+      attiny_steps_returned_.right = steps;
+      received_steps_right = true;
 
-  default:
-    if (received_steps_left && received_steps_right) {
-      received_steps_left = false;
-      received_steps_right = false;
-      compute_pose_velocity(attiny_steps_returned_);
-    }
+    default:
+      if (received_steps_left && received_steps_right) {
+        received_steps_left = false;
+        received_steps_right = false;
+        compute_pose_velocity(attiny_steps_returned_);
+      }
   }
 }
 
