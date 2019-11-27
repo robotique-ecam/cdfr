@@ -1,11 +1,12 @@
 #include <cstdio>
 #include <string>
-#include <fstream>
-#include <iostream>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
+
 
 class I2C {
 public:
@@ -19,7 +20,7 @@ public:
   }
 
   uint8_t read_byte(uint8_t cmd) {
-    return i2c_smbus_read_byte(i2c_fd_);
+    return i2c_smbus_read_byte(i2c_fd_, cmd);
   }
 
   uint16_t read_word(uint8_t cmd) {
