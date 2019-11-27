@@ -60,6 +60,8 @@ void Drive::init_variables() {
   speed_multiplier_ = max_freq_ / speed_resolution_;
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
+
+  time_since_last_sync_ = this->get_clock()->now();
 }
 
 
@@ -95,7 +97,7 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
-  time_since_last_sync_ = this->now();
+  time_since_last_sync_ = this->get_clock()->now();
   compute_pose_velocity(attiny_steps_returned_);
 }
 
