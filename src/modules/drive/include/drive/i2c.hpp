@@ -14,6 +14,16 @@ extern "C" {
   #include <i2c/smbus.h>
 }
 
+extern __s32 i2c_smbus_write_quick(int file, __u8 value);
+extern __s32 i2c_smbus_read_byte(int file);
+extern __s32 i2c_smbus_write_byte(int file, __u8 value);
+extern __s32 i2c_smbus_read_byte_data(int file, __u8 command);
+extern __s32 i2c_smbus_write_byte_data(int file, __u8 command, __u8 value);
+extern __s32 i2c_smbus_read_word_data(int file, __u8 command);
+extern __s32 i2c_smbus_write_word_data(int file, __u8 command, __u16 value);
+extern __s32 i2c_smbus_process_call(int file, __u8 command, __u16 value);
+
+
 class I2C {
 public:
   I2C(int i2c_bus);
