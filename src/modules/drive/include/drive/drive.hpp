@@ -8,7 +8,6 @@
 #include <chrono>
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
-#include <serial/serial.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <thread>
 
