@@ -1,10 +1,10 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
+#include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
-#include "tiny_uart.hpp"
 #include <chrono>
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
@@ -27,12 +27,6 @@ public:
   ~Drive();
 
 private:
-  struct TinyCMD {
-    /* Speed order for ATTiny going through UART */
-    uint8_t left[4] = {0xFF, STEPPER_LEFT << 4, 0, 0xFE};
-    uint8_t right[4] = {0xFF, STEPPER_RIGHT << 4, 0, 0xFE};
-  };
-
   struct TinyData {
     /* ATTiny steps from UART */
     int32_t left = 0;
@@ -72,11 +66,8 @@ private:
       return vec;
   }
 
-  // For communicating with ATTiny85 over UART
-  std::shared_ptr<serial::Serial> serial_interface_;
-  std::string serial_port_;
-  uint32_t serial_baudrate_;
-  TinyUART tiny_uart;
+  // For communicating with ATTiny85 over I2C
+  I2C i2c_bus;
 
   // ROS time
   rclcpp::Time time_since_last_sync_;

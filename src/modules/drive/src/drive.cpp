@@ -1,7 +1,8 @@
 #include <drive/drive.hpp>
 
 
-#define DEBUG
+#define I2C_ADDR_MOTOR_LEFT 0x10
+#define I2C_ADDR_MOTOR_RIGHT 0x11
 
 
 Drive::Drive() : Node("drive_node") {
@@ -11,18 +12,13 @@ Drive::Drive() : Node("drive_node") {
   /* Give variables their initial values */
   init_variables();
 
-  /* Open UART connection */
-  try {
-    serial_interface_ = std::make_shared<serial::Serial>(this->serial_port_, this->serial_baudrate_);
-  } catch (serial::IOException) {
-    RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
+  /* Open I2C connection */
+  if (!i2c_bus.open(1)) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to open I2C BUS : ");
     exit(1);
   }
 
-  serial_interface_->setTimeout(0, 2, 0, 2, 0);
-  tiny_uart.set_steps_callback(std::bind(&Drive::steps_received_callback, this,
-                                         std::placeholders::_1,
-                                         std::placeholders::_2));
+
   serial_read_timer_ = this->create_wall_timer(1ms, std::bind(&Drive::read_from_serial, this));
 
   /* Init ROS Publishers and Subscribers */
@@ -86,26 +82,6 @@ void Drive::read_from_serial() {
   }
 }
 
-void Drive::steps_received_callback(int32_t steps, uint8_t id) {
-  switch (id) {
-    [[fallthrough]];
-    case STEPPER_LEFT:
-      attiny_steps_returned_.left = steps;
-      received_steps_left = true;
-
-    case STEPPER_RIGHT:
-      attiny_steps_returned_.right = steps;
-      received_steps_right = true;
-
-    default:
-      if (received_steps_left && received_steps_right) {
-        received_steps_left = false;
-        received_steps_right = false;
-        compute_pose_velocity(attiny_steps_returned_);
-      }
-  }
-}
-
 uint8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
   velocity = abs(velocity);
@@ -120,26 +96,31 @@ uint8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
+  char steps_left[2];
+  char steps_right[2];
   double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
   double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
-
   differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
-  std::cout << "Left: 0x" << std::hex
-            << static_cast<int>(differential_speed_cmd_.left[2]) << std::endl;
-  std::cout << "Right: 0x" << std::hex
-            << static_cast<int>(differential_speed_cmd_.right[2]) << std::endl;
+
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
   differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
   differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
-  this->serial_interface_->write(differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
-  this->serial_interface_->write(differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
+  this->i2c_bus->write_bytes(I2C_ADDR_MOTOR_LEFT, differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
+  this->i2c_bus->read_bytes(I2C_ADDR_MOTOR_LEFT, steps_left, sizeof(steps_left));
+
+  this->i2c_bus->write_bytes(I2C_ADDR_MOTOR_RIGHT, differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
+  this->i2c_bus->read_bytes(I2C_ADDR_MOTOR_RIGHT, steps_right, sizeof(steps_right));
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();
+
+  attiny_steps_returned_.left = steps_left[0] << 8 | steps_left[1];
+  attiny_steps_returned_.right = steps_right[0] << 8 | steps_right[1];
+  compute_pose_velocity(attiny_steps_returned_);
 }
 
 
