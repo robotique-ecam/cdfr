@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
@@ -10,14 +11,14 @@ class I2C {
 public:
   I2C(int i2c_bus) {
     filename_ = "/dev/i2c-" + std::to_string(i2c_bus);
-    i2c_fd_ = open(filename_, O_RDWR);
+    i2c_fd_ = open(filename_, I2C_RDWR);
   }
 
-  int set_address(int addr) {
-    ioctl(i2c_fd_, I2C_SLAVE, cmd);
+  void set_address(int addr) {
+    ioctl(i2c_fd_, I2C_SLAVE, addr);
   }
 
-  int read_byte(uint8_t cmd) {
+  uint8_t read_byte(uint8_t cmd) {
     return i2c_smbus_read_byte(i2c_fd_);
   }
 

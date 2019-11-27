@@ -80,12 +80,12 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
   double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
-  differential_speed_cmd_.left[2] = compute_velocity_cmd(differential_speed_left);
-  differential_speed_cmd_.right[2] = compute_velocity_cmd(differential_speed_right);
+  differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
+  differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
 
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
-  differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
+  // differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
+  // differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
