@@ -18,11 +18,11 @@ public:
   }
 
   int read_byte(uint8_t cmd) {
-    return i2c_smbus_read_byte(i2c_fd_) {
+    return i2c_smbus_read_byte(i2c_fd_);
   }
 
   uint16_t read_word(uint8_t cmd) {
-    return i2c_smbus_read_word_data(i2c_fd_, cmd)
+    return i2c_smbus_read_word_data(i2c_fd_, cmd);
   }
 
   void write_byte(uint8_t cmd) {
