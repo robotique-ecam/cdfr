@@ -5,12 +5,13 @@
 #include <cstdio>
 #include <string>
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
-
+extern "C" {
+  #include <sys/stat.h>
+  #include <sys/ioctl.h>
+  #include <sys/types.h>
+  #include <linux/i2c-dev.h>
+  #include <i2c/smbus.h>
+}
 
 class I2C {
 public:
