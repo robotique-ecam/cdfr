@@ -1,3 +1,6 @@
+#ifndef I2C_HEADER_HPP
+#define I2C_HEADER_HPP
+
 #include <cstdio>
 #include <string>
 #include <fcntl.h>
@@ -33,6 +36,8 @@ public:
 
 private:
   static int i2c_fd_;
-  std::string filename_;
+  static std::string filename_;
 
 };
+
+#endif /* I2C_HEADER_HPP */
