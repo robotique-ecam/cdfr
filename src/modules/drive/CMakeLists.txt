@@ -40,13 +40,14 @@ set(dependencies
 
 set(EXEC_NAME "drive")
 
-target_link_libraries(${EXEC_NAME} i2c)
 
 add_executable(${EXEC_NAME}
   src/drive_node.cpp
   src/drive.cpp
   src/i2c.cpp
 )
+
+target_link_libraries(${EXEC_NAME} i2c)
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 
