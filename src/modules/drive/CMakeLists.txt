@@ -43,6 +43,7 @@ set(EXEC_NAME "drive")
 add_executable(${EXEC_NAME}
   src/drive_node.cpp
   src/drive.cpp
+  src/i2c.cpp
 )
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})

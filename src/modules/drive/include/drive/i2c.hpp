@@ -1,6 +1,7 @@
 #ifndef I2C_HEADER_HPP
 #define I2C_HEADER_HPP
 
+
 #include <cstdio>
 #include <string>
 #include <fcntl.h>
@@ -13,30 +14,15 @@
 
 class I2C {
 public:
-  I2C(int i2c_bus) {
-    filename_ = "/dev/i2c-" + std::to_string(i2c_bus);
-    i2c_fd_ = open(filename_.c_str(), I2C_RDWR);
-  }
-
-  void set_address(int addr) {
-    ioctl(i2c_fd_, I2C_SLAVE, addr);
-  }
-
-  uint8_t read_byte() {
-    return i2c_smbus_read_byte(i2c_fd_);
-  }
-
-  uint16_t read_word(uint8_t cmd) {
-    return i2c_smbus_read_word_data(i2c_fd_, cmd);
-  }
-
-  void write_byte(uint8_t cmd) {
-    i2c_smbus_write_byte(i2c_fd_, cmd);
-  }
+  I2C(int i2c_bus);
+  void set_address(int addr);
+  uint8_t read_byte();
+  uint16_t read_word(uint8_t cmd);
+  void write_byte(uint8_t cmd);
 
 private:
-  static int i2c_fd_;
-  static std::string filename_;
+  int i2c_fd_;
+  std::string filename_;
 
 };
 
