@@ -11,7 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    urdf = os.path.join(get_package_share_directory('asterix'), 'robot', 'asterix.urdf')
+    urdf = os.path.join(get_package_share_directory('asterix'), 'asterix.urdf')
     asterix_drive_params = os.path.join(get_package_share_directory('drive'), 'param', 'asterix.yml')
 
     return launch.LaunchDescription([

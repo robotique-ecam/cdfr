@@ -1,23 +1,24 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
-
-#include <thread>
-#include <math.h>
-#include <serial/serial.h>
-#include <rclcpp/rclcpp.hpp>
-#include <tf2/LinearMath/Quaternion.h>
+#include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
-
+#include <chrono>
+#include <math.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include <thread>
 
 #define LEFT 0
 #define RIGHT 1
 
+#define STEPPER_LEFT 1
+#define STEPPER_RIGHT 2
 
 using namespace rclcpp;
-
+using namespace std::chrono;
 
 class Drive : public rclcpp::Node {
 public:
@@ -26,15 +27,15 @@ public:
 
 private:
   struct TinyCMD {
-    /* Speed order for ATTiny going through UART */
-    int8_t left[2] = {1 << 4, 0};
-    int8_t right[2]= {2 << 4, 0};
+    /* ATTiny steps from UART */
+    uint8_t left = 0;
+    uint8_t right = 0;
   };
 
   struct TinyData {
-    /* Speed order for ATTiny going through UART */
-    int16_t left = 0;
-    int16_t right = 0;
+    /* ATTiny steps from UART */
+    int32_t left = 0;
+    int32_t right = 0;
   };
 
   struct Differential {
@@ -55,10 +56,15 @@ private:
     double thetha = 0;
   };
 
-  // For communicating with ATTiny85 over UART
-  std::shared_ptr<serial::Serial> serial_interface_;
-  std::string serial_port_;
-  uint32_t serial_baudrate_;
+  template<typename T> void print(std::vector<T> const &v) {
+      for (auto i: v) {
+          std::cout << "0x" << std::hex << i << ' ';
+      }
+      std::cout << '\n';
+  }
+
+  // For communicating with ATTiny85 over I2C
+  std::shared_ptr<I2C> i2c;
 
   // ROS time
   rclcpp::Time time_since_last_sync_;
@@ -79,16 +85,27 @@ private:
 
   double wheel_separation_;
   double wheel_radius_;
+  int max_freq_;
+  int speed_resolution_;
+
+  /* I2C Bus */
+  int i2c_bus;
 
   /* Computed values */
   uint16_t steps_per_turn_;
   double mm_per_turn_;
   double mm_per_step_;
+  double speed_multiplier_;
+  double max_speed_;
+  double min_speed_;
 
   /* Temporary values */
   double dt = 1; /* us */
   double trajectory_radius = 0;
   double trajectory_radius_left = 0;
+
+  bool received_steps_left;
+  bool received_steps_right;
 
   TinyData attiny_speed_cmd_;
   TinyData attiny_steps_returned_;
@@ -98,14 +115,18 @@ private:
   Differential differential_move_;
   Instantaneous instantaneous_speed_;
   Instantaneous instantaneous_move_;
+  rclcpp::TimerBase::SharedPtr serial_read_timer_;
 
   void init_parameters();
   void init_variables();
   void update_tf();
   void update_joint_states();
   void update_odometry();
+  void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
+  void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
+  uint8_t compute_velocity_cmd(double velocity);
 
 };
 

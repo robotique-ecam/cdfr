@@ -1,6 +1,10 @@
 #include <drive/drive.hpp>
 
 
+#define I2C_ADDR_MOTOR_LEFT 0x10
+#define I2C_ADDR_MOTOR_RIGHT 0x11
+
+
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
   init_parameters();
@@ -8,15 +12,8 @@ Drive::Drive() : Node("drive_node") {
   /* Give variables their initial values */
   init_variables();
 
-  /* Open UART connection */
-  try {
-    serial_interface_ = std::make_shared<serial::Serial>(this->serial_port_, this->serial_baudrate_);
-  } catch (serial::IOException) {
-    RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
-    exit(1);
-  }
-  // Test the timeout at 2ms
-  // serial_interface_.setTimeout(serial::Timeout::max(), 0, 2, 0, 2);
+  /* Open I2C connection */
+  i2c = std::make_shared<I2C>(1);
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -33,22 +30,24 @@ Drive::Drive() : Node("drive_node") {
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("serial_port");
+  this->declare_parameter("i2c_bus");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
+  this->declare_parameter("microcontroler.max_steps_frequency");
+  this->declare_parameter("microcontroler.speedramp_resolution");
 
   // Get parameters from yaml
-  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ttyUSB0");
-  this->get_parameter_or<uint32_t>("serial.baudrate", serial_baudrate_, 115200);
-
+  this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
-  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.0);
-  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.0);
+  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
+  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
+  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
+  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 254);
 }
 
 
@@ -57,23 +56,49 @@ void Drive::init_variables() {
   steps_per_turn_ = 200 * 16;
   mm_per_turn_ = 2 * M_PI * wheel_radius_;
   mm_per_step_ = mm_per_turn_ / steps_per_turn_;
+
+  speed_multiplier_ = max_freq_ / speed_resolution_;
+  max_speed_ = max_freq_ * mm_per_step_;
+  min_speed_ = speed_multiplier_ * mm_per_step_;
+
+  time_since_last_sync_ = this->get_clock()->now();
+}
+
+
+uint8_t Drive::compute_velocity_cmd(double velocity) {
+  /* Compute absolute velocity command to be sent to microcontroler */
+  velocity = abs(velocity);
+  if (velocity >= max_speed_) {
+    return speed_resolution_ - 1;
+  } else if (velocity < min_speed_) {
+    return 0;
+  } else {
+    return (uint8_t) round(velocity * (speed_resolution_ - 1) / max_speed_);
+  }
 }
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  differential_speed_cmd_.left[1] = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  differential_speed_cmd_.right[1] = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+
+  differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
+  differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
 
   /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  differential_speed_cmd_.left[0] ^= (-signbit(differential_speed_cmd_.left[1]) ^ differential_speed_cmd_.left[0]) & 1;
-  differential_speed_cmd_.right[0] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[0]) & 1;
+  // differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
+  // differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, 2);
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, 2);
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  attiny_steps_returned_.left = this->i2c->read_word(differential_speed_cmd_.left);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
-  time_since_last_sync_ = this->now();
+  time_since_last_sync_ = this->get_clock()->now();
+  compute_pose_velocity(attiny_steps_returned_);
 }
 
 
