@@ -32,6 +32,12 @@ private:
     int32_t right = 0;
   };
 
+  struct TinyData {
+    /* ATTiny steps from UART */
+    int32_t left = 0;
+    int32_t right = 0;
+  };
+
   struct Differential {
     /* Computed values of d and theta from steps */
     double left = 0;
@@ -57,16 +63,8 @@ private:
       std::cout << '\n';
   }
 
-  template<typename T> std::vector<T> slice(std::vector<T> const &v, int m, int n) {
-      auto first = v.cbegin() + m;
-      auto last = v.cbegin() + n + 1;
-
-      std::vector<T> vec(first, last);
-      return vec;
-  }
-
   // For communicating with ATTiny85 over I2C
-  I2C i2c_bus;
+  std::shared_ptr<I2C> i2c;
 
   // ROS time
   rclcpp::Time time_since_last_sync_;
@@ -89,6 +87,9 @@ private:
   double wheel_radius_;
   int max_freq_;
   int speed_resolution_;
+
+  /* I2C Bus */
+  int i2c_bus;
 
   /* Computed values */
   uint16_t steps_per_turn_;

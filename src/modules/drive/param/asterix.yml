@@ -8,9 +8,7 @@ drive_node:
       max_steps_frequency: 10000
       speedramp_resolution: 254
 
-    serial:
-      port: "/dev/ACM0"
-      baudrate: 115200
+    i2c_bus: 1
 
     joint_states_frame: "base_footprint"
     odom_frame: "odom"

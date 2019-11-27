@@ -13,11 +13,7 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
   /* Open I2C connection */
-  if (!i2c_bus.open(1)) {
-    RCLCPP_ERROR(this->get_logger(), "Unable to open I2C BUS : ");
-    exit(1);
-  }
-
+  i2c = std::make_shared<I2C>(1);
 
   serial_read_timer_ = this->create_wall_timer(1ms, std::bind(&Drive::read_from_serial, this));
 
@@ -36,7 +32,7 @@ Drive::Drive() : Node("drive_node") {
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("serial_port");
+  this->declare_parameter("i2c_bus");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
@@ -46,9 +42,7 @@ void Drive::init_parameters() {
   this->declare_parameter("microcontroler.speedramp_resolution");
 
   // Get parameters from yaml
-  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ttyUSB0");
-  this->get_parameter_or<uint32_t>("serial.baudrate", serial_baudrate_, 115200);
-
+  this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
@@ -65,11 +59,11 @@ void Drive::init_variables() {
   mm_per_turn_ = 2 * M_PI * wheel_radius_;
   mm_per_step_ = mm_per_turn_ / steps_per_turn_;
 
-
   speed_multiplier_ = max_freq_ / speed_resolution_;
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
 }
+
 
 void Drive::read_from_serial() {
   if (serial_interface_->available()) {
@@ -81,6 +75,7 @@ void Drive::read_from_serial() {
     tiny_uart.update(&read_data);
   }
 }
+
 
 uint8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
@@ -109,17 +104,14 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
-  this->i2c_bus->write_bytes(I2C_ADDR_MOTOR_LEFT, differential_speed_cmd_.left, sizeof(differential_speed_cmd_.left));
-  this->i2c_bus->read_bytes(I2C_ADDR_MOTOR_LEFT, steps_left, sizeof(steps_left));
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  attiny_steps_returned_.left = this->i2c->read_word(differential_speed_cmd_.left);
 
-  this->i2c_bus->write_bytes(I2C_ADDR_MOTOR_RIGHT, differential_speed_cmd_.right, sizeof(differential_speed_cmd_.right));
-  this->i2c_bus->read_bytes(I2C_ADDR_MOTOR_RIGHT, steps_right, sizeof(steps_right));
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT;
+  attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->now();
-
-  attiny_steps_returned_.left = steps_left[0] << 8 | steps_left[1];
-  attiny_steps_returned_.right = steps_right[0] << 8 | steps_right[1];
   compute_pose_velocity(attiny_steps_returned_);
 }
 

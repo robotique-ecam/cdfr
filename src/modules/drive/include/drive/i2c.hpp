@@ -1,40 +1,36 @@
 #include <cstdio>
+#include <string>
+#include <fstream>
 #include <iostream>
-#include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
 
 
 class I2C {
 public:
-  int open(int i2c_bus) {
-    sprintf(filename_, "/dev/i2c-%d", i2c_bus);
-    if ((file_i2c_ = open(filename_, I2C_RDWR)) < 0) {
-      /* Failed to open the i2c bus */
-      return -1;
-    }
+  I2C(int i2c_bus) {
+    filename_ = "/dev/i2c-" + std::to_string(i2c_bus);
+    i2c_fd_ = open(filename_, O_RDWR);
   }
 
-  int read_bytes(int addr, unsigned char buffer, int length) {
-    /* Failed to acquire bus access and/or read from slave */
-    if (set_address_(addr) && fread(file_i2c_, buffer, length) != length) {
-      return -1;
-    }
+  int set_address(int addr) {
+    ioctl(i2c_fd_, I2C_SLAVE, cmd);
   }
 
-  int write_bytes(int addr, unsigned char buffer, int length) {
-    /* Failed to acquire bus access and/or write from slave */
-    if (set_address_(addr) && fwrite(file_i2c_, buffer, length) != length) {
-      return -1;
-    }
+  int read_byte(uint8_t cmd) {
+    return i2c_smbus_read_byte(i2c_fd_) {
+  }
+
+  uint16_t read_word(uint8_t cmd) {
+    return i2c_smbus_read_word_data(i2c_fd_, cmd)
+  }
+
+  void write_byte(uint8_t cmd) {
+    i2c_smbus_write_byte(i2c_fd_, cmd);
   }
 
 private:
-  int file_i2c_;
-  char *filename_;
+  static int i2c_fd_;
+  std::string filename_;
 
-  int set_address_(int addr) {
-    if (ioctl(file_i2c_, I2C_SLAVE, addr) < 0) {
-      return -1;
-    }
-  }
 };
