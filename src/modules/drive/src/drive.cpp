@@ -15,8 +15,6 @@ Drive::Drive() : Node("drive_node") {
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(1);
 
-  serial_read_timer_ = this->create_wall_timer(1ms, std::bind(&Drive::read_from_serial, this));
-
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
 
@@ -65,18 +63,6 @@ void Drive::init_variables() {
 }
 
 
-void Drive::read_from_serial() {
-  if (serial_interface_->available()) {
-    std::vector<uint8_t> read_data;
-    serial_interface_->read(read_data);
-    #ifdef DEBUG
-      print(read_data);
-    #endif
-    tiny_uart.update(&read_data);
-  }
-}
-
-
 uint8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
   velocity = abs(velocity);
@@ -91,8 +77,6 @@ uint8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  char steps_left[2];
-  char steps_right[2];
   double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
   double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
@@ -107,7 +91,7 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
   attiny_steps_returned_.left = this->i2c->read_word(differential_speed_cmd_.left);
 
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT;
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
   attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;

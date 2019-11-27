@@ -26,10 +26,10 @@ public:
   ~Drive();
 
 private:
-  struct TinyData {
+  struct TinyCMD {
     /* ATTiny steps from UART */
-    int32_t left = 0;
-    int32_t right = 0;
+    uint8_t left = 0;
+    uint8_t right = 0;
   };
 
   struct TinyData {
