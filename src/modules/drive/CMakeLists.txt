@@ -20,7 +20,6 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
-find_package(serial REQUIRED)
 
 
 ################################################################################
@@ -37,7 +36,6 @@ set(dependencies
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
-  "serial"
 )
 
 set(EXEC_NAME "drive")
@@ -75,5 +73,4 @@ ament_export_dependencies(rclcpp)
 ament_export_dependencies(sensor_msgs)
 ament_export_dependencies(tf2)
 ament_export_dependencies(tf2_msgs)
-ament_export_dependencies(serial)
 ament_package()
