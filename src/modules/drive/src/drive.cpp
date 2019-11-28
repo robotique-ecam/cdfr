@@ -47,7 +47,7 @@ void Drive::init_parameters() {
   this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
   this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
-  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 254);
+  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
 }
 
 
@@ -65,15 +65,15 @@ void Drive::init_variables() {
 }
 
 
-uint8_t Drive::compute_velocity_cmd(double velocity) {
+int8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
-  velocity = abs(velocity);
-  if (velocity >= max_speed_) {
-    return speed_resolution_ - 1;
-  } else if (velocity < min_speed_) {
+  double abs_velocity = abs(velocity);
+  if (abs_velocity >= max_speed_) {
+    return ((velocity<0)?(-1):(1)) * (speed_resolution_ - 1);
+  } else if (abs_velocity < min_speed_) {
     return 0;
   } else {
-    return (uint8_t) round(velocity * (speed_resolution_ - 1) / max_speed_);
+    return (int8_t) round(velocity * (speed_resolution_ - 1) / max_speed_) - ((velocity<0)?(1):(0));
   }
 }
 
@@ -84,10 +84,6 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
-
-  /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  // differential_speed_cmd_.left[1] ^= (-signbit(differential_speed_left) ^ differential_speed_cmd_.left[1]) & 1;
-  // differential_speed_cmd_.right[1] ^= (-signbit(differential_speed_right) ^ differential_speed_cmd_.right[1]) & 1;
 
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);

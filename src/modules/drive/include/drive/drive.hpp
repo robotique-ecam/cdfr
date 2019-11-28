@@ -28,8 +28,8 @@ public:
 private:
   struct TinyCMD {
     /* ATTiny steps from UART */
-    uint8_t left = 0;
-    uint8_t right = 0;
+    int8_t left = 0;
+    int8_t right = 0;
   };
 
   struct TinyData {
