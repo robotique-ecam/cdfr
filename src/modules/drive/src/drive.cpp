@@ -69,7 +69,7 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
   double abs_velocity = abs(velocity);
   if (abs_velocity >= max_speed_) {
-    return ((velocity<0)?(-1):(1)) * (speed_resolution_ - 1);
+    return (int8_t) ((velocity<0)?(-1):(1)) * (speed_resolution_ - 1);
   } else if (abs_velocity < min_speed_) {
     return 0;
   } else {
