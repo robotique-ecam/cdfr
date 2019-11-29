@@ -95,6 +95,9 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
   compute_pose_velocity(attiny_steps_returned_);
+  update_odometry();
+  update_tf();
+  update_joint_states();
 }
 
 
@@ -164,10 +167,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT];
-  joint_states_.position[RIGHT];
-  joint_states_.velocity[LEFT];
-  joint_states_.velocity[RIGHT];
+  joint_states_.position[LEFT] = differential_move_.left / trajectory_radius_left;
+  joint_states_.position[RIGHT] = differential_move_.right / trajectory_radius_left;
+  joint_states_.velocity[LEFT] = differential_move_.left / (trajectory_radius_left * dt);
+  joint_states_.velocity[RIGHT] = differential_move_.right / (trajectory_radius_left * dt);
   joint_states_pub_->publish(joint_states_);
 }
 
