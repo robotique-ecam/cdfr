@@ -167,10 +167,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] = differential_move_.left / trajectory_radius_left;
-  joint_states_.position[RIGHT] = differential_move_.right / trajectory_radius_left;
-  joint_states_.velocity[LEFT] = differential_move_.left / (trajectory_radius_left * dt);
-  joint_states_.velocity[RIGHT] = differential_move_.right / (trajectory_radius_left * dt);
+  joint_states_.position[LEFT] = differential_move_.left;
+  joint_states_.position[RIGHT] = differential_move_.right;
+  joint_states_.velocity[LEFT] = differential_speed_.left;
+  joint_states_.velocity[RIGHT] = differential_speed_.right;
   joint_states_pub_->publish(joint_states_);
 }
 
