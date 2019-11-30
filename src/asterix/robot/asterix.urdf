@@ -79,7 +79,7 @@
 
   <link name="wheel_left_link">
     <visual>
-      <origin xyz="0 0.7 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0.07 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.018" radius="0.033"/>
       </geometry>
@@ -104,7 +104,7 @@
 
   <link name="wheel_right_link">
     <visual>
-      <origin xyz="0 0.70 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0.070 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.018" radius="0.033"/>
       </geometry>
