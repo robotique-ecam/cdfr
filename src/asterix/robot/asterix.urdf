@@ -47,11 +47,7 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="robotbase"/>
-<<<<<<< HEAD
-    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-=======
     <origin xyz="0.0 0.0 0.16" rpy="0 0 0"/>
->>>>>>> origin/urdf
   </joint>
 
   <link name="robotbase">
@@ -107,16 +103,5 @@
       </geometry>
       <material name="dark"/>
     </visual>
-<<<<<<< HEAD
-
-    <collision>
-      <origin xyz="0 -0.70 0" rpy="0 0 0"/>
-      <geometry>
-        <cylinder length="0.018" radius="0.033"/>
-      </geometry>
-    </collision>
-
-=======
->>>>>>> origin/urdf
   </link>
 </robot>
