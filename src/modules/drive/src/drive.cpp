@@ -61,8 +61,8 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
 
-  joint_states_.name.push_back("wheel_left_link");
-  joint_states_.name.push_back("wheel_right_link");
+  joint_states_.name.push_back("wheel_left_joint");
+  joint_states_.name.push_back("wheel_right_joint");
   joint_states_.position.resize(2, 0.0);
   joint_states_.velocity.resize(2, 0.0);
   joint_states_.effort.resize(2, 0.0);
