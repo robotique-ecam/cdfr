@@ -47,14 +47,14 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="robotbase"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.16" rpy="0 0 0"/>
   </joint>
 
   <link name="robotbase">
     <visual>
-      <origin xyz="0.0 0.0 0.0715" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="0.140 0.140 0.143"/>
+        <box size="0.2 0.26 0.32"/>
       </geometry>
       <material name="blue"/>
     </visual>
@@ -62,7 +62,7 @@
     <collision>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
         <geometry>
-          <box size="0.140 0.140 0.143"/>
+          <box size="0.25 0.30 0.35"/>
         </geometry>
     </collision>
 
@@ -72,7 +72,7 @@
   <joint name="wheel_left_joint" type="continuous">
     <parent link="robotbase"/>
     <child link="wheel_left_link"/>
-    <origin xyz="0.0 0.08 0.023" rpy="0 0 0"/>
+    <origin xyz="0.0 0.13 -0.13" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
@@ -81,23 +81,16 @@
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.018" radius="0.033"/>
+        <cylinder length="0.01" radius="0.04"/>
       </geometry>
       <material name="dark"/>
     </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <cylinder length="0.018" radius="0.033"/>
-      </geometry>
-    </collision>
   </link>
 
   <joint name="wheel_right_joint" type="continuous">
     <parent link="robotbase"/>
     <child link="wheel_right_link"/>
-    <origin xyz="0.0 -0.080 0.023" rpy="0 0 0"/>
+    <origin xyz="0.0 -0.13 -0.13" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
@@ -106,17 +99,9 @@
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.018" radius="0.033"/>
+        <cylinder length="0.01" radius="0.04"/>
       </geometry>
       <material name="dark"/>
     </visual>
-
-    <collision>
-      <origin xyz="0 -0.70 0" rpy="0 0 0"/>
-      <geometry>
-        <cylinder length="0.018" radius="0.033"/>
-      </geometry>
-    </collision>
-
   </link>
 </robot>
