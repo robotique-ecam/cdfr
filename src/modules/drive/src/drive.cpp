@@ -166,12 +166,20 @@ void Drive::update_tf() {
 }
 
 void Drive::update_joint_states() {
+  std::cout << "Entering Drive::update_joint_states" << std::endl;
   joint_states_.header.stamp = time_since_last_sync_;
+  std::cout << "Attached timestamp" << std::endl;
   joint_states_.position[LEFT] = differential_move_.left;
+  std::cout << "position[LEFT]" << std::endl;
   joint_states_.position[RIGHT] = differential_move_.right;
+  std::cout << "position[RIGHT]" << std::endl;
   joint_states_.velocity[LEFT] = differential_speed_.left;
+  std::cout << "velocity[LEFT]" << std::endl;
   joint_states_.velocity[RIGHT] = differential_speed_.right;
+  std::cout << "velocity[RIGHT]" << std::endl;
+  std::cout << "Publishing" << std::endl;
   joint_states_pub_->publish(joint_states_);
+  std::cout << "Published" << std::endl;
 }
 
 
