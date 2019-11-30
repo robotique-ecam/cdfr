@@ -72,14 +72,14 @@
   <joint name="wheel_left_joint" type="continuous">
     <parent link="robotbase"/>
     <child link="wheel_left_link"/>
-    <origin xyz="0.0 0.08 0.023" rpy="-1.57 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0.0 0.08 0.023" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
   <link name="wheel_left_link">
     <visual>
-      <origin xyz="0 0.07 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.018" radius="0.033"/>
       </geometry>
@@ -97,14 +97,14 @@
   <joint name="wheel_right_joint" type="continuous">
     <parent link="robotbase"/>
     <child link="wheel_right_link"/>
-    <origin xyz="0.0 -0.080 0.023" rpy="-1.57 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0.0 -0.080 0.023" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
   <link name="wheel_right_link">
     <visual>
-      <origin xyz="0 0.070 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.018" radius="0.033"/>
       </geometry>
