@@ -93,14 +93,15 @@ private:
   int i2c_bus;
 
   /* PID */
-  PID left_wheel_pid_;
-  PID right_wheel_pid_;
-  Differential cmd_vel_;
+  // PID left_wheel_pid_;
+  // PID right_wheel_pid_;
+  // Differential cmd_vel_;
 
   /* Computed values */
   uint16_t steps_per_turn_;
   double mm_per_turn_;
   double mm_per_step_;
+  double meters_per_step_;
   double speed_multiplier_;
   double max_speed_;
   double min_speed_;

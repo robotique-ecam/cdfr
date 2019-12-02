@@ -58,15 +58,11 @@ void Drive::init_variables() {
   steps_per_turn_ = 200 * 16;
   mm_per_turn_ = 2 * M_PI * wheel_radius_;
   mm_per_step_ = mm_per_turn_ / steps_per_turn_;
+  meters_per_step_ = mm_per_step_ * 1e-3;
 
   speed_multiplier_ = max_freq_ / speed_resolution_;
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
-
-  left_wheel_pid_.set_params(10, 10, 0.001);
-  right_wheel_pid_.set_params(10, 10, 0.001);
-  left_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
-  right_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -92,10 +88,10 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::update_velocity() {
-  // double differential_speed_left = cmd_vel_.left;
-  // double differential_speed_right = cmd_vel_.right;
-  double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
-  double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
+  double differential_speed_left = cmd_vel_.left;
+  double differential_speed_right = cmd_vel_.right;
+  // double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
+  // double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
@@ -123,10 +119,10 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 
 
 void Drive::compute_pose_velocity(TinyData steps_returned) {
-  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e3;
+  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = mm_per_step_ * steps_returned.left;
-  differential_move_.right = mm_per_step_ * steps_returned.right;
+  differential_move_.left = meters_per_step_ * steps_returned.left;
+  differential_move_.right = meters_per_step_ * steps_returned.right;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
@@ -147,6 +143,9 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
     instantaneous_speed_.angular = instantaneous_move_.angular / dt;
     instantaneous_speed_.linear = instantaneous_move_.linear / dt;
   }
+  odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.x + (instantaneous_move_.angular / 2.0));
+  odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.y + (instantaneous_move_.angular / 2.0));
+  odom_pose_.thetha += instantaneous_move_.angular;
 }
 
 
@@ -188,8 +187,8 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] = differential_move_.left;
-  joint_states_.position[RIGHT] = differential_move_.right;
+  joint_states_.position[LEFT] += differential_move_.left;
+  joint_states_.position[RIGHT] += differential_move_.right;
   joint_states_.velocity[LEFT] = differential_speed_.left;
   joint_states_.velocity[RIGHT] = differential_speed_.right;
   joint_states_pub_->publish(joint_states_);
