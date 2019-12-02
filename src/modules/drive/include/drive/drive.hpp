@@ -79,7 +79,7 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
-  rclcpp::TimerBase::SharedPtr timer_base_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
