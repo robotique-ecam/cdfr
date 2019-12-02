@@ -95,7 +95,7 @@ private:
   /* PID */
   // PID left_wheel_pid_;
   // PID right_wheel_pid_;
-  // Differential cmd_vel_;
+  Differential cmd_vel_;
 
   /* Computed values */
   uint16_t steps_per_turn_;
