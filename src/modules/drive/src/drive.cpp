@@ -56,9 +56,8 @@ void Drive::init_parameters() {
 void Drive::init_variables() {
   /* Compute initial values */
   steps_per_turn_ = 200 * 16;
-  mm_per_turn_ = 2 * M_PI * wheel_radius_;
-  mm_per_step_ = mm_per_turn_ / steps_per_turn_;
-  meters_per_step_ = mm_per_step_ * 1e-3;
+  meters_per_turn_ = 2 * M_PI * wheel_radius_;
+  meters_per_step_ = meters_per_turn_ / steps_per_turn_;
 
   speed_multiplier_ = max_freq_ / speed_resolution_;
   max_speed_ = max_freq_ * mm_per_step_;

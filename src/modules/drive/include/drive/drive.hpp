@@ -99,8 +99,7 @@ private:
 
   /* Computed values */
   uint16_t steps_per_turn_;
-  double mm_per_turn_;
-  double mm_per_step_;
+  double meters_per_turn_;
   double meters_per_step_;
   double speed_multiplier_;
   double max_speed_;
