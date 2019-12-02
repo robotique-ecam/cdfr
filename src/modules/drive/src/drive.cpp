@@ -63,8 +63,8 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
 
-  left_wheel_pid_.set_params(0, 1, 3);
-  right_wheel_pid_.set_params(0, 1, 3);
+  left_wheel_pid_.set_params(10, 10, 0.001);
+  right_wheel_pid_.set_params(10, 10, 0.001);
   left_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
   right_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
 
