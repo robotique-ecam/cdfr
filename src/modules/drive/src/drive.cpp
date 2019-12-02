@@ -24,7 +24,7 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
+  timer_ = this->create_wall_timer(20ms, std::bind(&Drive::update_velocity, this));
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
@@ -102,9 +102,6 @@ void Drive::update_velocity() {
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
   attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
-
-  std::cout << "L : " << attiny_steps_returned_.left << std::endl;
-  std::cout << "R : " << attiny_steps_returned_.right << std::endl;
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
