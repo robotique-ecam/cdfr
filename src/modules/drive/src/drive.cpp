@@ -60,8 +60,8 @@ void Drive::init_variables() {
   meters_per_step_ = meters_per_turn_ / steps_per_turn_;
 
   speed_multiplier_ = max_freq_ / speed_resolution_;
-  max_speed_ = max_freq_ * mm_per_step_;
-  min_speed_ = speed_multiplier_ * mm_per_step_;
+  max_speed_ = max_freq_ * meters_per_step_;
+  min_speed_ = speed_multiplier_ * meters_per_step_;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
