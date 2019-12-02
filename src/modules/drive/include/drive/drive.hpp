@@ -1,6 +1,7 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
+#include "pid.hpp"
 #include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -91,6 +92,11 @@ private:
   /* I2C Bus */
   int i2c_bus;
 
+  /* PID */
+  PID left_wheel_pid_;
+  PID right_wheel_pid_;
+  Differential cmd_vel_;
+
   /* Computed values */
   uint16_t steps_per_turn_;
   double mm_per_turn_;
@@ -122,6 +128,7 @@ private:
   void update_tf();
   void update_joint_states();
   void update_odometry();
+  void update_velocity();
   void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
   void steps_received_callback(int32_t steps, uint8_t id);

@@ -24,6 +24,8 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
+  this->create_wall_timer(10ms, std::bind(&Drive::update_velocity, this));
+
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
 
@@ -61,6 +63,11 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * mm_per_step_;
   min_speed_ = speed_multiplier_ * mm_per_step_;
 
+  left_wheel_pid_.set_params(0, 3, 6);
+  right_wheel_pid_.set_params(0, 3, 6);
+  left_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
+  right_wheel_pid_.set_limits(1 - speed_resolution_, speed_resolution_ - 1);
+
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
   joint_states_.position.resize(2, 0.0);
@@ -84,9 +91,9 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 }
 
 
-void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+void Drive::update_velocity() {
+  double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
+  double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
@@ -104,6 +111,12 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   update_odometry();
   update_tf();
   update_joint_states();
+}
+
+
+void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
+  cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 }
 
 
