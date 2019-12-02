@@ -92,8 +92,10 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::update_velocity() {
-  double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
-  double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
+  double differential_speed_left = cmd_vel_.left;
+  double differential_speed_right = cmd_vel_.right;
+  // double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
+  // double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
