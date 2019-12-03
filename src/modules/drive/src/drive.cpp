@@ -157,7 +157,7 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.y + (instantaneous_move_.angular / 2.0));
   odom_pose_.thetha += instantaneous_move_.angular;
 
-  std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.z" << odom_pose_.z <<  std::endl;
+  std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
 }
 
 
