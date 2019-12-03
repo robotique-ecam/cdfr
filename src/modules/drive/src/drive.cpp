@@ -127,7 +127,7 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
-  std::cout << "differential_move.left: " << differential_move.left << "  differential_move.right:" << differential_move.right << std::endl;
+  std::cout << "differential_move_.left: " << differential_move_.left << "  differential_move_.right:" << differential_move_.right << std::endl;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
