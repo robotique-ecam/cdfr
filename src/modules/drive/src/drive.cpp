@@ -122,11 +122,17 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
+  std::cout << "steps_returned.left: " << steps_returned.left << "  steps_returned.right:" << steps_returned.right << std::endl;
+
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
+  std::cout << "differential_move.left: " << differential_move.left << "  differential_move.right:" << differential_move.right << std::endl;
+
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
+
+  std::cout << "differential_speed.left: " << differential_speed.left << "  differential_speed.right:" << differential_speed.right << std::endl;
 
   if (steps_returned.left == steps_returned.right) {
     instantaneous_speed_.angular = 0;
@@ -144,9 +150,14 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
     instantaneous_speed_.angular = instantaneous_move_.angular / dt;
     instantaneous_speed_.linear = instantaneous_move_.linear / dt;
   }
+
+  std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
+
   odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.x + (instantaneous_move_.angular / 2.0));
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.y + (instantaneous_move_.angular / 2.0));
   odom_pose_.thetha += instantaneous_move_.angular;
+
+  std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.z" << odom_pose_.z <<  std::endl;
 }
 
 
