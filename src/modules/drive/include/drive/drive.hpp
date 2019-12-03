@@ -28,15 +28,15 @@ public:
 
 private:
   struct TinyCMD {
-    /* ATTiny steps from UART */
+    /* ATTiny speed command to I2C */
     int8_t left = 0;
     int8_t right = 0;
   };
 
   struct TinyData {
-    /* ATTiny steps from UART */
-    int32_t left = 0;
-    int32_t right = 0;
+    /* ATTiny steps from I2C */
+    int16_t left = 0;
+    int16_t right = 0;
   };
 
   struct Differential {

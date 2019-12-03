@@ -97,10 +97,10 @@ void Drive::update_velocity() {
 
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = this->i2c->read_word(differential_speed_cmd_.left);
+  attiny_steps_returned_.left = (int16_t) this->i2c->read_word(differential_speed_cmd_.left);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
+  attiny_steps_returned_.right = (int16_t) this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
