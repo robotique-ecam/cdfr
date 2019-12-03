@@ -24,7 +24,7 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  timer_ = this->create_wall_timer(20ms, std::bind(&Drive::update_velocity, this));
+  // timer_ = this->create_wall_timer(20ms, std::bind(&Drive::update_velocity, this));
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
@@ -114,6 +114,8 @@ void Drive::update_velocity() {
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
   cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
   cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+
+  update_velocity();
 }
 
 
