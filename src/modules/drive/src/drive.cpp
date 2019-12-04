@@ -24,7 +24,7 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  // timer_ = this->create_wall_timer(20ms, std::bind(&Drive::update_velocity, this));
+  timer_ = this->create_wall_timer(50ms, std::bind(&Drive::update_velocity, this));
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
@@ -111,8 +111,8 @@ void Drive::update_velocity() {
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  cmd_vel_.left = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  cmd_vel_.right = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
   update_velocity();
 }
@@ -121,17 +121,17 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  std::cout << "steps_returned.left: " << steps_returned.left << "  steps_returned.right:" << steps_returned.right << std::endl;
+  // std::cout << "steps_returned.left: " << steps_returned.left << "  steps_returned.right:" << steps_returned.right << std::endl;
 
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
-  std::cout << "differential_move_.left: " << differential_move_.left << "  differential_move_.right:" << differential_move_.right << std::endl;
+  // std::cout << "differential_move_.left: " << differential_move_.left << "  differential_move_.right:" << differential_move_.right << std::endl;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
 
-  std::cout << "differential_speed_.left: " << differential_speed_.left << "  differential_speed_.right:" << differential_speed_.right << std::endl;
+  // std::cout << "differential_speed_.left: " << differential_speed_.left << "  differential_speed_.right:" << differential_speed_.right << std::endl;
 
   instantaneous_move_.linear = (differential_move_.left + differential_move_.right) / 2;
   instantaneous_move_.angular = (differential_move_.left - differential_move_.right) / (wheel_separation_);
@@ -139,13 +139,13 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   instantaneous_speed_.linear = (differential_speed_.left + differential_speed_.right) / 2;
   instantaneous_speed_.angular = (differential_speed_.left - differential_speed_.right) / (wheel_separation_);
 
-  std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
+  // std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
 
   odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.thetha += instantaneous_move_.angular;
 
-  std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
+  // std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
 }
 
 
