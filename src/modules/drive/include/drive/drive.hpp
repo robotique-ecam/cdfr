@@ -57,14 +57,8 @@ private:
     double thetha = 0;
   };
 
-  template<typename T> void print(std::vector<T> const &v) {
-      for (auto i: v) {
-          std::cout << "0x" << std::hex << i << ' ';
-      }
-      std::cout << '\n';
-  }
-
   // For communicating with ATTiny85 over I2C
+  int i2c_bus;
   std::shared_ptr<I2C> i2c;
 
   // ROS time
@@ -90,7 +84,6 @@ private:
   int speed_resolution_;
 
   /* I2C Bus */
-  int i2c_bus;
 
   /* PID */
   // PID left_wheel_pid_;

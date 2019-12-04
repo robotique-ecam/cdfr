@@ -56,6 +56,7 @@ void Drive::init_parameters() {
 void Drive::init_variables() {
   /* Compute initial values */
   steps_per_turn_ = 200 * 16;
+  rads_per_step = 1 / (M_PI * wheel_radius_);
   meters_per_turn_ = 2 * M_PI * wheel_radius_;
   meters_per_step_ = meters_per_turn_ / steps_per_turn_;
 
@@ -89,8 +90,6 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 void Drive::update_velocity() {
   double differential_speed_left = cmd_vel_.left;
   double differential_speed_right = cmd_vel_.right;
-  // double differential_speed_left = left_wheel_pid_.compute(cmd_vel_.left, differential_speed_.left);
-  // double differential_speed_right = right_wheel_pid_.compute(cmd_vel_.right, differential_speed_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
@@ -134,27 +133,16 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
 
   std::cout << "differential_speed_.left: " << differential_speed_.left << "  differential_speed_.right:" << differential_speed_.right << std::endl;
 
-  if (steps_returned.left == steps_returned.right) {
-    instantaneous_speed_.angular = 0;
-    instantaneous_speed_.linear = differential_speed_.left;
-  } else if (steps_returned.left == -steps_returned.right) {
-    instantaneous_speed_.linear = 0;
-    instantaneous_speed_.angular = (differential_speed_.right - differential_move_.left) / wheel_separation_;
-  } else {
-    trajectory_radius_left = wheel_separation_ * differential_move_.left / (differential_move_.right - differential_move_.left);
-    trajectory_radius = 2 * trajectory_radius_left + wheel_separation_;
+  instantaneous_move_.linear = (differential_move_.left + differential_move_.right) / 2;
+  instantaneous_move_.angular = (differential_move_.left - differential_move_.right) / (wheel_separation_);
 
-    instantaneous_move_.angular = differential_move_.left / trajectory_radius_left;
-    instantaneous_move_.linear = wheel_radius_ * sqrt(2 - 2 * cos(instantaneous_move_.angular));
-
-    instantaneous_speed_.angular = instantaneous_move_.angular / dt;
-    instantaneous_speed_.linear = instantaneous_move_.linear / dt;
-  }
+  instantaneous_speed_.linear = (differential_speed_.left + differential_speed_.right) / 2;
+  instantaneous_speed_.angular = (differential_speed_.left - differential_speed_.right) / (wheel_separation_);
 
   std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
 
-  odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.x + (instantaneous_move_.angular / 2.0));
-  odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.y + (instantaneous_move_.angular / 2.0));
+  odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
+  odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.thetha += instantaneous_move_.angular;
 
   std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
@@ -176,7 +164,6 @@ void Drive::update_odometry() {
 
   // We should update the twist of the odometry
   odom_.twist.twist.linear.x = instantaneous_speed_.linear;
-  odom_.twist.twist.linear.y = 0;
   odom_.twist.twist.angular.z = instantaneous_speed_.angular;
   odom_.header.stamp = time_since_last_sync_;
   odom_pub_->publish(odom_);
@@ -199,10 +186,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] += differential_move_.left;
-  joint_states_.position[RIGHT] += differential_move_.right;
-  joint_states_.velocity[LEFT] = differential_speed_.left;
-  joint_states_.velocity[RIGHT] = differential_speed_.right;
+  joint_states_.position[LEFT] += attiny_steps_returned_.left * rads_per_step;
+  joint_states_.position[RIGHT] += attiny_steps_returned_.right * rads_per_step;
+  joint_states_.velocity[LEFT] =  attiny_steps_returned_.left * rads_per_step / dt;
+  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
 
