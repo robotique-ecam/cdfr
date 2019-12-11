@@ -22,7 +22,7 @@ add_library(${PROJECT_NAME}
   src/i2c.cpp
 )
 
-set_target_properties(mylib PROPERTIES PUBLIC_HEADER include/i2c.hpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER include/i2c.hpp)
 
 ################################################################################
 # Install
