@@ -18,24 +18,16 @@ include_directories(
   include
 )
 
-set(EXEC_NAME "i2c")
-
 add_library(${PROJECT_NAME}
   src/i2c.cpp
 )
 
+set_target_properties(mylib PROPERTIES PUBLIC_HEADER include/i2c.hpp)
+
 ################################################################################
 # Install
 ################################################################################
-install(TARGETS ${EXEC_NAME}
+install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION lib/${PROJECT_NAME}
-)
-
-install(DIRECTORY include/
   PUBLIC_HEADER DESTINATION include/
 )
-
-################################################################################
-# Macro for ament package
-################################################################################
-# ament_package()
