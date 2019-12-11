@@ -14,6 +14,8 @@ Drive::Drive() : Node("drive_node") {
 
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(1);
+  speedramp_left_ = std::make_shared<Speedramp>();
+  speedramp_right_ = std::make_shared<Speedramp>();
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -32,6 +34,7 @@ Drive::Drive() : Node("drive_node") {
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
+  this->declare_parameter("accel");
   this->declare_parameter("i2c_bus");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
@@ -50,6 +53,7 @@ void Drive::init_parameters() {
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
   this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
   this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
+  this->get_parameter_or<double>("speedramp.accel", accel_, 9.81);
 }
 
 
@@ -63,6 +67,9 @@ void Drive::init_variables() {
   speed_multiplier_ = max_freq_ / speed_resolution_;
   max_speed_ = max_freq_ * meters_per_step_;
   min_speed_ = speed_multiplier_ * meters_per_step_;
+
+  speedramp_left_->set_acceleration(accel_);
+  speedramp_right_->set_acceleration(accel_);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -88,8 +95,8 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::update_velocity() {
-  double differential_speed_left = cmd_vel_.left;
-  double differential_speed_right = cmd_vel_.right;
+  double differential_speed_left = speedramp_->compute(cmd_vel_.left);
+  double differential_speed_right = speedramp_->compute(cmd_vel_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);

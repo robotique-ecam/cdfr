@@ -1,7 +1,7 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
-#include "pid.hpp"
+#include "speedramp.hpp"
 #include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -10,7 +10,7 @@
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <thread>
+
 
 #define LEFT 0
 #define RIGHT 1
@@ -74,10 +74,13 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
   rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<Speedramp> speedramp_left_;
+  std::shared_ptr<Speedramp> speedramp_right_;
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
 
+  double accel_;
   double wheel_separation_;
   double wheel_radius_;
   int max_freq_;
