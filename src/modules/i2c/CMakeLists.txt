@@ -28,6 +28,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER include/i2c.hpp)
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/
 )
 
 ament_package()
