@@ -13,7 +13,7 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
   /* Open I2C connection */
-  i2c = std::make_shared<I2C>(1);
+  i2c = std::make_shared<I2C>(i2c_bus);
   speedramp_left_ = std::make_shared<Speedramp>();
   speedramp_right_ = std::make_shared<Speedramp>();
 

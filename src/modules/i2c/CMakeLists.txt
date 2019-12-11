@@ -14,11 +14,9 @@ endif()
 ################################################################################
 # Build
 ################################################################################
-include_directories(
-  include
-)
 
 add_library(${PROJECT_NAME}
+  include/i2c.hpp
   src/i2c.cpp
 )
 
@@ -28,8 +26,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER include/i2c.hpp)
 # Install
 ################################################################################
 install(TARGETS ${PROJECT_NAME}
-  COMPONENT library
-  ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  LIBRARY DESTINATION lib/${PROJECT_NAME}
-  PUBLIC_HEADER DESTINATION include/
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
 )
+
+ament_package()
