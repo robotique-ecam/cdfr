@@ -28,6 +28,8 @@ set_target_properties(mylib PROPERTIES PUBLIC_HEADER include/i2c.hpp)
 # Install
 ################################################################################
 install(TARGETS ${PROJECT_NAME}
+  COMPONENT library
+  ARCHIVE DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib/${PROJECT_NAME}
   PUBLIC_HEADER DESTINATION include/
 )
