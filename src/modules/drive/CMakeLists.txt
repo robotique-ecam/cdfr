@@ -36,7 +36,6 @@ set(dependencies
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
-  "i2c"
 )
 
 set(EXEC_NAME "drive")
@@ -45,6 +44,7 @@ set(EXEC_NAME "drive")
 add_executable(${EXEC_NAME}
   src/drive_node.cpp
   src/drive.cpp
+  src/i2c.cpp
 )
 
 target_link_libraries(${EXEC_NAME} i2c)
@@ -77,5 +77,4 @@ ament_export_dependencies(rclcpp)
 ament_export_dependencies(sensor_msgs)
 ament_export_dependencies(tf2)
 ament_export_dependencies(tf2_msgs)
-ament_export_dependencies(i2c)
 ament_package()
