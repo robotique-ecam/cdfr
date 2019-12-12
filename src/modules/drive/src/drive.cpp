@@ -70,8 +70,8 @@ void Drive::init_variables() {
 
   speedramp_left_->set_acceleration(accel_);
   speedramp_right_->set_acceleration(accel_);
-  speedramp_left_->set_delay(10ms);
-  speedramp_right_->set_delay(10ms);
+  speedramp_left_->set_delay(0.05);
+  speedramp_right_->set_delay(0.05);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
