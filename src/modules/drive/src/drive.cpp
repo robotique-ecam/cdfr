@@ -70,6 +70,8 @@ void Drive::init_variables() {
 
   speedramp_left_->set_acceleration(accel_);
   speedramp_right_->set_acceleration(accel_);
+  speedramp_left_->set_delay(10ms);
+  speedramp_right_->set_delay(10ms);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -95,8 +97,8 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::update_velocity() {
-  double differential_speed_left = speedramp_->compute(cmd_vel_.left);
-  double differential_speed_right = speedramp_->compute(cmd_vel_.right);
+  double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
+  double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
