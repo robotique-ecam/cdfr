@@ -1,6 +1,7 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
+#include "speedramp.hpp"
 #include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -9,7 +10,7 @@
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <thread>
+
 
 #define LEFT 0
 #define RIGHT 1
@@ -27,15 +28,15 @@ public:
 
 private:
   struct TinyCMD {
-    /* ATTiny steps from UART */
-    uint8_t left = 0;
-    uint8_t right = 0;
+    /* ATTiny speed command to I2C */
+    int8_t left = 0;
+    int8_t right = 0;
   };
 
   struct TinyData {
-    /* ATTiny steps from UART */
-    int32_t left = 0;
-    int32_t right = 0;
+    /* ATTiny steps from I2C */
+    int16_t left = 0;
+    int16_t right = 0;
   };
 
   struct Differential {
@@ -56,14 +57,8 @@ private:
     double thetha = 0;
   };
 
-  template<typename T> void print(std::vector<T> const &v) {
-      for (auto i: v) {
-          std::cout << "0x" << std::hex << i << ' ';
-      }
-      std::cout << '\n';
-  }
-
   // For communicating with ATTiny85 over I2C
+  int i2c_bus;
   std::shared_ptr<I2C> i2c;
 
   // ROS time
@@ -78,23 +73,31 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
-  rclcpp::TimerBase::SharedPtr timer_base_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<Speedramp> speedramp_left_;
+  std::shared_ptr<Speedramp> speedramp_right_;
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
 
+  double accel_;
   double wheel_separation_;
   double wheel_radius_;
   int max_freq_;
   int speed_resolution_;
 
   /* I2C Bus */
-  int i2c_bus;
+
+  /* PID */
+  // PID left_wheel_pid_;
+  // PID right_wheel_pid_;
+  Differential cmd_vel_;
 
   /* Computed values */
   uint16_t steps_per_turn_;
-  double mm_per_turn_;
-  double mm_per_step_;
+  double rads_per_step;
+  double meters_per_turn_;
+  double meters_per_step_;
   double speed_multiplier_;
   double max_speed_;
   double min_speed_;
@@ -122,11 +125,12 @@ private:
   void update_tf();
   void update_joint_states();
   void update_odometry();
+  void update_velocity();
   void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
-  uint8_t compute_velocity_cmd(double velocity);
+  int8_t compute_velocity_cmd(double velocity);
 
 };
 

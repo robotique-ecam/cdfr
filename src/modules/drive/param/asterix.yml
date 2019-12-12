@@ -6,7 +6,10 @@ drive_node:
 
     microcontroler:
       max_steps_frequency: 10000
-      speedramp_resolution: 254
+      speedramp_resolution: 128
+
+    speedramp:
+      accel: 9.81 # 1g
 
     i2c_bus: 1
 
