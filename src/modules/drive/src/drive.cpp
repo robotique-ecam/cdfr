@@ -1,6 +1,9 @@
 #include <drive.hpp>
 
 
+#define USE_SPEEDRAMP
+#define USE_TIMER
+
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
 
@@ -26,7 +29,9 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
+  #ifdef USE_TIMER
   timer_ = this->create_wall_timer(50ms, std::bind(&Drive::update_velocity, this));
+  #endif
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
@@ -72,6 +77,8 @@ void Drive::init_variables() {
   speedramp_right_->set_acceleration(accel_);
   speedramp_left_->set_delay(0.05);
   speedramp_right_->set_delay(0.05);
+  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
+  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -97,8 +104,13 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 
 
 void Drive::update_velocity() {
+  #ifdef USE_SPEEDRAMP
   double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
   double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
+  #else
+  double differential_speed_left = cmd_vel_.left;
+  double differential_speed_right = cmd_vel_.right;
+  #endif
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
