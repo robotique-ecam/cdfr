@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-"""I2C Interface ROS::2 package build tool."""
+"""Asterix metapackage."""
 
 
 from setuptools import setup
@@ -12,7 +12,7 @@ package_name = 'asterix'
 
 setup(
     name=package_name,
-    version='0.2.0',
+    version='0.1.0',
     packages=[package_name],
     data_files=[
         ('share/' + package_name, ['package.xml', 'launch/launch.py', 'robot/asterix.urdf']),
@@ -28,7 +28,7 @@ setup(
     license='Funtech Makers :: CDFR 2020 :: Equipe 1',
     entry_points={
         'console_scripts': [
-            'main = asterix.main:main',
+            'asterix = asterix.main:main',
         ],
     },
 )

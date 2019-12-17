@@ -42,6 +42,28 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
 
+  <!--Interial macros-->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0" iyy="${m*(3*r*r+h*h)/12}" iyz = "0" izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="box_inertia" params="m w h d">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m / 12.0 * (d*d + h*h)}" ixy="0.0" ixz="0.0" iyy="${m / 12.0 * (w*w + h*h)}" iyz="0.0" izz="${m / 12.0 * (w*w + d*d)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertia" params="m r">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${2.0*m*(r*r)/5.0}" ixy="0.0" ixz="0.0" iyy="${2.0*m*(r*r)/5.0}" iyz="0.0" izz="${2.0*m*(r*r)/5.0}"/>
+    </inertial>
+  </xacro:macro>
+
   <link name="base_footprint"/>
 
   <joint name="base_joint" type="fixed">
@@ -51,8 +73,9 @@
   </joint>
 
   <link name="robotbase">
+    <xacro:box_inertia m="4" w="0.2" h="0.26" d="0.32"/>
     <visual>
-      <origin xyz="0.0 0.0 0.0715" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <box size="0.2 0.26 0.32"/>
       </geometry>
@@ -78,8 +101,9 @@
   </joint>
 
   <link name="wheel_left_link">
+    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
     <visual>
-      <origin xyz="0 0.07 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.01" radius="0.04"/>
       </geometry>
@@ -96,8 +120,9 @@
   </joint>
 
   <link name="wheel_right_link">
+    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
     <visual>
-      <origin xyz="0 0.070 0" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
         <cylinder length="0.01" radius="0.04"/>
       </geometry>
