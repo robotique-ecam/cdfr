@@ -1,9 +1,6 @@
 #include <drive.hpp>
 
 
-#define USE_SPEEDRAMP
-#define USE_TIMER
-
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
 
@@ -15,8 +12,10 @@ Drive::Drive() : Node("drive_node") {
   /* Give variables their initial values */
   init_variables();
 
+  #ifndef SIMULATION
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
+  #endif /* SIMULATION */
   speedramp_left_ = std::make_shared<Speedramp>();
   speedramp_right_ = std::make_shared<Speedramp>();
 
@@ -40,7 +39,6 @@ Drive::Drive() : Node("drive_node") {
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
   this->declare_parameter("accel");
-  this->declare_parameter("i2c_bus");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
@@ -50,7 +48,10 @@ void Drive::init_parameters() {
   this->declare_parameter("microcontroler.speedramp_resolution");
 
   // Get parameters from yaml
+  #ifndef SIMULATION
+  this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
+  #endif /* SIMULATION */
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
@@ -86,11 +87,10 @@ void Drive::init_variables() {
   joint_states_.velocity.resize(2, 0.0);
   joint_states_.effort.resize(2, 0.0);
 
-  joint_states_.name.push_back("wheel_left_joint");
-  joint_states_.name.push_back("wheel_right_joint");
-  joint_states_.position.resize(2, 0.0);
-  joint_states_.velocity.resize(2, 0.0);
-  joint_states_.effort.resize(2, 0.0);
+  #ifdef SIMULATION
+  old_cmd_vel_.right = 0;
+  old_cmd_vel_.left = 0;
+  #endif /* SIMULATION */
 
   time_since_last_sync_ = this->get_clock()->now();
 }
@@ -121,12 +121,17 @@ void Drive::update_velocity() {
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
 
+  #ifndef SIMULATION
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
   attiny_steps_returned_.left = (int16_t) this->i2c->read_word(differential_speed_cmd_.left);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
   attiny_steps_returned_.right = (int16_t) this->i2c->read_word(differential_speed_cmd_.right);
+  #else
+  cmd_vel_.right = differential_speed_right;
+  cmd_vel_.left = differential_speed_left;
+  #endif /* SIMULATION */
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
@@ -148,17 +153,21 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  // std::cout << "steps_returned.left: " << steps_returned.left << "  steps_returned.right:" << steps_returned.right << std::endl;
-
+  #ifndef SIMULATION
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
-  // std::cout << "differential_move_.left: " << differential_move_.left << "  differential_move_.right:" << differential_move_.right << std::endl;
-
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
+  #else
+  differential_speed_.left = old_cmd_vel_.left;
+  differential_speed_.right = old_cmd_vel_.right;
 
-  // std::cout << "differential_speed_.left: " << differential_speed_.left << "  differential_speed_.right:" << differential_speed_.right << std::endl;
+  differential_move_.left = differential_speed_.left * dt;
+  differential_move_.right = differential_speed_.right * dt;
+
+  old_cmd_vel_ = cmd_vel_;
+  #endif /* SIMULATION */
 
   instantaneous_move_.linear = (differential_move_.left + differential_move_.right) / 2;
   instantaneous_move_.angular = (differential_move_.left - differential_move_.right) / (wheel_separation_);
@@ -166,13 +175,9 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   instantaneous_speed_.linear = (differential_speed_.left + differential_speed_.right) / 2;
   instantaneous_speed_.angular = (differential_speed_.left - differential_speed_.right) / (wheel_separation_);
 
-  // std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
-
   odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.thetha += instantaneous_move_.angular;
-
-  // std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
 }
 
 
