@@ -1,3 +1,8 @@
+#ifndef SPEEDRAMP_HEADER_HPP
+#define SPEEDRAMP_HEADER_HPP
+
+#ifdef USE_SPEEDRAMP
+
 #include <math.h>
 
 
@@ -49,3 +54,6 @@ private:
   double _previous = 0;
   double _acceleration = 0; // g/s^2
 };
+
+#endif /* USE_SPEEDRAMP */
+#endif /* SPEEDRAMP_HEADER_HPP */

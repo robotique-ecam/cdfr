@@ -2,10 +2,6 @@
 #define DRIVE_NODE_HPP
 
 
-#define USE_SPEEDRAMP
-#define USE_TIMER
-
-
 #ifndef SIMULATION
   #include "i2c.hpp"
 #endif
@@ -83,9 +79,14 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
+  #ifdef USE_TIMER
   rclcpp::TimerBase::SharedPtr timer_;
+  #endif /* USE_TIMER */
+
+  #ifdef USE_SPEEDRAMP
   std::shared_ptr<Speedramp> speedramp_left_;
   std::shared_ptr<Speedramp> speedramp_right_;
+  #endif /* USE_SPEEDRAMP */
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
