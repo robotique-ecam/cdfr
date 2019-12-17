@@ -1,3 +1,8 @@
+#ifndef SPEEDRAMP_HEADER_HPP
+#define SPEEDRAMP_HEADER_HPP
+
+#ifdef USE_SPEEDRAMP
+
 #include <math.h>
 
 
@@ -13,7 +18,7 @@ public:
   }
 
   void set_acceleration(double acceleration_rate) {
-    this->_acceleration = acceleration_rate;
+    _acceleration = acceleration_rate;
     _step = _acceleration * _dt;
   }
 
@@ -41,11 +46,14 @@ public:
   }
 
 private:
-  double _dt;
-  double _step;
-  double _min_speed;
-  double _max_speed;
-  double _setpoint;
-  double _previous;
-  double _acceleration; // g/s^2
+  double _dt = 0;
+  double _step = 0;
+  double _min_speed = 0;
+  double _max_speed = 0;
+  double _setpoint = 0;
+  double _previous = 0;
+  double _acceleration = 0; // g/s^2
 };
+
+#endif /* USE_SPEEDRAMP */
+#endif /* SPEEDRAMP_HEADER_HPP */

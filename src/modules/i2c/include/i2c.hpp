@@ -1,6 +1,7 @@
 #ifndef I2C_HEADER_HPP
 #define I2C_HEADER_HPP
 
+#ifndef SIMULATION
 
 #include <cstdio>
 #include <string>
@@ -29,4 +30,5 @@ private:
 
 };
 
+#endif /* SIMULATION */
 #endif /* I2C_HEADER_HPP */

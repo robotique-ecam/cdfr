@@ -1,8 +1,11 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
+
+#ifndef SIMULATION
+  #include "i2c.hpp"
+#endif
 #include "speedramp.hpp"
-#include "i2c.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -57,9 +60,12 @@ private:
     double thetha = 0;
   };
 
+  #ifndef SIMULATION
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
+
+  #endif
 
   // ROS time
   rclcpp::Time time_since_last_sync_;
@@ -73,9 +79,14 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
+  #ifdef USE_TIMER
   rclcpp::TimerBase::SharedPtr timer_;
+  #endif /* USE_TIMER */
+
+  #ifdef USE_SPEEDRAMP
   std::shared_ptr<Speedramp> speedramp_left_;
   std::shared_ptr<Speedramp> speedramp_right_;
+  #endif /* USE_SPEEDRAMP */
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
@@ -86,12 +97,6 @@ private:
   int max_freq_;
   int speed_resolution_;
 
-  /* I2C Bus */
-
-  /* PID */
-  // PID left_wheel_pid_;
-  // PID right_wheel_pid_;
-  Differential cmd_vel_;
 
   /* Computed values */
   uint16_t steps_per_turn_;
@@ -114,6 +119,8 @@ private:
   TinyData attiny_steps_returned_;
   TinyCMD differential_speed_cmd_;
   OdometricPose odom_pose_;
+  Differential cmd_vel_;
+  Differential old_cmd_vel_;
   Differential differential_speed_;
   Differential differential_move_;
   Instantaneous instantaneous_speed_;

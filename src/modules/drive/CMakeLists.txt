@@ -47,7 +47,23 @@ add_executable(${EXEC_NAME}
   src/i2c.cpp
 )
 
-target_link_libraries(${EXEC_NAME} i2c)
+option(SIMULATION "Simulation mode" OFF)
+option(SPEEDRAMP "Enable speedramp" OFF)
+option(TIMER "Enable Wall Timer for odometry" OFF)
+
+if(SIMULATION)
+  add_definitions(-DSIMULATION)
+else()
+  target_link_libraries(${EXEC_NAME} i2c)
+endif(SIMULATION)
+
+if(SPEEDRAMP)
+  add_definitions(-DUSE_SPEEDRAMP)
+endif(SPEEDRAMP)
+
+if(TIMER)
+  add_definitions(-DUSE_TIMER)
+endif(TIMER)
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 
