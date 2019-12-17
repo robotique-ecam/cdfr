@@ -1,5 +1,8 @@
-#include <drive/drive.hpp>
+#include <drive.hpp>
 
+
+#define USE_SPEEDRAMP
+#define USE_TIMER
 
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
@@ -13,7 +16,9 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
   /* Open I2C connection */
-  i2c = std::make_shared<I2C>(1);
+  i2c = std::make_shared<I2C>(i2c_bus);
+  speedramp_left_ = std::make_shared<Speedramp>();
+  speedramp_right_ = std::make_shared<Speedramp>();
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -24,12 +29,17 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
+  #ifdef USE_TIMER
+  timer_ = this->create_wall_timer(50ms, std::bind(&Drive::update_velocity, this));
+  #endif
+
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
 
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
+  this->declare_parameter("accel");
   this->declare_parameter("i2c_bus");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
@@ -48,18 +58,33 @@ void Drive::init_parameters() {
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
   this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
   this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
+  this->get_parameter_or<double>("speedramp.accel", accel_, 9.81);
 }
 
 
 void Drive::init_variables() {
   /* Compute initial values */
   steps_per_turn_ = 200 * 16;
-  mm_per_turn_ = 2 * M_PI * wheel_radius_;
-  mm_per_step_ = mm_per_turn_ / steps_per_turn_;
+  rads_per_step = 1 / (M_PI * wheel_radius_);
+  meters_per_turn_ = 2 * M_PI * wheel_radius_;
+  meters_per_step_ = meters_per_turn_ / steps_per_turn_;
 
   speed_multiplier_ = max_freq_ / speed_resolution_;
-  max_speed_ = max_freq_ * mm_per_step_;
-  min_speed_ = speed_multiplier_ * mm_per_step_;
+  max_speed_ = max_freq_ * meters_per_step_;
+  min_speed_ = speed_multiplier_ * meters_per_step_;
+
+  speedramp_left_->set_acceleration(accel_);
+  speedramp_right_->set_acceleration(accel_);
+  speedramp_left_->set_delay(0.05);
+  speedramp_right_->set_delay(0.05);
+  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
+  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
+
+  joint_states_.name.push_back("wheel_left_joint");
+  joint_states_.name.push_back("wheel_right_joint");
+  joint_states_.position.resize(2, 0.0);
+  joint_states_.velocity.resize(2, 0.0);
+  joint_states_.effort.resize(2, 0.0);
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -84,19 +109,24 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 }
 
 
-void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  double differential_speed_left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  double differential_speed_right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+void Drive::update_velocity() {
+  #ifdef USE_SPEEDRAMP
+  double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
+  double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
+  #else
+  double differential_speed_left = cmd_vel_.left;
+  double differential_speed_right = cmd_vel_.right;
+  #endif
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
 
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = this->i2c->read_word(differential_speed_cmd_.left);
+  attiny_steps_returned_.left = (int16_t) this->i2c->read_word(differential_speed_cmd_.left);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = this->i2c->read_word(differential_speed_cmd_.right);
+  attiny_steps_returned_.right = (int16_t) this->i2c->read_word(differential_speed_cmd_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
@@ -107,31 +137,42 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 }
 
 
-void Drive::compute_pose_velocity(TinyData steps_returned) {
-  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e3;
+void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
+  cmd_vel_.left = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.right = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
-  differential_move_.left = mm_per_step_ * steps_returned.left;
-  differential_move_.right = mm_per_step_ * steps_returned.right;
+  update_velocity();
+}
+
+
+void Drive::compute_pose_velocity(TinyData steps_returned) {
+  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
+
+  // std::cout << "steps_returned.left: " << steps_returned.left << "  steps_returned.right:" << steps_returned.right << std::endl;
+
+  differential_move_.left = meters_per_step_ * steps_returned.left;
+  differential_move_.right = meters_per_step_ * steps_returned.right;
+
+  // std::cout << "differential_move_.left: " << differential_move_.left << "  differential_move_.right:" << differential_move_.right << std::endl;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
 
-  if (steps_returned.left == steps_returned.right) {
-    instantaneous_speed_.angular = 0;
-    instantaneous_speed_.linear = differential_speed_.left;
-  } else if (steps_returned.left == -steps_returned.right) {
-    instantaneous_speed_.linear = 0;
-    instantaneous_speed_.angular = (differential_speed_.right - differential_move_.left) / wheel_separation_;
-  } else {
-    trajectory_radius_left = wheel_separation_ * differential_move_.left / (differential_move_.right - differential_move_.left);
-    trajectory_radius = 2 * trajectory_radius_left + wheel_separation_;
+  // std::cout << "differential_speed_.left: " << differential_speed_.left << "  differential_speed_.right:" << differential_speed_.right << std::endl;
 
-    instantaneous_move_.angular = differential_move_.left / trajectory_radius_left;
-    instantaneous_move_.linear = wheel_radius_ * sqrt(2 - 2 * cos(instantaneous_move_.angular));
+  instantaneous_move_.linear = (differential_move_.left + differential_move_.right) / 2;
+  instantaneous_move_.angular = (differential_move_.left - differential_move_.right) / (wheel_separation_);
 
-    instantaneous_speed_.angular = instantaneous_move_.angular / dt;
-    instantaneous_speed_.linear = instantaneous_move_.linear / dt;
-  }
+  instantaneous_speed_.linear = (differential_speed_.left + differential_speed_.right) / 2;
+  instantaneous_speed_.angular = (differential_speed_.left - differential_speed_.right) / (wheel_separation_);
+
+  // std::cout << "instantaneous_speed_.angular: " << instantaneous_speed_.angular << "  instantaneous_speed_.linear:" << instantaneous_speed_.linear << std::endl;
+
+  odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
+  odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
+  odom_pose_.thetha += instantaneous_move_.angular;
+
+  // std::cout << "odom_pose_.x: " << odom_pose_.x << "  odom_pose_.y:" << odom_pose_.y << "odom_pose_.theta" << odom_pose_.thetha <<  std::endl;
 }
 
 
@@ -150,7 +191,6 @@ void Drive::update_odometry() {
 
   // We should update the twist of the odometry
   odom_.twist.twist.linear.x = instantaneous_speed_.linear;
-  odom_.twist.twist.linear.y = 0;
   odom_.twist.twist.angular.z = instantaneous_speed_.angular;
   odom_.header.stamp = time_since_last_sync_;
   odom_pub_->publish(odom_);
@@ -173,10 +213,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] = differential_move_.left;
-  joint_states_.position[RIGHT] = differential_move_.right;
-  joint_states_.velocity[LEFT] = differential_speed_.left;
-  joint_states_.velocity[RIGHT] = differential_speed_.right;
+  joint_states_.position[LEFT] += attiny_steps_returned_.left * rads_per_step;
+  joint_states_.position[RIGHT] += attiny_steps_returned_.right * rads_per_step;
+  joint_states_.velocity[LEFT] =  attiny_steps_returned_.left * rads_per_step / dt;
+  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
 
