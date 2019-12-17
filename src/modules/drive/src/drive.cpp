@@ -74,13 +74,6 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * meters_per_step_;
   min_speed_ = speed_multiplier_ * meters_per_step_;
 
-  speedramp_left_->set_acceleration(accel_);
-  speedramp_right_->set_acceleration(accel_);
-  speedramp_left_->set_delay(0.05);
-  speedramp_right_->set_delay(0.05);
-  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
-  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
-
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
   joint_states_.position.resize(2, 0.0);
@@ -88,6 +81,13 @@ void Drive::init_variables() {
   joint_states_.effort.resize(2, 0.0);
 
   #ifdef SIMULATION
+  speedramp_left_->set_acceleration(accel_);
+  speedramp_right_->set_acceleration(accel_);
+  speedramp_left_->set_delay(0.05);
+  speedramp_right_->set_delay(0.05);
+  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
+  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
+
   old_cmd_vel_.right = 0;
   old_cmd_vel_.left = 0;
   #endif /* SIMULATION */
