@@ -35,7 +35,7 @@ setup(
     maintainer_email='ewen.brun@ecam.fr',
     keywords=['ROS2', '', 'CDFR'],
     description='Code balise Assurancetourix.',
-    license='Funtech Makers :: CDFR 2020 :: Equipe 1',
+    license='Funtech Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
             'main = assurancetourix.main:main',
