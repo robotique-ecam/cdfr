@@ -4,6 +4,8 @@
 """Asterix metapackage."""
 
 
+from os import path
+from glob import glob
 from setuptools import setup
 
 
@@ -15,7 +17,9 @@ setup(
     version='0.1.0',
     packages=[package_name],
     data_files=[
-        ('share/' + package_name, ['package.xml', 'launch/launch.py', 'robot/asterix.urdf']),
+        (path.join('share', package_name), ['package.xml', 'launch/launch.py']),
+        (path.join('share', package_name, 'param'), glob('param/*')),
+        (path.join('share', package_name, 'robot'), glob('robot/*')),
     ],
     zip_safe=True,
     install_requires=['setuptools'],
