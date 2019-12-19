@@ -20,7 +20,7 @@ def generate_launch_description():
     map_dir = LaunchConfiguration(
         'map',
         default=os.path.join(
-            get_package_share_directory('asterix'),
+            get_package_share_directory('assurancetourix'),
             'map',
             'map.yaml'))
 
