@@ -22,7 +22,7 @@ def generate_launch_description():
         default=os.path.join(
             get_package_share_directory('assurancetourix'),
             'map',
-            'map.yaml'))
+            'map.yml'))
 
     param_dir = LaunchConfiguration(
         'params',
