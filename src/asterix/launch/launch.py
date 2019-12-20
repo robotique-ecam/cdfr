@@ -19,6 +19,7 @@ def generate_launch_description():
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
     urdf = os.path.join(get_package_share_directory('asterix'), 'robot', 'asterix.urdf')
     params = os.path.join(get_package_share_directory('asterix'), 'param', 'asterix.yml')
+    map_dir = LaunchConfiguration('map', default=os.path.join(get_package_share_directory('assurancetourix'), 'map', 'map.yml'))
 
     return launch.LaunchDescription([
         DeclareLaunchArgument(
@@ -40,6 +41,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/nav2_bringup_launch.py']),
             launch_arguments={
+                'map': map_dir,
                 'use_sim_time': use_sim_time,
                 'params': params}.items(),
         )
