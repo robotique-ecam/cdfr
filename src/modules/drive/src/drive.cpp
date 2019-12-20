@@ -32,7 +32,7 @@ Drive::Drive() : Node("drive_node") {
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
   #ifdef USE_TIMER
-  timer_ = this->create_wall_timer(50ms, std::bind(&Drive::update_velocity, this));
+  timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
   #endif
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");

@@ -49,7 +49,7 @@ add_executable(${EXEC_NAME}
 
 option(SIMULATION "Simulation mode" OFF)
 option(SPEEDRAMP "Enable speedramp" OFF)
-option(TIMER "Enable Wall Timer for odometry" OFF)
+option(TIMER "Enable Wall Timer for odometry" ON)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
