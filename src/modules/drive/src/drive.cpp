@@ -55,9 +55,9 @@ void Drive::init_parameters() {
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
   #endif /* SIMULATION */
-  this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
+  this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
-  this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
+  this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
   this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
   this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
   this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
