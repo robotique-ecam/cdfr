@@ -54,15 +54,16 @@ dwb_controller:
     decel_lim_x: -2.5
     decel_lim_y: 0.0
     decel_lim_theta: -3.2
-    vx_samples: 50
-    vy_samples: 10
+    vx_samples: 20
+    vy_samples: 5
     vtheta_samples: 20
+    controller_frequency: 50
     sim_time: 1.7
     linear_granularity: 0.05
     xy_goal_tolerance: 0.01
     transform_tolerance: 0.01
     critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
-    BaseObstacle.scale: 0.02
+    BaseObstacle.scale: 0.01
     PathAlign.scale: 0.0
     GoalAlign.scale: 0.0
     PathDist.scale: 32.0
