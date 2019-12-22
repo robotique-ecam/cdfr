@@ -57,7 +57,7 @@ dwb_controller:
     vx_samples: 20
     vy_samples: 5
     vtheta_samples: 20
-    controller_frequency: 20.0
+    controller_frequency: 10.0
     linear_granularity: 0.05
     xy_goal_tolerance: 0.02
     transform_tolerance: 0.2
