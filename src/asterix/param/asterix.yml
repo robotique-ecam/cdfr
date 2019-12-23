@@ -25,15 +25,44 @@ sensors_node:
     base_frame: "base_link"
 
 
+amcl_map_client:
+  ros__parameters:
+    use_sim_time: True
+
+
+amcl_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+
 bt_navigator:
   ros__parameters:
-    use_sim_time: False
-    bt_xml_filename: "bt_navigator.xml"
+    use_sim_time: True
+    bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    plugin_lib_names:
+    - nav2_compute_path_to_pose_action_bt_node
+    - nav2_follow_path_action_bt_node
+    - nav2_back_up_action_bt_node
+    - nav2_spin_action_bt_node
+    - nav2_wait_action_bt_node
+    - nav2_clear_costmap_service_bt_node
+    - nav2_is_stuck_condition_bt_node
+    - nav2_goal_reached_condition_bt_node
+    - nav2_initial_pose_received_condition_bt_node
+    - nav2_reinitialize_global_localization_service_bt_node
+    - nav2_rate_controller_bt_node
+    - nav2_recovery_node_bt_node
+    - nav2_pipeline_sequence_bt_node
 
-dwb_controller:
+
+controller_server:
   ros__parameters:
-    robot_base_frame: 'base_link'
-    use_sim_time: False
+    use_sim_time: True
     debug_trajectory_details: True
     min_vel_x: -0.9
     min_vel_y: 0.0
@@ -58,8 +87,9 @@ dwb_controller:
     vy_samples: 5
     vtheta_samples: 20
     controller_frequency: 10.0
+    sim_time: 1.7
     linear_granularity: 0.05
-    xy_goal_tolerance: 0.02
+    xy_goal_tolerance: 0.05
     transform_tolerance: 0.2
     critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
     BaseObstacle.scale: 0.01
@@ -67,94 +97,88 @@ dwb_controller:
     GoalAlign.scale: 0.0
     PathDist.scale: 32.0
     GoalDist.scale: 24.0
-    RotateToGoal.scale: 16.0
+    RotateToGoal.scale: 32.0
+
+
+controller_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
 
 local_costmap:
   local_costmap:
     ros__parameters:
-      use_sim_time: False
-      global_frame: 'odom'
-      robot_base_frame: 'base_link'
+      use_sim_time: True
+      global_frame: odom
       plugin_names: ["obstacle_layer", "inflation_layer"]
       plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
       rolling_window: true
       width: 3
       height: 3
       resolution: 0.05
-      robot_radius: 0.15
+      robot_radius: 0.22
       inflation_layer.cost_scaling_factor: 3.0
       obstacle_layer:
         enabled: True
+        scan:
+          topic: /asterix/scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+      static_layer:
+        map_subscribe_transient_local: True
       always_send_full_costmap: True
       observation_sources: scan
-      scan:
-        topic: /scan
-        max_obstacle_height: 2.0
-        clearing: True
-        marking: True
   local_costmap_client:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
   local_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
+
 
 global_costmap:
   global_costmap:
     ros__parameters:
-      use_sim_time: False
-      robot_radius: 0.105
-      robot_base_frame: 'base_link'
+      use_sim_time: True
+      robot_radius: 0.22
       obstacle_layer:
         enabled: True
+        scan:
+          topic: /asterix/scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+      static_layer:
+        map_subscribe_transient_local: True
       always_send_full_costmap: True
       observation_sources: scan
-      scan:
-        topic: /scan
-        max_obstacle_height: 2.0
-        clearing: True
-        marking: True
   global_costmap_client:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
   global_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
+
 
 map_server:
   ros__parameters:
     use_sim_time: False
     yaml_filename: "map.yml"
 
-lifecycle_manager:
-  ros__parameters:
-    use_sim_time: False
-    autostart: True
-    node_names: ['map_server', 'world_model', 'dwb_controller',
-                 'navfn_planner', 'bt_navigator']
 
-lifecycle_manager_service_client:
+planner_server:
   ros__parameters:
-    use_sim_time: False
-
-lifecycle_manager_client_service_client:
-  ros__parameters:
-    use_sim_time: False
-
-navfn_planner:
-  ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     tolerance: 0.0
     use_astar: false
 
-navfn_planner_GetCostmap_client:
+
+planner_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
+
 
 robot_state_publisher:
   ros__parameters:
-    use_sim_time: False
-
-world_model:
-  ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
