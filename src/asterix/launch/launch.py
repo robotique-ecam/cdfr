@@ -43,6 +43,6 @@ def generate_launch_description():
             launch_arguments={
                 'map': map_dir,
                 'use_sim_time': use_sim_time,
-                'params': params}.items(),
+                'params_file': params}.items(),
         )
     ])
