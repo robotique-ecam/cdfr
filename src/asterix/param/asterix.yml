@@ -84,7 +84,7 @@ controller_server:
     PathAlign/class: PathAlign
     PathDist:
       aggregation_type: last
-      scale: 64.0
+      scale: 32.0
     PathDist/class: PathDist
     RotateToGoal:
       scale: 16.0
@@ -146,8 +146,9 @@ controller_server:
     trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
     transform_tolerance: 0.2
     use_sim_time: true
-    vx_samples: 20
-    vy_samples: 5
+    vx_samples: 32
+    vy_samples: 0
+    vtheta_samples: 32
     xy_goal_tolerance: 0.005
     yaw_goal_tolerance: 0.25
 
