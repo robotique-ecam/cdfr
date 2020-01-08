@@ -38,8 +38,8 @@ private:
 
   struct TinyData {
     /* ATTiny steps from I2C */
-    int16_t left = 0;
-    int16_t right = 0;
+    int32_t left = 0;
+    int32_t right = 0;
   };
 
   struct Differential {
@@ -112,8 +112,8 @@ private:
   double trajectory_radius = 0;
   double trajectory_radius_left = 0;
 
-  bool received_steps_left;
-  bool received_steps_right;
+  bool sign_steps_left = false;
+  bool sign_steps_right = false;
 
   TinyData attiny_speed_cmd_;
   TinyData attiny_steps_returned_;
