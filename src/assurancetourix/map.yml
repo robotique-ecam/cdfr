@@ -1,6 +1,0 @@
-image: mapbleu.ppm
-resolution: 0.02
-origin: [3.0, 2.0, 0]
-negate: 0
-occupied_thresh: 0.6
-free_thresh: 0.4

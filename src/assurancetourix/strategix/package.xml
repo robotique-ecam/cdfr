@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>assurancetourix</name>
-  <version>0.3.0</version>
-  <description>Assurancetourix package</description>
+  <name>strategix</name>
+  <version>0.0.1</version>
+  <description>Strategix package</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Funtech Makers :: CDFR 2020 :: Equipe 1</license>
+  <license>Funtech Makers :: CDFR 2020</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
