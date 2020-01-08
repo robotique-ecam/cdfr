@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+
+
+"""Script generating maps for CDR2020."""
+
+
+from os import path
 from PIL import Image, ImageDraw
 
 noir = (0, 0, 0)
@@ -10,10 +17,12 @@ reso = 2
 
 
 def cm_pix(taille_cm, cmpar_pixel):
+    """Return cm per pixel."""
     return (taille_cm // cmpar_pixel)
 
 
 def creamap():
+    """Function for creating basemap."""
     map = Image.new('RGB', (cm_pix(longueur_cm, reso),
                             cm_pix(largeur_cm, reso)), blanc)
 
@@ -37,14 +46,16 @@ def creamap():
 
 
 def creamapbleu():
+    """Add blue side specific elements."""
     mapbleu, draw = creamap()
     draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
                                         cm_pix(largeur_cm, reso))), noir, 1)
-    mapbleu.save("mapbleu.ppm", "ppm")
+    mapbleu.save(path.join("map", "mapbleu.ppm"), "ppm")
 
 
 def creamapjaune():
+    """Add yellow side specific elements."""
     mapjaune, draw = creamap()
     draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
                                        cm_pix(largeur_cm, reso))), noir, 1)
-    mapjaune.save("mapjaune.ppm", "ppm")
+    mapjaune.save(path.join("map", "mapjaune.ppm"), "ppm")
