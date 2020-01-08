@@ -9,7 +9,8 @@ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo ap
 
 sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
-sudo apt update && sudo apt install -y ros-eloquent-desktop i3 xinit i2c-tools libi2c-dev git lxterminal python3-argcomplete python3-colcon-common-extensions
+sudo apt update && sudo apt install -y ros-eloquent-desktop i3 xinit i2c-tools libi2c-dev git lxterminal python3-argcomplete python3-colcon-common-extensions ros-eloquent-launch-testing ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs
+
 
 
 
