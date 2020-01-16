@@ -51,8 +51,16 @@ ament_target_dependencies(${EXEC_NAME} ${dependencies})
 ################################################################################
 # Install
 ################################################################################
+execute_process(COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/map/map.py ${CMAKE_CURRENT_SOURCE_DIR})
+
+
 install(TARGETS ${EXEC_NAME}
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY launch map
+  DESTINATION share/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
@@ -62,11 +70,5 @@ install(DIRECTORY include/
 ################################################################################
 # Macro for ament package
 ################################################################################
-ament_export_include_directories(include)
-ament_export_dependencies(geometry_msgs)
-ament_export_dependencies(nav_msgs)
 ament_export_dependencies(rclcpp)
-ament_export_dependencies(sensor_msgs)
-ament_export_dependencies(tf2)
-ament_export_dependencies(tf2_msgs)
 ament_package()

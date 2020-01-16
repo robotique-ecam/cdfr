@@ -4,6 +4,7 @@
 """Script generating maps for CDR2020."""
 
 
+import sys
 from os import path
 from PIL import Image, ImageDraw
 
@@ -50,7 +51,7 @@ def creamapbleu():
     mapbleu, draw = creamap()
     draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
                                         cm_pix(largeur_cm, reso))), noir, 1)
-    mapbleu.save(path.join("map", "mapbleu.ppm"), "ppm")
+    mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.ppm"), "ppm")
 
 
 def creamapjaune():
@@ -58,4 +59,9 @@ def creamapjaune():
     mapjaune, draw = creamap()
     draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
                                        cm_pix(largeur_cm, reso))), noir, 1)
-    mapjaune.save(path.join("map", "mapjaune.ppm"), "ppm")
+    mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.ppm"), "ppm")
+
+
+if __name__ == '__main__':
+    creamapbleu()
+    creamapjaune()
