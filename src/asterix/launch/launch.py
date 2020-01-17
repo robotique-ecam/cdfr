@@ -32,6 +32,8 @@ def generate_launch_description():
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
 
+        Node(package='lcd_driver', node_executable='lcd_driver', output='screen', parameters=[params]),
+
         Node(package='drive', node_executable='drive', output='screen', parameters=[params]),
 
         Node(package='robot_state_publisher', node_executable='robot_state_publisher', output='screen', arguments=[urdf]),
