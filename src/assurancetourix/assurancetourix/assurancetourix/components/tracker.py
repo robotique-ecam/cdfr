@@ -2,6 +2,7 @@
 
 
 import cv2
+import time
 from cv2 import aruco
 
 
@@ -11,10 +12,7 @@ class Tracker:
     def __init__(self):
         """Init Tracker."""
         self.parameters = aruco.DetectorParameters_create()
-        self.parameters.perspectiveRemovePixelPerCell = 6
-        self.parameters.adaptiveThreshConstant = 12
-        self.parameters.maxErroneousBitsInBorderRate = 0.6
-        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_1000)
+        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
 
     def _detect_markers(self, frame):
         """Detect ARUCO marker."""
@@ -35,7 +33,9 @@ if __name__ == '__main__':
     from camera import Camera
     cam = Camera()
     tracker = Tracker()
+    t = time.time()
     frame = cam.cap.read()[1]
     r = tracker._detect_markers(frame)
+    print("Took ", (time.time() - t)*1000, "ms")
     print(r)
     cv2.imwrite("out.png", tracker._draw(frame, r[0]))
