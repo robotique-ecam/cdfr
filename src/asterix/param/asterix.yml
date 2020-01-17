@@ -124,7 +124,6 @@ controller_server:
       # Scores a trajectory based on how far it ends up from the path provided by the global planner.
     - GoalDist
       # Scores a trajectory based on how close the trajectory gets the robot to the goal pose.
-    holonomic_robot: false
     debug_trajectory_details: false
     decel_lim_theta: -2.0
     decel_lim_x: -0.2
@@ -154,12 +153,11 @@ controller_server:
     trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
     transform_tolerance: 0.2
     use_sim_time: true
-    vx_samples: 3
+    vx_samples: 10
     vy_samples: 0
-    vtheta_samples: 3
-    xy_goal_tolerance: 0.05
+    vtheta_samples: 0
+    xy_goal_tolerance: 0.25
     yaw_goal_tolerance: 0.05
-    latch_xy_goal_tolerance: true
 
 
 controller_server_rclcpp_node:
