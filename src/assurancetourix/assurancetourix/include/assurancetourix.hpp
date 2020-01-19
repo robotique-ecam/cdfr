@@ -11,17 +11,13 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/aruco.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 
-
-#define LEFT 0
-#define RIGHT 1
-
-#define STEPPER_LEFT 1
-#define STEPPER_RIGHT 2
 
 using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
+
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -48,7 +44,7 @@ private:
   cv_bridge::CvImage cv_img_bridge;
   sensor_msgs::msg::Image img_msg;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
+  image_transport::Publisher image_pub_;
 
   // Parameters
   int _camera_id;

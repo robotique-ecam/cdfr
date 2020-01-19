@@ -11,9 +11,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
     exit(-1);
   }
 
-  auto qos = rclcpp::QoS(rclcpp::KeepLast(5));
-
-  image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("detected_aruco", qos);
+  image_pub_ = image_transport::create_publisher(this, "detected_aruco", rmw_qos_profile_default);
 
   timer_ = this->create_wall_timer(1s, std::bind(&Assurancetourix::detect, this));
 
@@ -39,7 +37,7 @@ void Assurancetourix::detect() {
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
 
-  image_pub_->publish(img_msg);
+  image_pub_.publish(img_msg);
 }
 
 
