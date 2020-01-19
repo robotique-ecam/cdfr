@@ -15,7 +15,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("detected_aruco", qos);
 
-  this->create_wall_timer(1s, std::bind(&Assurancetourix::detect, this));
+  timer_ = this->create_wall_timer(1s, std::bind(&Assurancetourix::detect, this));
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }

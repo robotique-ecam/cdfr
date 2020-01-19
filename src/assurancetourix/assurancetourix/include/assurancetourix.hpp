@@ -47,6 +47,7 @@ private:
 
   cv_bridge::CvImagePtr cv_img_bridge;
   sensor_msgs::msg::Image img_msg;
+  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
 
   // Parameters
