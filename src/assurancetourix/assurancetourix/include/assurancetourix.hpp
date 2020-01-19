@@ -45,7 +45,7 @@ private:
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
 
-  cv_bridge::CvImagePtr cv_img_bridge;
+  cv_bridge::CvImage cv_img_bridge;
   sensor_msgs::msg::Image img_msg;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
