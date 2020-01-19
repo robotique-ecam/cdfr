@@ -4,9 +4,11 @@
 import cv2
 import time
 from cv2 import aruco
+from rclpy.node import Node
 
 
-class Tracker:
+class Assurancetourix(Node):
+
     """ARUCO AR TAG Tracker adaptation for robots."""
 
     def __init__(self):
@@ -19,6 +21,11 @@ class Tracker:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict, parameters=self.parameters)
         return corners, ids
+
+    def _plot_axis(self, ):
+        """Plot axis on graph."""
+        aruco.estimatePoseSingleMarkers()
+        return aruco.drawAxis()
 
     def _regroup_markers(self):
         """Regroup marker corresponding to the same robot."""
