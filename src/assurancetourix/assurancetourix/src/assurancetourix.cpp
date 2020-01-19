@@ -16,6 +16,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("detected_aruco", qos);
 
   this->create_wall_timer(1s, std::bind(&Assurancetourix::detect, this));
+
+  RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
 
@@ -25,15 +27,24 @@ void Assurancetourix::init_parameters() {
 
 
 void Assurancetourix::detect() {
+
+  std::cout << "Running detection\n";
+
   _cap.read(_frame);
   _frame.copyTo(_anotated);
   img_msg.header.stamp = this->get_clock()->now();
 
+  std::cout << "Captured frame\n";
+
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
+  std::cout << "Detected\n";
+
   cv_img_bridge->image = _anotated;
   cv_img_bridge->toImageMsg(img_msg);
+
+  std::cout << "Publishing\n";
 
   image_pub_->publish(img_msg);
 }
