@@ -22,29 +22,22 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
 
 void Assurancetourix::init_parameters() {
-
+  cv_img_bridge.encoding = "bgr8";
+  cv_img_bridge.header.frame_id = "odom";
 }
 
 
 void Assurancetourix::detect() {
 
-  std::cout << "Running detection\n";
-
   _cap.read(_frame);
   _frame.copyTo(_anotated);
-  img_msg.header.stamp = this->get_clock()->now();
-
-  std::cout << "Captured frame\n";
+  cv_img_bridge.header.stamp = this->get_clock()->now();
 
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
-  std::cout << "Detected\n";
-
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
-
-  std::cout << "Publishing\n";
 
   image_pub_->publish(img_msg);
 }
