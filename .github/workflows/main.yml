@@ -19,6 +19,6 @@ jobs:
           sudo mkdir -p /etc/apt-get/sources.list.d/ && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-eloquent-ros-base python3-colcon-common-extensions \
-          libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge libi2c-dev i2c-tools
+          libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools
       - name: Test all CDR packages
         run: . /opt/ros/eloquent/setup.bash && colcon build
