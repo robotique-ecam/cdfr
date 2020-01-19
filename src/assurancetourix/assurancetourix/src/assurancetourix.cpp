@@ -43,7 +43,7 @@ void Assurancetourix::detect() {
 
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
-.
+
   std::cout << "Publishing\n";
 
   image_pub_->publish(img_msg);
