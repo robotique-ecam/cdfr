@@ -23,7 +23,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
 void Assurancetourix::init_parameters() {
   cv_img_bridge.encoding = "bgr8";
-  cv_img_bridge.header.frame_id = "wide_angle_camera";
+  cv_img_bridge.header.frame_id = "robotbase";
 }
 
 
