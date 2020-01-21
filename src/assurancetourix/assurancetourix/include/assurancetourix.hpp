@@ -38,6 +38,15 @@ private:
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
 
+  /* when camera calibration will be done */
+  std::vector<cv::Vec3d> _rvecs, _tvecs;
+
+  double mat_dist_coeffs[] = {0.3500038366337939, -1.4933155679576624, 0.022462074105878548, -0.008107582986986875, 2.9089180661290976};
+  double mat_camera_matrix_coeff[][] = {{500.1787284360219, 0.0, 306.89160844028396}, {0.0, 503.06670218899563, 248.89861392261338}, {0.0, 0.0, 1.0}};
+
+  cv::Mat _distCoeffs = Mat(6,1, CV_64F, mat_dist_coeffs);
+  cv::Mat _cameraMatrix = Mat(3,3, CV_64F, mat_camera_matrix_coeff);
+
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
 

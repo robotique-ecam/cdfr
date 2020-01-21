@@ -49,6 +49,11 @@ void Assurancetourix::_detect_aruco(Mat img) {
 void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0)
     cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
+
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.05, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
+    for(int i=0; i<_detected_ids.size(); i++)
+      cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
+
 }
 
 
