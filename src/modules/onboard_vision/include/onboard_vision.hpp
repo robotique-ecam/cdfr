@@ -26,6 +26,7 @@ public:
 private:
   Mat _frame;
   Mat _bwframe;
+  Mat _frame_mask;
   Rect _rect_roi;
   VideoCapture _cap;
   std::vector<Vec3f> _cups_circles;
@@ -45,10 +46,10 @@ private:
   void _capture_image();
   void _analysis_roi();
   void _undistort_images();
-  void _detect_hough_circles();
-  void _mask_circle(Vec3f circle);
+  void detect_hough_circles();
   void _get_dominant_color();
   void find_objects();
+  Scalar _get_circle_dominant_color(Vec3f detected_circle);
 };
 
 #endif /* ONBOARD_VISION_NODE_HPP */

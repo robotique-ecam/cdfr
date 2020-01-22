@@ -30,7 +30,7 @@ lcd_driver:
     i2c_bus: 6
     i2c_addr: 0x27
 
-    banner: "Asterix v0.3.1"
+    banner: "Asterix v0.3.2"
 
 
 amcl_map_client:
