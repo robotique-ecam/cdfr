@@ -1,9 +1,5 @@
 #include "sensors.hpp"
 
-#define I2C_ADDR_SENSOR_FRONT_LEFT 0x20
-#define I2C_ADDR_SENSOR_FRONT_RIGHT 0x21
-#define I2C_ADDR_SENSOR_BACK_LEFT 0x22
-#define I2C_ADDR_SENSOR_BACK_RIGHT 0x23
 
 Sensors::Sensors() : Node("sensors_node") {
   /* Init parametrers from YAML */
@@ -19,12 +15,9 @@ Sensors::Sensors() : Node("sensors_node") {
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
-  sensors_pub_ = this->create_publisher<sensor_msgs::msg::Range>("sensors",&distance);
+  sensors_pub_ = this->create_publisher<sensor_msgs::msg::Range>("sensors", qos);
 
-
-  #ifdef USE_TIMER
-  timer_ = this->create_wall_timer(50ms, std::bind(&Sensors::receive_distance, this));
-  #endif
+  timer_ = this->create_wall_timer(200ms, std::bind(&Sensors::receive_distance, this));
 
 
   RCLCPP_INFO(this->get_logger(), "Sensor node initialised");
@@ -33,14 +26,19 @@ Sensors::Sensors() : Node("sensors_node") {
 
 void Sensors::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("duration");
-  this->declare_parameter("distance");
+  this->declare_parameter("i2c_bus");
+  this->declare_parameter("hcsr04_names");
+  std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
 
   // Get parameters from yaml
-  #ifndef SIMULATION
-  this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 3);
-  #endif /* SIMULATION */
+
+  for(auto it = hcsr04_names.begin(); it != hcsr04_names.end(); it++) {
+     this->declare_parameter("hcsr04." + *it + ".frame_id");
+     this->declare_parameter("hcsr04." + *it + ".addr");
+     sensor_frames.push_back(this->get_parameter("hcsr04." + *it + ".frame_id").as_string());
+     sensor_addresses.push_back(this->get_parameter("hcsr04." + *it + ".addr").as_int());
+  }
 }
 
 
@@ -51,6 +49,7 @@ void Sensors::init_variables() {
   hcsr_range_msg.field_of_view = 1;
 }
 
+
 void Sensors::receive_distance() {
   #ifndef SIMULATION
   for (int i=0; i < sensor_addresses.size(); i++) {
@@ -60,24 +59,8 @@ void Sensors::receive_distance() {
     hcsr_range_msg.range = distance / 100;
     sensors_pub_->publish(hcsr_range_msg);
   }
-
-
-  this->declare_parameter("hcsr04_names")
-std::vector<std::string> n = this->get_parameter("hcsr04_names").as_string_array();
-
-for(std::string &name : n) {
-   this->declare_parameter("hcsr04." + name + ".frame_id");
-   this->declare_parameter("hcsr04." + name + ".addr");
-   int64_t frame_id = this->get_parameter("hcsr04." + name + ".frame_id").();
-   int64_t addr = this->get_parameter("hcsr04." + name + ".addr").as_int();
-}
-
-
-
-  #else
   #endif /* SIMULATION */
 }
-
 
 
 Sensors::~Sensors() {
