@@ -30,7 +30,7 @@ void Sensors::init_parameters() {
   this->declare_parameter("hcsr04_names");
 
   // Get parameters from yaml
-  this->get_parameter_or<int>("i2c_bus", i2c_bus, 3);
+  this->get_parameter_or<int>("i2c_bus", i2c_bus, 0);
   std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
 
   for(auto it = hcsr04_names.begin(); it != hcsr04_names.end(); it++) {
