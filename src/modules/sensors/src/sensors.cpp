@@ -28,10 +28,10 @@ void Sensors::init_parameters() {
   // Declare parameters that may be set on this node
   this->declare_parameter("i2c_bus");
   this->declare_parameter("hcsr04_names");
-  std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
 
   // Get parameters from yaml
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 3);
+  std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
 
   for(auto it = hcsr04_names.begin(); it != hcsr04_names.end(); it++) {
      this->declare_parameter("hcsr04." + *it + ".frame_id");
