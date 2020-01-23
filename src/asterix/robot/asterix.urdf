@@ -129,4 +129,25 @@
       <material name="dark"/>
     </visual>
   </link>
+
+  <link name="sensor_front_left" update_rate="40">
+    <parent link="robotbase"/>
+    <origin wyz="0.13 0.13 -0.10" rpy="0 0 0"/>
+  </sensor>
+
+  <link name="sensor_front_right" update_rate="40">
+    <parent link="robotbase"/>
+    <origin wyz="0.13 -0.13 -0.10" rpy="0 0 0"/>
+  </sensor>
+
+  <link name="sensor_back_left" update_rate="40">
+    <parent link="robotbase"/>
+    <origin wyz="-0.13 0.13 -0.10" rpy="0 0 0"/>
+  </sensor>
+
+  <link name="sensor_back_right" update_rate="40">
+    <parent link="robotbase"/>
+    <origin wyz="-0.13 -0.13 -0.10" rpy="0 0 0"/>
+  </sensor>
+
 </robot>
