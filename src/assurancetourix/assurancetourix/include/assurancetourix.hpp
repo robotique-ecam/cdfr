@@ -14,6 +14,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <assurancetourix_msg/msg/assurancetourix_msg.hpp>
 
 
 using namespace rclcpp;
@@ -57,6 +58,10 @@ private:
   sensor_msgs::msg::Image img_msg;
   rclcpp::TimerBase::SharedPtr timer_;
   image_transport::Publisher image_pub_;
+
+  rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
+
+  rclcpp::Publisher<assurancetourix_msg::msg::AssurancetourixMsg>::SharedPtr pos_rot_ids;
 
   // Parameters
   int _camera_id;
