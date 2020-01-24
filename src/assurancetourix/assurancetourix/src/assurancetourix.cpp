@@ -39,7 +39,7 @@ void Assurancetourix::detect() {
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
 
-  pos_rot_ids = this->create_publisher<assurancetourix_msg::msg::AssurancetourixMsg>("_mat_pos_rot + _detected_ids", qos);
+  //pos_rot_ids = this->create_publisher<assurancetourix_msg::msg::AssurancetourixMsg>("vision_position", qos);
   //image_pub_.publish(img_msg);
 
 }
@@ -51,12 +51,17 @@ void Assurancetourix::_detect_aruco(Mat img) {
 
 
 void Assurancetourix::_anotate_image(Mat img) {
+  //std_msgs::msg::int[] _detected_ids_list;
   if (_detected_ids.size() > 0)
   {
     cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
     //RCLCPP_INFO(this->get_logger(), "number of ArUco detected: %d", _detected_ids.size());
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.05, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
     //RCLCPP_INFO(this->get_logger(), "id: %d, %f, %f, %f, %f",  _detected_ids.size(),_rvecs[0].operator[](0), _rvecs[0].operator[](1), _rvecs[0].operator[](2), _rvecs[0].operator[](1));
+
+    //int* _detected_ids_list = &_detected_ids[0];
+
+    //pos_rot_ids.ids = _detected_ids_list;
 
     if (_mat_pos_rot.size() >= 1) {
       _mat_pos_rot.clear();
@@ -65,12 +70,25 @@ void Assurancetourix::_anotate_image(Mat img) {
     for(int i=0; i<int(_detected_ids.size()); i++) {
 
       cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
-      tf2::Quaternion _pos_rot(_tvecs[i].operator[](0), _tvecs[i].operator[](1), _tvecs[i].operator[](2), _rvecs[i].operator[](1));
-      _mat_pos_rot.push_back(_pos_rot);
 
+      pose.position.x = float(_tvecs[i].operator[](0));
+      pose.position.y = float(_tvecs[i].operator[](1));
+      pose.position.z = float(_tvecs[i].operator[](2));
+      pose.orientation.x = float(_rvecs[i].operator[](0));
+      pose.orientation.y = float(_rvecs[i].operator[](1));
+      pose.orientation.z = float(_rvecs[i].operator[](2));
+      pose.orientation.w = 0;
+      _mat_pos_rot.push_back(pose);
+
+      //_detected_ids_list[i] = _detected_ids[i];
       //RCLCPP_INFO(this->get_logger(), "%f, %f, %f, %f", float(_tvecs[i].operator[](0)), float(_tvecs[i].operator[](1)), float(_tvecs[i].operator[](2)), float(_rvecs[i].operator[](1)));
       RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
+
+    pos_rot_ids.position = _mat_pos_rot;
+    //pos_rot_ids.ids = _detected_ids_list;
+
+
     //cv::imshow("out.png", img);
   }
 }

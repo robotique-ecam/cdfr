@@ -15,6 +15,8 @@
 #include <image_transport/image_transport.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <assurancetourix_msg/msg/assurancetourix_msg.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <std_msgs/msg/int8.hpp>
 
 
 using namespace rclcpp;
@@ -42,7 +44,7 @@ private:
 
   /* when camera calibration will be done */
   std::vector<cv::Vec3d> _rvecs, _tvecs;
-  std::vector<tf2::Quaternion> _mat_pos_rot;
+  std::vector<geometry_msgs::msg::Pose> _mat_pos_rot;
 
   /* TODO: establish the new coeffss with the camera */
   double mat_dist_coeffs[1][5] = {{0.3500038366337939, -1.4933155679576624, 0.022462074105878548, -0.008107582986986875, 2.9089180661290976}};
@@ -59,10 +61,12 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   image_transport::Publisher image_pub_;
 
+  geometry_msgs::msg::Pose pose;
+
+  assurancetourix_msg::msg::AssurancetourixMsg pos_rot_ids;
+
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
-
-  rclcpp::Publisher<assurancetourix_msg::msg::AssurancetourixMsg>::SharedPtr pos_rot_ids;
-
+  //rclcpp::Publisher<assurancetourix_msg::msg::AssurancetourixMsg>::SharedPtr pos_rot_ids;
   // Parameters
   int _camera_id;
 };
