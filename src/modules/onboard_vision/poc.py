@@ -5,13 +5,13 @@ import numpy as np
 
 
 body_colors = {
-    'red': {'bounds': ([0, 0, 110], [25, 55, 255]), 'color': (0, 0, 200)},
-    'green': {'bounds': ([0, 50, 0], [50, 95, 55]), 'color': (0, 200, 0)},
-}
-
-top_colors = {
-    'red':  {'bounds': ([30, 70, 200], [70, 130, 255]), 'color': (0, 0, 255)},
-    'green': {'bounds': ([40, 90, 90], [65, 140, 140]),  'color': (0, 255, 0)}
+    'red': {'bounds': [
+        ([0, 50, 50], [20, 255, 255]),
+        ([170, 50, 50], [180, 255, 255])
+    ], 'color': (0, 0, 200)},
+    'green': {'bounds': [
+        ([34, 50, 50], [80, 255, 255])
+    ], 'color': (0, 200, 0)},
 }
 
 
@@ -30,27 +30,18 @@ def min_area_boxes(mask, threshold=120):
     return rects
 
 
-def min_enclosing_circle(mask, threshold=300):
-    circles = []
-    _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for contour in contours:
-        if (cv2.arcLength(contour, True) > threshold):
-            (x, y), radius = cv2.minEnclosingCircle(contour)
-            center = (int(x), int(y))
-            radius = int(radius)
-            circles.append([center, radius])
-    return circles
-
-
 # Read image
 print("[+] Preparing camera")
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1640)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1232)
+# cap.set(cv2.CAP_PROP_EXPOSURE,-10)
 
 print("[+] Capturing frame")
-im = cv2.blur(cap.read()[1].astype(np.uint8), (3, 3))
+frame = cv2.flip(cap.read()[1], 0).astype(np.uint8)
+im = cv2.blur(frame, (3, 3))
+hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+
 img = im.copy()
 global_mask = np.zeros(im.shape[:-1], np.uint8)
 
@@ -58,19 +49,11 @@ print("[+] Processing")
 t = time.time()
 
 for body in body_colors:
-    lower, upper = body_colors[body]['bounds']
-    mask = color_mask(im, lower, upper)
-    global_mask += mask
-    rects = min_area_boxes(mask)
-    cv2.drawContours(im, rects, -1, body_colors[body]['color'], 2)
-
-for top in top_colors:
-    lower, upper = top_colors[body]['bounds']
-    mask = color_mask(im, lower, upper)
-    global_mask += mask
-    for c in min_enclosing_circle(mask):
-        center, radius = c
-        cv2.circle(im, center, radius, top_colors[body]['color'], 2)
+    for lower, upper in body_colors[body]['bounds']:
+        mask = color_mask(hsv, lower, upper)
+        global_mask += mask
+        rects = min_area_boxes(mask)
+        cv2.drawContours(im, rects, -1, body_colors[body]['color'], 2)
 
 
 print("[i] Processing took", (time.time() - t) * 1000, "ms")
