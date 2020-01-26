@@ -76,6 +76,7 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
+    use_sim_time: True
     # Trajectory Scoring Parameters
     #
     # Scores a trajectory based on where the path passes over the costmap.
@@ -124,23 +125,24 @@ controller_server:
     - RotateToGoal
 
     # Robot Configuration Parameters
-    acc_lim_theta: 2.0
+    acc_lim_theta: 1.0
     acc_lim_x: 0.2
     acc_lim_y: 0.0
-    decel_lim_theta: -2.0
+    decel_lim_theta: -1.0
     decel_lim_x: -0.2
     decel_lim_y: 0.0
-    max_speed_xy: 10.0 # Allow noise
+
     max_vel_theta: 1.0
-    max_vel_x: 0.40
+    max_vel_x: 0.50
     max_vel_y: 0.0
-    min_speed_theta: 0.0
-    min_speed_xy: -0.40
-    min_vel_x: -0.40
+    min_speed_theta: 0.01
+    min_speed_xy: -1.0
+    max_speed_xy: 1.0
+    min_vel_x: -0.50
     min_vel_y: 0.0
     min_theta_velocity_threshold: 0.001
     min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
+    min_y_velocity_threshold: 1.0
 
 
     debug_trajectory_details: false
@@ -154,7 +156,7 @@ controller_server:
     publish_trajectories: false
     publish_transformed_plan: true
     trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
-    transform_tolerance: 0.01
+    transform_tolerance: 0.2
 
     # Forward Simulation Parameters
     sim_time: 1.0
