@@ -6,11 +6,11 @@ import numpy as np
 
 body_colors = {
     'red': {'bounds': [
-        ([0, 50, 50], [20, 255, 255]),
+        ([0, 50, 50], [10, 255, 255]),
         ([170, 50, 50], [180, 255, 255])
     ], 'color': (0, 0, 200)},
     'green': {'bounds': [
-        ([34, 50, 50], [80, 255, 255])
+        ([50, 50, 50], [70, 255, 255])
     ], 'color': (0, 200, 0)},
 }
 
@@ -21,7 +21,7 @@ def color_mask(img, color_lower, color_upper):
     return cv2.morphologyEx(raw_mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
 
 
-def min_area_boxes(mask, threshold=120):
+def min_area_boxes(mask, threshold=300):
     rects = []
     _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
