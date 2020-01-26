@@ -130,7 +130,7 @@ controller_server:
     decel_lim_theta: -2.0
     decel_lim_x: -0.2
     decel_lim_y: 0.0
-    max_speed_xy: 0.40
+    max_speed_xy: 10.0 # Allow noise
     max_vel_theta: 1.0
     max_vel_x: 0.40
     max_vel_y: 0.0
