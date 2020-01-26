@@ -47,8 +47,8 @@ private:
   void _analysis_roi();
   void _undistort_images();
   void detect_hough_circles();
-  void _get_dominant_color();
   void find_objects();
+  char _get_dominant_color(Scalar mean, Mat roi, Mat mask);
   Scalar _get_circle_dominant_color(Vec3f detected_circle);
 };
 

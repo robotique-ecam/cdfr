@@ -41,15 +41,11 @@ Scalar OnboardVision::_get_circle_dominant_color(Vec3f detected_circle) {
     Mat roi(_frame, rect);
     Mat mask(roi.size(), roi.type(), Scalar::all(0));
     circle(mask, Point(detected_circle[2], detected_circle[2]), detected_circle[2], Scalar::all(255), -1);
-
-
 }
 
 
 char OnboardVision::_get_dominant_color(Scalar mean, Mat roi, Mat mask) {
-  double _mean[4] = mean.val;
 
-  for (int i = 0; i < 4; i++)
 }
 
 
@@ -73,7 +69,7 @@ void OnboardVision::find_objects() {
 
   if (_cups_circles.size() > 0)
     for (int i = 0; i < _cups_circles.size(); i++)
-      _get_circle_dominant_color(_cups_circles[i]).;
+      _get_circle_dominant_color(_cups_circles[i]);
 
 
 }
