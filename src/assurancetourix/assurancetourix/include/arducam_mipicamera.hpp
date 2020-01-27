@@ -6,12 +6,6 @@
 #define VCOS_ALIGN_DOWN(p,n) (((ptrdiff_t)(p)) & ~((n)-1))
 #define VCOS_ALIGN_UP(p,n) VCOS_ALIGN_DOWN((ptrdiff_t)(p)+(n)-1,(n))
 
-namespace arducam {
-
-extern "C" {
-
-#include <stdint.h>
-
 #define IMAGE_ENCODING_I420 FOURCC('I', '4', '2', '0')
 #define IMAGE_ENCODING_JPEG FOURCC('J', 'P', 'E', 'G')
 #define IMAGE_ENCODING_RAW_BAYER FOURCC('R', 'A', 'W', ' ')
@@ -77,6 +71,14 @@ extern "C" {
 /** Signals that the end of the current payload ends a NAL */
 #define MMAL_BUFFER_HEADER_FLAG_NAL_END (1 << 12)
 /* @} */
+
+
+namespace arducam {
+
+extern "C" {
+
+#include <stdint.h>
+
 
 typedef struct {
     uint32_t encoding;

@@ -29,8 +29,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 }
 
 
-cv::Mat * Assurancetourix::get_image(arducam::CAMERA_INSTANCE camera_instance, int width, int height) {
-    arducam::IMAGE_FORMAT fmt = {arducam::IMAGE_ENCODING_I420, 50};
+cv::Mat * Assurancetourix::get_image(CAMERA_INSTANCE camera_instance, int width, int height) {
+    arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
     arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
     if (!buffer)
         return NULL;
