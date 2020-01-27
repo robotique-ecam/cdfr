@@ -19,7 +19,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(visualization_msgs REQUIRED)
-find_package(assurancetourix_msg REQUIRED)
 find_package(OpenCV REQUIRED)
 
 
@@ -33,7 +32,6 @@ include_directories(
 set(dependencies
   "rclcpp"
   "sensor_msgs"
-  "assurancetourix_msg"
   "cv_bridge"
   "image_transport"
   "visualization_msgs"
