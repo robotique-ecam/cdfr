@@ -17,7 +17,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/point.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
-#include "arducam_mipicamera.h"
+#include "arducam_mipicamera.hpp"
 
 
 using namespace rclcpp;
