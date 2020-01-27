@@ -10,7 +10,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   arducam::arducam_set_resolution(camera_instance, &width, &height);
   arducam::arducam_software_auto_exposure(camera_instance, 1);
   arducam::arducam_software_auto_white_balance(camera_instance, 1);
-  rclcpp::sleep_for(1s);
+  // rclcpp::sleep_for(1s);
   #else // Standard camera
   _cap.open(_api_id + _camera_id);
   if (!_cap.isOpened()) {
