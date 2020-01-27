@@ -34,7 +34,7 @@ void Assurancetourix::get_image() {
     arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
     arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
     if (!buffer)
-        return NULL;
+        break;
     width = VCOS_ALIGN_UP(width, 32);
     height = VCOS_ALIGN_UP(height, 16);
     cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
