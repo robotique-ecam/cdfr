@@ -46,17 +46,13 @@ set(EXEC_NAME "assurancetourix")
 option(MIPI_CAMERA "Use MIPI camera" OFF)
 
 
-if(MIPI_CAMERA)
-  add_definitions(-DMIPI_CAMERA)
-endif(MIPI_CAMERA)
-
-
 add_executable(${EXEC_NAME}
   src/assurancetourix.cpp
   src/assurancetourix_node.cpp
 )
 
 if(MIPI_CAMERA)
+  add_definitions(-DMIPI_CAMERA)
   target_link_libraries(${EXEC_NAME} -larducam_mipicamera)
 endif(MIPI_CAMERA)
 
