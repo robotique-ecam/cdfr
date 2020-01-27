@@ -11,12 +11,13 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <image_transport/image_transport.h>
 #include <visualization_msgs/msg/marker.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/point.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
+#include "arducam_mipicamera.h"
 
 
 using namespace rclcpp;
@@ -35,9 +36,15 @@ private:
   void _anotate_image(Mat img);
 
 private:
-  VideoCapture _cap;
-  Mat _frame, _anotated;
+  #ifdef MIPI_CAMERA
+  CAMERA_INSTANCE camera_instance;
+  int width = 1920, height = 1080;
+  #else
   int _api_id = cv::CAP_ANY;
+  VideoCapture _cap;
+  #endif // MIPI_CAMERA
+
+  Mat _frame, _anotated;
 
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
