@@ -1,12 +1,16 @@
 #ifndef _ARDUCAM_MIPI_CAMERA_H__
 #define _ARDUCAM_MIPI_CAMERA_H__
 
+
+#define FOURCC(a, b, c, d) ((a) | (b << 8) | (c << 16) | (d << 24))
+#define VCOS_ALIGN_DOWN(p,n) (((ptrdiff_t)(p)) & ~((n)-1))
+#define VCOS_ALIGN_UP(p,n) VCOS_ALIGN_DOWN((ptrdiff_t)(p)+(n)-1,(n))
+
 namespace arducam {
 
 extern "C" {
 
 #include <stdint.h>
-#define FOURCC(a, b, c, d) ((a) | (b << 8) | (c << 16) | (d << 24))
 
 #define IMAGE_ENCODING_I420 FOURCC('I', '4', '2', '0')
 #define IMAGE_ENCODING_JPEG FOURCC('J', 'P', 'E', 'G')

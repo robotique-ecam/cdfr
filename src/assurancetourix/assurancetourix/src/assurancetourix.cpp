@@ -34,8 +34,8 @@ cv::Mat * Assurancetourix::get_image(arducam::CAMERA_INSTANCE camera_instance, i
     arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
     if (!buffer)
         return NULL;
-    width = arducam::VCOS_ALIGN_UP(width, 32);
-    height = arducam::VCOS_ALIGN_UP(height, 16);
+    width = VCOS_ALIGN_UP(width, 32);
+    height = VCOS_ALIGN_UP(height, 16);
     cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
     cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
     arducam::arducam_release_buffer(buffer);
