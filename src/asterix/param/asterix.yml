@@ -135,7 +135,7 @@ controller_server:
     max_vel_theta: 1.0
     max_vel_x: 0.50
     max_vel_y: 0.0
-    min_speed_theta: 0.01
+    min_speed_theta: 0.005
     min_speed_xy: -1.0
     max_speed_xy: 1.0
     min_vel_x: -0.50
@@ -156,19 +156,19 @@ controller_server:
     publish_trajectories: false
     publish_transformed_plan: true
     trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
-    transform_tolerance: 0.2
+    transform_tolerance: 0.0
 
     # Forward Simulation Parameters
     sim_time: 1.0
     linear_granularity: 0.005
     use_sim_time: true
-    vx_samples: 20
+    vx_samples: 15
     vy_samples: 0
     vtheta_samples: 5
-    controller_frequency: 10.0
+    controller_frequency: 20.0
 
     # Goal Tolerance Parameters
-    xy_goal_tolerance: 0.10
+    xy_goal_tolerance: 0.05
     yaw_goal_tolerance: 0.05
     latch_xy_goal_tolerance: true
 
