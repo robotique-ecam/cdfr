@@ -42,6 +42,8 @@ private:
   #else
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
+
+  cv::Mat * get_image(arducam::CAMERA_INSTANCE camera_instance, int width, int height);
   #endif // MIPI_CAMERA
 
   Mat _frame, _anotated;
