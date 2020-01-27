@@ -75,9 +75,11 @@ private:
   geometry_msgs::msg::Point useless_point;
   std::vector<geometry_msgs::msg::Point> useless_point_vector;
 
-  std_msgs::msg::ColorRGBA useless_color;
   std::vector<std_msgs::msg::ColorRGBA> useless_color_vector;
 
+  std_msgs::msg::ColorRGBA blue_color_ArUco;
+  std_msgs::msg::ColorRGBA yellow_color_ArUco;
+  std_msgs::msg::ColorRGBA default_color_ArUco;
   // Parameters
   int _camera_id;
 };
