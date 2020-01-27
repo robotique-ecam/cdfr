@@ -13,10 +13,10 @@
 #include <opencv2/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
+#include <visualization_msgs/msg/marker.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <assurancetourix_msg/msg/assurancetourix_msg.hpp>
-#include <geometry_msgs/msg/pose.hpp>
-#include <std_msgs/msg/int8.hpp>
+#include <geometry_msgs/msg/point.hpp>
+#include <std_msgs/msg/color_rgba.hpp>
 
 
 using namespace rclcpp;
@@ -42,9 +42,7 @@ private:
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
 
-  /* when camera calibration will be done */
   std::vector<cv::Vec3d> _rvecs, _tvecs;
-  std::vector<geometry_msgs::msg::Pose> _mat_pos_rot;
 
   /* TODO: establish the new coeffss with the camera */
   double mat_dist_coeffs[1][5] = {{0.3500038366337939, -1.4933155679576624, 0.022462074105878548, -0.008107582986986875, 2.9089180661290976}};
@@ -61,12 +59,17 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   image_transport::Publisher image_pub_;
 
-  geometry_msgs::msg::Pose pose;
-
-  assurancetourix_msg::msg::AssurancetourixMsg pos_rot_ids;
-
+  visualization_msgs::msg::Marker marker;
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
-  //rclcpp::Publisher<assurancetourix_msg::msg::AssurancetourixMsg>::SharedPtr pos_rot_ids;
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
+
+  //useless point and colors, just to fill up the vector of points for the pointer
+  geometry_msgs::msg::Point useless_point;
+  std::vector<geometry_msgs::msg::Point> useless_point_vector;
+
+  std_msgs::msg::ColorRGBA useless_color;
+  std::vector<std_msgs::msg::ColorRGBA> useless_color_vector;
+
   // Parameters
   int _camera_id;
 };

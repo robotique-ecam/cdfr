@@ -12,7 +12,7 @@
   <buildtool_depend>sensor_msgs</buildtool_depend>
   <buildtool_depend>image_transport</buildtool_depend>
   <buildtool_depend>cv_bridge</buildtool_depend>
-  <buildtool_depend>assurancetourix_msg</buildtool_depend>
+  <buildtool_depend>visualization_msgs</buildtool_depend>
 
   <depend>libopencv-dev</depend>
 
