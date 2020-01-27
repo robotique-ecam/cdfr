@@ -11,7 +11,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
-#include <cv_bridge/cv_bridge.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <visualization_msgs/msg/marker.hpp>
 #include <tf2/LinearMath/Quaternion.h>
