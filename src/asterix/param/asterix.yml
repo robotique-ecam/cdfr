@@ -131,7 +131,6 @@ controller_server:
     decel_lim_theta: -2.0
     decel_lim_x: -0.2
     decel_lim_y: 0.0
-
     max_vel_theta: 1.0
     max_vel_x: 0.50
     max_vel_y: 0.0
@@ -193,7 +192,8 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.02
-      robot_radius: 0.15
+      # robot_radius: 0.15
+      footprint: [[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]
       inflation_layer.cost_scaling_factor: 3.0
       obstacle_layer:
         enabled: False
@@ -218,7 +218,8 @@ global_costmap:
   global_costmap:
     ros__parameters:
       use_sim_time: True
-      robot_radius: 0.15
+      # robot_radius: 0.15
+      footprint: [[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]
       obstacle_layer:
         enabled: True
         scan:
