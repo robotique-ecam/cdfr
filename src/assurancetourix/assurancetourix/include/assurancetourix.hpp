@@ -37,7 +37,7 @@ private:
 
 private:
   #ifdef MIPI_CAMERA
-  CAMERA_INSTANCE camera_instance;
+  arducam::CAMERA_INSTANCE camera_instance;
   int width = 1920, height = 1080;
   #else
   int _api_id = cv::CAP_ANY;

@@ -6,10 +6,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   init_parameters();
 
   #ifdef MIPI_CAMERA
-  arducam_init_camera(&camera_instance);
-  arducam_set_resolution(camera_instance, &width, &height);
-  arducam_software_auto_exposure(camera_instance, 1);
-  arducam_software_auto_white_balance(camera_instance, 1);
+  arducam::arducam_init_camera(&camera_instance);
+  arducam::arducam_set_resolution(camera_instance, &width, &height);
+  arducam::arducam_software_auto_exposure(camera_instance, 1);
+  arducam::arducam_software_auto_white_balance(camera_instance, 1);
   usleep(1000 * 1000 * 1);
   #else // Standard camera
   _cap.open(_api_id + _camera_id);
@@ -29,16 +29,16 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 }
 
 
-cv::Mat * Assurancetourix::get_image(CAMERA_INSTANCE camera_instance, int width, int height) {
+cv::Mat * Assurancetourix::get_image(arducam::CAMERA_INSTANCE camera_instance, int width, int height) {
     IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
-    BUFFER *buffer = arducam_capture(camera_instance, &fmt, 3000);
+    BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
     if (!buffer)
         return NULL;
     width = VCOS_ALIGN_UP(width, 32);
     height = VCOS_ALIGN_UP(height, 16);
     cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
     cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
-    arducam_release_buffer(buffer);
+    arducam::arducam_release_buffer(buffer);
     return image;
 }
 
