@@ -7,9 +7,9 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   #ifdef MIPI_CAMERA
   arducam::arducam_init_camera(&camera_instance);
-  arducam::arducam_set_resolution(camera_instance, &width, &height);
-  arducam::arducam_software_auto_exposure(camera_instance, 1);
+  arducam::arducam_set_mode(camera_instance, 2); // width: 1920, height: 1080, pixelformat: pBAA, desc: (null)
   arducam::arducam_software_auto_white_balance(camera_instance, 1);
+  arducam::arducam_software_auto_exposure(camera_instance, 1);
   // rclcpp::sleep_for(1s);
   #else // Standard camera
   _cap.open(_api_id + _camera_id);
