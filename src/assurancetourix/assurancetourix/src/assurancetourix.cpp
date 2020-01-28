@@ -1,16 +1,24 @@
 #include <assurancetourix.hpp>
 
+
 Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
+  #ifdef MIPI_CAMERA
+  arducam::arducam_init_camera(&camera_instance);
+  arducam::arducam_set_resolution(camera_instance, &width, &height);
+  arducam::arducam_software_auto_exposure(camera_instance, 1);
+  arducam::arducam_software_auto_white_balance(camera_instance, 1);
+  // rclcpp::sleep_for(1s);
+  #else // Standard camera
   _cap.open(_api_id + _camera_id);
   if (!_cap.isOpened()) {
     RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
     exit(-1);
   }
+  #endif // MIPI_CAMERA
 
-  //initialisation of the publisher
   image_pub_ = image_transport::create_publisher(this, "detected_aruco", rmw_qos_profile_default);
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
 
@@ -19,6 +27,22 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 
 }
+
+
+#ifdef MIPI_CAMERA
+void Assurancetourix::get_image() {
+    arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
+    arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
+    if (buffer) {
+      width = VCOS_ALIGN_UP(width, 32);
+      height = VCOS_ALIGN_UP(height, 16);
+      cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
+      cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
+      arducam::arducam_release_buffer(buffer);
+      _frame = *image;
+    }
+}
+#endif // MIPI_CAMERA
 
 
 void Assurancetourix::init_parameters() {
@@ -36,8 +60,9 @@ void Assurancetourix::init_parameters() {
   yellow_color_ArUco.b = 0.0;
   yellow_color_ArUco.a = 1.0;
 
-  //initialisation of the marker
   marker.header.frame_id = "map";
+  marker.header.stamp.sec = 10;
+  marker.header.stamp.nanosec = 100000000;
   marker.ns = "rviz";
   marker.type = visualization_msgs::msg::Marker::CUBE;
   marker.action = visualization_msgs::msg::Marker::ADD;
@@ -76,14 +101,15 @@ void Assurancetourix::init_parameters() {
   marker.text = "useless";
   marker.mesh_resource = "null";
   marker.mesh_use_embedded_materials = false;
-
-
 }
 
 
 void Assurancetourix::detect() {
-
+  #ifdef MIPI_CAMERA
+  get_image();
+  #else
   _cap.read(_frame);
+  #endif // MIPI_CAMERA
   _frame.copyTo(_anotated);
   cv_img_bridge.header.stamp = this->get_clock()->now();
   marker.header.stamp = this->get_clock()->now();
@@ -97,7 +123,6 @@ void Assurancetourix::detect() {
   cv_img_bridge.toImageMsg(img_msg);
 
   image_pub_.publish(img_msg);
-
 }
 
 
@@ -107,8 +132,7 @@ void Assurancetourix::_detect_aruco(Mat img) {
 
 
 void Assurancetourix::_anotate_image(Mat img) {
-  if (_detected_ids.size() > 0)
-  {
+  if (_detected_ids.size() > 0) {
     cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.05, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 

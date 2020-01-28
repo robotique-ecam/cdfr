@@ -17,6 +17,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/point.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
+#include "arducam_mipicamera.hpp"
 
 
 using namespace rclcpp;
@@ -35,9 +36,16 @@ private:
   void _anotate_image(Mat img);
 
 private:
-  VideoCapture _cap;
-  Mat _frame, _anotated;
+  #ifdef MIPI_CAMERA
+  arducam::CAMERA_INSTANCE camera_instance;
+  int width = 1920, height = 1080;
+  void get_image();
+  #else
   int _api_id = cv::CAP_ANY;
+  VideoCapture _cap;
+  #endif // MIPI_CAMERA
+
+  Mat _frame, _anotated;
 
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
