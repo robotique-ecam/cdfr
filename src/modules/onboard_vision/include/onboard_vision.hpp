@@ -48,6 +48,7 @@ private:
   void _undistort_images();
   void detect_hough_circles();
   void find_objects();
+  void OnboardVision::_mask_circle(cv::Vec3f)
   char _get_dominant_color(Scalar mean, Mat roi, Mat mask);
   Scalar _get_circle_dominant_color(Vec3f detected_circle);
 };
