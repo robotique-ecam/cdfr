@@ -35,7 +35,6 @@ private:
   void _detect_aruco(Mat img);
   void _anotate_image(Mat img);
 
-private:
   #ifdef MIPI_CAMERA
   arducam::CAMERA_INSTANCE camera_instance;
   int width = 1920, height = 1080;

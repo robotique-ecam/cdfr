@@ -40,6 +40,7 @@ void Assurancetourix::get_image() {
       cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
       arducam::arducam_release_buffer(buffer);
       _frame = *image;
+      delete image;
     }
 }
 #endif // MIPI_CAMERA
