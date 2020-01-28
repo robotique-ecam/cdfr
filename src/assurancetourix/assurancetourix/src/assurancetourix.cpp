@@ -84,9 +84,9 @@ void Assurancetourix::init_parameters() {
   marker.pose.orientation.w = 0;
   marker.id = 0;
 
-  useless_point.x = 1;
+  useless_point.x = 0;
   useless_point.y = 1;
-  useless_point.z = 1;
+  useless_point.z = 0;
   useless_point_vector.push_back(useless_point);
   marker.points = useless_point_vector;
 
@@ -142,11 +142,14 @@ void Assurancetourix::_anotate_image(Mat img) {
       cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
 
       marker.pose.position.x = 3*_tvecs[i].operator[](0);
-      marker.pose.position.y = 2*_tvecs[i].operator[](1);
-      marker.pose.position.z = _tvecs[i].operator[](2) * (-1);
+      marker.pose.position.y = 3*_tvecs[i].operator[](1);
+      marker.pose.position.z = 3*_tvecs[i].operator[](2);
+
+      double angle = norm(_rvecs[i]);
+      Vec3d axis = _rvecs[i] / angle;
 
       tf2::Quaternion q;
-      q.setRPY(_rvecs[i].operator[](0), _rvecs[i].operator[](1), _rvecs[i].operator[](2));
+      q.setRotation(tf2::Vector3(axis[0], axis[1], axis[2]), angle);
 
       marker.pose.orientation.x = q.x();
       marker.pose.orientation.y = q.y();
