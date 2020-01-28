@@ -123,6 +123,7 @@ void Assurancetourix::detect() {
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
 
+
   image_pub_.publish(img_msg);
 }
 
@@ -166,8 +167,6 @@ void Assurancetourix::_anotate_image(Mat img) {
       else {marker.color = default_color_ArUco;}
       marker.id = _detected_ids[i];
 
-
-
       marker_pub_->publish(marker);
       RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
@@ -176,5 +175,8 @@ void Assurancetourix::_anotate_image(Mat img) {
 
 
 Assurancetourix::~Assurancetourix() {
+  #ifdef MIPI_CAMERA
+  arducam::arducam_close_camera(camera_instance);
+  #endif // MIPI_CAMERA
   RCLCPP_INFO(this->get_logger(), "Assurancetourix node terminated");
 }
