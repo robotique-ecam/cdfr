@@ -52,8 +52,8 @@ private:
   std::vector<cv::Vec3d> _rvecs, _tvecs;
 
   /* TODO: establish the new coeffss with the camera */
-  double mat_dist_coeffs[1][5] = {{0.3500038366337939, -1.4933155679576624, 0.022462074105878548, -0.008107582986986875, 2.9089180661290976}};
-  double mat_camera_matrix_coeff[3][3] = {{500.1787284360219, 0.0, 306.89160844028396}, {0.0, 503.06670218899563, 248.89861392261338}, {0.0, 0.0, 1.0}};
+  double mat_dist_coeffs[1][5] = {{0.3764196381675952, 0.04110048800291252, 0.22561542466361806, -0.04945838920708183, -0.4677971323451955}};
+  double mat_camera_matrix_coeff[3][3] = {{3667.6295530241346, 0.0, 1309.653212735876}, {0.0, 3009.8721997418875, 1565.0383212417412}, {0.0, 0.0, 1.0}};
 
   cv::Mat _distCoeffs = Mat(5,1, CV_64F, mat_dist_coeffs);
   cv::Mat _cameraMatrix = Mat(3,3, CV_64F, mat_camera_matrix_coeff);
