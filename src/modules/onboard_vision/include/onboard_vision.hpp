@@ -2,6 +2,7 @@
 #define ONBOARD_VISION_NODE_HPP
 
 #include <math.h>
+#include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
