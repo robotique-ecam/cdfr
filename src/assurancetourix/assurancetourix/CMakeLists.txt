@@ -16,6 +16,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
 
 
 ################################################################################
@@ -27,6 +30,9 @@ include_directories(
 
 set(dependencies
   "rclcpp"
+  "sensor_msgs"
+  "cv_bridge"
+  "image_transport"
   "OpenCV"
 )
 

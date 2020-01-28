@@ -11,3 +11,17 @@ colcon build --cmake-args ' -DCMAKE_CXX_FLAGS="-march=native"' ' -DCMAKE_CXX_FLA
 ```
 pip3 install --upgrade colcon-common-extensions --upgrade-strategy=eager
 ```
+
+#### Use clang_complete
+
+fish users
+```
+set -gx CC (pwd)/tools/clang_complete/cc
+set -gx CXX (pwd)/tools/clang_complete/g++
+```
+
+bash users
+```
+export CC=$(pwd)/tools/clang_complete/cc
+export CXX=$(pwd)/tools/clang_complete/g++
+```
