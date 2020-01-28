@@ -67,11 +67,17 @@ void OnboardVision::find_objects() {
       70   // max diameter
   );
 
+
   if (_cups_circles.size() > 0)
     for (int i = 0; i < _cups_circles.size(); i++)
       _get_circle_dominant_color(_cups_circles[i]);
 
+}
 
+
+void OnboardVision::_mask_circle(Vec3f circle) {
+    // Get rectangular ROI containing circle
+    Rect roi(circle[0], circle[1], circle[2] * 2, circle[2] * 2);
 }
 
 

@@ -1,7 +1,6 @@
 #ifndef ONBOARD_VISION_NODE_HPP
 #define ONBOARD_VISION_NODE_HPP
 
-
 #include <math.h>
 #include <vector>
 #include <chrono>
