@@ -20,9 +20,26 @@ drive_node:
 
 sensors_node:
   ros__parameters:
-    i2c_bus: 0
+    i2c_bus: 4
 
-    base_frame: "base_link"
+    hcsr04_names : [front_left, front_right, back_left, back_right]
+
+    hcsr04:
+      front_left:
+        addr: 0x20
+        frame_id: 'sensor_front_left'
+
+      front_right:
+        addr: 0x21
+        frame_id: 'sensor_front_right'
+
+      back_left:
+        addr: 0x22
+        frame_id: 'sensor_back_left'
+
+      back_right:
+        addr: 0x23
+        frame_id: 'sensor_back_right'
 
 
 lcd_driver:
