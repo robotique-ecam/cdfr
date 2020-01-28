@@ -63,8 +63,7 @@ void Assurancetourix::init_parameters() {
   yellow_color_ArUco.a = 1.0;
 
   marker.header.frame_id = "map";
-  marker.header.stamp.sec = 10;
-  marker.header.stamp.nanosec = 100000000;
+  marker.header.stamp = this->get_clock()->now();
   marker.ns = "rviz";
   marker.type = visualization_msgs::msg::Marker::CUBE;
   marker.action = visualization_msgs::msg::Marker::ADD;
@@ -76,7 +75,7 @@ void Assurancetourix::init_parameters() {
   marker.color.g = 250.0;
   marker.color.b = 0.0;
   marker.lifetime.sec = 0;
-  marker.lifetime.nanosec = 100000000;
+  marker.lifetime.nanosec = 500000000;
   marker.pose.position.x = 0;
   marker.pose.position.y = 0;
   marker.pose.position.z = 0;
@@ -92,7 +91,7 @@ void Assurancetourix::init_parameters() {
   useless_point_vector.push_back(useless_point);
   marker.points = useless_point_vector;
 
-  default_color_ArUco.a = 0.0;
+  default_color_ArUco.a = 1.0;
   default_color_ArUco.r = 255.0;
   default_color_ArUco.g = 255.0;
   default_color_ArUco.b = 255.0;
