@@ -20,7 +20,7 @@ drive_node:
 
 sensors_node:
   ros__parameters:
-    i2c_bus: 0
+    i2c_bus: 4
 
     hcsr04_names : [front_left, front_right, back_left, back_right]
 
