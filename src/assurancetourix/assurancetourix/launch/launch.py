@@ -4,11 +4,27 @@
 """Assurancetourix launcher."""
 
 
+import os
 import launch
-import launch_ros.actions
+from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    leds = launch_ros.actions.Node(package='assurancetourix', node_executable='leds', output='screen')
-    main = launch_ros.actions.Node(package='assurancetourix', node_executable='main', output='screen')
-    return launch.LaunchDescription([main, leds])
+
+    params = os.path.join(get_package_share_directory('assurancetourix'), 'param', 'assurancetourix.yml')
+
+    return launch.LaunchDescription([
+        DeclareLaunchArgument(
+            'params',
+            default_value=params,
+            description='Full path to param file to load'),
+
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='false',
+            description='Use simulation (Gazebo) clock if true'),
+
+        Node(package='assurancetourix', node_executable='assurancetourix', output='screen', parameters=[params]),
+    ])

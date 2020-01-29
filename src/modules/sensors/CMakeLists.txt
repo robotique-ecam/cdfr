@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(drive)
+project(sensors)
 
 # Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
@@ -15,7 +15,6 @@ endif()
 ################################################################################
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -31,25 +30,22 @@ include_directories(
 
 set(dependencies
   "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
 )
 
-set(EXEC_NAME "drive")
+set(EXEC_NAME "sensors")
 
 
 add_executable(${EXEC_NAME}
-  src/drive_node.cpp
-  src/drive.cpp
+  src/sensors_node.cpp
+  src/sensors.cpp
   src/i2c.cpp
 )
 
 option(SIMULATION "Simulation mode" OFF)
-option(SPEEDRAMP "Enable speedramp" OFF)
-option(TIMER "Enable Wall Timer for odometry" ON)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
@@ -57,13 +53,6 @@ else()
   target_link_libraries(${EXEC_NAME} i2c)
 endif(SIMULATION)
 
-if(SPEEDRAMP)
-  add_definitions(-DUSE_SPEEDRAMP)
-endif(SPEEDRAMP)
-
-if(TIMER)
-  add_definitions(-DUSE_TIMER)
-endif(TIMER)
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 

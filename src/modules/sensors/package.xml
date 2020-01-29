@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>drive</name>
+  <name>sensors</name>
   <version>0.4.0</version>
-  <description>Drive node</description>
+  <description>Sensors node</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Club Robotique ECAM :: CDFR 2020</license>
+  <license>Club Robotique ECAM :: CDFR 2020 :: Equipe 1</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rclcpp</buildtool_depend>
-  <build_depend>i2c</build_depend>
-
+  <buildtool_depend>serial</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

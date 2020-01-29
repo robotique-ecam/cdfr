@@ -1,15 +1,23 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>assurancetourix</name>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <description>Assurancetourix package</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Funtech Makers :: CDFR 2020</license>
+  <license>Club Robotique ECAM :: CDFR 2020</license>
 
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rclcpp</buildtool_depend>
+  <buildtool_depend>sensor_msgs</buildtool_depend>
+  <buildtool_depend>image_transport</buildtool_depend>
+  <buildtool_depend>cv_bridge</buildtool_depend>
+  <depend>libopencv-dev</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
