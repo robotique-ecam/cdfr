@@ -130,22 +130,22 @@
     </visual>
   </link>
 
-  <link name="sensor_front_left" update_rate="40">
+  <link name="sensor_front_left" type="fixed">
     <parent link="robotbase"/>
     <origin wyz="0.13 0.13 -0.10" rpy="0 0 0"/>
   </link>
 
-  <link name="sensor_front_right" update_rate="40">
+  <link name="sensor_front_right" type="fixed">
     <parent link="robotbase"/>
     <origin wyz="0.13 -0.13 -0.10" rpy="0 0 0"/>
   </link>
 
-  <link name="sensor_back_left" update_rate="40">
+  <link name="sensor_back_left" type="fixed">
     <parent link="robotbase"/>
     <origin wyz="-0.13 0.13 -0.10" rpy="0 0 0"/>
   </link>
 
-  <link name="sensor_back_right" update_rate="40">
+  <link name="sensor_back_right" type="fixed">
     <parent link="robotbase"/>
     <origin wyz="-0.13 -0.13 -0.10" rpy="0 0 0"/>
   </link>
