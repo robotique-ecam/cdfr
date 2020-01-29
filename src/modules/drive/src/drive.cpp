@@ -1,4 +1,8 @@
-#include <drive/drive.hpp>
+#include <drive.hpp>
+
+
+#define I2C_ADDR_MOTOR_LEFT 0x10
+#define I2C_ADDR_MOTOR_RIGHT 0x11
 
 
 Drive::Drive() : Node("drive_node") {
@@ -8,15 +12,15 @@ Drive::Drive() : Node("drive_node") {
   /* Give variables their initial values */
   init_variables();
 
-  /* Open UART connection */
-  try {
-    serial_interface_ = std::make_shared<serial::Serial>(this->serial_port_, this->serial_baudrate_);
-  } catch (serial::IOException) {
-    RCLCPP_ERROR(this->get_logger(), "Unable to open serial port : %s",  this->serial_port_.c_str());
-    exit(1);
-  }
-  // Test the timeout at 2ms
-  // serial_interface_.setTimeout(serial::Timeout::max(), 0, 2, 0, 2);
+  #ifndef SIMULATION
+  /* Open I2C connection */
+  i2c = std::make_shared<I2C>(i2c_bus);
+  #endif /* SIMULATION */
+
+  #ifdef USE_SPEEDRAMP
+  speedramp_left_ = std::make_shared<Speedramp>();
+  speedramp_right_ = std::make_shared<Speedramp>();
+  #endif /* USE_SPEEDRAMP */
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -27,81 +31,161 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
+  #ifdef USE_TIMER
+  timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
+  #endif
+
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
 
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("serial_port");
+  this->declare_parameter("accel");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
+  this->declare_parameter("microcontroler.max_steps_frequency");
+  this->declare_parameter("microcontroler.speedramp_resolution");
 
   // Get parameters from yaml
-  this->get_parameter_or<std::string>("serial.port", serial_port_, "/dev/ttyUSB0");
-  this->get_parameter_or<uint32_t>("serial.baudrate", serial_baudrate_, 115200);
-
-  this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_footprint");
+  #ifndef SIMULATION
+  this->declare_parameter("i2c_bus");
+  this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
+  #endif /* SIMULATION */
+  this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
-  this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_footprint");
-  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.0);
-  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.0);
+  this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
+  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
+  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
+  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
+  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
+  this->get_parameter_or<double>("speedramp.accel", accel_, 9.81);
 }
 
 
 void Drive::init_variables() {
   /* Compute initial values */
   steps_per_turn_ = 200 * 16;
-  mm_per_turn_ = 2 * M_PI * wheel_radius_;
-  mm_per_step_ = mm_per_turn_ / steps_per_turn_;
+  rads_per_step = 2 * M_PI / steps_per_turn_;
+  meters_per_turn_ = 2 * M_PI * wheel_radius_;
+  meters_per_step_ = meters_per_turn_ / steps_per_turn_;
+
+  speed_multiplier_ = max_freq_ / speed_resolution_;
+  max_speed_ = max_freq_ * meters_per_step_;
+  min_speed_ = speed_multiplier_ * meters_per_step_;
+
+  #ifdef USE_SPEEDRAMP
+  speedramp_left_->set_acceleration(accel_);
+  speedramp_right_->set_acceleration(accel_);
+  speedramp_left_->set_delay(0.05);
+  speedramp_right_->set_delay(0.05);
+  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
+  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
+  #endif /* SPEEDRAMP */
+
+  joint_states_.name.push_back("wheel_left_joint");
+  joint_states_.name.push_back("wheel_right_joint");
+  joint_states_.position.resize(2, 0.0);
+  joint_states_.velocity.resize(2, 0.0);
+  joint_states_.effort.resize(2, 0.0);
+
+  #ifdef SIMULATION
+  old_cmd_vel_.right = 0;
+  old_cmd_vel_.left = 0;
+  #endif /* SIMULATION */
+
+  time_since_last_sync_ = this->get_clock()->now();
+}
+
+
+int8_t Drive::compute_velocity_cmd(double velocity) {
+  /* Compute absolute velocity command to be sent to microcontroler */
+  double abs_velocity = abs(velocity);
+  if (abs_velocity >= max_speed_) {
+    return (int8_t) ((velocity<0)?(-1):(1)) * (speed_resolution_ - 1);
+  } else if (abs_velocity < min_speed_) {
+    return 0;
+  } else {
+    return (int8_t) round(velocity * (speed_resolution_ - 1) / max_speed_) - ((velocity<0)?(1):(0));
+  }
+}
+
+
+void Drive::update_velocity() {
+  #ifdef USE_SPEEDRAMP
+  double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
+  double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
+  #else
+  double differential_speed_left = cmd_vel_.left;
+  double differential_speed_right = cmd_vel_.right;
+  #endif
+
+  differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
+  differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
+
+  #ifndef SIMULATION
+  /* Send speed commands */
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  attiny_steps_returned_.left = (int32_t) (this->sign_steps_left?-1:1) * this->i2c->read_word(differential_speed_cmd_.left);
+  this->sign_steps_left = signbit(differential_speed_cmd_.left);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  attiny_steps_returned_.right = (int32_t) (this->sign_steps_right?-1:1) * this->i2c->read_word(differential_speed_cmd_.right);
+  this->sign_steps_right = signbit(differential_speed_cmd_.right);
+
+  #else
+  cmd_vel_.right = differential_speed_right;
+  cmd_vel_.left = differential_speed_left;
+  #endif /* SIMULATION */
+
+  previous_time_since_last_sync_ = time_since_last_sync_;
+  time_since_last_sync_ = this->get_clock()->now();
+  compute_pose_velocity(attiny_steps_returned_);
+  update_odometry();
+  update_tf();
+  update_joint_states();
 }
 
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  differential_speed_cmd_.left[1] = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  differential_speed_cmd_.right[1] = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
 
-  /* Set first bit of the ID according to differential_speed_cmd_ sign */
-  differential_speed_cmd_.left[0] ^= (-signbit(differential_speed_cmd_.left[1]) ^ differential_speed_cmd_.left[0]) & 1;
-  differential_speed_cmd_.right[0] ^= (-signbit(differential_speed_cmd_.right[1]) ^ differential_speed_cmd_.right[0]) & 1;
-
-  /* Send speed commands */
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.left, 2);
-  this->serial_interface_->write((const uint8_t*) differential_speed_cmd_.right, 2);
-
-  previous_time_since_last_sync_ = time_since_last_sync_;
-  time_since_last_sync_ = this->now();
+  update_velocity();
 }
 
 
 void Drive::compute_pose_velocity(TinyData steps_returned) {
-  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e3;
+  dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = mm_per_step_ * steps_returned.left;
-  differential_move_.right = mm_per_step_ * steps_returned.right;
+  #ifndef SIMULATION
+  differential_move_.left = meters_per_step_ * steps_returned.left;
+  differential_move_.right = meters_per_step_ * steps_returned.right;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
+  #else
+  differential_speed_.left = old_cmd_vel_.left;
+  differential_speed_.right = old_cmd_vel_.right;
 
-  if (steps_returned.left == steps_returned.right) {
-    instantaneous_speed_.angular = 0;
-    instantaneous_speed_.linear = differential_speed_.left;
-  } else if (steps_returned.left == -steps_returned.right) {
-    instantaneous_speed_.linear = 0;
-    instantaneous_speed_.angular = (differential_speed_.right - differential_move_.left) / wheel_separation_;
-  } else {
-    trajectory_radius_left = wheel_separation_ * differential_move_.left / (differential_move_.right - differential_move_.left);
-    trajectory_radius = 2 * trajectory_radius_left + wheel_separation_;
+  differential_move_.left = differential_speed_.left * dt;
+  differential_move_.right = differential_speed_.right * dt;
 
-    instantaneous_move_.angular = differential_move_.left / trajectory_radius_left;
-    instantaneous_move_.linear = wheel_radius_ * sqrt(2 - 2 * cos(instantaneous_move_.angular));
+  old_cmd_vel_ = cmd_vel_;
+  #endif /* SIMULATION */
 
-    instantaneous_speed_.angular = instantaneous_move_.angular / dt;
-    instantaneous_speed_.linear = instantaneous_move_.linear / dt;
-  }
+  instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
+  instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (wheel_separation_);
+
+  instantaneous_speed_.linear = (differential_speed_.right + differential_speed_.left) / 2;
+  instantaneous_speed_.angular = (differential_speed_.right - differential_speed_.left) / (wheel_separation_);
+
+  odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
+  odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
+  odom_pose_.thetha += instantaneous_move_.angular;
 }
 
 
@@ -120,7 +204,6 @@ void Drive::update_odometry() {
 
   // We should update the twist of the odometry
   odom_.twist.twist.linear.x = instantaneous_speed_.linear;
-  odom_.twist.twist.linear.y = 0;
   odom_.twist.twist.angular.z = instantaneous_speed_.angular;
   odom_.header.stamp = time_since_last_sync_;
   odom_pub_->publish(odom_);
@@ -143,10 +226,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT];
-  joint_states_.position[RIGHT];
-  joint_states_.velocity[LEFT];
-  joint_states_.velocity[RIGHT];
+  joint_states_.position[LEFT] += attiny_steps_returned_.left * rads_per_step;
+  joint_states_.position[RIGHT] += attiny_steps_returned_.right * rads_per_step;
+  joint_states_.velocity[LEFT] =  attiny_steps_returned_.left * rads_per_step / dt;
+  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
 

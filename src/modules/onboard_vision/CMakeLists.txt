@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(drive)
+project(onboard_vision)
 
 # Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
@@ -10,16 +10,12 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-################################################################################
+#################################################################################
 # Find and load build settings from external packages
 ################################################################################
 find_package(ament_cmake REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(tf2_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
 
 
 ################################################################################
@@ -30,40 +26,19 @@ include_directories(
 )
 
 set(dependencies
-  "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
-  "sensor_msgs"
-  "tf2"
-  "tf2_msgs"
+  "OpenCV"
 )
 
-set(EXEC_NAME "drive")
+set(EXEC_NAME "onboard_vision")
 
 
 add_executable(${EXEC_NAME}
-  src/drive_node.cpp
-  src/drive.cpp
-  src/i2c.cpp
+  src/onboard_vision_node.cpp
+  src/onboard_vision.cpp
 )
 
 option(SIMULATION "Simulation mode" OFF)
-option(SPEEDRAMP "Enable speedramp" OFF)
-option(TIMER "Enable Wall Timer for odometry" ON)
-
-if(SIMULATION)
-  add_definitions(-DSIMULATION)
-else()
-  target_link_libraries(${EXEC_NAME} i2c)
-endif(SIMULATION)
-
-if(SPEEDRAMP)
-  add_definitions(-DUSE_SPEEDRAMP)
-endif(SPEEDRAMP)
-
-if(TIMER)
-  add_definitions(-DUSE_TIMER)
-endif(TIMER)
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 

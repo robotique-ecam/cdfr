@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 
 
-"""Obelix ROS2."""
+"""I2C Interface ROS::2 package build tool."""
 
 
+from os import path
+from glob import glob
 from setuptools import setup, find_packages
 
 
-package_name = 'obelix'
+package_name = 'strategix'
 
 
 setup(
     name=package_name,
-    version='0.2.0',
+    version='0.0.1',
     packages=find_packages(),
     data_files=[
-        ('share/' + package_name, ['package.xml', 'launch/launch.py']),
+        (path.join('share', package_name), ['package.xml']),
     ],
     zip_safe=True,
     install_requires=['setuptools'],
@@ -23,12 +25,12 @@ setup(
     author_email='ewen.brun@ecam.fr',
     maintainer='Ewen BRUN',
     maintainer_email='ewen.brun@ecam.fr',
-    keywords=['ROS2', 'Robot', 'CDFR'],
-    description='Obelix ROS2',
+    keywords=['ROS2', '', 'CDFR'],
+    description='Code node strategix.',
     license='Funtech Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
-            'main = obelix.main:main',
+            'strategix = strategix.strategix:main',
         ],
     },
 )
