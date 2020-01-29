@@ -48,8 +48,10 @@ void Assurancetourix::get_image() {
 
 void Assurancetourix::init_parameters() {
   // initialisation of image message
+  #ifdef SHOW_IMAGE
   cv_img_bridge.encoding = "bgr8";
   cv_img_bridge.header.frame_id = "map";
+  #endif //SHOW_IMAGE
 
   // initialisation of marker message
   marker.header.frame_id = "map";
@@ -68,22 +70,26 @@ void Assurancetourix::detect() {
   #endif // MIPI_CAMERA
 
   _frame.copyTo(_anotated);
-
-  cv_img_bridge.header.stamp = this->get_clock()->now();
   marker.header.stamp = this->get_clock()->now();
 
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
+  #ifdef SHOW_IMAGE
+  cv_img_bridge.header.stamp = this->get_clock()->now();
   cv_img_bridge.image = _anotated;
   cv_img_bridge.toImageMsg(img_msg);
-
   image_pub_.publish(img_msg);
+  #endif // SHOW_IMAGE
 }
 
 
 void Assurancetourix::_detect_aruco(Mat img) {
   cv::aruco::detectMarkers(img, _dictionary, _marker_corners, _detected_ids, _parameters, _rejected_candidates);
+  #ifdef SHOW_IMAGE
+  //drawDetectedMarkers ont the image (activate only for debug)
+  cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
+  #endif// SHOW_IMAGE
 }
 
 void Assurancetourix::set_vision_for_rviz(double color[3], double scale[3], uint type) {
@@ -98,13 +104,15 @@ void Assurancetourix::set_vision_for_rviz(double color[3], double scale[3], uint
 
 void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
-    cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.05, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
     for(int i=0; i<int(_detected_ids.size()); i++) {
 
+      #ifdef SHOW_IMAGE
+      //drawAxis on the image (activate only for debug)
       cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
+      #endif // SHOW_IMAGE
 
       marker.pose.position.x = _tvecs[i].operator[](0);
       marker.pose.position.y = _tvecs[i].operator[](1);

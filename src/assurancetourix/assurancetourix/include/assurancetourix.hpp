@@ -22,6 +22,8 @@ using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
 
+//#define SHOW_IMAGE
+
 class Assurancetourix : public rclcpp::Node {
 public:
   Assurancetourix();
@@ -71,7 +73,7 @@ private:
   double blue_color_ArUco[3] = {0, 0, 255};
   double yellow_color_ArUco[3] = {255, 255, 0};
   double default_color_ArUco[3] = {120, 120, 120};
-  double arrow_scale[3] = {0.1,0.1,0.1};
+  double arrow_scale[3] = {0.3,0.05,0.05};
   double game_elements_scale[3] = {0.7,0.7,0.01};
   uint robot_type = 0;
   uint game_element_type = 1;
