@@ -104,7 +104,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -120,7 +120,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -136,7 +136,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -152,7 +152,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
