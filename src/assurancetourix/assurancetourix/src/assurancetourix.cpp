@@ -7,9 +7,12 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   #ifdef MIPI_CAMERA
   arducam::arducam_init_camera(&camera_instance);
-  arducam::arducam_set_mode(camera_instance, 2); // width: 1920, height: 1080, pixelformat: pBAA, desc: (null)
+  arducam::arducam_set_mode(camera_instance, 0); // width: 3280, height: 2464, pixelformat: pBAA, desc: (null)
+  arducam::arducam_reset_control(camera_instance, 0x00980911);
+  arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
+  arducam::arducam_get_control(camera_instance, 0x00980911, &exposure);
   arducam::arducam_software_auto_white_balance(camera_instance, 1);
-  arducam::arducam_software_auto_exposure(camera_instance, 1);
+  arducam::arducam_get_gain(camera_instance, &rgain, &bgain);
   #else // Standard camera
   _cap.open(_api_id + _camera_id);
   if (!_cap.isOpened()) {
@@ -20,7 +23,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   image_pub_ = image_transport::create_publisher(this, "detected_aruco", rmw_qos_profile_default);
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-
+  cv::namedWindow("Display", cv::WINDOW_AUTOSIZE);
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
@@ -57,8 +60,8 @@ void Assurancetourix::init_parameters() {
   marker.header.frame_id = "map";
   marker.color.a = 1.0;
   marker.action = visualization_msgs::msg::Marker::ADD;
-  marker.lifetime.sec = 0;
-  marker.lifetime.nanosec = 500000000;
+  marker.lifetime.sec = 1;
+  marker.lifetime.nanosec = 0;
 }
 
 
@@ -69,17 +72,17 @@ void Assurancetourix::detect() {
   _cap.read(_frame);
   #endif // MIPI_CAMERA
 
-  _frame.copyTo(_anotated);
+  _frame.convertTo(raised_contrast, -1, contrast, 0);
+
+  raised_contrast.copyTo(_anotated);
   marker.header.stamp = this->get_clock()->now();
 
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
   #ifdef SHOW_IMAGE
-  cv_img_bridge.header.stamp = this->get_clock()->now();
-  cv_img_bridge.image = _anotated;
-  cv_img_bridge.toImageMsg(img_msg);
-  image_pub_.publish(img_msg);
+  cv::imshow("Display", _anotated);
+  cv::waitKey(3);
   #endif // SHOW_IMAGE
 }
 

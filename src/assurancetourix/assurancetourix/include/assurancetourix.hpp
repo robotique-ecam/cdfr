@@ -6,6 +6,7 @@
 #include <vector>
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
@@ -22,7 +23,7 @@ using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
 
-//#define SHOW_IMAGE
+#define SHOW_IMAGE
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -38,14 +39,15 @@ private:
 
   #ifdef MIPI_CAMERA
   arducam::CAMERA_INSTANCE camera_instance;
-  int width = 1920, height = 1080;
+  int width = 3280, height = 2464, exposure = 600, rgain = 50, bgain =280;
   void get_image();
   #else
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
   #endif // MIPI_CAMERA
 
-  Mat _frame, _anotated;
+  Mat _frame, _anotated, raised_contrast;
+  int contrast = 8;
 
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
