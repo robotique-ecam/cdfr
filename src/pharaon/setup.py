@@ -27,7 +27,7 @@ setup(
     license='Funtech Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
-            'main = pharaon.main:main',
+            'pharaon = pharaon.main:main',
         ],
     },
 )

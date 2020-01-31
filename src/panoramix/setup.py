@@ -27,7 +27,7 @@ setup(
     license='Funtech Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
-            'main = panoramix.main:main',
+            'panoramix = panoramix.main:main',
         ],
     },
 )
