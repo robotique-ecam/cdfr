@@ -2,7 +2,7 @@
 
 <robot name="Asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(ros)/src/asterix/robot/Couleurs.urdf"/>
+  <xacro:include filename="colors.xacro"/>
 
   <!--Interial macros-->
   <xacro:macro name="cylinder_inertia" params="m r h">
