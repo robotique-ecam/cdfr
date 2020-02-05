@@ -1,7 +1,6 @@
 #ifndef ONBOARD_VISION_NODE_HPP
 #define ONBOARD_VISION_NODE_HPP
 
-
 #include <math.h>
 #include <vector>
 #include <chrono>
@@ -11,8 +10,6 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/aruco.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
 #include <visualization_msgs/msg/marker.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/point.hpp>
@@ -22,8 +19,6 @@
 using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
-
-#define SHOW_IMAGE
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -35,19 +30,17 @@ private:
   void init_parameters();
   void _detect_aruco(Mat img);
   void _anotate_image(Mat img);
-  void set_vision_for_rviz(double color[3], double scale[3], uint type);
+  void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
 
   #ifdef MIPI_CAMERA
   arducam::CAMERA_INSTANCE camera_instance;
-  int width = 3280, height = 2464, exposure = 600, rgain = 50, bgain =280;
   void get_image();
   #else
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
   #endif // MIPI_CAMERA
 
-  Mat _frame, _anotated, raised_contrast;
-  int contrast = 8;
+  Mat _frame, _anotated, raised_contrast, image_minus_t, xor_image;
 
   std::vector<int> _detected_ids;
   std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
@@ -63,26 +56,35 @@ private:
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
 
-  cv_bridge::CvImage cv_img_bridge;
-  sensor_msgs::msg::Image img_msg;
   rclcpp::TimerBase::SharedPtr timer_;
-  image_transport::Publisher image_pub_;
 
   visualization_msgs::msg::Marker marker;
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
-  double blue_color_ArUco[3] = {0, 0, 255};
-  double yellow_color_ArUco[3] = {255, 255, 0};
-  double default_color_ArUco[3] = {120, 120, 120};
-  double arrow_scale[3] = {0.3,0.05,0.05};
-  double game_elements_scale[3] = {0.7,0.7,0.01};
-  uint robot_type = 0;
-  uint game_element_type = 1;
-
-
   // Parameters
   int _camera_id;
+
+  int width;
+  int height;
+  bool show_image;
+  int exposure;
+  uint rgain;
+  uint bgain;
+  int mode;
+  double contrast;
+  std::vector<double> blue_color_ArUco;
+  std::vector<double> yellow_color_ArUco;
+  std::vector<double> default_color_ArUco;
+  std::vector<double> arrow_scale;
+  std::vector<double> game_elements_scale;
+  uint robot_type;
+  uint game_element_type;
+  int lifetime_sec;
+  int lifetime_nano_sec;
+  String header_frame_id;
+  bool starter_flag;
+
 };
 
 #endif /* ONBOARD_VISION_NODE_HPP */

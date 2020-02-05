@@ -1,0 +1,26 @@
+assurancetourix_node:
+  ros__parameters:
+    camera:
+      exposure: 250
+      rgain: 3110
+      bgain: 5160
+      mode: 0
+      mat_dist_coeffs: {{0.3764196381675952, 0.04110048800291252, 0.22561542466361806, -0.04945838920708183, -0.4677971323451955}}
+      mat_camera_matrix_coeff: {{3667.6295530241346, 0.0, 1309.653212735876}, {0.0, 3009.8721997418875, 1565.0383212417412}, {0.0, 0.0, 1.0}}
+
+    image:
+      show_image: true
+      contrast: 8.0
+      #add filter
+
+    rviz_settings:
+      blue_color_ArUco: {0.0,0.0,255.0}
+      yellow_color_ArUco: {255.0,255.0,0.0}
+      default_color_ArUco: {120.0,120.0,120.0}
+      arrow_scale: {0.3,0.05,0.05}
+      game_elements_scale: {0.07,0.07,0.01}
+      robot_type: 0
+      game_element_type: 1
+      lifetime_sec: 5
+      lifetime_nano_sec: 0
+      header_frame_id: "map"
