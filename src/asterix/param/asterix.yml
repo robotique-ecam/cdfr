@@ -125,22 +125,22 @@ controller_server:
     - RotateToGoal
 
     # Robot Configuration Parameters
-    acc_lim_theta: 2.0
-    acc_lim_x: 0.2
+    acc_lim_theta: 3.0
+    acc_lim_x: 1.0
     acc_lim_y: 0.0
-    decel_lim_theta: -2.0
-    decel_lim_x: -0.2
+    decel_lim_theta: -3.0
+    decel_lim_x: -1.0
     decel_lim_y: 0.0
-    max_vel_theta: 1.0
-    max_vel_x: 0.50
+    max_vel_theta: 3.0
+    max_vel_x: 0.79
     max_vel_y: 0.0
-    min_speed_theta: 0.001
-    min_speed_xy: -1.0
-    max_speed_xy: 1.0
-    min_vel_x: -0.50
+    min_speed_theta: 0.05
+    min_speed_xy: 0.006
+    max_speed_xy: 0.80
+    min_vel_x: -0.79
     min_vel_y: 0.0
-    min_theta_velocity_threshold: 0.001
-    min_x_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.05
+    min_x_velocity_threshold: 0.006
     min_y_velocity_threshold: 1.0
 
 
