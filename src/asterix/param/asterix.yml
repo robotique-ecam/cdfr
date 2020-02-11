@@ -20,9 +20,26 @@ drive_node:
 
 sensors_node:
   ros__parameters:
-    i2c_bus: 0
+    i2c_bus: 4
 
-    base_frame: "base_link"
+    hcsr04_names : [front_left, front_right, back_left, back_right]
+
+    hcsr04:
+      front_left:
+        addr: 0x20
+        frame_id: 'sensor_front_left'
+
+      front_right:
+        addr: 0x21
+        frame_id: 'sensor_front_right'
+
+      back_left:
+        addr: 0x22
+        frame_id: 'sensor_back_left'
+
+      back_right:
+        addr: 0x23
+        frame_id: 'sensor_back_right'
 
 
 lcd_driver:
@@ -30,7 +47,7 @@ lcd_driver:
     i2c_bus: 6
     i2c_addr: 0x27
 
-    banner: "Asterix v0.3.3"
+    banner: "Asterix v0.4.1"
 
 
 amcl:
@@ -193,7 +210,7 @@ local_costmap:
       height: 3
       resolution: 0.02
       # robot_radius: 0.15
-      footprint: "[[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]"
+      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       inflation_layer.cost_scaling_factor: 3.0
       obstacle_layer:
         enabled: False
@@ -219,7 +236,7 @@ global_costmap:
     ros__parameters:
       use_sim_time: True
       # robot_radius: 0.15
-      footprint: "[[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]"
+      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       obstacle_layer:
         enabled: True
         scan:
