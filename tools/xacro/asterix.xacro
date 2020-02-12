@@ -2,45 +2,7 @@
 
 <robot name="Asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <material name="black">
-      <color rgba="0.0 0.0 0.0 1.0"/>
-  </material>
-
-  <material name="dark">
-    <color rgba="0.3 0.3 0.3 1.0"/>
-  </material>
-
-  <material name="light_black">
-    <color rgba="0.4 0.4 0.4 1.0"/>
-  </material>
-
-  <material name="blue">
-    <color rgba="0.0 0.0 0.8 1.0"/>
-  </material>
-
-  <material name="green">
-    <color rgba="0.0 0.8 0.0 1.0"/>
-  </material>
-
-  <material name="grey">
-    <color rgba="0.5 0.5 0.5 1.0"/>
-  </material>
-
-  <material name="orange">
-    <color rgba="1.0 0.4235 0.0392 1.0"/>
-  </material>
-
-  <material name="brown">
-    <color rgba="0.8706 0.8118 0.7647 1.0"/>
-  </material>
-
-  <material name="red">
-    <color rgba="0.8 0.0 0.0 1.0"/>
-  </material>
-
-  <material name="white">
-    <color rgba="1.0 1.0 1.0 1.0"/>
-  </material>
+  <xacro:include filename="colors.xacro"/>
 
   <!--Interial macros-->
   <xacro:macro name="cylinder_inertia" params="m r h">
@@ -142,7 +104,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -158,7 +120,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -174,7 +136,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
@@ -190,7 +152,7 @@
       <geometry>
         <box size="0.01 0.05 0.02"/>
       </geometry>
-      <material name="green"/>
+      <material name="white"/>
     </visual>
   </link>
 
