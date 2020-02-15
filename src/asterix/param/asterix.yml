@@ -56,6 +56,14 @@ amcl:
     robot_model_type: "differential"
 
 
+lcd_driver:
+  ros__parameters:
+    i2c_bus: 6
+    i2c_addr: 0x27
+
+    banner: "Asterix v0.3.1"
+
+
 amcl_map_client:
   ros__parameters:
     use_sim_time: True
