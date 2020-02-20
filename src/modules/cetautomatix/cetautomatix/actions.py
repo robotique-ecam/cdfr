@@ -2,13 +2,16 @@
 
 import sys
 import rclpy
-import py_trees
-from magic_points import elements
 import numpy as np
+from magic_points import elements
 from rclpy.node import Node
+
+import py_trees
+import py_trees_ros
+# import py_trees_ros_interfaces.action as py_trees_actions
+import py_trees.console as console
 from geometry_msgs.msg import PoseStamped
-import py_trees_ros.mock.actions
-import py_trees_ros_interfaces.action as py_trees_actions
+from nav2_msgs.action import NavigateToPose
 
 
 class Robot(Node):
@@ -38,19 +41,22 @@ class Robot(Node):
 
     def getGoalPose(self, index_of_goal):
         msg = PoseStamped()
-
         self.goal_pose = self.goal_pose_array[index_of_goal]
-
-        msg.pose.position.x = float(self.goal_pose[0])
-        msg.pose.position.y = float(self.goal_pose[1])
         msg.pose.position.z = 0.0
+        if len(self.goal_pose) != 4:
+            msg.pose.position.x = float(self.goal_pose[0])
+            msg.pose.position.y = float(self.goal_pose[1])
+        else:
+            pass
 
-        q = self.euler_to_quaternion(float(self.goal_pose[2]), 0, 0)
-
-        msg.pose.orientation.x = q[0]
-        msg.pose.orientation.y = q[1]
-        msg.pose.orientation.z = q[2]
-        msg.pose.orientation.w = q[3]
+        if len(self.goal_pose) == 3:
+            q = self.euler_to_quaternion(float(self.goal_pose[2]), 0, 0)
+            msg.pose.orientation.x = q[0]
+            msg.pose.orientation.y = q[1]
+            msg.pose.orientation.z = q[2]
+            msg.pose.orientation.w = q[3]
+        else:
+            pass
 
         return msg
 
@@ -71,14 +77,14 @@ def create_root() -> py_trees.behaviour.Behaviour:
         )"""
     move_1 = py_trees_ros.actions.ActionClient(
             name="Move 1",
-            action_type=py_trees_actions.MoveBase,
-            action_name="move_base",
+            action_type=NavigateToPose,
+            action_name="/asterix/navigate_to_pose",
             action_goal=rrr.getGoalPose(0)
         )
     move_2 = py_trees_ros.actions.ActionClient(
             name="Move 2",
-            action_type=py_trees_actions.MoveBase,
-            action_name="move_base",
+            action_type=NavigateToPose,
+            action_name="/asterix/navigate_to_pose",
             action_goal=rrr.getGoalPose(1)
         )
     root.add_children([move_1, move_2])
@@ -94,14 +100,14 @@ def main():
     )
     try:
         tree.setup(timeout=15.0)
-    except py_trees_ros.exceptions.TimedOutError:
-        # console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
+    except py_trees_ros.exceptions.TimedOutError as e:
+        console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
         tree.shutdown()
         rclpy.shutdown()
         sys.exit(1)
     except KeyboardInterrupt:
         # not a warning, nor error, usually a user-initiated shutdown
-        # console.logerror("tree setup interrupted")
+        console.logerror("tree setup interrupted")
         tree.shutdown()
         rclpy.shutdown()
         sys.exit(1)
