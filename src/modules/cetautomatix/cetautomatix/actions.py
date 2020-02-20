@@ -42,7 +42,7 @@ class Robot(Node):
 
         msg.pose.position.x = float(self.goal_pose[0])
         msg.pose.position.y = float(self.goal_pose[1])
-        msg.pose.position.z = 0
+        msg.pose.position.z = 0.0
 
         q = self.euler_to_quaternion(float(self.goal_pose[2]), 0, 0)
 
