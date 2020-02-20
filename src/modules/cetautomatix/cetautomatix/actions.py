@@ -70,6 +70,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
             name="Asterix",
             policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
         )
+    actions = py_trees.composites.Sequence("Actions")
     """end_of_match = py_trees.decorators.EternalGuard(
             name="End of match?",
             condition=timer,
@@ -87,7 +88,8 @@ def create_root() -> py_trees.behaviour.Behaviour:
             action_name="/asterix/navigate_to_pose",
             action_goal=rrr.getGoalPose(1)
         )
-    root.add_children([move_1, move_2])
+    root.add_children([actions])
+    actions.add_children([move_1, move_2])
 
     return root
 
