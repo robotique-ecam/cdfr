@@ -72,13 +72,13 @@ def create_root() -> py_trees.behaviour.Behaviour:
     move_1 = py_trees_ros.actions.ActionClient(
             name="Move 1",
             action_type=py_trees_actions.MoveBase,
-            action_name="move_1",
+            action_name="move_base",
             action_goal=rrr.getGoalPose(0)
         )
     move_2 = py_trees_ros.actions.ActionClient(
             name="Move 2",
             action_type=py_trees_actions.MoveBase,
-            action_name="move_2",
+            action_name="move_base",
             action_goal=rrr.getGoalPose(1)
         )
     root.add_children([move_1, move_2])
