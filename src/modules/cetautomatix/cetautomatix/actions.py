@@ -8,9 +8,8 @@ from rclpy.node import Node
 
 import py_trees
 import py_trees_ros
-# import py_trees_ros_interfaces.action as py_trees_actions
 import py_trees.console as console
-from geometry_msgs.msg import PoseStamped
+from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav2_msgs.action import NavigateToPose
 
 
@@ -40,21 +39,21 @@ class Robot(Node):
         return [qx, qy, qz, qw]
 
     def getGoalPose(self, index_of_goal):
-        msg = PoseStamped()
+        msg = NavigateToPose_Goal()
         self.goal_pose = self.goal_pose_array[index_of_goal]
-        msg.pose.position.z = 0.0
+        msg.pose.pose.position.z = 0.0
         if len(self.goal_pose) != 4:
-            msg.pose.position.x = float(self.goal_pose[0])
-            msg.pose.position.y = float(self.goal_pose[1])
+            msg.pose.pose.position.x = float(self.goal_pose[0])
+            msg.pose.pose.position.y = float(self.goal_pose[1])
         else:
             pass
 
         if len(self.goal_pose) == 3:
             q = self.euler_to_quaternion(float(self.goal_pose[2]), 0, 0)
-            msg.pose.orientation.x = q[0]
-            msg.pose.orientation.y = q[1]
-            msg.pose.orientation.z = q[2]
-            msg.pose.orientation.w = q[3]
+            msg.pose.pose.orientation.x = q[0]
+            msg.pose.pose.orientation.y = q[1]
+            msg.pose.pose.orientation.z = q[2]
+            msg.pose.pose.orientation.w = q[3]
         else:
             pass
 
