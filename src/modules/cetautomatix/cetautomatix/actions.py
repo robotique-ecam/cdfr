@@ -12,9 +12,9 @@ import py_trees_ros_interfaces.action as py_trees_actions
 class Robot(Node):
     def __init__(
         self,
-        goal_pose: [elements["ARUCO42"], elements["GOBROUGE"]["GOB7"]],
-        tolerance_position: [0.5],
-        timeout: [60],
+        goal_pose=[elements["ARUCO42"], elements["GOBROUGE"]["GOB7"]],
+        tolerance_position=[0.5],
+        timeout=[60],
     ):
         super().__init__(node_name='drone_tester')
 
