@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import rclpy
 import py_trees
 from magic_points import elements
 import numpy as np
@@ -16,7 +17,7 @@ class Robot(Node):
         tolerance_position=[0.5],
         timeout=[60],
     ):
-        super().__init__(node_name='drone_tester')
+        super().__init__(node_name='robot')
 
         self.goal_pose_array = goal_pose
         self.timeout_array = timeout
@@ -53,6 +54,7 @@ class Robot(Node):
         return msg
 
 
+rclpy.init()
 rrr = Robot()
 
 robot = py_trees.composites.Parallel(
