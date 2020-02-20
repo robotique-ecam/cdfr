@@ -118,6 +118,7 @@ void Drive::update_velocity() {
   #ifdef USE_SPEEDRAMP
   double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
   double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
+  double differential_old_speed_left = speedramp_left_->compute(old_cmd_vel_.left);
   #else
   double differential_speed_left = cmd_vel_.left;
   double differential_speed_right = cmd_vel_.right;
@@ -129,13 +130,18 @@ void Drive::update_velocity() {
   #ifndef SIMULATION
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t) (this->sign_steps_left?-1:1) * this->i2c->read_word(differential_speed_cmd_.left);
+  attiny_steps_returned_.left = (int32_t) (this->sign_steps_left?-1:1) * this->i2c->read_word(differential_speed_cmd_.left) + delta_step_2 - delta_step_1;
   this->sign_steps_left = signbit(differential_speed_cmd_.left);
-
+  left_start_time_ = this->get_clock()->now();
+  
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
   attiny_steps_returned_.right = (int32_t) (this->sign_steps_right?-1:1) * this->i2c->read_word(differential_speed_cmd_.right);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
-
+  right_start_time_ = this->get_clock()->now();
+  
+  retard = (left_start_time_ - right_start_time_).nanoseconds() * 1e-9; /* ~0,2ms */
+  delta_step2 = (retard/dt)*this->i2c->read_word(differential_speed_cmd_.left);
+  delta_step1 = (retard/dt)*this->i2c->read_word(differential_old_speed_cmd_.left);
   #else
   cmd_vel_.right = differential_speed_right;
   cmd_vel_.left = differential_speed_left;
