@@ -61,7 +61,6 @@ class Robot(Node):
         return msg
 
 
-rclpy.init(args=None)
 rrr = Robot()
 
 
@@ -95,6 +94,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
 
 
 def main():
+    rclpy.init(args=None)
     root = create_root()
     tree = py_trees_ros.trees.BehaviourTree(
         root=root,
@@ -122,6 +122,7 @@ def main():
         pass
 
     tree.shutdown()
+    tree.node.destroy_node()
     rclpy.shutdown()
 
 
