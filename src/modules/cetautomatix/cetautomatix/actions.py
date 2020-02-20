@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import rclpy
 import py_trees
 from magic_points import elements
@@ -54,28 +55,66 @@ class Robot(Node):
         return msg
 
 
-rclpy.init()
 rrr = Robot()
 
-robot = py_trees.composites.Parallel(
-        name="Asterix",
-        policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
+
+def create_root() -> py_trees.behaviour.Behaviour:
+    root = py_trees.composites.Parallel(
+            name="Asterix",
+            policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
+        )
+    """end_of_match = py_trees.decorators.EternalGuard(
+            name="End of match?",
+            condition=timer,
+            child=stop_robots
+        )"""
+    move_1 = py_trees_ros.actions.ActionClient(
+            name="Move 1",
+            action_type=py_trees_actions.MoveBase,
+            action_name="move_1",
+            action_goal=rrr.getGoalPose(0)
+        )
+    move_2 = py_trees_ros.actions.ActionClient(
+            name="Move 2",
+            action_type=py_trees_actions.MoveBase,
+            action_name="move_2",
+            action_goal=rrr.getGoalPose(1)
+        )
+    root.add_children([move_1, move_2])
+
+    return root
+
+
+def main():
+    rclpy.init(args=None)
+    root = create_root()
+    tree = py_trees_ros.trees.BehaviourTree(
+        root=root,
+        unicode_tree_debug=True
     )
-"""end_of_match = py_trees.decorators.EternalGuard(
-        name="End of match?",
-        condition=timer,
-        child=stop_robots
-    )"""
-move_1 = py_trees_ros.actions.ActionClient(
-        name="Move 1",
-        action_type=py_trees_actions.MoveBase,
-        action_name="move_1",
-        action_goal=rrr.getGoalPose(0)
-    )
-move_2 = py_trees_ros.actions.ActionClient(
-        name="Move 2",
-        action_type=py_trees_actions.MoveBase,
-        action_name="move_2",
-        action_goal=rrr.getGoalPose(1)
-    )
-robot.add_children([move_1, move_2])
+    try:
+        tree.setup(timeout=15.0)
+    except py_trees_ros.exceptions.TimedOutError:
+        # console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
+        tree.shutdown()
+        rclpy.shutdown()
+        sys.exit(1)
+    except KeyboardInterrupt:
+        # not a warning, nor error, usually a user-initiated shutdown
+        # console.logerror("tree setup interrupted")
+        tree.shutdown()
+        rclpy.shutdown()
+        sys.exit(1)
+
+    tree.tick_tock(period_ms=1000.0)
+
+    try:
+        rclpy.spin(tree.node)
+    except KeyboardInterrupt:
+        pass
+
+    tree.shutdown()
+    rclpy.shutdown()
+
+
+main()
