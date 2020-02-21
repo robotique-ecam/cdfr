@@ -38,7 +38,7 @@ def generate_launch_description():
 
         Node(package='robot_state_publisher', node_executable='robot_state_publisher', output='screen', arguments=[urdf]),
 
-        Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']),
+        Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['0.2', '1.5', '0', '0', '0', '0', 'map', 'odom']),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
