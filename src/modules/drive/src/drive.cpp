@@ -139,7 +139,7 @@ void Drive::update_velocity() {
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
   right_start_time_ = this->get_clock()->now();
   
-  retard = (left_start_time_ - right_start_time_).nanoseconds() * 1e-9; /* ~0,2ms */
+  retard = (left_start_time_ - right_start_time_).nanoseconds() * 1e-9; /* ~ 0,2ms */
   delta_step2 = (retard/dt)*this->i2c->read_word(differential_speed_cmd_.left);
   delta_step1 = (retard/dt)*this->i2c->read_word(differential_old_speed_cmd_.left);
   #else
