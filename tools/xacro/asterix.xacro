@@ -106,7 +106,7 @@
   <joint name="sensor_back_left_joint" type="fixed">
     <parent link="robotbase"/>
     <child link="sensor_back_left"/>
-    <origin xyz="-0.096 0.1 0.05" rpy="0 0 1.57"/>
+    <origin xyz="-0.096 0.1 0.05" rpy="0 0 3.14159"/>
   </joint>
 
   <link name="sensor_back_left">
@@ -122,7 +122,7 @@
   <joint name="sensor_back_right_joint" type="fixed">
     <parent link="robotbase"/>
     <child link="sensor_back_right"/>
-    <origin xyz="-0.096 -0.1 0.05" rpy="0 0 1.57"/>
+    <origin xyz="-0.096 -0.1 0.05" rpy="0 0 3.14159"/>
   </joint>
 
   <link name="sensor_back_right">
