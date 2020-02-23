@@ -1,30 +1,9 @@
 <?xml version="1.0" ?>
 
-<robot name="Asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="colors.xacro"/>
-
-  <!--Interial macros-->
-  <xacro:macro name="cylinder_inertia" params="m r h">
-    <inertial>
-      <mass value="${m}"/>
-      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0" iyy="${m*(3*r*r+h*h)/12}" iyz = "0" izz="${m*r*r/2}"/>
-    </inertial>
-  </xacro:macro>
-
-  <xacro:macro name="box_inertia" params="m w h d">
-    <inertial>
-      <mass value="${m}"/>
-      <inertia ixx="${m / 12.0 * (d*d + h*h)}" ixy="0.0" ixz="0.0" iyy="${m / 12.0 * (w*w + h*h)}" iyz="0.0" izz="${m / 12.0 * (w*w + d*d)}"/>
-    </inertial>
-  </xacro:macro>
-
-  <xacro:macro name="sphere_inertia" params="m r">
-    <inertial>
-      <mass value="${m}"/>
-      <inertia ixx="${2.0*m*(r*r)/5.0}" ixy="0.0" ixz="0.0" iyy="${2.0*m*(r*r)/5.0}" iyz="0.0" izz="${2.0*m*(r*r)/5.0}"/>
-    </inertial>
-  </xacro:macro>
+  <xacro:include filename="inertias.xacro"/>
 
   <link name="base_link"/>
 
@@ -127,7 +106,7 @@
   <joint name="sensor_back_left_joint" type="fixed">
     <parent link="robotbase"/>
     <child link="sensor_back_left"/>
-    <origin xyz="-0.096 0.1 0.05" rpy="0 0 0"/>
+    <origin xyz="-0.096 0.1 0.05" rpy="0 0 3.14159"/>
   </joint>
 
   <link name="sensor_back_left">
@@ -143,7 +122,7 @@
   <joint name="sensor_back_right_joint" type="fixed">
     <parent link="robotbase"/>
     <child link="sensor_back_right"/>
-    <origin xyz="-0.096 -0.1 0.05" rpy="0 0 0"/>
+    <origin xyz="-0.096 -0.1 0.05" rpy="0 0 3.14159"/>
   </joint>
 
   <link name="sensor_back_right">
