@@ -47,13 +47,21 @@ lcd_driver:
     i2c_bus: 6
     i2c_addr: 0x27
 
-    banner: "Asterix v0.3.3"
+    banner: "Asterix v0.4.0"
 
 
 amcl:
   ros__parameters:
     use_sim_time: True
     robot_model_type: "differential"
+
+
+lcd_driver:
+  ros__parameters:
+    i2c_bus: 6
+    i2c_addr: 0x27
+
+    banner: "Asterix v0.3.1"
 
 
 amcl_map_client:
@@ -210,7 +218,7 @@ local_costmap:
       height: 3
       resolution: 0.02
       # robot_radius: 0.15
-      footprint: "[[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]"
+      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       inflation_layer.cost_scaling_factor: 3.0
       obstacle_layer:
         enabled: False
@@ -236,7 +244,7 @@ global_costmap:
     ros__parameters:
       use_sim_time: True
       # robot_radius: 0.15
-      footprint: "[[-0.128, -0.095], [-0.128, 0.095], [0.128, 0.095], [0.128, -0.095]]"
+      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       obstacle_layer:
         enabled: True
         scan:

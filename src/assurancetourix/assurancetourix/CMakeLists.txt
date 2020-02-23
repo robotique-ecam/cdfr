@@ -14,11 +14,13 @@ endif()
 # Find and load build settings from external packages
 ################################################################################
 find_package(ament_cmake REQUIRED)
+find_package(tf2 REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(OpenCV REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
 
 
 ################################################################################
@@ -29,14 +31,19 @@ include_directories(
 )
 
 set(dependencies
+  "tf2"
   "rclcpp"
   "sensor_msgs"
   "cv_bridge"
   "image_transport"
+  "visualization_msgs"
   "OpenCV"
 )
 
 set(EXEC_NAME "assurancetourix")
+
+
+option(MIPI_CAMERA "Use MIPI camera" OFF)
 
 
 add_executable(${EXEC_NAME}
@@ -44,12 +51,10 @@ add_executable(${EXEC_NAME}
   src/assurancetourix_node.cpp
 )
 
-option(SIMULATION "Simulation mode" OFF)
-if(SIMULATION)
-  add_definitions(-DSIMULATION)
-else()
-  target_link_libraries(${EXEC_NAME} i2c)
-endif(SIMULATION)
+if(MIPI_CAMERA)
+  add_definitions(-DMIPI_CAMERA)
+  target_link_libraries(${EXEC_NAME} -larducam_mipicamera)
+endif(MIPI_CAMERA)
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 

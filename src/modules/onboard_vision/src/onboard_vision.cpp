@@ -35,21 +35,7 @@ void OnboardVision::_analysis_roi() {
 }
 
 
-Scalar OnboardVision::_get_circle_dominant_color(Vec3f detected_circle) {
-    // Get rectangular ROI containing circle
-    Rect rect(detected_circle[0], detected_circle[1], detected_circle[2] * 2, detected_circle[2] * 2);
-    Mat roi(_frame, rect);
-    Mat mask(roi.size(), roi.type(), Scalar::all(0));
-    circle(mask, Point(detected_circle[2], detected_circle[2]), detected_circle[2], Scalar::all(255), -1);
-}
-
-
-char OnboardVision::_get_dominant_color(Scalar mean, Mat roi, Mat mask) {
-
-}
-
-
-void OnboardVision::find_objects() {
+void OnboardVision::_detect_hough_circles() {
   // Start by applying a median blur to reduce false positives
   cvtColor(_frame, _bwframe, cv::COLOR_BGR2GRAY);
   medianBlur(_bwframe, _bwframe, 5);
@@ -66,12 +52,6 @@ void OnboardVision::find_objects() {
       30,  // min diameter
       70   // max diameter
   );
-
-
-  if (_cups_circles.size() > 0)
-    for (int i = 0; i < _cups_circles.size(); i++)
-      _get_circle_dominant_color(_cups_circles[i]);
-
 }
 
 
@@ -79,7 +59,6 @@ void OnboardVision::_mask_circle(Vec3f circle) {
     // Get rectangular ROI containing circle
     Rect roi(circle[0], circle[1], circle[2] * 2, circle[2] * 2);
 }
-
 
 OnboardVision::~OnboardVision() {
   RCLCPP_INFO(this->get_logger(), "Onboard vision node terminated");
