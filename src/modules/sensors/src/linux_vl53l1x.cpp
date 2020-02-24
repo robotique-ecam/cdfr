@@ -30,6 +30,7 @@ LINUX_VL53L1X::LINUX_VL53L1X(I2C &i2cPort, uint8_t addr, int shutdownPin, int in
   _i2cPort = &i2cPort;
   _shutdownPin = shutdownPin;
   _interruptPin = interruptPin;
+  _i2cAddress = addr;
   _device = new VL53L1X(&i2cPort, shutdownPin, interruptPin, addr);
 }
 

@@ -67,7 +67,7 @@ void Sensors::init_variables() {
 }
 
 
-void init_sensors() {
+void Sensors::init_sensors() {
   for(auto addr = vl53l1x_addresses.begin(); addr != vl53l1x_addresses.end(); addr++) {
     vl53l1x_sensors.push_back(LINUX_VL53L1X(&i2c, *addr));
   }

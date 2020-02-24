@@ -137,9 +137,9 @@ public:
     MyDevice.I2cDevAddr = addr;
     MyDevice.I2cHandle = i2c;
     Device = &MyDevice;
-    if (gpio0 >= 0) {
-      pinMode(gpio0, OUTPUT);
-    }
+    // if (gpio0 >= 0) {
+    //   pinMode(gpio0, OUTPUT);
+    // }
   }
 
   /** Destructor
@@ -174,7 +174,7 @@ public:
 
     while (!sensorState && !status) {
       status = VL53L1X_BootState(&sensorState);
-      VL53L1_WaitMs(2);
+      usleep(2 * 1000); // delay(2)
     }
     if (!status) {
       status = VL53L1X_SensorInit();
