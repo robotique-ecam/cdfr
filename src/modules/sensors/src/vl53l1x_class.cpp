@@ -952,7 +952,7 @@ VL53L1X_ERROR VL53L1X::VL53L1_I2CWrite(uint8_t DeviceAddr,
   io_buffer_[0] = (uint8_t)RegisterAddr >> 8;
   io_buffer_[1] = (uint8_t)RegisterAddr & 0xFF;
   memcpy(&io_buffer_[2], pdata, NumByteToWrite);
-  return dev_i2c->write(io_buffer_, (NumByteToWrite + 2));
+  return dev_i2c->bus_write(io_buffer_, (NumByteToWrite + 2));
 }
 
 VL53L1X_ERROR VL53L1X::VL53L1_I2CRead(uint8_t DeviceAddr, uint16_t RegisterAddr,
@@ -975,11 +975,11 @@ VL53L1X_ERROR VL53L1X::VL53L1_I2CRead(uint8_t DeviceAddr, uint16_t RegisterAddr,
 #endif
     io_buffer_[0] = (uint8_t)RegisterAddr >> 8;
     io_buffer_[1] = (uint8_t)RegisterAddr & 0xFF;
-    status = dev_i2c->write(io_buffer_, 2);
+    status = dev_i2c->bus_write(io_buffer_, 2);
 
   } while (status != 0);
          dev_i2c->set_address((DeviceAddr) >> 1) & 0x7F);
-         status = dev_i2c->read(pBuffer, NumByteToRead);
+         status = dev_i2c->bus_read(pBuffer, NumByteToRead);
          return status;
 }
 

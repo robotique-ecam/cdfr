@@ -24,8 +24,8 @@ public:
   uint8_t read_byte();
   uint16_t read_word(uint8_t cmd);
   void write_byte(uint8_t cmd);
-  uint8_t read(uint8_t *buff, uint8_t lenght);
-  uint8_t write(uint8_t *buff, uint8_t lenght);
+  uint8_t bus_read(uint8_t *buff, uint8_t lenght);
+  uint8_t bus_write(uint8_t *buff, uint8_t lenght);
 
 private:
   int i2c_fd_;
