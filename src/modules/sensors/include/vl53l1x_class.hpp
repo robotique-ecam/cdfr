@@ -132,7 +132,7 @@ public:
    * GPIO_1 INT
    * @param[in] DevAddr device address, 0x52 by default
    */
-  VL53L1X(std::shared_ptr<I2C> i2c, int pin, int pin_gpio1, uint8_t addr = VL53L1X_DEFAULT_DEVICE_ADDRESS)
+  VL53L1X(I2C* i2c, int pin, int pin_gpio1, uint8_t addr = VL53L1X_DEFAULT_DEVICE_ADDRESS)
       : RangeSensor(), dev_i2c(i2c), gpio0(pin), gpio1Int(pin_gpio1) {
     MyDevice.I2cDevAddr = addr;
     MyDevice.I2cHandle = i2c;
@@ -517,7 +517,7 @@ protected:
 
 protected:
   /* IO Device */
-  std::shared_ptr<I2C> dev_i2c;
+  I2C* dev_i2c;
   /* IO Buffer */
   uint8_t io_buffer_[VL53L1_MAX_I2C_XFER_SIZE + 2];
   /* Digital out pin */

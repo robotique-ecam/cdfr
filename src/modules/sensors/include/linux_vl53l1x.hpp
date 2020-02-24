@@ -149,7 +149,7 @@ public:
                                     // sensor and passing this known distance
                                     // into the function.
 private:
-  std::shared_ptr<I2C> _i2cPort;
+  I2C* _i2cPort;
   int _shutdownPin;
   int _interruptPin;
   int _i2cAddress = 0x52;
