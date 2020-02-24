@@ -29,7 +29,7 @@ setup(
     maintainer_email='ewen.brun@ecam.fr',
     keywords=['ROS2', '', 'CDFR'],
     description='Asterix RO2 System',
-    license='Funtech Makers :: CDFR 2020',
+    license='ECAM Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
             'asterix = asterix.main:main',
