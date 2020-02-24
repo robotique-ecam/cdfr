@@ -31,7 +31,7 @@ LINUX_VL53L1X::LINUX_VL53L1X(I2C* i2cPort, uint8_t addr, int shutdownPin, int in
   _shutdownPin = shutdownPin;
   _interruptPin = interruptPin;
   _i2cAddress = addr;
-  _device = new VL53L1X(&i2cPort, shutdownPin, interruptPin, addr);
+  _device = new VL53L1X(i2cPort, shutdownPin, interruptPin, addr);
 }
 
 bool LINUX_VL53L1X::init() { return _device->VL53L1X_SensorInit(); }
