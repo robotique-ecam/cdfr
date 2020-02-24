@@ -31,7 +31,7 @@
 
 class LINUX_VL53L1X {
 public:
-  LINUX_VL53L1X(I2C &i2cPort = I2C(1), uint8_t addr, int shutdownPin = -1,
+  LINUX_VL53L1X(I2C &i2cPort, uint8_t addr, int shutdownPin = -1,
                 int interruptPin = -1); // Constructs our Distance sensor
                                         // without an interrupt or shutdown pin
   bool init();                          // Deprecated version of begin

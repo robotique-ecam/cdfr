@@ -157,8 +157,8 @@ public:
   VL53L1X_ERROR InitSensor(uint8_t address) {
     VL53L1X_ERROR status = 0;
     uint8_t sensorState = 0;
-    VL53L1_Off();
-    VL53L1_On();
+    // VL53L1_Off();
+    // VL53L1_On();
     status = VL53L1X_SetI2CAddress(address);
 
 #ifdef DEBUG_MODE
@@ -174,7 +174,7 @@ public:
 
     while (!sensorState && !status) {
       status = VL53L1X_BootState(&sensorState);
-      delay(2);
+      VL53L1_WaitMs(2);
     }
     if (!status) {
       status = VL53L1X_SensorInit();
