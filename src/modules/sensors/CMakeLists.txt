@@ -42,6 +42,8 @@ set(EXEC_NAME "sensors")
 add_executable(${EXEC_NAME}
   src/sensors_node.cpp
   src/sensors.cpp
+  src/vl53l1x_class.cpp
+  src/linux_vl53l1x.cpp
   src/i2c.cpp
 )
 
