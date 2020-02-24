@@ -26,8 +26,8 @@
 #include "vl53l1x_class.hpp"
 #include <stdlib.h>
 
-LINUX_VL53L1X::LINUX_VL53L1X(I2C &i2cPort, uint8_t addr, int shutdownPin, int interruptPin) {
-  _i2cPort = &i2cPort;
+LINUX_VL53L1X::LINUX_VL53L1X(std::shared_ptr<I2C> i2cPort, uint8_t addr, int shutdownPin, int interruptPin) {
+  _i2cPort = i2cPort;
   _shutdownPin = shutdownPin;
   _interruptPin = interruptPin;
   _i2cAddress = addr;

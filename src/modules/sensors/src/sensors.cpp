@@ -69,14 +69,14 @@ void Sensors::init_variables() {
 
 void Sensors::init_sensors() {
   for(auto addr = vl53l1x_addresses.begin(); addr != vl53l1x_addresses.end(); addr++) {
-    vl53l1x_sensors.push_back(LINUX_VL53L1X(&i2c, *addr));
+    vl53l1x_sensors.push_back(LINUX_VL53L1X(i2c, *addr));
   }
 }
 
 
 void Sensors::receive_distance() {
   #ifndef SIMULATION
-  for (int i=0; i < hcsr04_addresses.size(); i++) {
+  for (unsigned int i=0; i < hcsr04_addresses.size(); i++) {
     hcsr_range_msg.header.stamp = this->get_clock()->now();
     this->i2c->set_address(hcsr04_addresses[i]);
     uint8_t distance = this->i2c->read_byte();
@@ -85,7 +85,7 @@ void Sensors::receive_distance() {
   }
 
   for(auto sensor = vl53l1x_sensors.begin(); sensor != vl53l1x_sensors.end(); sensor++) {
-    hcsr_range_msg.header.stamp = this->get_clock()->now();
+    vl53l1x_range_msg.header.stamp = this->get_clock()->now();
     vl53l1x_range_msg.range = (float) sensor->getDistance() / 1000;
     sensors_pub_->publish(vl53l1x_range_msg);
   }
