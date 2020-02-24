@@ -24,4 +24,12 @@ void I2C::write_byte(uint8_t cmd) {
   i2c_smbus_write_byte(i2c_fd_, cmd);
 }
 
+uint8_t I2C::read(uint8_t *buff, uint8_t lenght) {
+  (read(i2c_fd_, buff, lenght) == lenght) ? return 0 : return 1;
+}
+
+uint8_t I2C::write(uint8_t *buff, uint8_t lenght) {
+  (write(i2c_fd_, buff, lenght) == lenght) ? return 0 : return 1;
+}
+
 #endif /* SIMULATION */
