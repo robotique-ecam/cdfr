@@ -938,7 +938,7 @@ VL53L1X_ERROR VL53L1X::VL53L1_I2CWrite(uint8_t DeviceAddr,
                                        uint16_t RegisterAddr, uint8_t *pBuffer,
                                        uint16_t NumByteToWrite) {
 
-  if ((NumByteToRead + 1) > VL53L1_MAX_I2C_XFER_SIZE)
+  if ((NumByteToWrite + 1) > VL53L1_MAX_I2C_XFER_SIZE)
     return -1;
 
 #ifdef DEBUG_MODE
@@ -949,9 +949,9 @@ VL53L1X_ERROR VL53L1X::VL53L1_I2CWrite(uint8_t DeviceAddr,
 #ifdef DEBUG_MODE
   std::cout << "Writing port number " << RegisterAddr << std::endl;
 #endif
-  io_buffer_[0] = (uint8_t)RegisterAddr >> 8;
-  io_buffer_[1] = (uint8_t)RegisterAddr & 0xFF;
-  memcpy(&io_buffer_[2], pdata, NumByteToWrite);
+  io_buffer_[0] = (uint8_t) RegisterAddr >> 8;
+  io_buffer_[1] = (uint8_t) RegisterAddr & 0xFF;
+  std::memcpy(&io_buffer_[2], pBuffer, NumByteToWrite);
   return dev_i2c->bus_write(io_buffer_, (NumByteToWrite + 2));
 }
 
@@ -978,7 +978,7 @@ VL53L1X_ERROR VL53L1X::VL53L1_I2CRead(uint8_t DeviceAddr, uint16_t RegisterAddr,
     status = dev_i2c->bus_write(io_buffer_, 2);
 
   } while (status != 0);
-         dev_i2c->set_address((DeviceAddr) >> 1) & 0x7F);
+         dev_i2c->set_address((DeviceAddr >> 1) & 0x7F);
          status = dev_i2c->bus_read(pBuffer, NumByteToRead);
          return status;
 }
