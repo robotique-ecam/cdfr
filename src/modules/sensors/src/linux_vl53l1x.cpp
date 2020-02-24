@@ -275,4 +275,4 @@ void LINUX_VL53L1X::calibrateOffset(uint16_t targetDistanceInMm) {
 void LINUX_VL53L1X::calibrateXTalk(uint16_t targetDistanceInMm) {
   uint16_t xTalk = getXTalk();
   _device->VL53L1X_CalibrateXtalk(targetDistanceInMm, &xTalk);
-};
+}
