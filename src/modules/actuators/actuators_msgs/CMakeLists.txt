@@ -25,7 +25,6 @@ find_package(std_msgs REQUIRED)
 ################################################################################
 set(msg_files
   "msg/Analog.msg"
-  "msg/Digital.msg"
 )
 
 set(srv_files
