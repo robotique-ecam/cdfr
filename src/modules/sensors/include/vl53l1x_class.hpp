@@ -40,6 +40,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include <cstring>
 #include "RangeSensor.hpp"
 #include "i2c.hpp"
 #include "vl53l1_error_codes.hpp"

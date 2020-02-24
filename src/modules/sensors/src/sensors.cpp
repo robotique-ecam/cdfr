@@ -8,13 +8,13 @@ Sensors::Sensors() : Node("sensors_node") {
   /* Give variables their initial values */
   init_variables();
 
-  /* Init VL53L1X Sensors */
-  init_sensors();
-
   /* Open I2C connection */
   #ifndef SIMULATION
   i2c = std::make_shared<I2C>(i2c_bus);
   #endif /* SIMULATION */
+
+  /* Init VL53L1X Sensors */
+  init_sensors();
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
