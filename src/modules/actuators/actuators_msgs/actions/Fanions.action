@@ -1,0 +1,5 @@
+bool deploy
+---
+bool deployed
+---
+bool deploying

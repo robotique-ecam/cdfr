@@ -24,7 +24,8 @@ find_package(std_msgs REQUIRED)
 # Declare ROS messages, services and actions
 ################################################################################
 set(msg_files
-  "msg/Analog.msg"
+  "actions/Cups.action"
+  "actions/Fanions.action"
 )
 
 set(srv_files

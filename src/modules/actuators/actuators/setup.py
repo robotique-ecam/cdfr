@@ -29,7 +29,7 @@ setup(
     license='ECAM Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
-            'actuators = actuators.main:main',
+            'actuators = actuators.actuators:main',
         ],
     },
 )
