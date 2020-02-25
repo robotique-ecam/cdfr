@@ -12,14 +12,13 @@ from pharaon_msgs.action import Pharaon
 
 
 bd_addr = "00:14:03:06:61:BA"
-port = 1
 
 
 class PharaonActionServer(Node):
 
     def __init__(self):
         super().__init__('pharaon_action_server')
-        self.bd_addr = "00:14:03:06:61:BA"
+        self.bd_addr = bd_addr
         self.port = 1
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.sock.connect(self.bd_addr, self.port)
