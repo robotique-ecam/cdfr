@@ -1,8 +1,8 @@
-int[] indexes
+Int[] indexes
 ---
-bool[] completed
+Bool[] completed
 ---
-bool[] moving
-bool[] pumping
-bool[] holding
-bool[] purging
+Bool[] moving
+Bool[] pumping
+Bool[] holding
+Bool[] purging

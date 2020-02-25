@@ -1,5 +1,5 @@
-bool deploy
+Bool deploy
 ---
-bool deployed
+Bool deployed
 ---
-bool deploying
+Bool deploying
