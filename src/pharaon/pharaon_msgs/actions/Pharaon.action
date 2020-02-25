@@ -1,0 +1,6 @@
+bool deploy
+---
+bool deployed
+---
+bool deploying
+bool lighting

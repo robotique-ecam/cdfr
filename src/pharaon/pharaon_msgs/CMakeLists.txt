@@ -23,12 +23,12 @@ find_package(std_msgs REQUIRED)
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
-set(srv_files
-  "srv/Pharaon.srv"
+set(action_files
+  "actions/Pharaon.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  ${srv_files}
+  ${action_files}
   DEPENDENCIES std_msgs
   ADD_LINTER_TESTS
 )
