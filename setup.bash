@@ -1,20 +1,49 @@
 #!/bin/bash
 
 function print_info {
-    (>&2 printf "\x1b[34m${1}\x1b[0m\n")
+    (>&2 printf "\x1b[36m[i] ${1}\x1b[0m\n")
 }
 
 function print_success {
-    (>&2 printf "\x1b[32m${1}\x1b[0m\n")
+    (>&2 printf "\x1b[32m[+] ${1}\x1b[0m\n")
     exit 0
 }
 
 function print_failure {
-    (>&2 printf "\x1b[31m${1}\x1b[0m\n")
+    (>&2 printf "\x1b[31m[!] ${1}\x1b[0m\n")
     exit 1
 }
 
-print_info "Setting up robot"
+echo "[38;5;004m                                 /
+                               &
+                              %
+                 %%%%%%%%%%%%%%%%
+             .%%%%%%%%%%%%%%%%%%%%%%/
+            %%%%%%%    #%%%%%%%%%%%%%%(
+          ,%%%%%%%%#   %%%%%%,   %%%%%%%
+          #%%%%%%%%%%%%%%%%%%    %%%%%%%
+               .#%%%%%%%%%%%%%%%%%%%%%%%
+         (%%%#, &%%%%%%%%%%%%%%%%%%%%%%
+ &%%%%%%%%%%%%%%%%%%%%%%%%%%#    (&%#
+    ##%%%%%%%%%%%    *%%%%%%%%%%%%#.
+       %%%%%%%%%%%.            (%%%%%
+      %%%%%%%%%%%%%*          *%%%%%%%/
+     %%%%%%%%%%%%%%%#        .%%%*(%%&
+    &%%%%%%%%%%%%%%%%%       %%%(
+   %%%%%%%%%%%%%%%%%%%%     %%%%
+  (%%%%%%%%%%%%%%%%%%%%%   %%%%
+     (%%%%%%%%%%%%%%%%%%% %%%%
+     %%%%%%%%%%%%%%%%%%%%%%%%
+     %%%%%%%%%%%%&         /
+        %%%%%%%.
 
-xacro tools/xacro/asterix.xacro -o src/asterix/robot/asterix.urdf
-print_success "Generated URDF for asterix"
+
+"
+
+print_info "Welcome to Robot Setup Script"
+read -p "Please enter the name of the robot to setup : " robot
+
+
+print_info "Setting up robot : $robot"
+
+xacro tools/xacro/$robot.xacro -o src/$robot/robot/$robot.urdf && print_success "Generated URDF for $robot" || print_failure "No such robot"
