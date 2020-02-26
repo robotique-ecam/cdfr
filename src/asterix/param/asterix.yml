@@ -205,7 +205,7 @@ controller_server:
     publish_local_plan: true
     publish_trajectories: false
     publish_transformed_plan: true
-    trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
+    trajectory_generator_name: "dwb_plugins::LimitedAccelGenerator"
     transform_tolerance: 0.2
 
     # Forward Simulation Parameters
