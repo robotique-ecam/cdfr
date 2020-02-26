@@ -5,6 +5,7 @@
 *DS_Store
 *.gch
 *.pgm
+*.urdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -165,13 +165,13 @@ controller_server:
     discretize_by_time: false
     goal_checker_name: dwb_plugins::SimpleGoalChecker
     local_controller_plugin: dwb_core::DWBLocalPlanner
-    publish_cost_grid_pc: false
-    publish_evaluation: false
+    publish_cost_grid_pc: true
+    publish_evaluation: true
     publish_global_plan: true
     publish_local_plan: true
-    publish_trajectories: false
+    publish_trajectories: true
     publish_transformed_plan: true
-    trajectory_generator_name: dwb_plugins::StandardTrajectoryGenerator
+    trajectory_generator_name: "dwb_plugins::LimitedAccelGenerator"
     transform_tolerance: 0.2
 
     # Forward Simulation Parameters

@@ -41,7 +41,7 @@ def generate_launch_description():
         Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['0.15', '1.0', '0', '0', '0', '0', 'map', 'odom']),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
+            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/nav2_bringup_launch.py']),
             launch_arguments={
                 'map': map_dir,
                 'use_sim_time': use_sim_time,
