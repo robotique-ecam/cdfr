@@ -51,7 +51,7 @@ def creamapbleu():
     mapbleu, draw = creamap()
     draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
                                         cm_pix(largeur_cm, reso))), noir, 1)
-    mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.ppm"), "ppm")
+    mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.pgm"))
 
 
 def creamapjaune():
@@ -59,7 +59,7 @@ def creamapjaune():
     mapjaune, draw = creamap()
     draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
                                        cm_pix(largeur_cm, reso))), noir, 1)
-    mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.ppm"), "ppm")
+    mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.pgm"))
 
 
 if __name__ == '__main__':

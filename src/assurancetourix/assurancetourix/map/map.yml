@@ -1,4 +1,4 @@
-image: mapbleu.ppm
+image: mapbleu.pgm
 resolution: 0.02
 origin: [-1.5, -1, 0.0]
 negate: 0
