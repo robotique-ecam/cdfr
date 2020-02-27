@@ -95,43 +95,6 @@ controller_server:
   ros__parameters:
     use_sim_time: True
     # Trajectory Scoring Parameters
-    #
-    # Scores a trajectory based on where the path passes over the costmap.
-    # To use this properly, you must use the inflation layer in costmap to
-    # expand obstacles by the robot's radius.
-    BaseObstacle/class: BaseObstacle
-    BaseObstacle:
-      scale: 0.01
-      sum_scores: false
-    # Scores a trajectory based on how well aligned the trajectory is with the goal pose.
-    GoalAlign/class: GoalAlign
-    GoalAlign:
-      aggregation_type: last
-      scale: 0.0
-    # Scores a trajectory based on how close the trajectory gets the robot to the goal pose.
-    GoalDist/class: GoalDist
-    GoalDist:
-      aggregation_type: last
-      scale: 24.0
-    # Prevents the robot from just moving backwards and forwards.
-    Oscillation/class: Oscillation
-    Oscillation:
-      scale: 1.0
-      x_only_threshold: 0.05
-    # Scores a trajectory based on how well it is aligned to the path provided by the global planner.
-    PathAlign/class: PathAlign
-    PathAlign:
-      aggregation_type: last
-      scale: 0.0
-    # Scores a trajectory based on how far it ends up from the path provided by the global planner.
-    PathDist/class: PathDist
-    PathDist:
-      aggregation_type: last
-      scale: 32.0
-    # Only allows the robot to rotate to the goal orientation when it is sufficiently close to the goal location
-    RotateToGoal/class: RotateToGoal
-    RotateToGoal:
-      scale: 0.01
     critics:
     - BaseObstacle
     #- GoalAlign
@@ -140,6 +103,12 @@ controller_server:
     #- PathAlign
     - PathDist
     #- RotateToGoal
+    BaseObstacle.scale: 0.02
+    PathAlign.scale: 0.0
+    GoalAlign.scale: 0.0
+    PathDist.scale: 32.0
+    GoalDist.scale: 24.0
+    RotateToGoal.scale: 32.0
 
     # Robot Configuration Parameters
     acc_lim_theta: 3.0
@@ -160,7 +129,6 @@ controller_server:
     min_x_velocity_threshold: 0.006
     min_y_velocity_threshold: 1.0
 
-
     debug_trajectory_details: false
     discretize_by_time: false
     goal_checker_name: dwb_plugins::SimpleGoalChecker
@@ -171,20 +139,21 @@ controller_server:
     publish_local_plan: true
     publish_trajectories: true
     publish_transformed_plan: true
-    trajectory_generator_name: "dwb_plugins::LimitedAccelGenerator"
+    trajectory_generator_name: "dwb_plugins::StandardTrajectoryGenerator"
     transform_tolerance: 0.2
 
     # Forward Simulation Parameters
-    sim_time: 1.7
-    linear_granularity: 0.025
-    use_sim_time: true
-    vx_samples: 25
-    vy_samples: 0
+    vx_samples: 20
+    vy_samples: 5
     vtheta_samples: 20
+    sim_time: 1.7
+    linear_granularity: 0.05
+    xy_goal_tolerance: 0.25
+    transform_tolerance: 0.2
     controller_frequency: 20.0
 
     # Goal Tolerance Parameters
-    xy_goal_tolerance: 0.25
+    xy_goal_tolerance: 0.05
     yaw_goal_tolerance: 0.05
     latch_xy_goal_tolerance: true
 
