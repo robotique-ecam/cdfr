@@ -131,15 +131,15 @@ controller_server:
     # Only allows the robot to rotate to the goal orientation when it is sufficiently close to the goal location
     RotateToGoal/class: RotateToGoal
     RotateToGoal:
-      scale: 16.0
+      scale: 0.01
     critics:
     - BaseObstacle
-    - GoalAlign
+    #- GoalAlign
     - GoalDist
     - Oscillation
-    - PathAlign
+    #- PathAlign
     - PathDist
-    - RotateToGoal
+    #- RotateToGoal
 
     # Robot Configuration Parameters
     acc_lim_theta: 3.0
@@ -180,7 +180,7 @@ controller_server:
     use_sim_time: true
     vx_samples: 25
     vy_samples: 0
-    vtheta_samples: 5
+    vtheta_samples: 20
     controller_frequency: 20.0
 
     # Goal Tolerance Parameters
