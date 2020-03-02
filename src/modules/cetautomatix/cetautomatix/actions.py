@@ -2,6 +2,7 @@
 
 import sys
 import rclpy
+import time
 import numpy as np
 from magic_points import elements
 from rclpy.node import Node
@@ -67,10 +68,12 @@ class Robot(Node):
 rclpy.init(args=None)
 rrr = Robot()
 
+timeEnd = time.time() + 5.0
+
 
 def create_root() -> py_trees.behaviour.Behaviour:
     def guardCondition():
-        return True
+        return True if time.time() > timeEnd else False
     actions = py_trees.composites.Sequence("Actions")
     idle = py_trees.behaviours.Success("Idle")
     move_1 = py_trees_ros.actions.ActionClient(
@@ -82,7 +85,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     timer = py_trees.timers.Timer("Timer", duration=5.0)
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
-            condition=timer.update(),
+            condition=guardCondition,
             child=idle
         )
     move_2 = py_trees_ros.actions.ActionClient(
