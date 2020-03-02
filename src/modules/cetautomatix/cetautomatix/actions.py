@@ -67,8 +67,8 @@ class Robot(Node):
 
 rclpy.init(args=None)
 robot = Robot()
-timePavillon = time.time() + 5.0
-timeEndOfGame = time.time() + 10.0
+timePavillon = time.time() + 4.0
+timeEndOfGame = time.time() + 7.0
 
 
 def create_root() -> py_trees.behaviour.Behaviour:
@@ -78,6 +78,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     def conditionPavillon():
         return True if time.time() > timePavillon else False
     idle = py_trees.behaviours.Success("Idle")
+    idle2 = py_trees.behaviours.Success("Idle2")
     move = py_trees_ros.actions.ActionClient(
         name="Move",
         action_type=NavigateToPose,
@@ -86,7 +87,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     )
     oneShotPavillon = py_trees.decorators.OneShot(
         name="OneShot",
-        child=idle
+        child=idle2
     )
     guardPavillon = py_trees.decorators.EternalGuard(
             name="Hisser pavillons?",
