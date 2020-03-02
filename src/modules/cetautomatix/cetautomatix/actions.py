@@ -86,7 +86,6 @@ def create_root() -> py_trees.behaviour.Behaviour:
     )
     oneShotPavillon = py_trees.decorators.OneShot(
         name="OneShot",
-        policy="ON_SUCCESSFUL_COMPLETION",
         child=idle
     )
     guardPavillon = py_trees.decorators.EternalGuard(
@@ -101,7 +100,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         )
     actions = py_trees.composites.Parallel(
         name="Actions",
-        policy="SuccessOnOne",
+        policy=py_trees.common.ParallelPolicy.SuccessOnOne,
         children=[guardPavillon, move]
     )
     root = py_trees.composites.Selector(
