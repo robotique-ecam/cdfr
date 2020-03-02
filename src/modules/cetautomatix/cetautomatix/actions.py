@@ -71,10 +71,6 @@ rrr = Robot()
 def create_root() -> py_trees.behaviour.Behaviour:
     def guardCondition():
         return end_of_game.status
-    root = py_trees.composites.Parallel(
-        name="Asterix",
-        policy=py_trees.common.ParallelPolicy.SuccessOnOne()
-    )
     actions = py_trees.composites.Sequence("Actions")
     move_1 = py_trees_ros.actions.ActionClient(
         name="Move 1",
@@ -85,7 +81,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
-            condition=guardCondition(),
+            condition=guardCondition,
             child=move_1
         )
     move_2 = py_trees_ros.actions.ActionClient(
@@ -94,8 +90,11 @@ def create_root() -> py_trees.behaviour.Behaviour:
         action_name="NavigateToPose",
         action_goal=rrr.getGoalPose(1)
     )
-    root.add_children([end_of_game_guard, actions])
     actions.add_children([move_2])
+    root = py_trees.composites.Selector(
+        name="Asterix",
+        children=[end_of_game_guard, actions]
+    )
 
     return root
 
