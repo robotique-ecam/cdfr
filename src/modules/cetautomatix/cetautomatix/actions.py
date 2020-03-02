@@ -74,26 +74,26 @@ def create_root() -> py_trees.behaviour.Behaviour:
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
     )
     actions = py_trees.composites.Sequence("Actions")
-    end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
-    """end_of_match = py_trees.decorators.EternalGuard(
-            name="End of match?",
-            condition=timer,
-            child=stop_robots
-        )"""
     move_1 = py_trees_ros.actions.ActionClient(
         name="Move 1",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
         action_goal=rrr.getGoalPose(0)
     )
+    end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
+    end_of_game_guard = py_trees.decorators.EternalGuard(
+            name="End of game?",
+            condition=end_of_game,
+            child=move_1
+        )
     move_2 = py_trees_ros.actions.ActionClient(
         name="Move 2",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
         action_goal=rrr.getGoalPose(1)
     )
-    root.add_children([end_of_game, actions])
-    actions.add_children([move_1, move_2])
+    root.add_children([end_of_game_guard, actions])
+    actions.add_children([move_2])
 
     return root
 
