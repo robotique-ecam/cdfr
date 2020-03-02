@@ -73,7 +73,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         return end_of_game.status == end_of_game.status.SUCCESS
     root = py_trees.composites.Parallel(
         name="Asterix",
-        policy=py_trees.common.ParallelPolicy.SuccessOnOne(synchronise=False)
+        policy=py_trees.common.ParallelPolicy.SuccessOnOne
     )
     actions = py_trees.composites.Sequence("Actions")
     move_1 = py_trees_ros.actions.ActionClient(
