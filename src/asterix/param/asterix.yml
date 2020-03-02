@@ -111,16 +111,16 @@ controller_server:
     RotateToGoal.scale: 32.0
 
     # Robot Configuration Parameters
-    acc_lim_theta: 3.0
+    acc_lim_theta: 2.0
     acc_lim_x: 1.0
     acc_lim_y: 0.0
-    decel_lim_theta: -3.0
+    decel_lim_theta: -2.0
     decel_lim_x: -1.0
     decel_lim_y: 0.0
-    max_vel_theta: 3.0
+    max_vel_theta: 1.0
     max_vel_x: 0.79
     max_vel_y: 0.0
-    min_speed_theta: 0.05
+    min_speed_theta: 0.01
     min_speed_xy: 0.006
     max_speed_xy: 0.80
     min_vel_x: -0.79
