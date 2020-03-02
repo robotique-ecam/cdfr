@@ -70,7 +70,7 @@ rrr = Robot()
 
 def create_root() -> py_trees.behaviour.Behaviour:
     def guardCondition():
-        return end_of_game.status
+        return True
     actions = py_trees.composites.Sequence("Actions")
     idle = py_trees.behaviours.Success("Idle")
     move_1 = py_trees_ros.actions.ActionClient(
@@ -79,10 +79,10 @@ def create_root() -> py_trees.behaviour.Behaviour:
         action_name="NavigateToPose",
         action_goal=rrr.getGoalPose(0)
     )
-    end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
+    timer = py_trees.timers.Timer("Timer", duration=5.0)
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
-            condition=guardCondition,
+            condition=timer.update(),
             child=idle
         )
     move_2 = py_trees_ros.actions.ActionClient(
