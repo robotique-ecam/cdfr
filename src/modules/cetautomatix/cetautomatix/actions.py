@@ -81,6 +81,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         action_goal=rrr.getGoalPose(0)
     )
     end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
+    end_of_game.initialise()
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
             condition=end_of_game.update(),
