@@ -83,7 +83,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     end_of_game = py_trees.timers.Timer("End of Game", duration=5.0)
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
-            condition=end_of_game,
+            condition=end_of_game.update(),
             child=move_1
         )
     move_2 = py_trees_ros.actions.ActionClient(
