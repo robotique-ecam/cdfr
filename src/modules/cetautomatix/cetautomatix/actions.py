@@ -66,38 +66,47 @@ class Robot(Node):
 
 
 rclpy.init(args=None)
-rrr = Robot()
-
-timeEnd = time.time() + 5.0
+robot = Robot()
+timePavillon = time.time() + 5.0
+timeEndOfGame = time.time() + 10.0
 
 
 def create_root() -> py_trees.behaviour.Behaviour:
-    def guardCondition():
-        return True if time.time() > timeEnd else False
-    actions = py_trees.composites.Sequence("Actions")
+    def conditionEndOfGame():
+        return True if time.time() > timeEndOfGame else False
+
+    def conditionPavillon():
+        return True if time.time() > timePavillon else False
     idle = py_trees.behaviours.Success("Idle")
-    move_1 = py_trees_ros.actions.ActionClient(
-        name="Move 1",
+    move = py_trees_ros.actions.ActionClient(
+        name="Move",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
-        action_goal=rrr.getGoalPose(0)
+        action_goal=robot.getGoalPose(0)
     )
-    timer = py_trees.timers.Timer("Timer", duration=5.0)
-    end_of_game_guard = py_trees.decorators.EternalGuard(
+    oneShotPavillon = py_trees.decorators.OneShot(
+        name="OneShot",
+        policy="ON_SUCCESSFUL_COMPLETION",
+        child=idle
+    )
+    guardPavillon = py_trees.decorators.EternalGuard(
+            name="Hisser pavillons?",
+            condition=conditionPavillon,
+            child=oneShotPavillon
+        )
+    guardEndOfGame = py_trees.decorators.EternalGuard(
             name="End of game?",
-            condition=guardCondition,
+            condition=conditionEndOfGame,
             child=idle
         )
-    move_2 = py_trees_ros.actions.ActionClient(
-        name="Move 2",
-        action_type=NavigateToPose,
-        action_name="NavigateToPose",
-        action_goal=rrr.getGoalPose(1)
+    actions = py_trees.composites.Parallel(
+        name="Actions",
+        policy="SuccessOnOne",
+        children=[guardPavillon, move]
     )
-    actions.add_children([move_1, move_2])
     root = py_trees.composites.Selector(
         name="Asterix",
-        children=[end_of_game_guard, actions]
+        children=[guardEndOfGame, actions]
     )
 
     return root
