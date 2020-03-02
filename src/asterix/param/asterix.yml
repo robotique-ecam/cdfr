@@ -73,21 +73,13 @@ lcd_driver:
     i2c_bus: 6
     i2c_addr: 0x27
 
-    banner: "Asterix v0.4.0"
+    banner: "Asterix v0.5.0"
 
 
 amcl:
   ros__parameters:
     use_sim_time: True
     robot_model_type: "differential"
-
-
-lcd_driver:
-  ros__parameters:
-    i2c_bus: 6
-    i2c_addr: 0x27
-
-    banner: "Asterix v0.3.1"
 
 
 amcl_map_client:
@@ -129,96 +121,65 @@ controller_server:
   ros__parameters:
     use_sim_time: True
     # Trajectory Scoring Parameters
-    #
-    # Scores a trajectory based on where the path passes over the costmap.
-    # To use this properly, you must use the inflation layer in costmap to
-    # expand obstacles by the robot's radius.
-    BaseObstacle/class: BaseObstacle
-    BaseObstacle:
-      scale: 0.01
-      sum_scores: false
-    # Scores a trajectory based on how well aligned the trajectory is with the goal pose.
-    GoalAlign/class: GoalAlign
-    GoalAlign:
-      aggregation_type: last
-      scale: 0.0
-    # Scores a trajectory based on how close the trajectory gets the robot to the goal pose.
-    GoalDist/class: GoalDist
-    GoalDist:
-      aggregation_type: last
-      scale: 24.0
-    # Prevents the robot from just moving backwards and forwards.
-    Oscillation/class: Oscillation
-    Oscillation:
-      scale: 1.0
-      x_only_threshold: 0.05
-    # Scores a trajectory based on how well it is aligned to the path provided by the global planner.
-    PathAlign/class: PathAlign
-    PathAlign:
-      aggregation_type: last
-      scale: 0.0
-    # Scores a trajectory based on how far it ends up from the path provided by the global planner.
-    PathDist/class: PathDist
-    PathDist:
-      aggregation_type: last
-      scale: 32.0
-    # Only allows the robot to rotate to the goal orientation when it is sufficiently close to the goal location
-    RotateToGoal/class: RotateToGoal
-    RotateToGoal:
-      scale: 16.0
     critics:
     - BaseObstacle
-    - GoalAlign
+    #- GoalAlign
     - GoalDist
     - Oscillation
-    - PathAlign
+    #- PathAlign
     - PathDist
-    - RotateToGoal
+    #- RotateToGoal
+    BaseObstacle.scale: 0.02
+    PathAlign.scale: 0.0
+    GoalAlign.scale: 0.0
+    PathDist.scale: 32.0
+    GoalDist.scale: 24.0
+    RotateToGoal.scale: 32.0
 
     # Robot Configuration Parameters
     acc_lim_theta: 2.0
-    acc_lim_x: 0.2
+    acc_lim_x: 1.0
     acc_lim_y: 0.0
     decel_lim_theta: -2.0
-    decel_lim_x: -0.2
+    decel_lim_x: -1.0
     decel_lim_y: 0.0
     max_vel_theta: 1.0
-    max_vel_x: 0.50
+    max_vel_x: 0.79
     max_vel_y: 0.0
-    min_speed_theta: 0.001
-    min_speed_xy: -1.0
-    max_speed_xy: 1.0
-    min_vel_x: -0.50
+    min_speed_theta: 0.01
+    min_speed_xy: 0.006
+    max_speed_xy: 0.80
+    min_vel_x: -0.79
     min_vel_y: 0.0
-    min_theta_velocity_threshold: 0.001
-    min_x_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.05
+    min_x_velocity_threshold: 0.006
     min_y_velocity_threshold: 1.0
-
 
     debug_trajectory_details: false
     discretize_by_time: false
     goal_checker_name: dwb_plugins::SimpleGoalChecker
     local_controller_plugin: dwb_core::DWBLocalPlanner
-    publish_cost_grid_pc: false
-    publish_evaluation: false
+    publish_cost_grid_pc: true
+    publish_evaluation: true
     publish_global_plan: true
     publish_local_plan: true
-    publish_trajectories: false
+    publish_trajectories: true
     publish_transformed_plan: true
-    trajectory_generator_name: "dwb_plugins::LimitedAccelGenerator"
+    trajectory_generator_name: "dwb_plugins::StandardTrajectoryGenerator"
     transform_tolerance: 0.2
 
     # Forward Simulation Parameters
+    vx_samples: 20
+    vy_samples: 5
+    vtheta_samples: 20
     sim_time: 1.7
-    linear_granularity: 0.025
-    use_sim_time: true
-    vx_samples: 25
-    vy_samples: 0
-    vtheta_samples: 5
+    linear_granularity: 0.05
+    xy_goal_tolerance: 0.25
+    transform_tolerance: 0.2
     controller_frequency: 20.0
 
     # Goal Tolerance Parameters
-    xy_goal_tolerance: 0.25
+    xy_goal_tolerance: 0.05
     yaw_goal_tolerance: 0.05
     latch_xy_goal_tolerance: true
 
