@@ -31,10 +31,14 @@ class Robot(Node):
 
     def euler_to_quaternion(self, yaw, pitch, roll):
 
-        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - \
+            np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + \
+            np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - \
+            np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + \
+            np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
 
         return [qx, qy, qz, qw]
 
@@ -66,9 +70,9 @@ rrr = Robot()
 
 def create_root() -> py_trees.behaviour.Behaviour:
     root = py_trees.composites.Parallel(
-            name="Asterix",
-            policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
-        )
+        name="Asterix",
+        policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False)
+    )
     actions = py_trees.composites.Sequence("Actions")
     """end_of_match = py_trees.decorators.EternalGuard(
             name="End of match?",
@@ -76,17 +80,17 @@ def create_root() -> py_trees.behaviour.Behaviour:
             child=stop_robots
         )"""
     move_1 = py_trees_ros.actions.ActionClient(
-            name="Move 1",
-            action_type=NavigateToPose,
-            action_name="/asterix/navigate_to_pose",
-            action_goal=rrr.getGoalPose(0)
-        )
+        name="Move 1",
+        action_type=NavigateToPose,
+        action_name="NavigateToPose",
+        action_goal=rrr.getGoalPose(0)
+    )
     move_2 = py_trees_ros.actions.ActionClient(
-            name="Move 2",
-            action_type=NavigateToPose,
-            action_name="/asterix/navigate_to_pose",
-            action_goal=rrr.getGoalPose(1)
-        )
+        name="Move 2",
+        action_type=NavigateToPose,
+        action_name="NavigateToPose",
+        action_goal=rrr.getGoalPose(1)
+    )
     root.add_children([actions])
     actions.add_children([move_1, move_2])
 
@@ -102,7 +106,8 @@ def main():
     try:
         tree.setup(timeout=15.0)
     except py_trees_ros.exceptions.TimedOutError as e:
-        console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
+        console.logerror(
+            console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
         tree.shutdown()
         rclpy.shutdown()
         sys.exit(1)

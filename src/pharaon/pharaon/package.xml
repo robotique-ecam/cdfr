@@ -4,7 +4,7 @@
   <version>0.0.1</version>
   <description>Pharaon Action Server</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Funtech Makers :: CDFR 2020</license>
+  <license>ECAM Makers :: CDFR 2020</license>
 
   <build_depend>pharaon_msgs</build_depend>
 

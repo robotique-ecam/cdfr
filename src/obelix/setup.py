@@ -25,7 +25,7 @@ setup(
     maintainer_email='ewen.brun@ecam.fr',
     keywords=['ROS2', 'Robot', 'CDFR'],
     description='Obelix ROS2',
-    license='Funtech Makers :: CDFR 2020',
+    license='ECAM Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
             'main = obelix.main:main',
