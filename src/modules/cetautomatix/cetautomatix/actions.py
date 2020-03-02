@@ -70,7 +70,7 @@ rrr = Robot()
 
 def create_root() -> py_trees.behaviour.Behaviour:
     def guardCondition():
-        return end_of_game.status == end_of_game.status.SUCCESS
+        return end_of_game.status
     root = py_trees.composites.Parallel(
         name="Asterix",
         policy=py_trees.common.ParallelPolicy.SuccessOnOne()
