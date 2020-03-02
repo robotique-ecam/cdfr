@@ -99,7 +99,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
             condition=conditionEndOfGame,
             child=idle
         )
-    actions = py_trees.composites.Selector(
+    actions = py_trees.composites.Sequence(
         name="Actions",
         # policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
         children=[guardPavillon, move]
