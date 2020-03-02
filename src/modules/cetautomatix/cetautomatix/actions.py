@@ -67,8 +67,8 @@ class Robot(Node):
 
 rclpy.init(args=None)
 robot = Robot()
-timePavillon = time.time() + 4.0
-timeEndOfGame = time.time() + 7.0
+timePavillon = time.time() + 5.0
+timeEndOfGame = time.time() + 10.0
 
 
 def create_root() -> py_trees.behaviour.Behaviour:
