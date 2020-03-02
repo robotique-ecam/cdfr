@@ -99,10 +99,14 @@ def create_root() -> py_trees.behaviour.Behaviour:
             condition=conditionEndOfGame,
             child=idle
         )
+    failureIsRunning = py_trees.decorators.FailureIsRunning(
+        name="Failure Is Running",
+        child=guardPavillon
+    )
     actions = py_trees.composites.Parallel(
         name="Actions",
         policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
-        children=[guardPavillon, move]
+        children=[failureIsRunning, move]
     )
     root = py_trees.composites.Selector(
         name="Asterix",
