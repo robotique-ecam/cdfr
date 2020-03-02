@@ -19,6 +19,8 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
 
 
 ################################################################################
@@ -34,6 +36,8 @@ set(dependencies
   "sensor_msgs"
   "visualization_msgs"
   "OpenCV"
+  "geometry_msgs"
+  "tf2_msgs"
 )
 
 set(EXEC_NAME "assurancetourix")

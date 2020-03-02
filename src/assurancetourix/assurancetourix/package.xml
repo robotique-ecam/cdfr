@@ -12,6 +12,7 @@
   <buildtool_depend>sensor_msgs</buildtool_depend>
   <buildtool_depend>visualization_msgs</buildtool_depend>
   <buildtool_depend>OpenCV</buildtool_depend>
+  <buildtool_depend>geometry_msgs</buildtool_depend>
 
   <depend>libopencv-dev</depend>
 
