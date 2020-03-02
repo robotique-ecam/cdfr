@@ -72,6 +72,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     def guardCondition():
         return end_of_game.status
     actions = py_trees.composites.Sequence("Actions")
+    idle = py_trees.behaviours.Success("Idle")
     move_1 = py_trees_ros.actions.ActionClient(
         name="Move 1",
         action_type=NavigateToPose,
@@ -82,7 +83,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
     end_of_game_guard = py_trees.decorators.EternalGuard(
             name="End of game?",
             condition=guardCondition,
-            child=move_1
+            child=idle
         )
     move_2 = py_trees_ros.actions.ActionClient(
         name="Move 2",
@@ -90,7 +91,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         action_name="NavigateToPose",
         action_goal=rrr.getGoalPose(1)
     )
-    actions.add_children([move_2])
+    actions.add_children([move_1, move_2])
     root = py_trees.composites.Selector(
         name="Asterix",
         children=[end_of_game_guard, actions]
