@@ -100,7 +100,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         )
     actions = py_trees.composites.Parallel(
         name="Actions",
-        policy=py_trees.common.ParallelPolicy.SuccessOnOne,
+        policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
         children=[guardPavillon, move]
     )
     root = py_trees.composites.Selector(
