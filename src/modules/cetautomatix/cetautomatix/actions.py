@@ -125,14 +125,14 @@ def create_root() -> py_trees.behaviour.Behaviour:
     )
     timeEndOfGame = Time(name="End Of Game Time", duration=30.0)
     timePavillon = Time(name="Pavillon Time", duration=5.0)
-    time = py_trees.composites.Parallel(
+    timeSetup = py_trees.composites.Parallel(
         name="Time",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[timeEndOfGame, timePavillon]
     )
     oneShotGoupille = py_trees.decorators.OneShot(
         name="OneShot Goupille",
-        child=time
+        child=timeSetup
     )
     successIsFailure = py_trees.decorators.SuccessIsFailure(
         name="Success Is Failure",
