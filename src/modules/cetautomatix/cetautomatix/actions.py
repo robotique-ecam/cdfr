@@ -84,7 +84,7 @@ GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def create_root() -> py_trees.behaviour.Behaviour:
     def conditionGoupille():
-        return True if not GPIO.input(27) else False
+        return False if GPIO.input(27) else True
 
     def conditionEndOfGame():
         return True if time.time() > timeEndOfGame.time else False
@@ -123,7 +123,7 @@ def create_root() -> py_trees.behaviour.Behaviour:
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[failureIsRunning, move]
     )
-    timeEndOfGame = Time(name="End Of Game Time", duration=30.0)
+    timeEndOfGame = Time(name="End Of Game Time", duration=10.0)
     timePavillon = Time(name="Pavillon Time", duration=5.0)
     timeSetup = py_trees.composites.Parallel(
         name="Time",
