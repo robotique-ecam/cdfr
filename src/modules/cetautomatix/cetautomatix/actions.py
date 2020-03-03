@@ -4,7 +4,7 @@ import sys
 import rclpy
 import time
 import numpy as np
-from gpiozero import Button
+import RPi.GPIO as GPIO
 from magic_points import elements
 from rclpy.node import Node
 
@@ -78,12 +78,13 @@ class Time(py_trees.behaviour.Behaviour):
 
 rclpy.init(args=None)
 robot = Robot()
-goupille = Button(4)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 def create_root() -> py_trees.behaviour.Behaviour:
     def conditionGoupille():
-        return True if not goupille.is_pressed() else False
+        return True if not GPIO.input(27) else False
 
     def conditionEndOfGame():
         return True if time.time() > timeEndOfGame.time else False
