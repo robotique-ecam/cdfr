@@ -109,10 +109,10 @@ def create_root() -> py_trees.behaviour.Behaviour:
         child=oneShotPavillon
     )
     guardEndOfGame = py_trees.decorators.EternalGuard(
-            name="End of game?",
-            condition=conditionEndOfGame,
-            child=idle
-        )
+        name="End of game?",
+        condition=conditionEndOfGame,
+        child=idle
+    )
     failureIsRunning = py_trees.decorators.FailureIsRunning(
         name="Failure Is Running",
         child=guardPavillon
