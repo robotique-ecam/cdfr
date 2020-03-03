@@ -90,15 +90,15 @@ def create_root() -> py_trees.behaviour.Behaviour:
         child=idle2
     )
     guardPavillon = py_trees.decorators.EternalGuard(
-            name="Hisser pavillons?",
-            condition=conditionPavillon,
-            child=oneShotPavillon
-        )
+        name="Hisser pavillons?",
+        condition=conditionPavillon,
+        child=oneShotPavillon
+    )
     guardEndOfGame = py_trees.decorators.EternalGuard(
-            name="End of game?",
-            condition=conditionEndOfGame,
-            child=idle
-        )
+        name="End of game?",
+        condition=conditionEndOfGame,
+        child=idle
+    )
     failureIsRunning = py_trees.decorators.FailureIsRunning(
         name="Failure Is Running",
         child=guardPavillon
