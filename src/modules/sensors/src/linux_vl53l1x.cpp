@@ -26,7 +26,7 @@
 #include "vl53l1x_class.hpp"
 #include <stdlib.h>
 
-LINUX_VL53L1X::LINUX_VL53L1X(I2C* i2cPort, uint8_t addr, int shutdownPin, int interruptPin) {
+LINUX_VL53L1X::LINUX_VL53L1X(I2C *i2cPort, uint8_t addr, int shutdownPin, int interruptPin) {
   _i2cPort = i2cPort;
   _shutdownPin = shutdownPin;
   _interruptPin = interruptPin;
@@ -65,13 +65,9 @@ int LINUX_VL53L1X::getI2CAddress() { return _i2cAddress; }
 
 void LINUX_VL53L1X::clearInterrupt() { _device->VL53L1X_ClearInterrupt(); }
 
-void LINUX_VL53L1X::setInterruptPolarityHigh() {
-  _device->VL53L1X_SetInterruptPolarity(1);
-}
+void LINUX_VL53L1X::setInterruptPolarityHigh() { _device->VL53L1X_SetInterruptPolarity(1); }
 
-void LINUX_VL53L1X::setInterruptPolarityLow() {
-  _device->VL53L1X_SetInterruptPolarity(0);
-}
+void LINUX_VL53L1X::setInterruptPolarityLow() { _device->VL53L1X_SetInterruptPolarity(0); }
 
 /**
  * This function gets the interrupt polarity\n
@@ -94,9 +90,7 @@ bool LINUX_VL53L1X::checkForDataReady() {
   return (bool)dataReady;
 }
 
-void LINUX_VL53L1X::setTimingBudgetInMs(uint16_t timingBudget) {
-  _device->VL53L1X_SetTimingBudgetInMs(timingBudget);
-}
+void LINUX_VL53L1X::setTimingBudgetInMs(uint16_t timingBudget) { _device->VL53L1X_SetTimingBudgetInMs(timingBudget); }
 
 uint16_t LINUX_VL53L1X::getTimingBudgetInMs() {
   uint16_t timingBudget;
@@ -104,13 +98,9 @@ uint16_t LINUX_VL53L1X::getTimingBudgetInMs() {
   return timingBudget;
 }
 
-void LINUX_VL53L1X::setDistanceModeLong() {
-  _device->VL53L1X_SetDistanceMode(2);
-}
+void LINUX_VL53L1X::setDistanceModeLong() { _device->VL53L1X_SetDistanceMode(2); }
 
-void LINUX_VL53L1X::setDistanceModeShort() {
-  _device->VL53L1X_SetDistanceMode(1);
-}
+void LINUX_VL53L1X::setDistanceModeShort() { _device->VL53L1X_SetDistanceMode(1); }
 
 uint8_t LINUX_VL53L1X::getDistanceMode() {
   uint16_t distanceMode;
@@ -118,9 +108,7 @@ uint8_t LINUX_VL53L1X::getDistanceMode() {
   return distanceMode;
 }
 
-void LINUX_VL53L1X::setIntermeasurementPeriod(uint16_t intermeasurement) {
-  _device->VL53L1X_SetInterMeasurementInMs(intermeasurement);
-}
+void LINUX_VL53L1X::setIntermeasurementPeriod(uint16_t intermeasurement) { _device->VL53L1X_SetInterMeasurementInMs(intermeasurement); }
 
 uint16_t LINUX_VL53L1X::getIntermeasurementPeriod() {
   uint16_t intermeasurement;
@@ -182,9 +170,7 @@ uint8_t LINUX_VL53L1X::getRangeStatus() {
   return temp;
 }
 
-void LINUX_VL53L1X::setOffset(int16_t offset) {
-  _device->VL53L1X_SetOffset(offset);
-}
+void LINUX_VL53L1X::setOffset(int16_t offset) { _device->VL53L1X_SetOffset(offset); }
 
 int16_t LINUX_VL53L1X::getOffset() {
   int16_t temp;
@@ -192,9 +178,7 @@ int16_t LINUX_VL53L1X::getOffset() {
   return temp;
 }
 
-void LINUX_VL53L1X::setXTalk(uint16_t xTalk) {
-  _device->VL53L1X_SetXtalk(xTalk);
-}
+void LINUX_VL53L1X::setXTalk(uint16_t xTalk) { _device->VL53L1X_SetXtalk(xTalk); }
 
 uint16_t LINUX_VL53L1X::getXTalk() {
   uint16_t temp;
@@ -202,10 +186,7 @@ uint16_t LINUX_VL53L1X::getXTalk() {
   return temp;
 }
 
-void LINUX_VL53L1X::setDistanceThreshold(uint16_t lowThresh, uint16_t hiThresh,
-                                         uint8_t window) {
-  _device->VL53L1X_SetDistanceThreshold(lowThresh, hiThresh, window, 1);
-}
+void LINUX_VL53L1X::setDistanceThreshold(uint16_t lowThresh, uint16_t hiThresh, uint8_t window) { _device->VL53L1X_SetDistanceThreshold(lowThresh, hiThresh, window, 1); }
 
 uint16_t LINUX_VL53L1X::getDistanceThresholdWindow() {
   uint16_t temp;
@@ -225,9 +206,7 @@ uint16_t LINUX_VL53L1X::getDistanceThresholdHigh() {
   return temp;
 }
 
-void LINUX_VL53L1X::setROI(uint8_t x, uint8_t y, uint8_t opticalCenter) {
-  _device->VL53L1X_SetROI(x, y, opticalCenter);
-}
+void LINUX_VL53L1X::setROI(uint8_t x, uint8_t y, uint8_t opticalCenter) { _device->VL53L1X_SetROI(x, y, opticalCenter); }
 
 uint16_t LINUX_VL53L1X::getROIX() {
   uint16_t tempX;
@@ -243,9 +222,7 @@ uint16_t LINUX_VL53L1X::getROIY() {
   return tempY;
 }
 
-void LINUX_VL53L1X::setSignalThreshold(uint16_t signalThreshold) {
-  _device->VL53L1X_SetSignalThreshold(signalThreshold);
-}
+void LINUX_VL53L1X::setSignalThreshold(uint16_t signalThreshold) { _device->VL53L1X_SetSignalThreshold(signalThreshold); }
 
 uint16_t LINUX_VL53L1X::getSignalThreshold() {
   uint16_t temp;
@@ -253,9 +230,7 @@ uint16_t LINUX_VL53L1X::getSignalThreshold() {
   return temp;
 }
 
-void LINUX_VL53L1X::setSigmaThreshold(uint16_t sigmaThreshold) {
-  _device->VL53L1X_SetSigmaThreshold(sigmaThreshold);
-}
+void LINUX_VL53L1X::setSigmaThreshold(uint16_t sigmaThreshold) { _device->VL53L1X_SetSigmaThreshold(sigmaThreshold); }
 
 uint16_t LINUX_VL53L1X::getSigmaThreshold() {
   uint16_t temp;
@@ -263,9 +238,7 @@ uint16_t LINUX_VL53L1X::getSigmaThreshold() {
   return temp;
 }
 
-void LINUX_VL53L1X::startTemperatureUpdate() {
-  _device->VL53L1X_StartTemperatureUpdate();
-}
+void LINUX_VL53L1X::startTemperatureUpdate() { _device->VL53L1X_StartTemperatureUpdate(); }
 
 void LINUX_VL53L1X::calibrateOffset(uint16_t targetDistanceInMm) {
   int16_t offset = getOffset();

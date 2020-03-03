@@ -25,3 +25,11 @@ bash users
 export CC=$(pwd)/tools/clang_complete/cc
 export CXX=$(pwd)/tools/clang_complete/g++
 ```
+
+
+### Use Clang format
+
+fish
+```
+git clang-format --commit (git hash-object -t tree /dev/null)
+```

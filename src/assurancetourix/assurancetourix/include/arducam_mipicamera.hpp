@@ -1,16 +1,15 @@
 #ifndef _ARDUCAM_MIPI_CAMERA_H__
 #define _ARDUCAM_MIPI_CAMERA_H__
 
-
 #define FOURCC(a, b, c, d) ((a) | (b << 8) | (c << 16) | (d << 24))
-#define VCOS_ALIGN_DOWN(p,n) (((ptrdiff_t)(p)) & ~((n)-1))
-#define VCOS_ALIGN_UP(p,n) VCOS_ALIGN_DOWN((ptrdiff_t)(p)+(n)-1,(n))
+#define VCOS_ALIGN_DOWN(p, n) (((ptrdiff_t)(p)) & ~((n)-1))
+#define VCOS_ALIGN_UP(p, n) VCOS_ALIGN_DOWN((ptrdiff_t)(p) + (n)-1, (n))
 
 #define IMAGE_ENCODING_I420 FOURCC('I', '4', '2', '0')
 #define IMAGE_ENCODING_JPEG FOURCC('J', 'P', 'E', 'G')
 #define IMAGE_ENCODING_RAW_BAYER FOURCC('R', 'A', 'W', ' ')
 #define IMAGE_ENCODING_BMP FOURCC('B', 'M', 'P', ' ')
-#define IMAGE_ENCODING_PNG FOURCC('P', 'N', 'G',' ')
+#define IMAGE_ENCODING_PNG FOURCC('P', 'N', 'G', ' ')
 
 #define VIDEO_ENCODING_H264 FOURCC('H', '2', '6', '4')
 
@@ -72,94 +71,91 @@
 #define MMAL_BUFFER_HEADER_FLAG_NAL_END (1 << 12)
 /* @} */
 
-
 namespace arducam {
 
 extern "C" {
 
 #include <stdint.h>
 
-
 typedef struct {
-    uint32_t encoding;
-    int quality; // JPEG quality setting (1-100)
+  uint32_t encoding;
+  int quality; // JPEG quality setting (1-100)
 } IMAGE_FORMAT;
 
 /** Describes a rectangle */
 typedef struct {
-    int32_t x;      /**< x coordinate (from left) */
-    int32_t y;      /**< y coordinate (from top) */
-    int32_t width;  /**< width */
-    int32_t height; /**< height */
+  int32_t x;      /**< x coordinate (from left) */
+  int32_t y;      /**< y coordinate (from top) */
+  int32_t width;  /**< width */
+  int32_t height; /**< height */
 } RECTANGLE;
 
 typedef struct {
-    int fullscreen;   // 0 is use previewRect, non-zero to use full screen
-    int opacity;      // Opacity of window - 0 = transparent, 255 = opaque
-    RECTANGLE window; // Destination rectangle for the preview window.
+  int fullscreen;   // 0 is use previewRect, non-zero to use full screen
+  int opacity;      // Opacity of window - 0 = transparent, 255 = opaque
+  RECTANGLE window; // Destination rectangle for the preview window.
 } PREVIEW_PARAMS;
 
-typedef struct
-{
-    uint32_t encoding;         /// Requested codec video encoding (MJPEG or H264)
-    int bitrate;               /// Requested bitrate
-    int intraperiod;           /// Intra-refresh period (key frame rate)
-    int quantisationParameter; /// Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
-    int bInlineHeaders;        /// Insert inline headers to stream (SPS, PPS)
-    int immutableInput;        /// Not working
-    int profile;               /// H264 profile to use for encoding
-    int level;                 /// H264 level to use for encoding
+typedef struct {
+  uint32_t encoding;         /// Requested codec video encoding (MJPEG or H264)
+  int bitrate;               /// Requested bitrate
+  int intraperiod;           /// Intra-refresh period (key frame rate)
+  int quantisationParameter; /// Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
+  int bInlineHeaders;        /// Insert inline headers to stream (SPS, PPS)
+  int immutableInput;        /// Not working
+  int profile;               /// H264 profile to use for encoding
+  int level;                 /// H264 level to use for encoding
 
-    int inlineMotionVectors; /// Encoder outputs inline Motion Vectors
-    int intra_refresh_type;  /// What intra refresh type to use. -1 to not set.
-    int addSPSTiming;        /// 0 or 1
-    int slices;              /// Horizontal slices per frame. Default 1 (off)
+  int inlineMotionVectors; /// Encoder outputs inline Motion Vectors
+  int intra_refresh_type;  /// What intra refresh type to use. -1 to not set.
+  int addSPSTiming;        /// 0 or 1
+  int slices;              /// Horizontal slices per frame. Default 1 (off)
 } VIDEO_ENCODER_STATE;
 
 typedef struct {
-    void *priv; /**< This is private data, please don't change it. */
-    uint8_t *data;
-    uint32_t alloc_size; /**< Allocated size in bytes of payload buffer */
-    uint32_t length;     /**< Number of bytes currently used in the payload buffer (starting
-                                   from offset) */
-    uint32_t flags;      /**< Flags describing properties of a buffer header (see
-                                   \ref bufferheaderflags "Buffer header flags") */
+  void *priv; /**< This is private data, please don't change it. */
+  uint8_t *data;
+  uint32_t alloc_size; /**< Allocated size in bytes of payload buffer */
+  uint32_t length;     /**< Number of bytes currently used in the payload buffer (starting
+                                 from offset) */
+  uint32_t flags;      /**< Flags describing properties of a buffer header (see
+                                 \ref bufferheaderflags "Buffer header flags") */
 
-    int64_t pts;    /**< Presentation timestamp in microseconds. \ref TIME_UNKNOWN
-                                   is used when the pts is unknown. */
-    void *userdata; /**< Field reserved for use by the client */
+  int64_t pts;    /**< Presentation timestamp in microseconds. \ref TIME_UNKNOWN
+                                 is used when the pts is unknown. */
+  void *userdata; /**< Field reserved for use by the client */
 } BUFFER;
 
-struct fract{
-	uint32_t numerator;
-	uint32_t denominator;
+struct fract {
+  uint32_t numerator;
+  uint32_t denominator;
 };
 
 struct format {
-    int mode;
-    int width;
-    int height;
-    uint32_t pixelformat;
-    struct fract frameintervals;
-    const char *description;   /* Description string */
-	uint32_t reserved[4];
+  int mode;
+  int width;
+  int height;
+  uint32_t pixelformat;
+  struct fract frameintervals;
+  const char *description; /* Description string */
+  uint32_t reserved[4];
 };
 
 struct camera_ctrl {
-    int id;
-    const char *desc;
-    int max_value;
-    int min_value;
-    int default_value;
+  int id;
+  const char *desc;
+  int max_value;
+  int min_value;
+  int default_value;
 };
 
 struct camera_interface {
-    int i2c_bus;        // /dev/i2c-0  or /dev/i2c-1
-    int camera_num;     // mipi interface num
-    int sda_pins[2];    // enable sda_pins[camera_num], disable sda_pins[camera_num ? 0 : 1]
-    int scl_pins[2];    // enable scl_pins[camera_num], disable scl_pins[camera_num ? 0 : 1]
-    int shutdown_pins[2];
-    int led_pins[2];
+  int i2c_bus;     // /dev/i2c-0  or /dev/i2c-1
+  int camera_num;  // mipi interface num
+  int sda_pins[2]; // enable sda_pins[camera_num], disable sda_pins[camera_num ? 0 : 1]
+  int scl_pins[2]; // enable scl_pins[camera_num], disable scl_pins[camera_num ? 0 : 1]
+  int shutdown_pins[2];
+  int led_pins[2];
 };
 
 // note The buffer will be automatically released after the callback function ends.
@@ -194,7 +190,6 @@ int arducam_init_camera(CAMERA_INSTANCE *camera_instance);
  @note Some boards have multiple camera interfaces.
  * */
 int arducam_init_camera2(CAMERA_INSTANCE *camera_instance, struct camera_interface cam_interface);
-
 
 /**
  * Set output resolution.
@@ -406,7 +401,7 @@ int arducam_set_control(CAMERA_INSTANCE camera_instance, int ctrl_id, int value)
  * */
 int arducam_get_control(CAMERA_INSTANCE camera_instance, int ctrl_id, int *value);
 
-int arducam_get_gain(CAMERA_INSTANCE camera_instance,int *rgain, int *bgain);
+int arducam_get_gain(CAMERA_INSTANCE camera_instance, int *rgain, int *bgain);
 
 /**
  * Get the resolution supported by the current camera
@@ -529,15 +524,13 @@ BUFFER *arducam_unpack_raw10_to_raw8(uint8_t *buff_in, int width, int height);
 BUFFER *arducam_unpack_raw10_to_raw16(uint8_t *buff_in, int width, int height);
 
 void arducam_manual_set_awb_compensation(uint32_t r_gain, uint32_t b_gain);
-//void arducam_manual_set_awb_compensation(CAMERA_INSTANCE camera_instance, uint32_t r_gain, uint32_t b_gain);
+// void arducam_manual_set_awb_compensation(CAMERA_INSTANCE camera_instance, uint32_t r_gain, uint32_t b_gain);
 
-//void arducam_manual_set_awb_compensation(uint32_t r_gain, uint32_t b_gain);
+// void arducam_manual_set_awb_compensation(uint32_t r_gain, uint32_t b_gain);
 
-
-//int arducam_set_mode(CAMERA_INSTANCE camera_instance, int mode);
-
+// int arducam_set_mode(CAMERA_INSTANCE camera_instance, int mode);
 }
 
-}
+} // namespace arducam
 
 #endif

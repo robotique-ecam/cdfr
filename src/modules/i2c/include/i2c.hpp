@@ -6,16 +6,15 @@
 #include <cstdio>
 #include <string>
 extern "C" {
-  #include <fcntl.h>
-  #include <unistd.h>
-  #include <sys/stat.h>
-  #include <sys/ioctl.h>
-  #include <sys/types.h>
-  #include <linux/i2c.h>
-  #include <linux/i2c-dev.h>
-  #include <i2c/smbus.h>
+#include <fcntl.h>
+#include <i2c/smbus.h>
+#include <linux/i2c-dev.h>
+#include <linux/i2c.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 }
-
 
 class I2C {
 public:
@@ -30,7 +29,6 @@ public:
 private:
   int i2c_fd_;
   std::string filename_;
-
 };
 
 #endif /* SIMULATION */

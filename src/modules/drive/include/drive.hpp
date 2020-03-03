@@ -1,19 +1,17 @@
 #ifndef DRIVE_NODE_HPP
 #define DRIVE_NODE_HPP
 
-
 #ifndef SIMULATION
-  #include "i2c.hpp"
+#include "i2c.hpp"
 #endif
-#include "speedramp.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "speedramp.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 #include <chrono>
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-
 
 #define LEFT 0
 #define RIGHT 1
@@ -60,12 +58,12 @@ private:
     double thetha = 0;
   };
 
-  #ifndef SIMULATION
+#ifndef SIMULATION
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
 
-  #endif
+#endif
 
   // ROS time
   rclcpp::Time time_since_last_sync_;
@@ -79,14 +77,14 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
-  #ifdef USE_TIMER
+#ifdef USE_TIMER
   rclcpp::TimerBase::SharedPtr timer_;
-  #endif /* USE_TIMER */
+#endif /* USE_TIMER */
 
-  #ifdef USE_SPEEDRAMP
+#ifdef USE_SPEEDRAMP
   std::shared_ptr<Speedramp> speedramp_left_;
   std::shared_ptr<Speedramp> speedramp_right_;
-  #endif /* USE_SPEEDRAMP */
+#endif /* USE_SPEEDRAMP */
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
@@ -96,7 +94,6 @@ private:
   double wheel_radius_;
   int max_freq_;
   int speed_resolution_;
-
 
   /* Computed values */
   uint16_t steps_per_turn_;
@@ -138,7 +135,6 @@ private:
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
-
 };
 
 #endif /* DRIVE_NODE_HPP */

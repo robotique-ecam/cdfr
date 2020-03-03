@@ -1,86 +1,90 @@
 #include <assurancetourix.hpp>
 
-
 Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-  #ifdef MIPI_CAMERA
-    RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
-    if ((mode > 6) || (mode < 0)) {
-      RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
-      exit(-1);
-    }
+#ifdef MIPI_CAMERA
+  RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
+  if ((mode > 6) || (mode < 0)) {
+    RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
+    exit(-1);
+  }
 
-    arducam::arducam_init_camera(&camera_instance);
-    arducam::arducam_set_mode(camera_instance, mode);
-    arducam::arducam_reset_control(camera_instance, 0x00980911);
-    arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
-    arducam::arducam_software_auto_white_balance(camera_instance, 1);
-    arducam::arducam_manual_set_awb_compensation( rgain, bgain);
+  arducam::arducam_init_camera(&camera_instance);
+  arducam::arducam_set_mode(camera_instance, mode);
+  arducam::arducam_reset_control(camera_instance, 0x00980911);
+  arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
+  arducam::arducam_software_auto_white_balance(camera_instance, 1);
+  arducam::arducam_manual_set_awb_compensation(rgain, bgain);
 
-  #else
-    _cap.open(_api_id + _camera_id);
-    if (!_cap.isOpened()) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
-      exit(-1);
-    }
-  #endif //MIPI_CAMERA
+#else
+  _cap.open(_api_id + _camera_id);
+  if (!_cap.isOpened()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
+    exit(-1);
+  }
+#endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  if (show_image){
+  if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-    //cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
+    // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
-
 }
-
 
 #ifdef MIPI_CAMERA
 void Assurancetourix::get_image() {
-    arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
-    arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
-	if (mode == 0) {int width = 3280, height = 2464;}
-    else if (mode == 1) {int width = 2592, height = 1944;}
-    else if (mode == 2) {int width = 1920, height = 1080;}
-    else if (mode == 3) {int width = 1640, height = 1232;}
-    else if (mode == 4) {int width = 1640, height = 922;}
-    else if (mode == 5) {int width = 1280, height = 720;}
-    else if (mode == 6) {int width = 640, height = 480;}
-    if (buffer) {
-      width = VCOS_ALIGN_UP(3280, 32);
-      height = VCOS_ALIGN_UP(2464, 16);
-      cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
-      cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
-      arducam::arducam_release_buffer(buffer);
-      cv::flip(*image, *image, -1);
-      _frame = *image;
-      delete image;
-    }
+  arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
+  arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
+  if (mode == 0) {
+    int width = 3280, height = 2464;
+  } else if (mode == 1) {
+    int width = 2592, height = 1944;
+  } else if (mode == 2) {
+    int width = 1920, height = 1080;
+  } else if (mode == 3) {
+    int width = 1640, height = 1232;
+  } else if (mode == 4) {
+    int width = 1640, height = 922;
+  } else if (mode == 5) {
+    int width = 1280, height = 720;
+  } else if (mode == 6) {
+    int width = 640, height = 480;
+  }
+  if (buffer) {
+    width = VCOS_ALIGN_UP(3280, 32);
+    height = VCOS_ALIGN_UP(2464, 16);
+    cv::Mat *image = new cv::Mat(cv::Size(width, (int)(height * 1.5)), CV_8UC1, buffer->data);
+    cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
+    arducam::arducam_release_buffer(buffer);
+    cv::flip(*image, *image, -1);
+    _frame = *image;
+    delete image;
+  }
 }
-#endif //MIPI_CAMERA
-
+#endif // MIPI_CAMERA
 
 void Assurancetourix::init_parameters() {
 
   this->declare_parameter("image.show_image");
   this->get_parameter_or<bool>("image.show_image", show_image, false);
 
-  #ifdef MIPI_CAMERA
-    this->declare_parameter("camera.exposure");
-    this->declare_parameter("camera.rgain");
-    this->declare_parameter("camera.bgain");
-    this->declare_parameter("camera.mode");
-    this->get_parameter_or<int>("camera.exposure", exposure,250);
-    this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
-    this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
-    this->get_parameter_or<int>("camera.mode", mode, 0);
-  #endif
+#ifdef MIPI_CAMERA
+  this->declare_parameter("camera.exposure");
+  this->declare_parameter("camera.rgain");
+  this->declare_parameter("camera.bgain");
+  this->declare_parameter("camera.mode");
+  this->get_parameter_or<int>("camera.exposure", exposure, 250);
+  this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
+  this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
+  this->get_parameter_or<int>("camera.mode", mode, 0);
+#endif
 
-  //declare variables from yml
+  // declare variables from yml
   this->declare_parameter("image.contrast");
   this->declare_parameter("rviz_settings.blue_color_ArUco");
   this->declare_parameter("rviz_settings.yellow_color_ArUco");
@@ -112,9 +116,7 @@ void Assurancetourix::init_parameters() {
   marker.action = visualization_msgs::msg::Marker::ADD;
   marker.lifetime.sec = lifetime_sec;
   marker.lifetime.nanosec = lifetime_nano_sec;
-
 }
-
 
 void Assurancetourix::detect() {
 
@@ -138,11 +140,11 @@ void Assurancetourix::detect() {
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
 
-  #ifdef MIPI_CAMERA
-    get_image();
-  #else
-    _cap.read(_frame);
-  #endif //MIPI_CAMERA
+#ifdef MIPI_CAMERA
+  get_image();
+#else
+  _cap.read(_frame);
+#endif // MIPI_CAMERA
   auto end_camera = std::chrono::high_resolution_clock::now();
 
   cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
@@ -162,7 +164,7 @@ void Assurancetourix::detect() {
   auto end_detection = std::chrono::high_resolution_clock::now();
   auto end_total = std::chrono::high_resolution_clock::now();
 
-  double time_taken_camera  = std::chrono::duration_cast<std::chrono::nanoseconds>(end_camera - start_camera).count();
+  double time_taken_camera = std::chrono::duration_cast<std::chrono::nanoseconds>(end_camera - start_camera).count();
   double time_taken_detection = std::chrono::duration_cast<std::chrono::nanoseconds>(end_detection - start_detection).count();
   double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_total).count();
 
@@ -170,25 +172,22 @@ void Assurancetourix::detect() {
   time_taken_detection *= 1e-9;
   time_taken_total *= 1e-9;
 
-  RCLCPP_INFO(this->get_logger(),"time of camera: %f", time_taken_camera);
-  RCLCPP_INFO(this->get_logger(),"time of detection: %f", time_taken_detection);
-  RCLCPP_INFO(this->get_logger(),"time of total: %f", time_taken_total);
-
-
+  RCLCPP_INFO(this->get_logger(), "time of camera: %f", time_taken_camera);
+  RCLCPP_INFO(this->get_logger(), "time of detection: %f", time_taken_detection);
+  RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
 
   if (show_image) {
     cv::imshow("anotated", _anotated);
-    //cv::imshow("origin", _frame);
+    // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
-  //image_minus_t = raised_contrast;
+  // image_minus_t = raised_contrast;
 }
-
 
 void Assurancetourix::_detect_aruco(Mat img) {
   cv::aruco::detectMarkers(img, _dictionary, _marker_corners, _detected_ids, _parameters, _rejected_candidates);
   if (show_image) {
-    //drawDetectedMarkers on the image (activate only for debug)
+    // drawDetectedMarkers on the image (activate only for debug)
     cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
   }
 }
@@ -208,10 +207,10 @@ void Assurancetourix::_anotate_image(Mat img) {
 
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
-    for(int i=0; i<int(_detected_ids.size()); i++) {
+    for (int i = 0; i < int(_detected_ids.size()); i++) {
 
       if (show_image) {
-        //drawAxis on the image (activate only for debug)
+        // drawAxis on the image (activate only for debug)
         cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
       }
 
@@ -230,13 +229,12 @@ void Assurancetourix::_anotate_image(Mat img) {
       marker.pose.orientation.z = q.z();
       marker.pose.orientation.w = q.w();
 
-      if ( (_detected_ids[i] <= 5) && (1 <= _detected_ids[i]) ){
+      if ((_detected_ids[i] <= 5) && (1 <= _detected_ids[i])) {
         set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
-      }
-      else if ( (_detected_ids[i] <= 10) && (6 <= _detected_ids[i]) ){
+      } else if ((_detected_ids[i] <= 10) && (6 <= _detected_ids[i])) {
         set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);
-      }
-      else {set_vision_for_rviz(default_color_ArUco, game_elements_scale, game_element_type);
+      } else {
+        set_vision_for_rviz(default_color_ArUco, game_elements_scale, game_element_type);
       }
 
       marker.id = _detected_ids[i];
@@ -247,10 +245,9 @@ void Assurancetourix::_anotate_image(Mat img) {
   }
 }
 
-
 Assurancetourix::~Assurancetourix() {
-  #ifdef MIPI_CAMERA
-    arducam::arducam_close_camera(camera_instance);
-  #endif //MIPI_CAMERA
+#ifdef MIPI_CAMERA
+  arducam::arducam_close_camera(camera_instance);
+#endif // MIPI_CAMERA
   RCLCPP_INFO(this->get_logger(), "Assurancetourix node terminated");
 }

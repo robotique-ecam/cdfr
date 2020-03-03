@@ -40,10 +40,10 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include <cstring>
 #include "RangeSensor.hpp"
 #include "i2c.hpp"
 #include "vl53l1_error_codes.hpp"
+#include <cstring>
 
 #define VL53L1X_IMPLEMENTATION_VER_MAJOR 1
 #define VL53L1X_IMPLEMENTATION_VER_MINOR 0
@@ -88,8 +88,7 @@ typedef int8_t VL53L1X_ERROR;
 #define VL53L1_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0 0x008C
 #define RESULT__AMBIENT_COUNT_RATE_MCPS_SD 0x0090
 #define VL53L1_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0 0x0096
-#define VL53L1_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0     \
-  0x0098
+#define VL53L1_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0 0x0098
 #define VL53L1_RESULT__OSC_CALIBRATE_VAL 0x00DE
 #define VL53L1_FIRMWARE__SYSTEM_STATUS 0x00E5
 #define VL53L1_IDENTIFICATION__MODEL_ID 0x010F
@@ -133,8 +132,7 @@ public:
    * GPIO_1 INT
    * @param[in] DevAddr device address, 0x52 by default
    */
-  VL53L1X(I2C* i2c, int pin, int pin_gpio1, uint8_t addr = VL53L1X_DEFAULT_DEVICE_ADDRESS)
-      : RangeSensor(), dev_i2c(i2c), gpio0(pin), gpio1Int(pin_gpio1) {
+  VL53L1X(I2C *i2c, int pin, int pin_gpio1, uint8_t addr = VL53L1X_DEFAULT_DEVICE_ADDRESS) : RangeSensor(), dev_i2c(i2c), gpio0(pin), gpio1Int(pin_gpio1) {
     MyDevice.I2cDevAddr = addr;
     MyDevice.I2cHandle = i2c;
     Device = &MyDevice;
@@ -396,10 +394,7 @@ public:
    * @param   Window detection mode : 0=below, 1=above, 2=out, 3=in
    * @param   IntOnNoTarget = 1 (No longer used - just use 1)
    */
-  VL53L1X_ERROR VL53L1X_SetDistanceThreshold(uint16_t ThreshLow,
-                                             uint16_t ThreshHigh,
-                                             uint8_t Window,
-                                             uint8_t IntOnNoTarget);
+  VL53L1X_ERROR VL53L1X_SetDistanceThreshold(uint16_t ThreshLow, uint16_t ThreshHigh, uint8_t Window, uint8_t IntOnNoTarget);
 
   /**
    * @brief This function returns the window detection mode (0=below; 1=above;
@@ -496,29 +491,22 @@ protected:
   VL53L1X_ERROR VL53L1_RdByte(VL53L1_DEV dev, uint16_t index, uint8_t *data);
   VL53L1X_ERROR VL53L1_RdWord(VL53L1_DEV dev, uint16_t index, uint16_t *data);
   VL53L1X_ERROR VL53L1_RdDWord(VL53L1_DEV dev, uint16_t index, uint32_t *data);
-  VL53L1X_ERROR VL53L1_UpdateByte(VL53L1_DEV dev, uint16_t index,
-                                  uint8_t AndData, uint8_t OrData);
+  VL53L1X_ERROR VL53L1_UpdateByte(VL53L1_DEV dev, uint16_t index, uint8_t AndData, uint8_t OrData);
 
-  VL53L1X_ERROR VL53L1_WriteMulti(VL53L1_DEV Dev, uint16_t index,
-                                  uint8_t *pdata, uint32_t count);
-  VL53L1X_ERROR VL53L1_ReadMulti(VL53L1_DEV Dev, uint16_t index, uint8_t *pdata,
-                                 uint32_t count);
+  VL53L1X_ERROR VL53L1_WriteMulti(VL53L1_DEV Dev, uint16_t index, uint8_t *pdata, uint32_t count);
+  VL53L1X_ERROR VL53L1_ReadMulti(VL53L1_DEV Dev, uint16_t index, uint8_t *pdata, uint32_t count);
 
-  VL53L1X_ERROR VL53L1_I2CWrite(uint8_t dev, uint16_t index, uint8_t *data,
-                                uint16_t number_of_bytes);
-  VL53L1X_ERROR VL53L1_I2CRead(uint8_t dev, uint16_t index, uint8_t *data,
-                               uint16_t number_of_bytes);
+  VL53L1X_ERROR VL53L1_I2CWrite(uint8_t dev, uint16_t index, uint8_t *data, uint16_t number_of_bytes);
+  VL53L1X_ERROR VL53L1_I2CRead(uint8_t dev, uint16_t index, uint8_t *data, uint16_t number_of_bytes);
   VL53L1X_ERROR VL53L1_GetTickCount(uint32_t *ptick_count_ms);
   VL53L1X_ERROR VL53L1_WaitUs(VL53L1_Dev_t *pdev, int32_t wait_us);
   VL53L1X_ERROR VL53L1_WaitMs(VL53L1_Dev_t *pdev, int32_t wait_ms);
 
-  VL53L1X_ERROR VL53L1_WaitValueMaskEx(VL53L1_Dev_t *pdev, uint32_t timeout_ms,
-                                       uint16_t index, uint8_t value,
-                                       uint8_t mask, uint32_t poll_delay_ms);
+  VL53L1X_ERROR VL53L1_WaitValueMaskEx(VL53L1_Dev_t *pdev, uint32_t timeout_ms, uint16_t index, uint8_t value, uint8_t mask, uint32_t poll_delay_ms);
 
 protected:
   /* IO Device */
-  I2C* dev_i2c;
+  I2C *dev_i2c;
   /* IO Buffer */
   uint8_t io_buffer_[VL53L1_MAX_I2C_XFER_SIZE + 2];
   /* Digital out pin */
