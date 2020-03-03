@@ -4,6 +4,7 @@ import sys
 import rclpy
 import time
 import numpy as np
+from gpiozero import Button
 from magic_points import elements
 from rclpy.node import Node
 
@@ -65,18 +66,31 @@ class Robot(Node):
         return msg
 
 
+class Time(py_trees.behaviour.Behaviour):
+    def __init__(self, name: str, duration: float):
+        super().__init__(name=name)
+        self.duration = duration
+
+    def update(self):
+        self.time = time.time() + self.duration
+        return py_trees.common.Status.SUCCESS
+
+
 rclpy.init(args=None)
 robot = Robot()
-timePavillon = time.time() + 5.0
-timeEndOfGame = time.time() + 30.0
+goupille = Button(4)
 
 
 def create_root() -> py_trees.behaviour.Behaviour:
+    def conditionGoupille():
+        return True if not goupille.is_pressed() else False
+
     def conditionEndOfGame():
-        return True if time.time() > timeEndOfGame else False
+        return True if time.time() > timeEndOfGame.time else False
 
     def conditionPavillon():
-        return True if time.time() > timePavillon else False
+        return True if time.time() > timePavillon.time else False
+
     idle = py_trees.behaviours.Success("Idle")
     idle2 = py_trees.behaviours.Success("Idle2")
     move = py_trees_ros.actions.ActionClient(
@@ -86,14 +100,14 @@ def create_root() -> py_trees.behaviour.Behaviour:
         action_goal=robot.getGoalPose(0)
     )
     oneShotPavillon = py_trees.decorators.OneShot(
-        name="OneShot",
+        name="OneShot Pavillon",
         child=idle2
     )
     guardPavillon = py_trees.decorators.EternalGuard(
-            name="Hisser pavillons?",
-            condition=conditionPavillon,
-            child=oneShotPavillon
-        )
+        name="Hisser pavillons?",
+        condition=conditionPavillon,
+        child=oneShotPavillon
+    )
     guardEndOfGame = py_trees.decorators.EternalGuard(
             name="End of game?",
             condition=conditionEndOfGame,
@@ -108,10 +122,28 @@ def create_root() -> py_trees.behaviour.Behaviour:
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[failureIsRunning, move]
     )
-    root = py_trees.composites.Selector(
-        name="Asterix",
-        children=[guardEndOfGame, actions]
+    timeEndOfGame = Time(name="End Of Game Time", duration=30.0)
+    timePavillon = Time(name="Pavillon Time", duration=5.0)
+    time = py_trees.composites.Selector(
+        name="Time",
+        children=[timeEndOfGame, timePavillon]
     )
+    oneShotGoupille = py_trees.decorators.OneShot(
+        name="OneShot Goupille",
+        child=time
+    )
+    asterix = py_trees.composites.Selector(
+        name="Asterix",
+        children=[oneShotGoupille, guardEndOfGame, actions]
+    )
+    guardGoupille = py_trees.decorators.EternalGuard(
+            name="Goupille?",
+            condition=conditionGoupille,
+            child=asterix
+        )
+    root = py_trees.composites.Sequence(
+        name='Root',
+        children=[guardGoupille])
 
     return root
 
