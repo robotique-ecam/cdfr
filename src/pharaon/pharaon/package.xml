@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pharaon</name>
+  <version>0.0.1</version>
+  <description>Pharaon Action Server</description>
+  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
+  <license>ECAM Makers :: CDFR 2020</license>
+
+  <build_depend>pharaon_msgs</build_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -2,11 +2,11 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>asterix</name>
-  <version>0.1.0</version>
+  <version>0.5.0</version>
   <description>Assurancetourix RO2 System</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
 
-  <license>Funtech Makers :: CDFR 2020</license>
+  <license>ECAM Makers :: CDFR 2020</license>
 
   <exec_depend>rclpy</exec_depend>
 

@@ -4,7 +4,8 @@
 *log/*
 *DS_Store
 *.gch
-*.ppm
+*.pgm
+*.urdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
