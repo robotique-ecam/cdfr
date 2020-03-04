@@ -78,6 +78,10 @@ install(DIRECTORY include/
   DESTINATION include/
 )
 
+install(DIRECTORY param/
+  DESTINATION share/${PROJECT_NAME}/param
+)
+
 ################################################################################
 # Macro for ament package
 ################################################################################

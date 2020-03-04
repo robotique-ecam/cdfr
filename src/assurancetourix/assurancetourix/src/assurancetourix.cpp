@@ -35,6 +35,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
+  RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
 
 }
 
@@ -43,16 +44,9 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 void Assurancetourix::get_image() {
     arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
     arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
-	if (mode == 0) {int width = 3280, height = 2464;}
-    else if (mode == 1) {int width = 2592, height = 1944;}
-    else if (mode == 2) {int width = 1920, height = 1080;}
-    else if (mode == 3) {int width = 1640, height = 1232;}
-    else if (mode == 4) {int width = 1640, height = 922;}
-    else if (mode == 5) {int width = 1280, height = 720;}
-    else if (mode == 6) {int width = 640, height = 480;}
     if (buffer) {
-      width = VCOS_ALIGN_UP(3280, 32);
-      height = VCOS_ALIGN_UP(2464, 16);
+      width = VCOS_ALIGN_UP(tmp_width, 32);
+      height = VCOS_ALIGN_UP(tmp_height, 16);
       cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
       cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
       arducam::arducam_release_buffer(buffer);
@@ -78,6 +72,13 @@ void Assurancetourix::init_parameters() {
     this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
     this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
     this->get_parameter_or<int>("camera.mode", mode, 0);
+    if (mode == 0) {int tmp_width = 3280, tmp_height = 2464;}
+    else if (mode == 1) {int tmp_width = 2592, tmp_height = 1944;}
+    else if (mode == 2) {int tmp_width = 1920, tmp_height = 1080;}
+    else if (mode == 3) {int tmp_width = 1640, tmp_height = 1232;}
+    else if (mode == 4) {int tmp_width = 1640, tmp_height = 922;}
+    else if (mode == 5) {int tmp_width = 1280, tmp_height = 720;}
+    else if (mode == 6) {int tmp_width = 640, tmp_height = 480;}
   #endif
 
   //declare variables from yml
@@ -98,13 +99,11 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_ArUco", default_color_ArUco, {120.0, 120.0, 120.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.arrow_scale", arrow_scale, {0.3, 0.05, 0.05});
   this->get_parameter_or<std::vector<double>>("rviz_settings.game_elements_scale", game_elements_scale, {0.07, 0.07, 0.01});
-  this->get_parameter_or<uint>("rviz_settings.robot_type", robot_type, 0);
+  this->get_parameter_or<uint>("rviz_settings.robot_type", robot_type, 2);
   this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
-  this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 5);
+  this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<String>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix/map");
-
-  RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
 
   // initialisation of marker message
   marker.header.frame_id = header_frame_id;
@@ -215,9 +214,9 @@ void Assurancetourix::_anotate_image(Mat img) {
         cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
       }
 
-      marker.pose.position.x = _tvecs[i].operator[](0);
-      marker.pose.position.y = _tvecs[i].operator[](1);
-      marker.pose.position.z = _tvecs[i].operator[](2);
+      marker.pose.position.x = _tvecs[i].operator[](0) - 0.15;
+      marker.pose.position.y = _tvecs[i].operator[](1) + 0.15;
+      marker.pose.position.z = _tvecs[i].operator[](2) - 0.15;
 
       double angle = norm(_rvecs[i]);
       Vec3d axis = _rvecs[i] / angle;

@@ -26,5 +26,7 @@ def generate_launch_description():
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
 
-        Node(package='assurancetourix', node_executable='assurancetourix', output='screen', parameters=[params]),
+        Node(package='assurancetourix', node_executable='assurancetourix', output='screen', parameters=[]),
+
+        Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['1.4', '2', '1', '3.141592654', '0', '-2.35619449', 'map', 'assurancetourix/map']),
     ])

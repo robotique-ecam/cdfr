@@ -37,6 +37,8 @@ private:
   #ifdef MIPI_CAMERA
   arducam::CAMERA_INSTANCE camera_instance;
   void get_image();
+  int tmp_width;
+  int tmp_height;
   #else
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
@@ -51,7 +53,7 @@ private:
 
   double mat_dist_coeffs[1][5] = {{-0.2516882849093723, 0.16911322215886648, -0.026507870194754653, -0.015272988672555004, -0.07677243583649554}};
   double mat_camera_matrix_coeff[3][3] = {{1386.7837474992405, 0.0, 625.7871833868004}, {0.0, 2292.0151491679253, 838.987898863883}, {0.0, 0.0, 1.0}};
-
+  
   cv::Mat _distCoeffs = Mat(5,1, CV_64F, mat_dist_coeffs);
   cv::Mat _cameraMatrix = Mat(3,3, CV_64F, mat_camera_matrix_coeff);
 
@@ -67,8 +69,6 @@ private:
   // Parameters
   int _camera_id;
 
-  int width;
-  int height;
   bool show_image;
   int exposure;
   uint rgain;
@@ -86,6 +86,7 @@ private:
   int lifetime_nano_sec;
   String header_frame_id;
   bool starter_flag;
+
 
 };
 
