@@ -23,6 +23,7 @@ class StrategixActionClient(Node):
 def main(args=None):
     rclpy.init(args=args)
     action_client = StrategixActionClient()
+    rclpy.spin(action_client)
 
 
 if __name__ == '__main__':
