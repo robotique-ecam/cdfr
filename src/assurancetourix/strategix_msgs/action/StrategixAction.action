@@ -1,7 +1,7 @@
-std_msgs/string robot
-std_msgs/string request
-std_msgs/string object
+std_msgs/String robot
+std_msgs/String request
+std_msgs/String object
 ---
-std_msgs/string todo
+std_msgs/String todo
 ---
-std_msgs/string feedback
+std_msgs/String feedback
