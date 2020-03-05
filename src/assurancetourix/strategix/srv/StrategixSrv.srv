@@ -1,5 +1,0 @@
-string robot
-int8 request
-int8 object
----
-string[] todo
