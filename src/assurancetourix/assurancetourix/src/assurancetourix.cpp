@@ -28,11 +28,17 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   #endif //MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
+  coordonate_pub_ = this->create_publisher<geometry_msgs::msg::PointStamped>("coordonate_position_transform", qos);
+
   if (show_image){
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
     //cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
+
+  tf2_ros::Buffer tfBuffer(this->get_clock());
+  tf2_ros::TransformListener tfListener(tfBuffer);
+  //assurancetourix_map_to_map = tfBuffer.lookupTransform("map", header_frame_id, rclcpp::Time(0), rclcpp::Duration(1) );
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
   RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
@@ -103,7 +109,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
   this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
-  this->get_parameter_or<String>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix/map");
+  this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "map/assurancetourix");
 
   // initialisation of marker message
   marker.header.frame_id = header_frame_id;
@@ -111,6 +117,9 @@ void Assurancetourix::init_parameters() {
   marker.action = visualization_msgs::msg::Marker::ADD;
   marker.lifetime.sec = lifetime_sec;
   marker.lifetime.nanosec = lifetime_nano_sec;
+
+  base_frame = "map";
+  coordonate.header.frame_id = base_frame;
 
 }
 
@@ -150,6 +159,7 @@ void Assurancetourix::detect() {
   raised_contrast.copyTo(_anotated);
 
   marker.header.stamp = this->get_clock()->now();
+  tmpStampedPoint.header.stamp = this->get_clock()->now();
 
   marker_pub_->publish(marker);
 
@@ -240,12 +250,58 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       marker.id = _detected_ids[i];
 
+      double x, y;
+      coordonate.header.frame_id = base_frame;
+      tf2::Transform pointFrameId;
+      getTransform(base_frame, header_frame_id, pointFrameId);
+      getPoint(pointFrameId, x, y);
+      coordonate.point.x = x;
+      coordonate.point.y = y,
+      coordonate.point.z = 0;
+
+      coordonate_pub_ -> publish(coordonate);
       marker_pub_->publish(marker);
       RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
   }
 }
 
+bool Assurancetourix::getTransform(const std::string& from, const std::string& to,
+                             tf2::Transform& tf)
+{
+    try {
+        tf2_ros::Buffer tfBuffer(this->get_clock());
+        tf2_ros::TransformListener tfListener(tfBuffer);
+        geometry_msgs::msg::TransformStamped tfs =
+            tfBuffer.lookupTransform(to, from, rclcpp::Time(0));
+        tf2::fromMsg(tfs.transform, tf);
+        return true;
+    }
+    catch (tf2::TransformException &ex) {
+         RCLCPP_INFO(this->get_logger(),"%s", ex.what());
+
+         return false;
+    }
+}
+// Transform a pose from one frame to another
+
+bool Assurancetourix::transformPose(const std::string& from, const std::string& to,
+                              const tf2::Transform& in, tf2::Transform& out)
+{
+    tf2::Transform tf;
+    if (!getTransform(from, to, tf)) {
+        return false;
+    }
+    out = tf * in;
+    return true;
+}
+
+void Assurancetourix::getPoint(const tf2::Transform& tf, double& x, double& y)
+{
+    tf2::Vector3 trans = tf.getOrigin();
+    x = trans.x();
+    y = trans.y();
+}
 
 Assurancetourix::~Assurancetourix() {
   #ifdef MIPI_CAMERA
