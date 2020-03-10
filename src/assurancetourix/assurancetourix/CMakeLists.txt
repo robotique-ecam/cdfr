@@ -21,6 +21,8 @@ find_package(visualization_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 
 ################################################################################
@@ -38,6 +40,8 @@ set(dependencies
   "OpenCV"
   "geometry_msgs"
   "tf2_msgs"
+  "tf2_ros"
+  "tf2_geometry_msgs"
 )
 
 set(EXEC_NAME "assurancetourix")
@@ -76,6 +80,10 @@ install(
 
 install(DIRECTORY include/
   DESTINATION include/
+)
+
+install(DIRECTORY param/
+  DESTINATION share/${PROJECT_NAME}/param
 )
 
 ################################################################################
