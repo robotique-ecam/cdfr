@@ -1,30 +1,25 @@
 #ifndef ONBOARD_VISION_NODE_HPP
 #define ONBOARD_VISION_NODE_HPP
 
-#include <math.h>
-#include <vector>
-#include <chrono>
-#include <string>
-#include <bits/stdc++.h>
+#include "arducam_mipicamera.hpp"
 #include <chrono>
 #include <geometry_msgs/msg/point.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 #include <math.h>
 #include <opencv2/aruco.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
-#include <visualization_msgs/msg/marker.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <geometry_msgs/msg/point.hpp>
-#include <geometry_msgs/msg/point_stamped.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
-#include "arducam_mipicamera.hpp"
-#include <tf2_ros/transform_listener.h>
+#include <string>
+#include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Transform.h>
-#include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <vector>
+#include <visualization_msgs/msg/marker.hpp>
 
 using namespace rclcpp;
 using namespace cv;
@@ -38,11 +33,9 @@ public:
 
 private:
   void init_parameters();
-  bool getTransform(const std::string& from, const std::string& to,
-                      tf2::Transform& tf);
-  bool transformPose(const std::string& from, const std::string& to,
-                       const tf2::Transform& in, tf2::Transform& out);
-  void getPoint(const tf2::Transform& tf, double& x, double& y);
+  bool getTransform(const std::string &from, const std::string &to, tf2::Transform &tf);
+  bool transformPose(const std::string &from, const std::string &to, const tf2::Transform &in, tf2::Transform &out);
+  void getPoint(const tf2::Transform &tf, double &x, double &y);
   void _detect_aruco(Mat img);
   void _anotate_image(Mat img);
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
@@ -52,7 +45,7 @@ private:
   void get_image();
   int tmp_width;
   int tmp_height;
-  #else
+#else
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
 #endif // MIPI_CAMERA
@@ -81,15 +74,15 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
   geometry_msgs::msg::PointStamped coordonate;
-  //geometry_msgs::msg::PointStamped coordonate;
+  // geometry_msgs::msg::PointStamped coordonate;
   geometry_msgs::msg::PointStamped tmpStampedPoint;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr coordonate_pub_;
-  //tf2_ros::Buffer tfBuffer;
-  //tf2_ros::TransformListener listener;
+  // tf2_ros::Buffer tfBuffer;
+  // tf2_ros::TransformListener listener;
 
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
 
-  //tf2_ros::TransformListener tf2_listener = new tf2_ros::TransformListener(tfBuffer);
+  // tf2_ros::TransformListener tf2_listener = new tf2_ros::TransformListener(tfBuffer);
   geometry_msgs::msg::TransformStamped assurancetourix_map_to_map;
 
   // Parameters
