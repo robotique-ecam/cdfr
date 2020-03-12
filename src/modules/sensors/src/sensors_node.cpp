@@ -1,6 +1,5 @@
 #include "sensors.hpp"
 
-
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto sensors_node = std::make_shared<Sensors>();

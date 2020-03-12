@@ -1,19 +1,16 @@
 #ifndef ONBOARD_VISION_NODE_HPP
 #define ONBOARD_VISION_NODE_HPP
 
-#include <math.h>
 #include <chrono>
-#include <rclcpp/rclcpp.hpp>
+#include <math.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
-
-
+#include <rclcpp/rclcpp.hpp>
 
 using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
-
 
 class OnboardVision : public rclcpp::Node {
 public:
@@ -37,7 +34,6 @@ private:
   int _roi_y_min;
   int _roi_x_max;
   int _roi_y_max;
-
 
   void init_parameters();
   void _capture_image();

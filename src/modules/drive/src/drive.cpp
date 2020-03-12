@@ -1,9 +1,7 @@
 #include <drive.hpp>
 
-
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
-
 
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
@@ -12,15 +10,15 @@ Drive::Drive() : Node("drive_node") {
   /* Give variables their initial values */
   init_variables();
 
-  #ifndef SIMULATION
+#ifndef SIMULATION
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
 
-  #ifdef USE_SPEEDRAMP
+#ifdef USE_SPEEDRAMP
   speedramp_left_ = std::make_shared<Speedramp>();
   speedramp_right_ = std::make_shared<Speedramp>();
-  #endif /* USE_SPEEDRAMP */
+#endif /* USE_SPEEDRAMP */
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -31,13 +29,12 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  #ifdef USE_TIMER
+#ifdef USE_TIMER
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
-  #endif
+#endif
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
-
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
@@ -50,11 +47,11 @@ void Drive::init_parameters() {
   this->declare_parameter("microcontroler.max_steps_frequency");
   this->declare_parameter("microcontroler.speedramp_resolution");
 
-  // Get parameters from yaml
-  #ifndef SIMULATION
+// Get parameters from yaml
+#ifndef SIMULATION
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
@@ -64,7 +61,6 @@ void Drive::init_parameters() {
   this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
   this->get_parameter_or<double>("speedramp.accel", accel_, 9.81);
 }
-
 
 void Drive::init_variables() {
   /* Compute initial values */
@@ -77,14 +73,14 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * meters_per_step_;
   min_speed_ = speed_multiplier_ * meters_per_step_;
 
-  #ifdef USE_SPEEDRAMP
+#ifdef USE_SPEEDRAMP
   speedramp_left_->set_acceleration(accel_);
   speedramp_right_->set_acceleration(accel_);
   speedramp_left_->set_delay(0.05);
   speedramp_right_->set_delay(0.05);
   speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
   speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
-  #endif /* SPEEDRAMP */
+#endif /* SPEEDRAMP */
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -92,54 +88,52 @@ void Drive::init_variables() {
   joint_states_.velocity.resize(2, 0.0);
   joint_states_.effort.resize(2, 0.0);
 
-  #ifdef SIMULATION
+#ifdef SIMULATION
   old_cmd_vel_.right = 0;
   old_cmd_vel_.left = 0;
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
 
   time_since_last_sync_ = this->get_clock()->now();
 }
-
 
 int8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
   double abs_velocity = abs(velocity);
   if (abs_velocity >= max_speed_) {
-    return (int8_t) ((velocity<0)?(-1):(1)) * (speed_resolution_ - 1);
+    return (int8_t)((velocity < 0) ? (-1) : (1)) * (speed_resolution_ - 1);
   } else if (abs_velocity < min_speed_) {
     return 0;
   } else {
-    return (int8_t) round(velocity * (speed_resolution_ - 1) / max_speed_) - ((velocity<0)?(1):(0));
+    return (int8_t)round(velocity * (speed_resolution_ - 1) / max_speed_) - ((velocity < 0) ? (1) : (0));
   }
 }
 
-
 void Drive::update_velocity() {
-  #ifdef USE_SPEEDRAMP
+#ifdef USE_SPEEDRAMP
   double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
   double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
-  #else
+#else
   double differential_speed_left = cmd_vel_.left;
   double differential_speed_right = cmd_vel_.right;
-  #endif
+#endif
 
   differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
   differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
 
-  #ifndef SIMULATION
+#ifndef SIMULATION
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t) (this->sign_steps_left?-1:1) * this->i2c->read_word(differential_speed_cmd_.left);
+  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.left);
   this->sign_steps_left = signbit(differential_speed_cmd_.left);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = (int32_t) (this->sign_steps_right?-1:1) * this->i2c->read_word(differential_speed_cmd_.right);
+  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.right);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
-  #else
+#else
   cmd_vel_.right = differential_speed_right;
   cmd_vel_.left = differential_speed_left;
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
 
   previous_time_since_last_sync_ = time_since_last_sync_;
   time_since_last_sync_ = this->get_clock()->now();
@@ -149,7 +143,6 @@ void Drive::update_velocity() {
   update_joint_states();
 }
 
-
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
   cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
   cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
@@ -157,17 +150,16 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   update_velocity();
 }
 
-
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  #ifndef SIMULATION
+#ifndef SIMULATION
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
-  #else
+#else
   differential_speed_.left = old_cmd_vel_.left;
   differential_speed_.right = old_cmd_vel_.right;
 
@@ -175,7 +167,7 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   differential_move_.right = differential_speed_.right * dt;
 
   old_cmd_vel_ = cmd_vel_;
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
 
   instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
   instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (wheel_separation_);
@@ -187,7 +179,6 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.thetha += instantaneous_move_.angular;
 }
-
 
 void Drive::update_odometry() {
   odom_.pose.pose.position.x = odom_pose_.x;
@@ -209,7 +200,6 @@ void Drive::update_odometry() {
   odom_pub_->publish(odom_);
 }
 
-
 void Drive::update_tf() {
   geometry_msgs::msg::TransformStamped odom_tf;
   odom_tf.header = odom_.header;
@@ -228,12 +218,9 @@ void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
   joint_states_.position[LEFT] += attiny_steps_returned_.left * rads_per_step;
   joint_states_.position[RIGHT] += attiny_steps_returned_.right * rads_per_step;
-  joint_states_.velocity[LEFT] =  attiny_steps_returned_.left * rads_per_step / dt;
+  joint_states_.velocity[LEFT] = attiny_steps_returned_.left * rads_per_step / dt;
   joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
 
-
-Drive::~Drive() {
-  RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
-}
+Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }

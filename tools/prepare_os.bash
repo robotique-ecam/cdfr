@@ -42,4 +42,10 @@ sudo chown :i2c /dev/i2c*
 sudo chmod g+rw /dev/i2c*
 sudo usermod -aG i2c $USER
 
+sudo chown :gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
+sudo usermod -aG gpio $USER
+
+pip3 install RPi.GPIO gpiozero
+
 ssh-keygen -t ed25519

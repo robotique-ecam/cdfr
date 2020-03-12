@@ -43,7 +43,18 @@ echo "[38;5;004m                                 /
 print_info "Welcome to Robot Setup Script"
 read -p "Please enter the name of the robot to setup : " robot
 
+if [ $robot = 'asterix' ] || [ $robot = 'obelix' ]; then
 
-print_info "Setting up robot : $robot"
+  print_info "Setting up $robot"
+  xacro tools/xacro/$robot.xacro -o src/$robot/robot/$robot.urdf && colcon build --symlink-install --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
-xacro tools/xacro/$robot.xacro -o src/$robot/robot/$robot.urdf && print_success "Generated URDF for $robot" || print_failure "No such robot"
+elif [ $robot = 'assurancetourix' ]; then
+
+  print_info "Setting up $robot"
+  colcon build --symlink-install --cmake-args ' -DMIPI_CAMERA=ON' --packages-select assurancetourix strategix pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+
+else
+
+  print_failure "No such component"
+
+fi

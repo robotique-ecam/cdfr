@@ -5,11 +5,11 @@
 
 #include <math.h>
 
-
 class Speedramp {
 public:
   void set_speed_limits(double min_value, double max_value) {
-    _min_speed = min_value; _max_speed = max_value;
+    _min_speed = min_value;
+    _max_speed = max_value;
   }
 
   void set_delay(double delay) {
