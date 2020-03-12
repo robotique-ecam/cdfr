@@ -34,6 +34,7 @@ class StrategixActionClient(Node):
         self.get_logger().info('Result: {0}'.format(self.list))
 
 
-rclpy.init()
-strategix_action_client = StrategixActionClient()
-rclpy.spin(strategix_action_client)
+if __name__ == '__main__':
+    rclpy.init()
+    strategix_action_client = StrategixActionClient()
+    rclpy.spin(strategix_action_client)
