@@ -4,7 +4,7 @@ from strategix_msgs.action import StrategixAction
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
-from score import Score
+from strategix.score import Score
 
 
 class StrategixActionServer(Node):

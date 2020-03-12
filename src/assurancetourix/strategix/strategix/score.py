@@ -1,4 +1,4 @@
-from actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
+from strategix.actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
 
 
 class Score:
