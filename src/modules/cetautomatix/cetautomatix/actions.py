@@ -16,17 +16,16 @@ from client import StrategixActionClient
 from nav2_msgs.action import NavigateToPose
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 
-odom_subscriber = OdomSubscriber()
-
 
 class Robot(Node):
-    def __init__(self):
+    def __init__(self, odom_subscriber):
         super().__init__(node_name='robot')
         self.objective = None
+        self.odom_subscriber = odom_subscriber
 
     def best_action(self, list):
         action_coeff_list = []
-        position = odom_subscriber.position
+        position = self.odom_subscriber.position
         # start = timeEndOfGame.time - 100.0
         for action in list:
             for key, value in elements.items():
@@ -73,9 +72,6 @@ class Robot(Node):
         return msg
 
 
-robot = Robot()
-
-
 class Time(py_trees.behaviour.Behaviour):
     def __init__(self, name: str, duration: float):
         super().__init__(name=name)
@@ -100,19 +96,21 @@ class SendToStrategix(py_trees.behaviour.Behaviour):
 
 
 class NewObjective(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str):
+    def __init__(self, name: str, robot):
         super().__init__(name=name)
+        self.robot = robot
 
     def update(self):
-        robot.best_action(strategix_action_client.list)
+        self.robot.best_action(strategix_action_client.list)
         return py_trees.common.Status.SUCCESS
 
 
 rclpy.init(args=None)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
+odom_subscriber = OdomSubscriber()
 strategix_action_client = StrategixActionClient()
+robot = Robot(odom_subscriber)
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:
@@ -138,7 +136,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name="Wait for data",
         clearing_policy=py_trees.common.ClearingPolicy.NEVER
     )
-    create_objective = NewObjective(name='Create new objective')
+    create_objective = NewObjective(name='Create new objective', robot=robot)
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
         children=[askList, waitForData, create_objective, move])
