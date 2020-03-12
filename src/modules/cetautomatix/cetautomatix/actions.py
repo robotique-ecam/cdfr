@@ -11,10 +11,12 @@ import py_trees.console as console
 from magic_points import elements
 from rclpy.node import Node
 from strategix_msgs.action import StrategixAction
-from client import strategix_action_client
-from subscriber import odom_subscriber
+from subscriber import OdomSubscriber
+from client import StrategixActionClient
 from nav2_msgs.action import NavigateToPose
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
+
+odom_subscriber = OdomSubscriber()
 
 
 class Robot(Node):
@@ -109,6 +111,8 @@ class NewObjective(py_trees.behaviour.Behaviour):
 rclpy.init(args=None)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+strategix_action_client = StrategixActionClient()
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:

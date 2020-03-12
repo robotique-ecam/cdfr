@@ -32,9 +32,3 @@ class StrategixActionClient(Node):
     def get_result_callback(self, future):
         self.list = future.result().result.todo
         self.get_logger().info('Result: {0}'.format(self.list))
-
-
-if __name__ == '__main__':
-    rclpy.init()
-    strategix_action_client = StrategixActionClient()
-    rclpy.spin(strategix_action_client)
