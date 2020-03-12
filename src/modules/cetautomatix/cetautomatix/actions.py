@@ -10,7 +10,7 @@ import py_trees_ros
 import py_trees.console as console
 from magic_points import elements
 from rclpy.node import Node
-from src.assurancetourix.strategix.action import StrategixAction
+from strategix_msgs.action import StrategixAction
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav2_msgs.action import NavigateToPose
 from client import strategix_action_client
