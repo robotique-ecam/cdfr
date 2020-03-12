@@ -1,9 +1,9 @@
-##!/usr/bin/env python3
+# !/usr/bin/env python3
 
 import rclpy
-from rclpy.action import ActionClient
 from rclpy.node import Node
-from src.assurancetourix.strategix.action import StrategixAction
+from rclpy.action import ActionClient
+from assurancetourix.strategix.action import StrategixAction
 
 
 class StrategixActionClient(Node):

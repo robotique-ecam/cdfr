@@ -11,10 +11,10 @@ import py_trees.console as console
 from magic_points import elements
 from rclpy.node import Node
 from strategix_msgs.action import StrategixAction
-from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
-from nav2_msgs.action import NavigateToPose
 from client import strategix_action_client
 from subscriber import odom_subscriber
+from nav2_msgs.action import NavigateToPose
+from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 
 
 class Robot(Node):
@@ -29,7 +29,8 @@ class Robot(Node):
         for action in list:
             for key, value in elements.items():
                 if key == action:
-                    distance = np.sqrt((value[0] - position[0])**2 + (value[1] - position[1])**2)
+                    distance = np.sqrt(
+                        (value[0] - position[0])**2 + (value[1] - position[1])**2)
                     coeff_distance = distance * 100 / 3.6
                     action_coeff_list.append((key, coeff_distance))
                     break
@@ -91,7 +92,8 @@ class SendToStrategix(py_trees.behaviour.Behaviour):
         self.object = object
 
     def update(self):
-        strategix_action_client.send_goal(self.sender, self.request, self.object)
+        strategix_action_client.send_goal(
+            self.sender, self.request, self.object)
         return py_trees.common.Status.SUCCESS
 
 
@@ -203,10 +205,10 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     def conditionGoupille():
         return False if GPIO.input(27) else True
     guardGoupille = py_trees.decorators.EternalGuard(
-            name="Goupille?",
-            condition=conditionGoupille,
-            child=asterix
-        )
+        name="Goupille?",
+        condition=conditionGoupille,
+        child=asterix
+    )
 
     """Root of the Tree"""
     root = py_trees.composites.Sequence(

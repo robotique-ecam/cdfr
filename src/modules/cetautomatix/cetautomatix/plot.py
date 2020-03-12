@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import magic_points
+import matplotlib.pyplot as plt
 
 plt.axes()
 border = plt.Rectangle((0, 0), 3, 2, ec='black', fc='w', lw=5)
