@@ -133,7 +133,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     waitForData = py_trees_ros.subscribers.WaitForData(
         topic_name='strategix',
         topic_type=StrategixAction,
-        qos_profile=rclpy.qos.qos_profile_default
+        qos_profile=rclpy.qos.qos_profile_default,
         name="Wait for data",
         clearing_policy=py_trees.common.ClearingPolicy.NEVER
     )
