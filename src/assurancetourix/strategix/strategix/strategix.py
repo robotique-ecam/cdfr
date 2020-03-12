@@ -11,7 +11,7 @@ class StrategixActionServer(Node):
     def __init__(self):
         super().__init__('strategix_action_server')
         self.score = Score()
-        self._action_server = ActionServer(self, StrategixAction, 'strategix', self.execute_callback)
+        self._action_server = ActionServer(self, StrategixAction, '/strategix', self.execute_callback)
 
     def execute_callback(self, goal_handle):
         self.get_logger().info('Executing goal...')
