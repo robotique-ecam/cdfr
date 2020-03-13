@@ -41,6 +41,8 @@ def generate_launch_description():
 
         Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['0.15', '1.0', '0', '0', '0', '0', 'map', 'odom']),
 
+        Node(package='cetautomatix', node_executable='cetautomatix', output='screen'),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/nav2_bringup_launch.py']),
             launch_arguments={

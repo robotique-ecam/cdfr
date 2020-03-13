@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cetautomatix</name>
+  <version>0.0.1</version>
+  <description>Cetautomatix package</description>
+  <maintainer email="maximilien.hirtz@ecam.fr">Max HIRTZ</maintainer>
+  <license>ECAM Makers :: CDFR 2020</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>strategix_msgs</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
