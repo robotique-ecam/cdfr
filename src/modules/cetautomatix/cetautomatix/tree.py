@@ -26,10 +26,12 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         action_name="NavigateToPose",
         action_goal=robot.getGoalPose()
     )
+
     moveSiF = py_trees.decorators.SuccessIsFailure(
         name="Success Is Failure",
         child=move
     )
+
     goal_msg = StrategixAction.Goal()
     goal_msg.sender = ' '
     goal_msg.request = 'todo'
@@ -40,33 +42,44 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         action_goal=goal_msg,
         name='Ask for List',
     )
-    print(dir(askList))
+
+    setattr(askList, 'result_message', [])
+    askList.goal_response_callback = lambda x: (print(x), setattr(askList, 'result_message', x))
+
     create_objective = NewObjective(
         name='Create new objective',
         robot=robot,
         list=askList.result_message
     )
+
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
-        children=[askList, create_objective, move])
+        children=[askList, create_objective, move]
+    )
+
     objective = py_trees.composites.Selector(
         name='Objective',
         children=[moveSiF, new_objective]
     )
 
     """Oneshot Pavillon"""
+
     def conditionPavillon():
         return True if time.time() > timePavillon.time else False
+
     idle2 = py_trees.behaviours.Success("Idle2")
+
     oneShotPavillon = py_trees.decorators.OneShot(
         name="OneShot Pavillon",
         child=idle2
     )
+
     guardPavillon = py_trees.decorators.EternalGuard(
         name="Hisser pavillons?",
         condition=conditionPavillon,
         child=oneShotPavillon
     )
+
     pavillonFiR = py_trees.decorators.FailureIsRunning(
         name="Failure Is Running",
         child=guardPavillon
