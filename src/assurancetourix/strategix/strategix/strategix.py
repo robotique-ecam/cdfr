@@ -4,14 +4,14 @@ from strategix_msgs.action import StrategixAction
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
-from score import Score
+from strategix.score import Score
 
 
 class StrategixActionServer(Node):
     def __init__(self):
         super().__init__('strategix_action_server')
         self.score = Score()
-        self._action_server = ActionServer(self, StrategixAction, 'strategix', self.execute_callback)
+        self._action_server = ActionServer(self, StrategixAction, '/strategix', self.execute_callback)
 
     def execute_callback(self, goal_handle):
         self.get_logger().info('Executing goal...')

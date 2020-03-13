@@ -12,29 +12,29 @@ class Action:
 
 class BonPort(Action):
     def __init__(self, name):
-        super().__init__(self, name)
+        super().__init__(name)
         self.pos = 'Out'
 
 
 class Gobelet(Action):
     def __init__(self, name, color):
-        super().__init__(self, name)
+        super().__init__(name)
         self.color = color
         self.inChenal = False
 
 
 class MancheAir(Action):
     def __init__(self, name):
-        super().__init__(self, name)
+        super().__init__(name)
 
 
 class Pavillon(Action):
     def __init__(self, name):
-        super().__init__(self, name)
+        super().__init__(name)
         self.raised = False
 
 
 class Phare(Action):
     def __init__(self, name):
-        super().__init__(self, name)
+        super().__init__(name)
         self.state = 0
