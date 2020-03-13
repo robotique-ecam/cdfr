@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import py_trees
+
 import time
+import py_trees
 
 
 class Time(py_trees.behaviour.Behaviour):

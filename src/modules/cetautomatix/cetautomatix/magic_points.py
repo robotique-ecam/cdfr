@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+
 """
 High level representation of Points of Interest on CDR2020 Table (to be used in Behavior Trees).
 Points in (x, y, a) for x & y in meters, a in degrees.
 Zones in (x0, y0, x1, y1) for x & y in meters.
 """
+
 
 elements = {
     "ECUEIL_BLEU": (0, 0.4, 180, 0),
