@@ -88,7 +88,7 @@ class Time(py_trees.behaviour.Behaviour):
 
 
 class SendToStrategix(py_trees.behaviour.Behaviour):
-    def __init__(self, strategix_action_client, name: str, request: str, sender=' ', object=' '):
+    def __init__(self, strategix_action_client, name, request, sender='', object=''):
         super().__init__(name=name)
         self.strategix_action_client = strategix_action_client
         self.sender = sender
