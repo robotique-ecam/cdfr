@@ -24,7 +24,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         self.objective = None
-        # self.subscription = self.create_subscription(Odometry, '/odom', self.listener_callback, 10)
+        self.subscription = self.create_subscription(Odometry, '/odom', self.listener_callback, 10)
 
     def listener_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
