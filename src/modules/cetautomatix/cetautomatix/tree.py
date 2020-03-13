@@ -40,6 +40,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         action_goal=goal_msg,
         name='Ask for List',
     )
+    print(dir(askList))
     create_objective = NewObjective(
         name='Create new objective',
         robot=robot,
