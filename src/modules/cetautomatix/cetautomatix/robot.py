@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+
 import numpy as np
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
-from magic_points import elements
+from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 
 

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 
-import rclpy
+
 import time
-import RPi.GPIO as GPIO
+import rclpy
 import py_trees
 import py_trees_ros
-from robot import Robot
-from custom_behaviours import Time, NewObjective
-from strategix_msgs.action import StrategixAction
+import RPi.GPIO as GPIO
+from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
-import faulthandler
+from strategix_msgs.action import StrategixAction
+from cetautomatix.custom_behaviours import Time, NewObjective
 
-faulthandler.enable()
 
 rclpy.init(args=None)
 GPIO.setmode(GPIO.BCM)
