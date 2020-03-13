@@ -1,6 +1,5 @@
 ##!/usr/bin/env python3
 
-import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from strategix_msgs.action import StrategixAction

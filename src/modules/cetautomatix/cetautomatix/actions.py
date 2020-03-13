@@ -11,27 +11,32 @@ import py_trees.console as console
 from magic_points import elements
 from rclpy.node import Node
 from strategix_msgs.action import StrategixAction
-from subscriber import OdomSubscriber
 from client import StrategixActionClient
+from nav_msgs.msg import Odometry
 from nav2_msgs.action import NavigateToPose
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 
 
 class Robot(Node):
-    def __init__(self, odom_subscriber):
+    def __init__(self):
         super().__init__(node_name='robot')
         self.objective = None
-        self.odom_subscriber = odom_subscriber
+        self.subscription = self.create_subscription(
+            Odometry, '/odom', self.listener_callback, 10)
+        self.subscription  # prevent unused variable warning
+
+    def listener_callback(self, msg):
+        self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+        self.get_logger().info('I heard: "%s"' % msg.data)
 
     def best_action(self, list):
         action_coeff_list = []
-        position = self.odom_subscriber.position
         # start = timeEndOfGame.time - 100.0
         for action in list:
             for key, value in elements.items():
                 if key == action:
                     distance = np.sqrt(
-                        (value[0] - position[0])**2 + (value[1] - position[1])**2)
+                        (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
                     coeff_distance = distance * 100 / 3.6
                     action_coeff_list.append((key, coeff_distance))
                     break
@@ -108,9 +113,8 @@ class NewObjective(py_trees.behaviour.Behaviour):
 rclpy.init(args=None)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-odom_subscriber = OdomSubscriber()
 strategix_action_client = StrategixActionClient()
-robot = Robot(odom_subscriber)
+robot = Robot()
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:
