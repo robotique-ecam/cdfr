@@ -86,7 +86,7 @@ void Sensors::receive_distance() {
 
   for(auto sensor : vl53l1x_sensors) {
     vl53l1x_range_msg.header.stamp = this->get_clock()->now();
-    vl53l1x_range_msg.range = (float) sensor->getDistance() / 1000;
+    vl53l1x_range_msg.range = (float) sensor.getDistance() / 1000;
     sensors_pub_->publish(vl53l1x_range_msg);
   }
   #endif /* SIMULATION */
