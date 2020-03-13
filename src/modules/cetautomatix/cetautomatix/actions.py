@@ -24,9 +24,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         self.objective = None
-        self.subscription = self.create_subscription(
-            Odometry, '/odom', self.listener_callback, 10)
-        self.subscription  # prevent unused variable warning
+        # self.subscription = self.create_subscription(Odometry, '/odom', self.listener_callback, 10)
 
     def listener_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
@@ -137,17 +135,17 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name='Ask for List',
         request='todo'
     )
-    waitForData = py_trees_ros.subscribers.WaitForData(
-        topic_name='strategix',
-        topic_type=StrategixAction,
-        qos_profile=rclpy.qos.qos_profile_system_default,
-        name="Wait for data",
-        clearing_policy=py_trees.common.ClearingPolicy.NEVER
-    )
+    # waitForData = py_trees_ros.subscribers.WaitForData(
+    #     topic_name='strategix',
+    #     topic_type=StrategixAction,
+    #     qos_profile=rclpy.qos.qos_profile_system_default,
+    #     name="Wait for data",
+    #     clearing_policy=py_trees.common.ClearingPolicy.NEVER
+    # )
     create_objective = NewObjective(name='Create new objective', robot=robot)
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
-        children=[askList, waitForData, create_objective, move])
+        children=[askList, create_objective, move])
     objective = py_trees.composites.Selector(
         name='Objective',
         children=[moveSiF, new_objective]
