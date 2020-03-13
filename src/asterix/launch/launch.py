@@ -20,6 +20,7 @@ def generate_launch_description():
     urdf = os.path.join(get_package_share_directory('asterix'), 'robot', 'asterix.urdf')
     params = os.path.join(get_package_share_directory('asterix'), 'param', 'asterix.yml')
     map_dir = LaunchConfiguration('map', default=os.path.join(get_package_share_directory('assurancetourix'), 'map', 'map.yml'))
+    bt_xml_file = LaunchConfiguration('bt_xml_file', default=os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behaviour_trees', 'navigate_w_replanning.xml'))
 
     return launch.LaunchDescription([
         DeclareLaunchArgument(
@@ -45,6 +46,7 @@ def generate_launch_description():
             launch_arguments={
                 'map': map_dir,
                 'use_sim_time': use_sim_time,
+                'bt_xml_file': bt_xml_file,
                 'params_file': params}.items(),
         )
     ])
