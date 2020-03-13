@@ -10,7 +10,6 @@ import py_trees_ros
 import py_trees.console as console
 from magic_points import elements
 from rclpy.node import Node
-from strategix_msgs.action import StrategixAction
 from client import StrategixActionClient
 from nav_msgs.msg import Odometry
 from nav2_msgs.action import NavigateToPose
@@ -89,14 +88,15 @@ class Time(py_trees.behaviour.Behaviour):
 
 
 class SendToStrategix(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str, request: str, sender=' ', object=' '):
+    def __init__(self, strategix_action_client, name: str, request: str, sender=' ', object=' '):
         super().__init__(name=name)
+        self.strategix_action_client = strategix_action_client
         self.sender = sender
         self.request = request
         self.object = object
 
     def update(self):
-        strategix_action_client.send_goal(
+        self.strategix_action_client.send_goal(
             self.sender, self.request, self.object)
         return py_trees.common.Status.SUCCESS
 
@@ -133,15 +133,9 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
     askList = SendToStrategix(
         name='Ask for List',
+        strategix_action_client=strategix_action_client,
         request='todo'
     )
-    # waitForData = py_trees_ros.subscribers.WaitForData(
-    #     topic_name='strategix',
-    #     topic_type=StrategixAction,
-    #     qos_profile=rclpy.qos.qos_profile_system_default,
-    #     name="Wait for data",
-    #     clearing_policy=py_trees.common.ClearingPolicy.NEVER
-    # )
     create_objective = NewObjective(name='Create new objective', robot=robot)
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
