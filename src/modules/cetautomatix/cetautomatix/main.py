@@ -12,7 +12,7 @@ def main():
     root = t.create_tree()
     tree = py_trees_ros.trees.BehaviourTree(
         root=root,
-        unicode_tree_debug=True
+        unicode_tree_debug=False
     )
     try:
         tree.setup(timeout=15.0)
