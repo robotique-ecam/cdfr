@@ -15,6 +15,9 @@ from client import StrategixActionClient
 from nav_msgs.msg import Odometry
 from nav2_msgs.action import NavigateToPose
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
+import faulthandler
+
+faulthandler.enable()
 
 
 class Robot(Node):
