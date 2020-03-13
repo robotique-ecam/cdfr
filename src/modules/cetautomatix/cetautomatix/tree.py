@@ -44,7 +44,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     setattr(askList, 'result_message', [])
-    askList.goal_response_callback = lambda x: (print(x), setattr(askList, 'result_message', x))
+    askList.goal_response_callback = lambda x: setattr(askList.result(), 'result_message', x)
 
     create_objective = NewObjective(
         name='Create new objective',
