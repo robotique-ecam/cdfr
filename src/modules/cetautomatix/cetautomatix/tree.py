@@ -27,9 +27,25 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         action_goal=robot.getGoalPose()
     )
 
+    def conditionMove():
+        return False if robot.objective is None else True
+
+    guardMove = py_trees.decorators.EternalGuard(
+        name="No objective?",
+        condition=conditionMove,
+        child=move
+    )
+
     moveSiF = py_trees.decorators.SuccessIsFailure(
         name="Success Is Failure",
-        child=move
+        child=guardMove
+    )
+
+    move2 = py_trees_ros.actions.ActionClient(
+        name="Move2",
+        action_type=NavigateToPose,
+        action_name="NavigateToPose",
+        action_goal=robot.getGoalPose()
     )
 
     goal_msg = StrategixAction.Goal()
@@ -54,7 +70,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
 
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
-        children=[askList, create_objective, move]
+        children=[askList, create_objective, move2]
     )
 
     objective = py_trees.composites.Selector(
@@ -103,17 +119,22 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     """Setup timers needed for the tree only when Goupille is activated"""
+
     timeEndOfGame = Time(name="End Of Game Time", duration=100.0)
+
     timePavillon = Time(name="Pavillon Time", duration=95.0)
+
     timeSetup = py_trees.composites.Parallel(
         name="Time",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[timeEndOfGame, timePavillon]
     )
+
     oneShotGoupille = py_trees.decorators.OneShot(
         name="OneShot Goupille",
         child=timeSetup
     )
+
     goupilleSiF = py_trees.decorators.SuccessIsFailure(
         name="Success Is Failure",
         child=oneShotGoupille
@@ -126,8 +147,10 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     """Goupille Guard"""
+
     def conditionGoupille():
         return False if GPIO.input(27) else True
+
     guardGoupille = py_trees.decorators.EternalGuard(
         name="Goupille?",
         condition=conditionGoupille,
