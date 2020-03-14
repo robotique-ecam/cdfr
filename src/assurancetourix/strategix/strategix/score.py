@@ -3,13 +3,13 @@ from strategix.actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
 
 class Score:
     def __init__(self):
-        self.mancheAir1 = MancheAir("MancheAir1")
-        self.mancheAir2 = MancheAir("MancheAir2")
-        self.gobelet1 = Gobelet("Gobelet1", 'V')
-        self.gobelet2 = Gobelet("Gobelet2", 'V')
-        self.gobelet3 = Gobelet("Gobelet3", 'R')
-        self.gobelet4 = Gobelet("Gobelet4", 'R')
-        self.phare = Phare("Phare")
+        self.mancheAir1 = MancheAir("MANCHE1")
+        self.mancheAir2 = MancheAir("MANCHE2")
+        self.gobelet1 = Gobelet("GOB1", 'V')
+        self.gobelet2 = Gobelet("GOB2", 'V')
+        self.gobelet3 = Gobelet("GOB3", 'R')
+        self.gobelet4 = Gobelet("GOB4", 'R')
+        self.phare = Phare("PHARE")
         self.bonPortGros = BonPort("BonPortGros")
         self.bonPortPetit = BonPort("BonPortPetit")
         self.pavillon = Pavillon("Pavillon")
