@@ -1,9 +1,8 @@
 <?xml version="1.0" ?>
 
-<robot name="$(arg robot)" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="${robot}" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:arg name="robot" default="robot"/>
-  <xacro:arg name="tf_prefix" default="$(arg robot)/"/>
+  <xacro:arg name="tf_prefix" default="${robot}/"/>
 
   <xacro:include filename="colors.xacro"/>
   <xacro:include filename="inertias.xacro"/>
