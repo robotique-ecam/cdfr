@@ -5,15 +5,17 @@
   <xacro:include filename="colors.xacro"/>
   <xacro:include filename="inertias.xacro"/>
 
-  <link name="base_link"/>
+  <xacro:arg name="tf_prefix" default=""/>
 
-  <joint name="base_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="robotbase"/>
+  <link name="$(arg tf_prefix)base_link"/>
+
+  <joint name="$(arg tf_prefix)base_joint" type="fixed">
+    <parent link="$(arg tf_prefix)base_link"/>
+    <child link="$(arg tf_prefix)robotbase"/>
     <origin xyz="0.0 0.0 0.16" rpy="0 0 0"/>
   </joint>
 
-  <link name="robotbase">
+  <link name="$(arg tf_prefix)robotbase">
     <xacro:box_inertia m="4" w="0.2" h="0.26" d="0.32"/>
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
@@ -25,23 +27,22 @@
 
     <collision>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <geometry>
-          <box size="0.25 0.30 0.35"/>
-        </geometry>
+      <geometry>
+        <box size="0.25 0.30 0.35"/>
+      </geometry>
     </collision>
 
   </link>
 
-
-  <joint name="wheel_left_joint" type="continuous">
-    <parent link="robotbase"/>
-    <child link="wheel_left_link"/>
+  <joint name="$(arg tf_prefix)wheel_left_joint" type="continuous">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)wheel_left_link"/>
     <origin xyz="0.0 0.13 -0.13" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
-  <link name="wheel_left_link">
+  <link name="$(arg tf_prefix)wheel_left_link">
     <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
@@ -52,15 +53,15 @@
     </visual>
   </link>
 
-  <joint name="wheel_right_joint" type="continuous">
-    <parent link="robotbase"/>
-    <child link="wheel_right_link"/>
+  <joint name="$(arg tf_prefix)wheel_right_joint" type="continuous">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)wheel_right_link"/>
     <origin xyz="0.0 -0.13 -0.13" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
-  <link name="wheel_right_link">
+  <link name="$(arg tf_prefix)wheel_right_link">
     <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
@@ -71,13 +72,13 @@
     </visual>
   </link>
 
-  <joint name="sensor_front_left_joint" type="fixed">
-    <parent link="robotbase"/>
-    <child link="sensor_front_left"/>
+  <joint name="$(arg tf_prefix)sensor_front_left_joint" type="fixed">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)sensor_front_left"/>
     <origin xyz="0.096 0.1 0.05" rpy="0 0 0"/>
   </joint>
 
-  <link name="sensor_front_left">
+  <link name="$(arg tf_prefix)sensor_front_left">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -87,13 +88,13 @@
     </visual>
   </link>
 
-  <joint name="sensor_front_right_joint" type="fixed">
-    <parent link="robotbase"/>
-    <child link="sensor_front_right"/>
+  <joint name="$(arg tf_prefix)sensor_front_right_joint" type="fixed">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)sensor_front_right"/>
     <origin xyz="0.096 -0.1 0.05" rpy="0 0 0"/>
   </joint>
 
-  <link name="sensor_front_right">
+  <link name="$(arg tf_prefix)sensor_front_right">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -103,13 +104,12 @@
     </visual>
   </link>
 
-  <joint name="sensor_back_left_joint" type="fixed">
-    <parent link="robotbase"/>
-    <child link="sensor_back_left"/>
-    <origin xyz="-0.096 0.1 0.05" rpy="0 0 3.14159"/>
+  <joint name="$(arg tf_prefix)sensor_back_left_joint" type="fixed">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)sensor_back_left"/>
   </joint>
 
-  <link name="sensor_back_left">
+  <link name="$(arg tf_prefix)sensor_back_left">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -119,13 +119,13 @@
     </visual>
   </link>
 
-  <joint name="sensor_back_right_joint" type="fixed">
-    <parent link="robotbase"/>
-    <child link="sensor_back_right"/>
+  <joint name="$(arg tf_prefix)sensor_back_right_joint" type="fixed">
+    <parent link="$(arg tf_prefix)robotbase"/>
+    <child link="$(arg tf_prefix)sensor_back_right"/>
     <origin xyz="-0.096 -0.1 0.05" rpy="0 0 3.14159"/>
   </joint>
 
-  <link name="sensor_back_right">
+  <link name="$(arg tf_prefix)sensor_back_right">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
