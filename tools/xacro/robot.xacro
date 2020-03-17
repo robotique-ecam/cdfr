@@ -43,11 +43,11 @@
   </joint>
 
   <link name="$(arg tf_prefix)wheel_left_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.04"/>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
       </geometry>
       <material name="dark"/>
     </visual>
@@ -62,11 +62,11 @@
   </joint>
 
   <link name="$(arg tf_prefix)wheel_right_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.04"/>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
       </geometry>
       <material name="dark"/>
     </visual>

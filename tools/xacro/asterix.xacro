@@ -4,9 +4,12 @@
 
   <xacro:property name="robot" value="asterix"/>
 
-  <xacro:property name="robotbase_lenght" value="0.2"/>
-  <xacro:property name="robotbase_width" value="0.26"/>
+  <xacro:property name="robotbase_lenght" value="0.18"/>
+  <xacro:property name="robotbase_width" value="0.315"/>
   <xacro:property name="robotbase_height" value="0.32"/>
+
+  <xacro:property name="wheel_radius" value=".0615"/>
+  <xacro:property name="wheel_width" value=".02"/>
 
   <xacro:include filename="robot.xacro"/>
 
