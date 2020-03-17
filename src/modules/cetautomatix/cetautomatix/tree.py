@@ -49,8 +49,13 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name='Ask for List',
     )
 
+    def strategix_result_callback(arg):
+        todo = arg.result().result.todo
+        setattr(askList, 'result_message', todo)
+        print("Strategix said", todo, flush=True)
+
     setattr(askList, 'result_message', [])
-    askList.get_result_callback = lambda x: setattr(askList, 'result_message', x.result().result.todo)
+    askList.get_result_callback = strategix_result_callback
 
     create_objective = NewObjective(
         name='Create new objective',
