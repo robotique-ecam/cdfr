@@ -9,7 +9,7 @@ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo ap
 
 sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
-sudo apt update && sudo apt install -y ros-eloquent-desktop i3 xinit i2c-tools libi2c-dev git lxterminal python3-argcomplete python3-colcon-common-extensions ros-eloquent-launch-testing ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs v4l-utils
+sudo apt update && sudo apt install -y ros-eloquent-desktop python3-rpi.gpio i3 xinit i2c-tools libi2c-dev git lxterminal python3-argcomplete python3-colcon-common-extensions ros-eloquent-launch-testing ros-eloquent-xacro ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs v4l-utils ros-eloquent-py-trees-ros-viewer ros-eloquent-py-trees-ros
 
 sudo curl -L --output /usr/bin/rpi-update https://raw.githubusercontent.com/Hexxeh/rpi-update/master/rpi-update && sudo chmod +x /usr/bin/rpi-update
 
@@ -42,10 +42,10 @@ sudo chown :i2c /dev/i2c*
 sudo chmod g+rw /dev/i2c*
 sudo usermod -aG i2c $USER
 
+sudo groupadd gpio
+sudo chmod g+rw /dev/gpiomem
 sudo chown :gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
 sudo usermod -aG gpio $USER
-
-pip3 install RPi.GPIO gpiozero
 
 ssh-keygen -t ed25519

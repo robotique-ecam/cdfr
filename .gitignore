@@ -23,8 +23,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -111,3 +109,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.pio
+*.gcc-flags.json
+*.clang_complete
