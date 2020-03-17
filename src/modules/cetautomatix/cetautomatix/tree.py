@@ -5,7 +5,13 @@ import time
 import rclpy
 import py_trees
 import py_trees_ros
-import RPi.GPIO as GPIO
+from pprint import pprint
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    from cetautomatix.utils.simulation import GPIOSim
+    print("Not running on RPI. Fallback to simulation !!!", flush=True)
+    GPIO = GPIOSim()
 from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
 from strategix_msgs.action import StrategixAction
@@ -44,7 +50,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     setattr(askList, 'result_message', [])
-    askList.goal_response_callback = lambda x: setattr(askList.result(), 'result_message', x)
+    askList.get_result_callback = lambda x: setattr(askList, 'result_message', x.result().result.todo)
 
     create_objective = NewObjective(
         name='Create new objective',
@@ -62,8 +68,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         children=[moveSiF, new_objective]
     )
 
-    """Oneshot Pavillon"""
-
+    # Oneshot Pavillon
     def conditionPavillon():
         return True if time.time() > timePavillon.time else False
 
@@ -85,14 +90,14 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         child=guardPavillon
     )
 
-    """Actions"""
+    # Actions
     actions = py_trees.composites.Parallel(
         name="Actions",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[pavillonFiR, objective]
     )
 
-    """Guard End of Game"""
+    # Guard End of Game
     def conditionEndOfGame():
         return True if time.time() > timeEndOfGame.time else False
     idle = py_trees.behaviours.Success("Idle")
@@ -102,7 +107,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         child=idle
     )
 
-    """Setup timers needed for the tree only when Goupille is activated"""
+    # Setup timers needed for the tree only when Goupille is activated
     timeEndOfGame = Time(name="End Of Game Time", duration=100.0)
     timePavillon = Time(name="Pavillon Time", duration=95.0)
     timeSetup = py_trees.composites.Parallel(
@@ -119,13 +124,13 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         child=oneShotGoupille
     )
 
-    """Asterix Root"""
+    # Asterix Root
     asterix = py_trees.composites.Selector(
         name="Asterix",
         children=[goupilleSiF, guardEndOfGame, actions]
     )
 
-    """Goupille Guard"""
+    # Goupille Guard
     def conditionGoupille():
         return False if GPIO.input(27) else True
     guardGoupille = py_trees.decorators.EternalGuard(
@@ -134,7 +139,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         child=asterix
     )
 
-    """Root of the Tree"""
+    # Root of the Tree
     root = py_trees.composites.Sequence(
         name='Root',
         children=[guardGoupille]
