@@ -1,3 +1,5 @@
 string sender
+string request
 string action
 ---
+bool success true

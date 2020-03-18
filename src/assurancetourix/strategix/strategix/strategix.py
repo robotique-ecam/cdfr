@@ -13,18 +13,26 @@ class StrategixActionServer(Node):
         self.score = Score()
         self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
+        self.get_logger().info("Strategix is ready")
 
     def available_callback(self, request, response):
         response.available = self.score.todoList
+        self.get_logger().info("GET %s" % (request.sender))
         return response
 
     def action_callback(self, request, response):
-        if request.request == 'preempt':
-            self.score.preempt(request.action)
-        elif request.request == 'drop':
-            self.score.release(request.action)
-        elif request.request == 'complete':
-            self.score.finish(request.action)
+        try:
+            if request.request == 'PREEMPT':
+                response.success = self.score.preempt(request.action)
+            elif request.request == 'DROP':
+                response.success = self.score.release(request.action)
+            elif request.request == 'CONFIRM':
+                response.success = self.score.finish(request.action)
+            else:
+                raise BaseException
+            self.get_logger().info("%s %s %s" % (request.sender, request.request, request.action))
+        except BaseException:
+            response.success = False
         return response
 
 

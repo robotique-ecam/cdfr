@@ -51,13 +51,16 @@ class Score:
         self.todoList.remove(action)
         self.wipList.append(action)
         self.updateScore()
+        return True
 
     def release(self, action):
         self.wipList.remove(action)
         self.todoList.append(action)
         self.updateScore()
+        return True
 
     def finish(self, action):
         self.wipList.remove(action)
         self.doneList.append(action)
         self.updateScore()
+        return True
