@@ -2,20 +2,20 @@
 
 <robot name="${robot}" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:arg name="tf_prefix" default="${robot}/"/>
+  <xacro:property name="tf_prefix" value="${robot}/"/>
 
   <xacro:include filename="colors.xacro"/>
   <xacro:include filename="inertias.xacro"/>
 
-  <link name="$(arg tf_prefix)base_link"/>
+  <link name="${tf_prefix}base_link"/>
 
-  <joint name="$(arg tf_prefix)base_joint" type="fixed">
-    <parent link="$(arg tf_prefix)base_link"/>
-    <child link="$(arg tf_prefix)robotbase"/>
+  <joint name="${tf_prefix}base_joint" type="fixed">
+    <parent link="${tf_prefix}base_link"/>
+    <child link="${tf_prefix}robotbase"/>
     <origin xyz="0.0 0.0 0.16" rpy="0 0 0"/>
   </joint>
 
-  <link name="$(arg tf_prefix)robotbase">
+  <link name="${tf_prefix}robotbase">
     <xacro:box_inertia m="4" w="${robotbase_lenght}" h="${robotbase_width}" d="${robotbase_height}"/>
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
@@ -34,16 +34,16 @@
 
   </link>
 
-  <joint name="$(arg tf_prefix)wheel_left_joint" type="continuous">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)wheel_left_link"/>
+  <joint name="${tf_prefix}wheel_left_joint" type="continuous">
+    <parent link="${tf_prefix}robotbase"/>
+    <child link="${tf_prefix}wheel_left_link"/>
     <origin xyz="0.0 ${robotbase_width/2} -${robotbase_width/2}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
-  <link name="$(arg tf_prefix)wheel_left_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+  <link name="${tf_prefix}wheel_left_link">
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
@@ -53,16 +53,16 @@
     </visual>
   </link>
 
-  <joint name="$(arg tf_prefix)wheel_right_joint" type="continuous">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)wheel_right_link"/>
+  <joint name="${tf_prefix}wheel_right_joint" type="continuous">
+    <parent link="${tf_prefix}robotbase"/>
+    <child link="${tf_prefix}wheel_right_link"/>
     <origin xyz="0.0 -${robotbase_width/2} -${robotbase_width/2}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
   </joint>
 
-  <link name="$(arg tf_prefix)wheel_right_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+  <link name="${tf_prefix}wheel_right_link">
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
