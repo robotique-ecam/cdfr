@@ -11,14 +11,14 @@ from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
-        self.objective = None
+        self.objective = "ARUCO42"
         self.subscription = self.create_subscription(Odometry, '/odom', self.listener_callback, 10)
 
     def listener_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
         self.get_logger().info('I heard: "%s"' % msg.data)
 
-    def best_action(self, list):
+    def compute_best_action(self, list):
         action_coeff_list = []
         # start = timeEndOfGame.time - 100.0
         for action in list:
@@ -52,15 +52,13 @@ class Robot(Node):
 
     def getGoalPose(self):
         msg = NavigateToPose_Goal()
-        for key, value in elements.items():
-            if key == self.objective:
-                msg.pose.pose.position.z = 0.0
-                msg.pose.pose.position.x = float(value[0])
-                msg.pose.pose.position.y = float(value[1])
-                q = self.euler_to_quaternion(float(value[2]), 0, 0)
-                msg.pose.pose.orientation.x = q[0]
-                msg.pose.pose.orientation.y = q[1]
-                msg.pose.pose.orientation.z = q[2]
-                msg.pose.pose.orientation.w = q[3]
-                break
+        value = elements[self.objective]
+        msg.pose.pose.position.z = 0.0
+        msg.pose.pose.position.x = value[0]
+        msg.pose.pose.position.y = value[1]
+        q = self.euler_to_quaternion(value[2] if value[2] is not None else 0, 0, 0)
+        msg.pose.pose.orientation.x = q[0]
+        msg.pose.pose.orientation.y = q[1]
+        msg.pose.pose.orientation.z = q[2]
+        msg.pose.pose.orientation.w = q[3]
         return msg

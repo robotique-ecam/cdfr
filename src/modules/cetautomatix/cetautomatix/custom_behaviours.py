@@ -22,5 +22,6 @@ class NewObjective(py_trees.behaviour.Behaviour):
         self.list = list
 
     def update(self):
-        self.robot.best_action(self.list)
+        self.robot.compute_best_action(self.list)
+        print("Best action is", self.robot.objective, flush=True)
         return py_trees.common.Status.SUCCESS

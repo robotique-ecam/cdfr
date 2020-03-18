@@ -1,7 +1,0 @@
-string sender
-string request
-string object
----
-string[] todo
----
-string feedback

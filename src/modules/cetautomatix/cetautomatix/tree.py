@@ -5,7 +5,6 @@ import time
 import rclpy
 import py_trees
 import py_trees_ros
-from pprint import pprint
 try:
     import RPi.GPIO as GPIO
 except ImportError:
@@ -27,31 +26,19 @@ robot = Robot()
 def create_tree() -> py_trees.behaviour.Behaviour:
     """Give objective & go to this objective"""
     move = py_trees_ros.actions.ActionClient(
-        name="Move",
+        name="NavigateToPose",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
         action_goal=robot.getGoalPose()
     )
 
     def conditionMove():
-        return False if robot.objective is None else True
+        return True if robot.objective is None else False
 
     guardMove = py_trees.decorators.EternalGuard(
-        name="No objective?",
+        name="Need objective ?",
         condition=conditionMove,
         child=move
-    )
-
-    moveSiF = py_trees.decorators.SuccessIsFailure(
-        name="Success Is Failure",
-        child=guardMove
-    )
-
-    move2 = py_trees_ros.actions.ActionClient(
-        name="Move2",
-        action_type=NavigateToPose,
-        action_name="NavigateToPose",
-        action_goal=robot.getGoalPose()
     )
 
     goal_msg = StrategixAction.Goal()
@@ -81,12 +68,12 @@ def create_tree() -> py_trees.behaviour.Behaviour:
 
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
-        children=[askList, create_objective, move2]
+        children=[askList, create_objective]
     )
 
     objective = py_trees.composites.Selector(
         name='Objective',
-        children=[moveSiF, new_objective]
+        children=[guardMove, new_objective]
     )
 
     # Oneshot Pavillon
@@ -129,12 +116,12 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     # Setup timers needed for the tree only when Goupille is activated
-    timeEndOfGame = Time(name="End Of Game Time", duration=100.0)
+    timeEndOfGame = Time(name="End Of Game Timer", duration=100.0)
 
-    timePavillon = Time(name="Pavillon Time", duration=95.0)
+    timePavillon = Time(name="Pavillon Timer", duration=95.0)
 
     timeSetup = py_trees.composites.Parallel(
-        name="Time",
+        name="Setup Timers",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[timeEndOfGame, timePavillon]
     )
