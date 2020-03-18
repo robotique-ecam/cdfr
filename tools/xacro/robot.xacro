@@ -6,6 +6,7 @@
 
   <xacro:include filename="colors.xacro"/>
   <xacro:include filename="inertias.xacro"/>
+  <xacro:include filename="sensors.xacro"/>
 
   <link name="$(arg tf_prefix)base_link"/>
 
@@ -43,11 +44,11 @@
   </joint>
 
   <link name="$(arg tf_prefix)wheel_left_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.04"/>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
       </geometry>
       <material name="dark"/>
     </visual>
@@ -62,77 +63,20 @@
   </joint>
 
   <link name="$(arg tf_prefix)wheel_right_link">
-    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.01"/>
+    <xacro:cylinder_inertia m="0.2" r="${wheel_radius}" h="${wheel_width}"/>
     <visual>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.04"/>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
       </geometry>
       <material name="dark"/>
     </visual>
   </link>
 
-  <joint name="$(arg tf_prefix)sensor_front_left_joint" type="fixed">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)sensor_front_left"/>
-    <origin xyz="0.096 0.1 0.05" rpy="0 0 0"/>
-  </joint>
-
-  <link name="$(arg tf_prefix)sensor_front_left">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.05 0.02"/>
-      </geometry>
-      <material name="white"/>
-    </visual>
-  </link>
-
-  <joint name="$(arg tf_prefix)sensor_front_right_joint" type="fixed">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)sensor_front_right"/>
-    <origin xyz="0.096 -0.1 0.05" rpy="0 0 0"/>
-  </joint>
-
-  <link name="$(arg tf_prefix)sensor_front_right">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.05 0.02"/>
-      </geometry>
-      <material name="white"/>
-    </visual>
-  </link>
-
-  <joint name="$(arg tf_prefix)sensor_back_left_joint" type="fixed">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)sensor_back_left"/>
-  </joint>
-
-  <link name="$(arg tf_prefix)sensor_back_left">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.05 0.02"/>
-      </geometry>
-      <material name="white"/>
-    </visual>
-  </link>
-
-  <joint name="$(arg tf_prefix)sensor_back_right_joint" type="fixed">
-    <parent link="$(arg tf_prefix)robotbase"/>
-    <child link="$(arg tf_prefix)sensor_back_right"/>
-    <origin xyz="-0.096 -0.1 0.05" rpy="0 0 3.14159"/>
-  </joint>
-
-  <link name="$(arg tf_prefix)sensor_back_right">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.05 0.02"/>
-      </geometry>
-      <material name="white"/>
-    </visual>
-  </link>
+  <!--Sensors-->
+  <xacro:hcsr04_sensor name="sensor_front_left" xyz="0.096 0.1 0.05" rpy="0 0 0"/>
+  <xacro:hcsr04_sensor name="sensor_front_right" xyz="0.096 -0.1 0.05" rpy="0 0 0"/>
+  <xacro:hcsr04_sensor name="sensor_back_left" xyz="-0.096 0.1 0.05" rpy="0 0 0"/>
+  <xacro:hcsr04_sensor name="sensor_back_right" xyz="-0.096 -0.1 0.05" rpy="0 0 0"/>
 
 </robot>
