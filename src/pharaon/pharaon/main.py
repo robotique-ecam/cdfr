@@ -20,7 +20,7 @@ class PharaonService(Node):
         self.srv = self.create_service(
             Trigger, 'activate', self.activate_callback)
         bd_addr = "00:14:03:06:61:BA"
-        port = 1
+        port = 0x1001
         sock.connect((bd_addr, port))
         sock.bind((" ", port))
         sock.listen(1)
