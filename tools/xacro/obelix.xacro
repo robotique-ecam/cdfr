@@ -8,6 +8,9 @@
   <xacro:property name="robotbase_width" value="0.26"/>
   <xacro:property name="robotbase_height" value="0.32"/>
 
+  <xacro:property name="wheel_radius" value=".04"/>
+  <xacro:property name="wheel_width" value=".01"/>
+
   <xacro:include filename="robot.xacro"/>
 
 </robot>
