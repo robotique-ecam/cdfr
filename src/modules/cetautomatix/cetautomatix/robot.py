@@ -13,7 +13,6 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
-        self.objective = "ARUCO42"
         self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
@@ -37,7 +36,7 @@ class Robot(Node):
         return response
 
     def drop_current_action(self):
-        """Preempt an action for the BT."""
+        """Drop an action for the BT."""
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
@@ -47,7 +46,7 @@ class Robot(Node):
         return response
 
     def confirm_current_action(self):
-        """Preempt an action for the BT."""
+        """Confirm an action for the BT."""
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
@@ -84,12 +83,12 @@ class Robot(Node):
             if action[1] > max:
                 max = action[1]
                 best_action = action[0]
-        self.objective = best_action
+        self._current_action = best_action
 
-    def get_goal_pose(self, action):
+    def get_goal_pose(self):
         """Get goal pose for action."""
         msg = NavigateToPose_Goal()
-        value = elements[action]
+        value = elements[self._current_action]
         msg.pose.pose.position.z = 0.0
         msg.pose.pose.position.x = value[0]
         msg.pose.pose.position.y = value[1]

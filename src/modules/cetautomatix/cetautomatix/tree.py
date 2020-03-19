@@ -14,7 +14,7 @@ except ImportError:
 from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
 from strategix_msgs.action import StrategixAction
-from cetautomatix.custom_behaviours import Time, NewObjective
+from cetautomatix.custom_behaviours import Time, NewAction, ConfirmAction
 
 
 rclpy.init(args=None)
@@ -24,7 +24,7 @@ robot = Robot()
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:
-    """Give objective & go to this objective"""
+    """Give objective & go to this objective
     move = py_trees_ros.actions.ActionClient(
         name="NavigateToPose",
         action_type=NavigateToPose,
@@ -69,11 +69,36 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     new_objective = py_trees.composites.Sequence(
         name='New Objective',
         children=[askList, create_objective]
+    )"""
+    # Execute
+    navigate = py_trees_ros.actions.ActionClient(
+        name="NavigateToPose",
+        action_type=NavigateToPose,
+        action_name="NavigateToPose",
+        action_goal=robot.getGoalPose()
     )
 
-    objective = py_trees.composites.Selector(
-        name='Objective',
-        children=[guardMove, new_objective]
+    actuator = py_trees.behaviours.Success(name="Actuators")
+
+    execute = py_trees.composites.Sequence(
+        name='Execute',
+        children=[navigate, actuator]
+    )
+
+    # Actions
+    confirm_action = ConfirmAction(
+        name='Confirm Action',
+        robot=robot
+    )
+
+    new_action = NewAction(
+        name='New Action',
+        robot=robot
+    )
+
+    actions = py_trees.composites.Sequence(
+        name='Actions',
+        children=[new_action, execute, comfirm_action]
     )
 
     # Oneshot Pavillon
@@ -98,11 +123,11 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         child=guardPavillon
     )
 
-    # Actions
-    actions = py_trees.composites.Parallel(
-        name="Actions",
+    # All Actions
+    all_actions = py_trees.composites.Parallel(
+        name="All Actions",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
-        children=[pavillonFiR, objective]
+        children=[pavillonFiR, actions]
     )
 
     # Guard End of Game

@@ -15,13 +15,24 @@ class Time(py_trees.behaviour.Behaviour):
         return py_trees.common.Status.SUCCESS
 
 
-class NewObjective(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot, list):
+class NewAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot):
         super().__init__(name=name)
         self.robot = robot
-        self.list = list
 
     def update(self):
-        self.robot.compute_best_action(self.list)
-        print("Best action is", self.robot.objective, flush=True)
-        return py_trees.common.Status.SUCCESS
+        if self.robot._current_action is None:
+            available = self.robot.fetch_available_actions()
+            best_action = self.robot.compute_best_action(available)
+            return py_trees.common.Status.SUCCESS if self.robot.preempt_action(best_action) else py_trees.common.Status.FAILURE
+        else:
+            return py_trees.common.Status.SUCCESS
+
+
+class ComfirmAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot):
+        super().__init__(name=name)
+        self.robot = robot
+
+    def update(self):
+        return py_trees.common.Status.SUCCESS if self.robot.confirm_current_action() else py_trees.common.Status.FAILURE
