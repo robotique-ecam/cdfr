@@ -31,7 +31,7 @@ class Robot(Node):
         """Preempt an action for the BT."""
         self._change_action_status_request.action = action
         self._change_action_status_request.request = "PREEMPT"
-        response = self._change_action_status_request.call(self._change_action_status_request)
+        response = self._change_action_status_client.call(self._change_action_status_request)
         self._current_action = action if response.success else None
         return response
 
@@ -41,7 +41,7 @@ class Robot(Node):
             return False
         self._change_action_status_request.action = self._current_action
         self._change_action_status_request.request = "DROP"
-        response = self._change_action_status_request.call(self._change_action_status_request)
+        response = self._change_action_status_client.call(self._change_action_status_request)
         self._current_action = None
         return response
 
@@ -51,7 +51,7 @@ class Robot(Node):
             return False
         self._change_action_status_request.action = self._current_action
         self._change_action_status_request.request = "CONFIRM"
-        response = self._change_action_status_request.call(self._change_action_status_request)
+        response = self._change_action_status_client.call(self._change_action_status_request)
         self._current_action = None
         return response
 

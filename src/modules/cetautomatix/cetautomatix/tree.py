@@ -13,7 +13,6 @@ except ImportError:
     GPIO = GPIOSim()
 from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
-from strategix_msgs.action import StrategixAction
 from cetautomatix.custom_behaviours import Time, NewAction, ConfirmAction
 
 
