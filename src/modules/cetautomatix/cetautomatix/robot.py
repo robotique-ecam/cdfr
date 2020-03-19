@@ -13,7 +13,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
-        self._current_action = None
+        self._current_action = "ARUCO42"
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._get_available_request = GetAvailableActions.Request()
