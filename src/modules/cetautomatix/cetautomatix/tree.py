@@ -98,7 +98,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
 
     actions = py_trees.composites.Sequence(
         name='Actions',
-        children=[new_action, execute, comfirm_action]
+        children=[new_action, execute, confirm_action]
     )
 
     # Oneshot Pavillon
