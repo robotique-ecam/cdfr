@@ -29,7 +29,7 @@ class NewAction(py_trees.behaviour.Behaviour):
             return py_trees.common.Status.SUCCESS
 
 
-class ComfirmAction(py_trees.behaviour.Behaviour):
+class ConfirmAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
         super().__init__(name=name)
         self.robot = robot
