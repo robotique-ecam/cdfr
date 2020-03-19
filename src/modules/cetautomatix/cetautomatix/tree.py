@@ -29,7 +29,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name="NavigateToPose",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
-        action_goal=robot.getGoalPose()
+        action_goal=robot.get_goal_pose()
     )
 
     def conditionMove():
@@ -75,7 +75,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name="NavigateToPose",
         action_type=NavigateToPose,
         action_name="NavigateToPose",
-        action_goal=robot.getGoalPose()
+        action_goal=robot.get_goal_pose()
     )
 
     actuator = py_trees.behaviours.Success(name="Actuators")
