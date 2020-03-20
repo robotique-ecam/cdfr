@@ -10,6 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
+          token: ${{ secrets.repo_key }}
           submodules: recursive
       - name: Setup ROS2 environment
         run: |
