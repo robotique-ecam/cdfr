@@ -27,9 +27,4 @@ setup(
     keywords=['ROS2', '', 'CDFR'],
     description='Actuators Hardware Interface',
     license='ECAM Makers :: CDFR 2020',
-    entry_points={
-        'console_scripts': [
-            'actuators = actuators.actuators:main',
-        ],
-    },
 )
