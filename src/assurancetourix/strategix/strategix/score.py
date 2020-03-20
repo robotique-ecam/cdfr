@@ -1,19 +1,18 @@
 from strategix.actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
+from cetautomatix.magic_points import RED_CUPS, GREEN_CUPS
 
 
 class Score:
     def __init__(self):
+        self.cups = [Gobelet(k, "R") for k in RED_CUPS]
+        self.cups += [Gobelet(k, "V") for k in GREEN_CUPS]
         self.mancheAir1 = MancheAir("MANCHE1")
         self.mancheAir2 = MancheAir("MANCHE2")
-        self.gobelet1 = Gobelet("GOB1", 'V')
-        self.gobelet2 = Gobelet("GOB2", 'V')
-        self.gobelet3 = Gobelet("GOB3", 'R')
-        self.gobelet4 = Gobelet("GOB4", 'R')
         self.phare = Phare("PHARE")
         self.bonPortGros = BonPort("BonPortGros")
         self.bonPortPetit = BonPort("BonPortPetit")
         self.pavillon = Pavillon("Pavillon")
-        self.todoList = [self.phare.name, self.mancheAir1.name, self.mancheAir2.name, self.gobelet1.name, self.gobelet2.name, self.gobelet3.name, self.gobelet4.name]
+        self.todoList = [a.name for a in self.cups] + [self.phare.name, self.mancheAir1.name, self.mancheAir2.name]
         self.wipList = []
         self.doneList = []
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+import rclpy
 import numpy as np
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
@@ -13,7 +14,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
-        self._current_action = "ARUCO42"
+        self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._get_available_request = GetAvailableActions.Request()
@@ -22,18 +23,30 @@ class Robot(Node):
         self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, '/odom', self._odom_callback, 1)
 
+    def _synchronous_call(self, client, request):
+        """Synchronous service call util function."""
+        future = client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        try:
+            response = future.result()
+        except BaseException:
+            response = None
+        return response
+
     def fetch_available_actions(self):
         """Fetch available actions for BT."""
-        response = self._get_available_client.call(self._get_available_request)
-        return response.available
+        response = self._synchronous_call(self._get_available_client, self._get_available_request)
+        return response.available if response is not None else []
 
     def preempt_action(self, action):
         """Preempt an action for the BT."""
         self._change_action_status_request.action = action
         self._change_action_status_request.request = "PREEMPT"
-        response = self._change_action_status_client.call(self._change_action_status_request)
+        response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
+        if response is None:
+            return False
         self._current_action = action if response.success else None
-        return response
+        return response.success
 
     def drop_current_action(self):
         """Drop an action for the BT."""
@@ -41,9 +54,11 @@ class Robot(Node):
             return False
         self._change_action_status_request.action = self._current_action
         self._change_action_status_request.request = "DROP"
-        response = self._change_action_status_client.call(self._change_action_status_request)
+        response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
+        if response is None:
+            return False
         self._current_action = None
-        return response
+        return response.success
 
     def confirm_current_action(self):
         """Confirm an action for the BT."""
@@ -51,9 +66,11 @@ class Robot(Node):
             return False
         self._change_action_status_request.action = self._current_action
         self._change_action_status_request.request = "CONFIRM"
-        response = self._change_action_status_client.call(self._change_action_status_request)
+        response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
+        if response is None:
+            return False
         self._current_action = None
-        return response
+        return response.success
 
     def _odom_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
@@ -84,17 +101,20 @@ class Robot(Node):
                 max = action[1]
                 best_action = action[0]
         self._current_action = best_action
+        return best_action
 
     def get_goal_pose(self):
         """Get goal pose for action."""
         msg = NavigateToPose_Goal()
-        value = elements[self._current_action]
-        msg.pose.pose.position.z = 0.0
-        msg.pose.pose.position.x = value[0]
-        msg.pose.pose.position.y = value[1]
-        q = self.euler_to_quaternion(value[2] if value[2] is not None else 0, 0, 0)
-        msg.pose.pose.orientation.x = q[0]
-        msg.pose.pose.orientation.y = q[1]
-        msg.pose.pose.orientation.z = q[2]
-        msg.pose.pose.orientation.w = q[3]
+        print(self._current_action, flush=True)
+        if self._current_action is not None:
+            value = elements[self._current_action]
+            msg.pose.pose.position.z = 0.0
+            msg.pose.pose.position.x = value[0]
+            msg.pose.pose.position.y = value[1]
+            q = self.euler_to_quaternion(value[2] if value[2] is not None else 0, 0, 0)
+            msg.pose.pose.orientation.x = q[0]
+            msg.pose.pose.orientation.y = q[1]
+            msg.pose.pose.orientation.z = q[2]
+            msg.pose.pose.orientation.w = q[3]
         return msg

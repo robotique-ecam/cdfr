@@ -32,6 +32,7 @@ class StrategixActionServer(Node):
                 raise BaseException
             self.get_logger().info("%s %s %s" % (request.sender, request.request, request.action))
         except BaseException:
+            self.get_logger().warn("Invalid call : %s %s %s" % (request.sender, request.request, request.action))
             response.success = False
         return response
 
