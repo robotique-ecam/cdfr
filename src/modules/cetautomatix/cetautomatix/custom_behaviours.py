@@ -36,3 +36,12 @@ class ConfirmAction(py_trees.behaviour.Behaviour):
 
     def update(self):
         return py_trees.common.Status.SUCCESS if self.robot.confirm_current_action() else py_trees.common.Status.FAILURE
+
+
+class ReleaseAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot):
+        super().__init__(name=name)
+        self.robot = robot
+
+    def update(self):
+        return py_trees.common.Status.SUCCESS if self.robot.drop_current_action() else py_trees.common.Status.FAILURE

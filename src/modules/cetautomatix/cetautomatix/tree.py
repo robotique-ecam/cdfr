@@ -13,7 +13,7 @@ except ImportError:
     GPIO = GPIOSim()
 from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
-from cetautomatix.custom_behaviours import Time, NewAction, ConfirmAction
+from cetautomatix.custom_behaviours import Time, NewAction, ConfirmAction, ReleaseAction
 
 
 rclpy.init(args=None)
@@ -23,57 +23,6 @@ robot = Robot()
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:
-    """Give objective & go to this objective
-    move = py_trees_ros.actions.ActionClient(
-        name="NavigateToPose",
-        action_type=NavigateToPose,
-        action_name="NavigateToPose",
-        action_goal=robot.get_goal_pose()
-    )
-
-    def conditionMove():
-        return True if robot.objective is None else False
-
-    guardMove = py_trees.decorators.EternalGuard(
-        name="Need objective ?",
-        condition=conditionMove,
-        child=move
-    )
-
-    goal_msg = StrategixAction.Goal()
-    goal_msg.sender = ' '
-    goal_msg.request = 'todo'
-    goal_msg.object = ' '
-    askList = py_trees_ros.action_clients.FromConstant(
-        action_type=StrategixAction,
-        action_name='/strategix',
-        action_goal=goal_msg,
-        name='Ask for List',
-    )
-
-    def strategix_result_callback(arg):
-        todo = arg.result().result.todo
-        setattr(askList, 'result_message', todo)
-        print("Strategix said", todo, flush=True)
-
-    setattr(askList, 'result_message', [])
-    askList.get_result_callback = strategix_result_callback
-
-    create_objective = NewObjective(
-        name='Create new objective',
-        robot=robot,
-        list=askList.result_message
-    )
-
-    new_objective = py_trees.composites.Sequence(
-        name='New Objective',
-        children=[askList, create_objective]
-    )"""
-
-    wait_for_goal = py_trees.behaviours.WaitForBlackboardVariable(
-        name="NavigateToPose",
-        variable_name="goal"
-    )
 
     # Execute
     navigate = py_trees_ros.action_clients.FromBlackboard(
@@ -87,8 +36,8 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     actuator = py_trees.behaviours.Success(name="Actuators")
 
     execute = py_trees.composites.Sequence(
-        name='Execute',
-        children=[wait_for_goal, navigate, actuator]
+        name='ExecuteAction',
+        children=[navigate, actuator]
     )
 
     # Actions
@@ -102,9 +51,19 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         robot=robot
     )
 
+    release_action = ReleaseAction(
+        name="ReleaseAction",
+        robot=robot
+    )
+
+    failure_handler = py_trees.composites.Selector(
+        name="FailureHandler",
+        children=[execute, release_action]
+    )
+
     actions = py_trees.composites.Sequence(
         name='Actions',
-        children=[new_action, execute, confirm_action]
+        children=[new_action, failure_handler, confirm_action]
     )
 
     # Oneshot Pavillon

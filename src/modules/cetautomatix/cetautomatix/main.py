@@ -29,7 +29,7 @@ def main():
         rclpy.shutdown()
         sys.exit(1)
 
-    tree.tick_tock(period_ms=500)
+    tree.tick_tock(period_ms=100)
 
     try:
         rclpy.spin(tree.node)

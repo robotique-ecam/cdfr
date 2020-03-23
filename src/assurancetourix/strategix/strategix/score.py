@@ -54,7 +54,7 @@ class Score:
 
     def release(self, action):
         self.wipList.remove(action)
-        self.todoList.append(action)
+        # Don't add failling action again
         self.updateScore()
         return True
 
