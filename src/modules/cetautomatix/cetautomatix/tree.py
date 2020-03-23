@@ -69,19 +69,26 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         name='New Objective',
         children=[askList, create_objective]
     )"""
-    # Execute
-    navigate = py_trees_ros.actions.ActionClient(
+
+    wait_for_goal = py_trees.behaviours.WaitForBlackboardVariable(
         name="NavigateToPose",
+        variable_name="goal"
+    )
+
+    # Execute
+    navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
         action_name="NavigateToPose",
-        action_goal=robot.get_goal_pose()
+        name="NavigateToPose",
+        key='goal',
+        generate_feedback_message=robot.get_goal_pose()
     )
 
     actuator = py_trees.behaviours.Success(name="Actuators")
 
     execute = py_trees.composites.Sequence(
         name='Execute',
-        children=[navigate, actuator]
+        children=[wait_for_goal, navigate, actuator]
     )
 
     # Actions

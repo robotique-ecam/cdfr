@@ -2,6 +2,7 @@
 
 
 import rclpy
+import py_trees
 import numpy as np
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
@@ -22,6 +23,8 @@ class Robot(Node):
         self._get_available_request.sender = robot
         self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, '/odom', self._odom_callback, 1)
+        self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
+        self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
 
     def _synchronous_call(self, client, request):
         """Synchronous service call util function."""
@@ -40,6 +43,7 @@ class Robot(Node):
 
     def preempt_action(self, action):
         """Preempt an action for the BT."""
+        self.get_goal_pose()
         self._change_action_status_request.action = action
         self._change_action_status_request.request = "PREEMPT"
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
@@ -106,7 +110,6 @@ class Robot(Node):
     def get_goal_pose(self):
         """Get goal pose for action."""
         msg = NavigateToPose_Goal()
-        print(self._current_action, flush=True)
         if self._current_action is not None:
             value = elements[self._current_action]
             msg.pose.pose.position.z = 0.0
@@ -117,4 +120,4 @@ class Robot(Node):
             msg.pose.pose.orientation.y = q[1]
             msg.pose.pose.orientation.z = q[2]
             msg.pose.pose.orientation.w = q[3]
-        return msg
+        self.blackboard.goal = msg
