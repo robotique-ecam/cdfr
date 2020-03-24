@@ -129,7 +129,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     # Asterix Root
     asterix = py_trees.composites.Selector(
         name="Asterix",
-        children=[goupilleSiF, guardEndOfGame, actions]
+        children=[goupilleSiF, guardEndOfGame, all_actions]
     )
 
     # Goupille Guard
