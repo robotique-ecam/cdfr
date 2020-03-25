@@ -58,7 +58,7 @@ add_executable(${EXEC_NAME}
 if(MIPI_CAMERA)
   add_definitions(-DMIPI_CAMERA)
   target_link_libraries(${EXEC_NAME} -larducam_mipicamera)
-endif(MIPI_CAMERA)
+endif()
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 

@@ -2,8 +2,21 @@
 
 ### Build
 
+#### Onboard build
+
+```bash
+cd ~/ros
+. /opt/ros/eloquent/setup.bash
+./setup.bash
+. install/setup.bash
 ```
-colcon build --cmake-args ' -DCMAKE_CXX_FLAGS="-march=native"' ' -DCMAKE_CXX_FLAGS="-O3"'
+
+#### Dev / Simulation build
+
+```bash
+. /path/to/ros/install/setup.bash
+cd path/to/ros
+colcon build --symlink-install --cmake-args ' -DSIMULATION=ON'
 ```
 
 #### Upgrading colcon on macOS / Win
@@ -27,9 +40,15 @@ export CXX=$(pwd)/tools/clang_complete/g++
 ```
 
 
-### Use Clang format
+### Code formating
 
 fish
 ```
-git clang-format --commit (git hash-object -t tree /dev/null)
+ament_clang_format --config ".clang-format" --reformat (colcon list -p)
+
+ament_flake8 --linelength 160 .
+
+ament_lint_cmake .
+
+ament_xmllint .
 ```

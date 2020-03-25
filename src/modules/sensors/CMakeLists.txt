@@ -53,7 +53,7 @@ if(SIMULATION)
   add_definitions(-DSIMULATION)
 else()
   target_link_libraries(${EXEC_NAME} i2c)
-endif(SIMULATION)
+endif()
 
 
 ament_target_dependencies(${EXEC_NAME} ${dependencies})

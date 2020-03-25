@@ -35,18 +35,18 @@ void Sensors::init_parameters() {
   std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
   std::vector<std::string> vl53l1x_names = this->get_parameter("vl53l1x_names").as_string_array();
 
-  for(auto name : hcsr04_names) {
-     this->declare_parameter("hcsr04." + name + ".frame_id");
-     this->declare_parameter("hcsr04." + name + ".addr");
-     hcsr04_frames.push_back(this->get_parameter("hcsr04." + name + ".frame_id").as_string());
-     hcsr04_addresses.push_back(this->get_parameter("hcsr04." + name + ".addr").as_int());
+  for (auto name : hcsr04_names) {
+    this->declare_parameter("hcsr04." + name + ".frame_id");
+    this->declare_parameter("hcsr04." + name + ".addr");
+    hcsr04_frames.push_back(this->get_parameter("hcsr04." + name + ".frame_id").as_string());
+    hcsr04_addresses.push_back(this->get_parameter("hcsr04." + name + ".addr").as_int());
   }
 
-  for(auto name : vl53l1x_names) {
-     this->declare_parameter("vl53l1x." + name + ".frame_id");
-     this->declare_parameter("vl53l1x." + name + ".addr");
-     vl53l1x_frames.push_back(this->get_parameter("vl53l1x." + name + ".frame_id").as_string());
-     vl53l1x_addresses.push_back(this->get_parameter("vl53l1x." + name + ".addr").as_int());
+  for (auto name : vl53l1x_names) {
+    this->declare_parameter("vl53l1x." + name + ".frame_id");
+    this->declare_parameter("vl53l1x." + name + ".addr");
+    vl53l1x_frames.push_back(this->get_parameter("vl53l1x." + name + ".frame_id").as_string());
+    vl53l1x_addresses.push_back(this->get_parameter("vl53l1x." + name + ".addr").as_int());
   }
 }
 
@@ -63,7 +63,7 @@ void Sensors::init_variables() {
 }
 
 void Sensors::init_sensors() {
-  for(auto addr : vl53l1x_addresses) {
+  for (auto addr : vl53l1x_addresses) {
     vl53l1x_sensors.push_back(LINUX_VL53L1X(i2c.get(), addr));
   }
 }
@@ -78,9 +78,9 @@ void Sensors::receive_distance() {
     sensors_pub_->publish(hcsr_range_msg);
   }
 
-  for(auto sensor : vl53l1x_sensors) {
+  for (auto sensor : vl53l1x_sensors) {
     vl53l1x_range_msg.header.stamp = this->get_clock()->now();
-    vl53l1x_range_msg.range = (float) sensor.getDistance() / 1000;
+    vl53l1x_range_msg.range = (float)sensor.getDistance() / 1000;
     sensors_pub_->publish(vl53l1x_range_msg);
   }
 #endif /* SIMULATION */
