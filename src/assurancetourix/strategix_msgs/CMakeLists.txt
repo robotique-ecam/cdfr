@@ -23,12 +23,13 @@ find_package(std_msgs REQUIRED)
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
-set(action_files
-  "action/StrategixAction.action"
+set(srv_files
+  "srv/ChangeActionStatus.srv"
+  "srv/GetAvailableActions.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  ${action_files}
+  ${srv_files}
   DEPENDENCIES std_msgs
   ADD_LINTER_TESTS
 )

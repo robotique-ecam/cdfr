@@ -4,13 +4,13 @@
 
   <!--Sensors macros-->
   <xacro:macro name="hcsr04_sensor" params="name xyz rpy">
-    <joint name="$(arg tf_prefix)${name}_joint" type="fixed">
-      <parent link="$(arg tf_prefix)robotbase"/>
-      <child link="$(arg tf_prefix)${name}"/>
+    <joint name="${tf_prefix}${name}_joint" type="fixed">
+      <parent link="${tf_prefix}robotbase"/>
+      <child link="${tf_prefix}${name}"/>
       <origin xyz="${xyz}" rpy="${rpy}"/>
     </joint>
 
-    <link name="$(arg tf_prefix)${name}">
+    <link name="${tf_prefix}${name}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>

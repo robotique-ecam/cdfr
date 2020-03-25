@@ -1,33 +1,40 @@
 #!/usr/bin/env python3
 
-from strategix_msgs.action import StrategixAction
+
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer
 from strategix.score import Score
+from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
 
 class StrategixActionServer(Node):
     def __init__(self):
         super().__init__('strategix_action_server')
         self.score = Score()
-        self._action_server = ActionServer(self, StrategixAction, '/strategix', self.execute_callback)
+        self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
+        self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
+        self.get_logger().info("Strategix is ready")
 
-    def execute_callback(self, goal_handle):
-        self.get_logger().info('Executing goal...')
-        todo = None
-        if goal_handle.request.request == 'todo':
-            todo = self.score.todoList
-        elif goal_handle.request.request == 'preempt':
-            self.score.preempt(goal_handle.request.object)
-        elif goal_handle.request.request == 'release':
-            self.score.release(goal_handle.request.object)
-        elif goal_handle.request.request == 'finish':
-            self.score.finish(goal_handle.request.object)
-        goal_handle.succeed()
-        result = StrategixAction.Result()
-        result.todo = todo
-        return result
+    def available_callback(self, request, response):
+        response.available = self.score.todoList
+        self.get_logger().info("GET %s" % (request.sender))
+        return response
+
+    def action_callback(self, request, response):
+        try:
+            if request.request == 'PREEMPT':
+                response.success = self.score.preempt(request.action)
+            elif request.request == 'DROP':
+                response.success = self.score.release(request.action)
+            elif request.request == 'CONFIRM':
+                response.success = self.score.finish(request.action)
+            else:
+                raise BaseException
+            self.get_logger().info("%s %s %s" % (request.sender, request.request, request.action))
+        except BaseException:
+            self.get_logger().warn("Invalid call : %s %s %s" % (request.sender, request.request, request.action))
+            response.success = False
+        return response
 
 
 def main(args=None):

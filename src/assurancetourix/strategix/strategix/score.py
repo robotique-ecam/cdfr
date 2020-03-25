@@ -1,19 +1,18 @@
 from strategix.actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
+from cetautomatix.magic_points import RED_CUPS, GREEN_CUPS
 
 
 class Score:
     def __init__(self):
-        self.mancheAir1 = MancheAir("MancheAir1")
-        self.mancheAir2 = MancheAir("MancheAir2")
-        self.gobelet1 = Gobelet("Gobelet1", 'V')
-        self.gobelet2 = Gobelet("Gobelet2", 'V')
-        self.gobelet3 = Gobelet("Gobelet3", 'R')
-        self.gobelet4 = Gobelet("Gobelet4", 'R')
-        self.phare = Phare("Phare")
+        self.cups = [Gobelet(k, "R") for k in RED_CUPS]
+        self.cups += [Gobelet(k, "V") for k in GREEN_CUPS]
+        self.mancheAir1 = MancheAir("MANCHE1")
+        self.mancheAir2 = MancheAir("MANCHE2")
+        self.phare = Phare("PHARE")
         self.bonPortGros = BonPort("BonPortGros")
         self.bonPortPetit = BonPort("BonPortPetit")
         self.pavillon = Pavillon("Pavillon")
-        self.todoList = [self.phare.name, self.mancheAir1.name, self.mancheAir2.name, self.gobelet1.name, self.gobelet2.name, self.gobelet3.name, self.gobelet4.name]
+        self.todoList = [a.name for a in self.cups] + [self.phare.name, self.mancheAir1.name, self.mancheAir2.name]
         self.wipList = []
         self.doneList = []
 
@@ -51,13 +50,16 @@ class Score:
         self.todoList.remove(action)
         self.wipList.append(action)
         self.updateScore()
+        return True
 
     def release(self, action):
         self.wipList.remove(action)
-        self.todoList.append(action)
+        # Don't add failling action again
         self.updateScore()
+        return True
 
     def finish(self, action):
         self.wipList.remove(action)
         self.doneList.append(action)
         self.updateScore()
+        return True
