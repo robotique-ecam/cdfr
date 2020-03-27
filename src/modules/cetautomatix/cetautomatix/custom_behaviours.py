@@ -76,6 +76,8 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
 
     def update(self):
         if time.time() > self.time:
-            # Code to end every actuator
+            if self.oneshot < 1:
+                self.oneshot += 1
+                # Code to end every action
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
