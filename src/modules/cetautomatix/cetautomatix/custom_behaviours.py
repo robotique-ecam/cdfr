@@ -5,16 +5,6 @@ import time
 import py_trees
 
 
-class Time(py_trees.behaviour.Behaviour):
-    def __init__(self, name, duration):
-        super().__init__(name=name)
-        self.duration = duration
-
-    def update(self):
-        self.time = time.time() + self.duration
-        return py_trees.common.Status.SUCCESS
-
-
 class NewAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
         super().__init__(name=name)
@@ -47,15 +37,45 @@ class ReleaseAction(py_trees.behaviour.Behaviour):
         return py_trees.common.Status.SUCCESS if self.robot.drop_current_action() else py_trees.common.Status.FAILURE
 
 
-class PavillonAction(py_trees.behaviour.Behaviour):
-    def __init__(self, time_action):
+class SetupTimersAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name, actions):
+        super().__init__(name=name)
+        self.actions = actions
         self.oneshot = 0
-        self.time_action = time_action
 
     def update(self):
-        if time.time() > self.time_action.time:
+        if self.oneshot < 1:
+            self.oneshot += 1
+            # Setup Timers
+            for action, duration in self.actions.items():
+                action.time = time.time() + duration
+            return py_trees.common.Status.SUCCESS
+        return py_trees.common.Status.FAILURE
+
+
+class PavillonAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name):
+        super().__init__(name=name)
+        self.time = 10000
+        self.oneshot = 0
+
+    def update(self):
+        if time.time() > self.time:
             if self.oneshot < 1:
                 self.oneshot += 1
                 # Code to activate PavillonAction
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING
+
+
+class EndOfGameAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name):
+        super().__init__(name=name)
+        self.time = 10000
+        self.oneshot = 0
+
+    def update(self):
+        if time.time() > self.time:
+            # Code to end every actuator
+            return py_trees.common.Status.SUCCESS
+        return py_trees.common.Status.FAILURE
