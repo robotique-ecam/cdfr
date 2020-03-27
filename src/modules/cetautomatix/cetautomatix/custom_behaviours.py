@@ -45,3 +45,17 @@ class ReleaseAction(py_trees.behaviour.Behaviour):
 
     def update(self):
         return py_trees.common.Status.SUCCESS if self.robot.drop_current_action() else py_trees.common.Status.FAILURE
+
+
+class PavillonAction(py_trees.behaviour.Behaviour):
+    def __init__(self, time_action):
+        self.oneshot = 0
+        self.time_action = time_action
+
+    def update(self):
+        if time.time() > self.time_action.time:
+            if self.oneshot < 1:
+                self.oneshot += 1
+                # Code to activate PavillonAction
+            return py_trees.common.Status.SUCCESS
+        return py_trees.common.Status.RUNNING
