@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-
-import time
 import rclpy
 import py_trees
 import py_trees_ros
@@ -13,7 +11,7 @@ except ImportError:
     GPIO = GPIOSim()
 from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
-from cetautomatix.custom_behaviours import Time, NewAction, ConfirmAction, ReleaseAction
+from cetautomatix.custom_behaviours import NewAction, ConfirmAction, ReleaseAction, SetupTimersAction, PavillonAction, EndOfGameAction
 
 
 rclpy.init(args=None)
@@ -23,7 +21,6 @@ robot = Robot()
 
 
 def create_tree() -> py_trees.behaviour.Behaviour:
-
     # Execute
     navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
@@ -66,70 +63,24 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         children=[new_action, failure_handler, confirm_action]
     )
 
-    # Oneshot Pavillon
-    def conditionPavillon():
-        return True if time.time() > timePavillon.time else False
+    pavillon = PavillonAction(name='Pavillon Action')
 
-    idle2 = py_trees.behaviours.Success("Idle2")
-
-    oneShotPavillon = py_trees.decorators.OneShot(
-        name="OneShot Pavillon",
-        child=idle2
-    )
-
-    guardPavillon = py_trees.decorators.EternalGuard(
-        name="Hisser pavillons?",
-        condition=conditionPavillon,
-        child=oneShotPavillon
-    )
-
-    pavillonFiR = py_trees.decorators.FailureIsRunning(
-        name="Failure Is Running",
-        child=guardPavillon
-    )
-
-    # All Actions
+    # Asterix Root
     all_actions = py_trees.composites.Parallel(
         name="All Actions",
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
-        children=[pavillonFiR, actions]
+        children=[pavillon, actions]
     )
 
-    # Guard End of Game
-    def conditionEndOfGame():
-        return True if time.time() > timeEndOfGame.time else False
-    idle = py_trees.behaviours.Success("Idle")
-    guardEndOfGame = py_trees.decorators.EternalGuard(
-        name="End of game?",
-        condition=conditionEndOfGame,
-        child=idle
+    end_of_game = EndOfGameAction(name='End Of Game?')
+
+    setup_timers = SetupTimersAction(
+        name='Setup Timers',
+        actions={pavillon: 95.0, end_of_game: 100.0}
     )
-
-    # Setup timers needed for the tree only when Goupille is activated
-    timeEndOfGame = Time(name="End Of Game Timer", duration=100.0)
-
-    timePavillon = Time(name="Pavillon Timer", duration=95.0)
-
-    timeSetup = py_trees.composites.Parallel(
-        name="Setup Timers",
-        policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
-        children=[timeEndOfGame, timePavillon]
-    )
-
-    oneShotGoupille = py_trees.decorators.OneShot(
-        name="OneShot Goupille",
-        child=timeSetup
-    )
-
-    goupilleSiF = py_trees.decorators.SuccessIsFailure(
-        name="Success Is Failure",
-        child=oneShotGoupille
-    )
-
-    # Asterix Root
     asterix = py_trees.composites.Selector(
         name="Asterix",
-        children=[goupilleSiF, guardEndOfGame, all_actions]
+        children=[setup_timers, end_of_game, all_actions]
     )
 
     # Goupille Guard
