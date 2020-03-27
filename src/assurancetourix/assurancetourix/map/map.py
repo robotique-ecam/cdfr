@@ -10,9 +10,11 @@ from PIL import Image, ImageDraw
 
 noir = (0, 0, 0)
 blanc = (255, 255, 255)
+bg_color = (150, 150, 150)
 
 longueur_cm = 304
 largeur_cm = 204
+offset_cm = 400
 
 reso = 2
 
@@ -46,11 +48,22 @@ def creamap():
     return (map, draw)
 
 
+def add_background(img):
+    """Create background for map."""
+    back = Image.new('RGB', (cm_pix(longueur_cm+offset_cm, reso), cm_pix(largeur_cm+offset_cm, reso)), bg_color)
+    bg_w, bg_h = back.size
+    img_w, img_h = img.size
+    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+    back.paste(img, offset)
+    return back
+
+
 def creamapbleu():
     """Add blue side specific elements."""
     mapbleu, draw = creamap()
     draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
                                         cm_pix(largeur_cm, reso))), noir, 1)
+    mapbleu = add_background(mapbleu)
     mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.pgm"))
 
 
@@ -59,6 +72,7 @@ def creamapjaune():
     mapjaune, draw = creamap()
     draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
                                        cm_pix(largeur_cm, reso))), noir, 1)
+    mapjaune = add_background(mapjaune)
     mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.pgm"))
 
 

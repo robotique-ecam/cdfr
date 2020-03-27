@@ -22,7 +22,7 @@ class Robot(Node):
         self._change_action_status_request = ChangeActionStatus.Request()
         self._get_available_request.sender = robot
         self._change_action_status_request.sender = robot
-        self._odom_sub = self.create_subscription(Odometry, '/odom', self._odom_callback, 1)
+        self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
 

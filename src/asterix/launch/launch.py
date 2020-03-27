@@ -16,7 +16,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    namespace = LaunchConfiguration('namespace', default_value='asterix')
+    namespace = LaunchConfiguration('namespace', default='asterix')
     use_namespace = LaunchConfiguration('use_namespace', default=True)
 
     urdf = os.path.join(get_package_share_directory('asterix'), 'robot', 'asterix.urdf')
@@ -86,7 +86,7 @@ def generate_launch_description():
         ]),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/nav2_bringup_launch.py']),
+            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
             launch_arguments={
                 'map': map_dir,
                 'namespace': namespace,
