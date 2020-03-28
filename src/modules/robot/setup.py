@@ -9,12 +9,12 @@ from glob import glob
 from setuptools import setup
 
 
-package_name = 'asterix'
+package_name = 'robot'
 
 
 setup(
     name=package_name,
-    version='0.1.0',
+    version='0.2.0',
     packages=[package_name],
     data_files=[
         (path.join('share', package_name), ['package.xml', 'launch/launch.py']),
@@ -30,9 +30,4 @@ setup(
     keywords=['ROS2', '', 'CDFR'],
     description='Asterix RO2 System',
     license='ECAM Makers :: CDFR 2020',
-    entry_points={
-        'console_scripts': [
-            'asterix = asterix.main:main',
-        ],
-    },
 )
