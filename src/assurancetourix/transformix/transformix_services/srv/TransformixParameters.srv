@@ -1,0 +1,5 @@
+std_msgs/String from_frame
+std_msgs/String to_frame
+geometry_msgs/PoseStamped pose_in
+---
+geometry_msgs/PoseStamped pose_out
