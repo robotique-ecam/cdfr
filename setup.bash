@@ -46,12 +46,12 @@ read -p "Please enter the name of the robot to setup : " robot
 if [ $robot = 'asterix' ] || [ $robot = 'obelix' ]; then
 
   print_info "Setting up $robot"
-  xacro tools/xacro/$robot.xacro -o src/$robot/robot/$robot.urdf && colcon build --symlink-install --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+  xacro tools/xacro/$robot.xacro -o src/$robot/robot/$robot.urdf && colcon build --symlink-install --cmake-args=' -DCMAKE_BUILD_TYPE=Release' --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = 'assurancetourix' ]; then
 
   print_info "Setting up $robot"
-  colcon build --symlink-install --cmake-args ' -DMIPI_CAMERA=ON' --packages-select assurancetourix strategix pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+  colcon build --symlink-install --cmake-args ' -DMIPI_CAMERA=ON' --cmake-args=' -DCMAKE_BUILD_TYPE=Release' --packages-select assurancetourix strategix pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 else
 

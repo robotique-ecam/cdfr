@@ -66,15 +66,13 @@ ament_target_dependencies(${EXEC_NAME} ${dependencies})
 ################################################################################
 # Install
 ################################################################################
-execute_process(COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/map/map.py ${CMAKE_CURRENT_SOURCE_DIR})
-
 
 install(TARGETS ${EXEC_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
-  DIRECTORY launch map
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 

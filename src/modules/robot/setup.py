@@ -30,4 +30,9 @@ setup(
     keywords=['ROS2', '', 'CDFR'],
     description='Asterix RO2 System',
     license='ECAM Makers :: CDFR 2020',
+    entry_points={
+        'console_scripts': [
+            'asterix = asterix.main:main',
+        ],
+    },
 )
