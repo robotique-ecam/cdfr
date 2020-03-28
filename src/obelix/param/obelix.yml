@@ -1,4 +1,4 @@
-asterix:
+obelix:
   drive_node:
     ros__parameters:
       wheels:
