@@ -17,7 +17,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
-def generate_launch_description():
+def generate_robot_launch_description(robot_namespace: str):
 
     map = LaunchConfiguration('map')
     namespace = LaunchConfiguration('namespace')
@@ -25,20 +25,14 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     bt_xml_file = LaunchConfiguration('bt_xml_file')
 
-    namespace_arg = DeclareLaunchArgument(
-        'namespace',
-        default_value='robot',
-        description='Robot global namespace'
-    )
-
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    robot_params = os.path.join(get_package_share_directory(namespace_arg), 'param', f'{namespace_arg}.yml')
+    robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
     navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
     with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
         for f in (r, n):
             params.file.write(f.read())
 
-    urdf = os.path.join(get_package_share_directory(namespace), 'robot', f'{namespace_arg}.urdf')
+    urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
     map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
@@ -48,7 +42,11 @@ def generate_launch_description():
                   ('/tf_static', 'tf_static')]
 
     return launch.LaunchDescription([
-        namespace_arg,
+        DeclareLaunchArgument(
+            'namespace',
+            default_value=robot_namespace,
+            description='Robot global namespace'
+        ),
 
         DeclareLaunchArgument(
             'use_namespace',
