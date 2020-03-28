@@ -87,7 +87,7 @@ def generate_robot_launch_description(robot_namespace: str):
                 package='lcd_driver',
                 node_executable='lcd_driver',
                 output='screen',
-                parameters=[params],
+                parameters=[params.name],
                 remappings=remappings,
             ),
 
@@ -95,7 +95,7 @@ def generate_robot_launch_description(robot_namespace: str):
                 package='drive',
                 node_executable='drive',
                 output='screen',
-                parameters=[params],
+                parameters=[params.name],
                 remappings=remappings,
             ),
 
@@ -131,6 +131,6 @@ def generate_robot_launch_description(robot_namespace: str):
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
                 'bt_xml_file': bt_xml_file,
-                'params_file': params}.items(),
+                'params_file': params.name}.items(),
         )
     ])
