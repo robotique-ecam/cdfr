@@ -25,4 +25,4 @@ jobs:
           ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
           ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles
       - name: Test all CDR packages
-        run: . /opt/ros/eloquent/setup.bash && colcon build
+        run: . /opt/ros/eloquent/setup.bash && ./setup.bash simulation
