@@ -28,8 +28,7 @@ def generate_launch_description():
     oneshot = True
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
 
-    def get_parameters():
-        global oneshot, params
+    def get_parameters(oneshot: bool, params: tempfile.NamedTemporaryFile):
         if oneshot:
             robot_params = os.path.join(get_package_share_directory(namespace), 'param', f'{namespace}.yml')
             navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
@@ -64,7 +63,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default=map_dir,
+            default_value=map_dir,
             description='Full path to map yaml file to load'
         ),
 
@@ -95,7 +94,7 @@ def generate_launch_description():
                 package='lcd_driver',
                 node_executable='lcd_driver',
                 output='screen',
-                parameters=[get_parameters()],
+                parameters=[get_parameters(oneshot, params)],
                 remappings=remappings,
             ),
 
@@ -103,7 +102,7 @@ def generate_launch_description():
                 package='drive',
                 node_executable='drive',
                 output='screen',
-                parameters=[get_parameters()],
+                parameters=[get_parameters(oneshot, params)],
                 remappings=remappings,
             ),
 
@@ -139,6 +138,6 @@ def generate_launch_description():
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
                 'bt_xml_file': bt_xml_file,
-                'params_file': get_parameters()}.items(),
+                'params_file': get_parameters(oneshot, params)}.items(),
         )
     ])
