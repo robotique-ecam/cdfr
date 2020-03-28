@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 
-"""Asterix launcher."""
+"""Generic ROS 2 robot launcher."""
 
 
 import os
 import launch
 import tempfile
 from launch.conditions import IfCondition
-from launch.actions import DeclareLaunchArgument, GroupAction
+from launch.actions import GroupAction
+from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
 from launch.substitutions import LaunchConfiguration
@@ -17,12 +18,12 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
-    namespace = LaunchConfiguration('namespace', default='robot')
-    use_namespace = LaunchConfiguration('use_namespace', default=True)
-
-    urdf = os.path.join(get_package_share_directory(namespace), 'robot', f'{namespace}.urdf')
+    map = LaunchConfiguration('map')
+    namespace = LaunchConfiguration('namespace')
+    use_namespace = LaunchConfiguration('use_namespace')
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    bt_xml_file = LaunchConfiguration('bt_xml_file')
 
     # Parameters fusion
     robot_params = os.path.join(get_package_share_directory(namespace), 'param', f'{namespace}.yml')
@@ -32,23 +33,50 @@ def generate_launch_description():
         for f in (r, n):
             params.file.write(f.read())
 
+    map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
+    urdf = os.path.join(get_package_share_directory(namespace), 'robot', f'{namespace}.urdf')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
-    map_dir = LaunchConfiguration('map', default=os.path.join(get_package_share_directory('map'), 'map', 'map.yml'))
-    bt_xml_file = LaunchConfiguration('bt_xml_file', default=os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml'))
+    nav2_bt_xml_file = os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
     return launch.LaunchDescription([
         DeclareLaunchArgument(
-            'params',
-            default_value=params,
-            description='Full path to param file to load'),
+            'namespace',
+            default_value='robot',
+            description='Robot global namespace'
+        ),
+
+        DeclareLaunchArgument(
+            'use_namespace',
+            default_value='true',
+            description='Whether to apply a namespace to the robot stack including navigation2'
+        ),
+
+        DeclareLaunchArgument(
+            'map',
+            default=map_dir,
+            description='Full path to map yaml file to load'
+        ),
 
         DeclareLaunchArgument(
             'use_sim_time',
             default_value='false',
-            description='Use simulation (Gazebo) clock if true'),
+            description='Use /clock if true'
+        ),
+
+        DeclareLaunchArgument(
+            'bt_xml_file',
+            default_value=nav2_bt_xml_file,
+            description='Full path to the behavior tree xml file to use'
+        ),
+
+        DeclareLaunchArgument(
+            'autostart',
+            default_value='true',
+            description='Automatically startup the nav2 stack'
+        ),
 
         GroupAction([
             PushRosNamespace(condition=IfCondition(use_namespace), namespace=namespace),
@@ -96,7 +124,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
             launch_arguments={
-                'map': map_dir,
+                'map': map,
                 'namespace': namespace,
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
