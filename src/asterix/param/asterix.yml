@@ -9,9 +9,6 @@ asterix:
         max_steps_frequency: 10000
         speedramp_resolution: 128
 
-      speedramp:
-        accel: 9.81 # 1g
-
       i2c_bus: 1
 
       joint_states_frame: "base_link"

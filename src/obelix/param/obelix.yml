@@ -2,15 +2,12 @@ obelix:
   drive_node:
     ros__parameters:
       wheels:
-        separation: 0.244
-        radius: 0.0405
+        separation: 0.282
+        radius: 0.061
 
       microcontroler:
         max_steps_frequency: 10000
         speedramp_resolution: 128
-
-      speedramp:
-        accel: 9.81 # 1g
 
       i2c_bus: 1
 
