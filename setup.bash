@@ -42,11 +42,9 @@ elif [ $robot = "assurancetourix" ]; then
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
-    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed" && exit 1
 
 else
     print_failure "No such component"
 
 fi
-
-exit $?

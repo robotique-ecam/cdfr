@@ -7,7 +7,7 @@
 ```bash
 cd ~/ros
 . /opt/ros/eloquent/setup.bash
-./setup.bash
+./setup.bash robot_name
 . install/setup.bash
 ```
 
@@ -16,7 +16,8 @@ cd ~/ros
 ```bash
 . /path/to/ros/install/setup.bash
 cd path/to/ros
-colcon build --symlink-install --cmake-args ' -DSIMULATION=ON'
+./setup.bash simulation
+. install/setup.bash
 ```
 
 #### Upgrading colcon on macOS / Win
