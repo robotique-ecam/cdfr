@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 project(obelix)
 
 
+################################################################################
+# Find and load build settings from external packages
+################################################################################
 find_package(ament_cmake REQUIRED)
 
 
