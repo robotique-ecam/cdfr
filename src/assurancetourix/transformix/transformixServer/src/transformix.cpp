@@ -24,7 +24,7 @@ void Transformix::generate_buffer_and_transform_my_pose_stamped(
   std::string from_frame, to_frame;
   geometry_msgs::msg::PoseStamped poseIn, poseOut;
   geometry_msgs::msg::TransformStamped transformStamped;
-  rclcpp::Clock::SharedPtr clock;
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>();
 
   from_frame = request -> from_frame.data;
   to_frame = request -> to_frame.data;
@@ -60,7 +60,7 @@ void Transformix::get_transform_stamped_from_frames(
 
   std::string from_frame, to_frame;
   geometry_msgs::msg::TransformStamped transformStamped;
-  rclcpp::Clock::SharedPtr clock();
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>();
 
   from_frame = request -> from_frame.data;
   to_frame = request -> to_frame.data;
