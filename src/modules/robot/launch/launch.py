@@ -32,7 +32,7 @@ def generate_launch_description():
     )
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    robot_params = os.path.join(get_package_share_directory(namespace), 'param', f'{namespace_arg}.yml')
+    robot_params = os.path.join(get_package_share_directory(namespace_arg), 'param', f'{namespace_arg}.yml')
     navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
     with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
         for f in (r, n):
