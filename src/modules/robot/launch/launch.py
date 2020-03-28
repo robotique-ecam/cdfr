@@ -25,16 +25,24 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     bt_xml_file = LaunchConfiguration('bt_xml_file')
 
-    # Parameters fusion
-    robot_params = os.path.join(get_package_share_directory(namespace), 'param', f'{namespace}.yml')
-    navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
+    oneshot = True
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
-        for f in (r, n):
-            params.file.write(f.read())
+
+    def get_parameters():
+        global oneshot, params
+        if oneshot:
+            robot_params = os.path.join(get_package_share_directory(namespace), 'param', f'{namespace}.yml')
+            navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
+            with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
+                for f in (r, n):
+                    params.file.write(f.read())
+            oneshot = False
+        return params.name
+
+    def get_urdf():
+        return os.path.join(get_package_share_directory(namespace), 'robot', f'{namespace}.urdf')
 
     map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
-    urdf = os.path.join(get_package_share_directory(namespace), 'robot', f'{namespace}.urdf')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
     nav2_bt_xml_file = os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml')
 
@@ -78,14 +86,16 @@ def generate_launch_description():
             description='Automatically startup the nav2 stack'
         ),
 
+
         GroupAction([
+
             PushRosNamespace(condition=IfCondition(use_namespace), namespace=namespace),
 
             Node(
                 package='lcd_driver',
                 node_executable='lcd_driver',
                 output='screen',
-                parameters=[params],
+                parameters=[get_parameters()],
                 remappings=remappings,
             ),
 
@@ -93,7 +103,7 @@ def generate_launch_description():
                 package='drive',
                 node_executable='drive',
                 output='screen',
-                parameters=[params],
+                parameters=[get_parameters()],
                 remappings=remappings,
             ),
 
@@ -101,7 +111,7 @@ def generate_launch_description():
                 package='robot_state_publisher',
                 node_executable='robot_state_publisher',
                 output='screen',
-                arguments=[urdf],
+                arguments=[get_urdf()],
                 remappings=remappings,
             ),
 
@@ -129,6 +139,6 @@ def generate_launch_description():
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
                 'bt_xml_file': bt_xml_file,
-                'params_file': params}.items(),
+                'params_file': get_parameters()}.items(),
         )
     ])
