@@ -20,7 +20,7 @@ function generate_urdfs {
         return 0
     else
         print_failure "Failled to generate URDFs"
-        return 1
+        exit 1
     fi
 }
 
@@ -34,11 +34,11 @@ fi
 
 if [ $robot = "asterix" ] || [ $robot = "obelix" ]; then
     print_info "Setting up $robot"
-    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed" && exit 1
 
 elif [ $robot = "assurancetourix" ]; then
     print_info "Setting up $robot"
-    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-select assurancetourix strategix_msgs strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-select assurancetourix strategix_msgs strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed" && exit 1
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
@@ -48,3 +48,5 @@ else
     print_failure "No such component"
 
 fi
+
+exit $?
