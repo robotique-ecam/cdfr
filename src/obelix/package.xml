@@ -3,14 +3,15 @@
 <package format="3">
   <name>obelix</name>
   <version>0.1.0</version>
-  <description>Obelix ROS2</description>
+  <description>Obelix launcher</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
   <license>ECAM Makers :: CDFR 2020</license>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

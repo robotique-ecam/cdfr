@@ -74,4 +74,4 @@ asterix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Asterix v0.7.0a"
+      banner: "Obelix v0.7.0a"
