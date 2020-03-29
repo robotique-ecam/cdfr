@@ -4,30 +4,34 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-#ifdef MIPI_CAMERA
-  RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
-  if ((mode > 6) || (mode < 0)) {
-    RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
-    exit(-1);
-  }
+  transformClient = this->create_client<transformix_services::srv::TransformixParametersTransformStamped>("get_transform");
 
-  arducam::arducam_init_camera(&camera_instance);
-  arducam::arducam_set_mode(camera_instance, mode);
-  arducam::arducam_reset_control(camera_instance, 0x00980911);
-  arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
-  arducam::arducam_software_auto_white_balance(camera_instance, 1);
-  arducam::arducam_manual_set_awb_compensation(rgain, bgain);
+  getTransformation(assurancetourix_to_map_transformation);
 
-#else
-  _cap.open(_api_id + _camera_id);
-  if (!_cap.isOpened()) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
-    exit(-1);
-  }
-#endif // MIPI_CAMERA
+  #ifdef MIPI_CAMERA
+    RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
+    if ((mode > 6) || (mode < 0)) {
+      RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
+      exit(-1);
+    }
+
+    arducam::arducam_init_camera(&camera_instance);
+    arducam::arducam_set_mode(camera_instance, mode);
+    arducam::arducam_reset_control(camera_instance, 0x00980911);
+    arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
+    arducam::arducam_software_auto_white_balance(camera_instance, 1);
+    arducam::arducam_manual_set_awb_compensation( rgain, bgain);
+
+  /*#else
+
+    _cap.open(_api_id + _camera_id);
+    if (!_cap.isOpened()) {
+      RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
+      exit(-1);
+    } */
+  #endif //MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  //coordonate_pub_ = this->create_publisher<geometry_msgs::msg::PointStamped>("coordonate_position_transform", qos);
   transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("coordonate_position_transform", qos);
 
   if (show_image) {
@@ -35,10 +39,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
     // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
-
-  //tf2_ros::Buffer tfBuffer(this->get_clock());
-  //tf2_ros::TransformListener tfListener(tfBuffer);
-  //assurancetourix_map_to_map = tfBuffer.lookupTransform("map", header_frame_id, rclcpp::Time(0), rclcpp::Duration(1) );
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
   RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
@@ -89,11 +89,11 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.lifetime_sec");
   this->declare_parameter("rviz_settings.lifetime_nano_sec");
 
-  this->get_parameter_or<double>("image.contrast", contrast, 3.0);
+  this->get_parameter_or<double>("image.contrast", contrast, 1.2);
   this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_ArUco", blue_color_ArUco, {0.0, 0.0, 255.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_ArUco", yellow_color_ArUco, {255.0, 255.0, 0.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_ArUco", default_color_ArUco, {120.0, 120.0, 120.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.arrow_scale", arrow_scale, {0.3, 0.05, 0.05});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.arrow_scale", arrow_scale, {0.05, 0.05, 0.05});
   this->get_parameter_or<std::vector<double>>("rviz_settings.game_elements_scale", game_elements_scale, {0.07, 0.07, 0.01});
   this->get_parameter_or<uint>("rviz_settings.robot_type", robot_type, 2);
   this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
@@ -109,17 +109,11 @@ void Assurancetourix::init_parameters() {
   marker.lifetime.nanosec = lifetime_nano_sec;
 
   base_frame = "map";
-  coordonate.header.frame_id = base_frame;
-
-  transformation.header.frame_id = base_frame;
-  transformation.child_frame_id = header_frame_id;
-  transformation.transform.translation.x = 1.4;
-  transformation.transform.translation.y = 2;
-  transformation.transform.translation.z = 1;
-  transformation.transform.rotation.w = 0.999;
-  transformation.transform.rotation.x = 0.027;
-  transformation.transform.rotation.y = 0.001;
-  transformation.transform.rotation.z = -0.021;
+  transformed_marker.header.frame_id = base_frame;
+  transformed_marker.color.a = 1.0;
+  transformed_marker.action = visualization_msgs::msg::Marker::ADD;
+  transformed_marker.lifetime.sec = lifetime_sec;
+  transformed_marker.lifetime.nanosec = lifetime_nano_sec;
 }
 
 void Assurancetourix::detect() {
@@ -144,11 +138,12 @@ void Assurancetourix::detect() {
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
 
-#ifdef MIPI_CAMERA
-  get_image();
-#else
-  _cap.read(_frame);
-#endif // MIPI_CAMERA
+  #ifdef MIPI_CAMERA
+    get_image();
+  #else
+    _frame = imread("/home/phileas/covid_home.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+    //_cap.read(_frame);
+  #endif //MIPI_CAMERA
   auto end_camera = std::chrono::high_resolution_clock::now();
 
   cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
@@ -157,9 +152,7 @@ void Assurancetourix::detect() {
   raised_contrast.copyTo(_anotated);
 
   marker.header.stamp = this->get_clock()->now();
-  tmpStampedPoint.header.stamp = this->get_clock()->now();
   transformed_marker.header.stamp = this->get_clock()->now();
-  transformation.header.stamp = this->get_clock()->now();
 
   marker_pub_->publish(marker);
 
@@ -188,7 +181,37 @@ void Assurancetourix::detect() {
     // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
-  // image_minus_t = raised_contrast;
+
+}
+
+void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped& transformation){
+  auto request = std::make_shared<transformix_services::srv::TransformixParametersTransformStamped::Request>();
+
+  std_msgs::msg::String fromFrame, toFrame;
+  fromFrame.data = header_frame_id;
+  toFrame.data = base_frame;
+  request->from_frame = fromFrame;
+  request->to_frame = toFrame;
+
+  while (!transformClient->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+  }
+  RCLCPP_INFO(this->get_logger(), "Getting transform...");
+
+  auto result = transformClient->async_send_request(request);
+
+  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+    rclcpp::executor::FutureReturnCode::SUCCESS)
+  {
+    transformation = result.get()->transform_stamped;
+    RCLCPP_INFO(this->get_logger(), "Get transform");
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "Failed to get transformation");
+  }
 }
 
 void Assurancetourix::_detect_aruco(Mat img) {
@@ -207,6 +230,13 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
   marker.scale.x = scale[0];
   marker.scale.y = scale[1];
   marker.scale.z = scale[2];
+  transformed_marker.type = type;
+  transformed_marker.color.r = color[0];
+  transformed_marker.color.g = color[1];
+  transformed_marker.color.b = color[2];
+  transformed_marker.scale.x = scale[0];
+  transformed_marker.scale.y = scale[1];
+  transformed_marker.scale.z = scale[2];
 }
 
 void Assurancetourix::_anotate_image(Mat img) {
@@ -221,9 +251,14 @@ void Assurancetourix::_anotate_image(Mat img) {
         cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
       }
 
-      marker.pose.position.x = _tvecs[i].operator[](0) - 0.15;
-      marker.pose.position.y = _tvecs[i].operator[](1) + 0.15;
-      marker.pose.position.z = _tvecs[i].operator[](2) - 0.15;
+      double x,y,z;
+      x= _tvecs[i].operator[](0) - 0.15;
+      y= _tvecs[i].operator[](1) + 0.15;
+      z= _tvecs[i].operator[](2) - 0.15;
+
+      marker.pose.position.x = x;
+      marker.pose.position.y = y;
+      marker.pose.position.z = z;
 
       double angle = norm(_rvecs[i]);
       Vec3d axis = _rvecs[i] / angle;
@@ -245,19 +280,17 @@ void Assurancetourix::_anotate_image(Mat img) {
       }
 
       marker.id = _detected_ids[i];
+
+      geometry_msgs::msg::PoseStamped tmpPoseIn, tmpPoseOut;
+      tmpPoseIn.header = marker.header;
+      tmpPoseIn.pose = marker.pose;
+
+      tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
+
+      tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
-      tmpStampedPoint.point.x = marker.pose.orientation.x;
-      tmpStampedPoint.point.y = marker.pose.orientation.y;
-      tmpStampedPoint.point.z = marker.pose.orientation.z;
-
-
-      tf2::doTransform(tmpStampedPoint, coordonate, transformation);
-      tf2::fromMsg(tmpStampedPoint, coordonate);
-
-      //coordonate.point.z = 0;
-      transformed_marker.pose.position.x = coordonate.point.x;
-      transformed_marker.pose.position.y = coordonate.point.y;
-      transformed_marker.pose.position.x = coordonate.point.z;
+      transformed_marker.header = tmpPoseOut.header;
+      transformed_marker.pose = tmpPoseOut.pose;
 
       transformed_marker_pub_ -> publish(transformed_marker);
       marker_pub_->publish(marker);

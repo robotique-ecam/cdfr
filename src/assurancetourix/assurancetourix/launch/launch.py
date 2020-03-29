@@ -8,7 +8,11 @@ import os
 import launch
 from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
+from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
 
 
 def generate_launch_description():
@@ -26,8 +30,10 @@ def generate_launch_description():
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
 
-        Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['1.4', '2', '1', '3.141592654', '0', '-2.35619449', 'map', 'assurancetourix/map']),
+        Node(package='transformix', node_executable='transformix', output='screen', arguments=[]),
 
-        Node(package='assurancetourix', node_executable='assurancetourix', output='screen', parameters=[]),
+        Node(package='tf2_ros', node_executable='static_transform_publisher', output='screen', arguments=['1.4', '2', '1', '3.141592654', '0', '-2.35619449', 'map', 'assurancetourix']),
+
+        Node(package='assurancetourix', node_executable='assurancetourix', output='screen', parameters=[params]),
 
     ])
