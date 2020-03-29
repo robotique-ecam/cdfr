@@ -4,7 +4,6 @@
 #include <TinyWireS.h>
 #include "speedramp.hpp"
 
-
 #define STEP 1
 #define I2C_ADDR 0x12
 #define STEPS_PER_MM 28 // Microstepping included
@@ -13,10 +12,8 @@
 #define PIN_ENA 1
 #define PIN_STEP 3
 
-
-#define abs(N) ((N<0)?(-N):(N))
-#define sign(N) ((N<0)?(1):(0))
-
+#define abs(N) ((N < 0) ? (-N) : (N))
+#define sign(N) ((N < 0) ? (1) : (0))
 
 bool move_up = true;
 uint32_t steps_goal = 0;
@@ -30,7 +27,6 @@ volatile bool raising = false;
 volatile bool max = false;
 volatile bool falling = false;
 
-
 void setup() {
   /* Setup IO */
   PORTB = 0;
@@ -40,13 +36,11 @@ void setup() {
   TIMSK |= (1 << OCIE1A);
 }
 
-
 void step() {
   PORTB |= (1 << PIN_STEP);
   _delay_us(2);
   PORTB &= ~(1 << PIN_STEP);
 }
-
 
 ISR(TIMER1_COMPA_vect) {
   if (raising) { // Going up to max speed
@@ -94,7 +88,6 @@ ISR(TIMER1_COMPA_vect) {
   TCNT1 = 0;
 }
 
-
 void on_receive_command(uint8_t n) {
   // Sanity check
   if (n == 1) {
@@ -131,7 +124,6 @@ void on_receive_command(uint8_t n) {
     TCCR1 = (TCCR1 & 0xf0) | prescaler[index];
   }
 }
-
 
 int main(int argc, char const *argv[]) {
 

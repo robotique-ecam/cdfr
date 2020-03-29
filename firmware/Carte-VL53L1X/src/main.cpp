@@ -3,10 +3,8 @@
 #include <VL53L1X.h>
 #include <LowPower.h>
 
-
 VL53L1X sensors[8];
 uint8_t addr = 0x30;
-
 
 void setup() {
   // All sensors pins are outputs and set to LOW
@@ -17,7 +15,7 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000);
 
-  for (uint8_t i = 0; i < 8; i++ ) {
+  for (uint8_t i = 0; i < 8; i++) {
     // Enable sensor
     PORTD += (1 << i);
     // Startup delay for sensor
@@ -38,7 +36,4 @@ void setup() {
   LowPower.idle(SLEEP_FOREVER, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
 }
 
-
-void loop() {
-
-}
+void loop() {}

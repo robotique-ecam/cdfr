@@ -1,7 +1,6 @@
 #include "FuntechStepper.h"
 
-FuntechStepper::FuntechStepper(int pin_enable, int pin_direction, int pin_step,
-                               int direction) {
+FuntechStepper::FuntechStepper(int pin_enable, int pin_direction, int pin_step, int direction) {
   this->pin_enable = pin_enable;
   this->pin_direction = pin_direction;
   this->pin_step = pin_step;

@@ -44,20 +44,18 @@
 
 #include <inttypes.h>
 
+class USI_TWI_S {
+private:
+  // static uint8_t USI_BytesAvail;
 
-class USI_TWI_S
-{
-  private:
-	//static uint8_t USI_BytesAvail;
-
-  public:
- 	USI_TWI_S();
-    void begin(uint8_t I2C_SLAVE_ADDR);
-    void send(uint8_t data);
-    uint8_t available();
-    uint8_t receive();
-    void onReceive( void (*)(uint8_t) );
-    void onRequest( void (*)(void) );
+public:
+  USI_TWI_S();
+  void begin(uint8_t I2C_SLAVE_ADDR);
+  void send(uint8_t data);
+  uint8_t available();
+  uint8_t receive();
+  void onReceive(void (*)(uint8_t));
+  void onRequest(void (*)(void));
 };
 
 void TinyWireS_stop_check();

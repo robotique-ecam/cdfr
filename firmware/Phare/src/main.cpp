@@ -3,8 +3,7 @@
 #include <SoftwareSerial.h>
 
 FuntechStepper stepper1 = FuntechStepper(0, 0, 4, FTS_BACKWARD); // Stepper fixe
-FuntechStepper stepper2 =
-    FuntechStepper(0, 0, 5, FTS_BACKWARD); // Stepper mobile
+FuntechStepper stepper2 = FuntechStepper(0, 0, 5, FTS_BACKWARD); // Stepper mobile
 
 SoftwareSerial ArduinoMaster(2, 3); // RX->D3 TX->D2
 String msg;
@@ -13,12 +12,11 @@ String msg;
 const uint8_t dataPin = 11;         // pin DO
 const uint8_t clockPin = 12;        // pin CO
 APA102<dataPin, clockPin> ledStrip; // instance du bandeau de leds
-const int ledCount = 92; // 89 réelles + 3 virtuelles pour finir le motif
+const int ledCount = 92;            // 89 réelles + 3 virtuelles pour finir le motif
 const uint8_t brightness = 5;
 rgb_color colors[ledCount];
 
-int tabIndiceLeds[16] = {0,  1,  12, 13, 23, 24, 35, 36,
-                         46, 47, 58, 59, 69, 70, 81, 82};
+int tabIndiceLeds[16] = {0, 1, 12, 13, 23, 24, 35, 36, 46, 47, 58, 59, 69, 70, 81, 82};
 int compteurLGBT = 0; // compteur pour la couleur des leds
 
 /// Drapeaux
@@ -57,8 +55,7 @@ void balayageLumiere() {
   }
 
   /// LGBT
-  compteurLGBT =
-      (compteurLGBT + 1) % 6; // Position dans l'animation arc-en-ciel
+  compteurLGBT = (compteurLGBT + 1) % 6; // Position dans l'animation arc-en-ciel
   switch (compteurLGBT) {
   case 0:
     for (int i = 0; i < 16; i++) {
@@ -101,10 +98,9 @@ void balayageLumiere() {
   }
 
   ledStrip.write(colors, ledCount, brightness); /// Animation des leds
-  delay(50); // tempo dans la vitesse du balayage
+  delay(50);                                    // tempo dans la vitesse du balayage
 
-  for (int i = 0; i < 16;
-       i++) { // translation des leds , incrémentation des indices
+  for (int i = 0; i < 16; i++) { // translation des leds , incrémentation des indices
     tabIndiceLeds[i] = (tabIndiceLeds[i] + 1) % ledCount;
   }
 }
@@ -144,9 +140,7 @@ void loop() {
           }
         }
         if (msg == "demandeStatus") {
-          msg = " phare deployé : " + String(phareDeploye) +
-                " phare allumé : " + String(phareAllume) +
-                " Phare deposé : " + String(phareDepose);
+          msg = " phare deployé : " + String(phareDeploye) + " phare allumé : " + String(phareAllume) + " Phare deposé : " + String(phareDepose);
           ArduinoMaster.print(msg);
         }
       }

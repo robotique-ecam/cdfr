@@ -4,7 +4,6 @@
 #include <avr/interrupt.h>
 #include <TinyWireS.h>
 
-
 #define TRIG_PIN 4
 #define ECHO_PIN 3
 #define DEVICE_ADDR 0x20
@@ -23,8 +22,14 @@
 #define SFTRIG 3 // HCSR0x has been triggered
 
 #define FILTER_WINDOW 3
-#define swap(a,b) a ^= b; b ^= a; a ^= b;
-#define sort(a,b) if(a>b){ swap(a,b); }
+#define swap(a, b)                                                                                                                                                                 \
+  a ^= b;                                                                                                                                                                          \
+  b ^= a;                                                                                                                                                                          \
+  a ^= b;
+#define sort(a, b)                                                                                                                                                                 \
+  if (a > b) {                                                                                                                                                                     \
+    swap(a, b);                                                                                                                                                                    \
+  }
 
 volatile uint8_t flags;
 
@@ -38,11 +43,10 @@ uint8_t index = 0;
 
 ////////////////// ROUTINES //////////////////////////
 
-
 void setup() {
   /* Set Inputs/Outputs */
   PORTB = 0;
-  DDRB |= (1 << TRIG_PIN) | (0 << ECHO_PIN) | (1<<DDB1);
+  DDRB |= (1 << TRIG_PIN) | (0 << ECHO_PIN) | (1 << DDB1);
 
   /* Setup PCINT3 REGISTERS AND ISR */
   GIMSK |= (1 << PCIE);
@@ -52,23 +56,22 @@ void setup() {
   TIMSK |= (1 << TOIE1);
 
   /* set timer0 A and B on PWM output and non-inverser */
-  TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1<<COM0A1) | (1<<COM0B1);
+  TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1 << COM0A1) | (1 << COM0B1);
 
-  /* setting for a 488Hz PWM frequency
-  f_pwm = f_ATtiny / (256 * prescaler) */
-  #if F_CPU == 1000000UL
-    // prescaler to 8
-    TCCR0B |= (1 << CS01);
-  #elif F_CPU == 8000000UL
-    // prescaler to 64
-    TCCR0B |= (1 << CS01) | (1 << CS00);
-  #elif F_CPU == 16000000UL
-    // prescaler to 256, here no prescaler so f_pwm to 244Hz
-    TCCR0B |= (1 << CS02);
-  #else
-  #error("Check datasheet for TCCR0B register content")
-  #endif
-
+/* setting for a 488Hz PWM frequency
+f_pwm = f_ATtiny / (256 * prescaler) */
+#if F_CPU == 1000000UL
+  // prescaler to 8
+  TCCR0B |= (1 << CS01);
+#elif F_CPU == 8000000UL
+  // prescaler to 64
+  TCCR0B |= (1 << CS01) | (1 << CS00);
+#elif F_CPU == 16000000UL
+  // prescaler to 256, here no prescaler so f_pwm to 244Hz
+  TCCR0B |= (1 << CS02);
+#else
+#error("Check datasheet for TCCR0B register content")
+#endif
 }
 
 void generate_trig_pulse() {
@@ -107,19 +110,20 @@ void transmit(uint8_t n) {
   TinyWireS.send(0xDE);
 }
 
-void pwm_PB0(uint8_t dutyCycle){
+void pwm_PB0(uint8_t dutyCycle) {
   /* Set duty cycle of the pwm on the timer0B for the PB0 output
      50cm ~ 0% and 5cm ~ 8% */
-  if (dutyCycle<0.5 || dutyCycle > 20){dutyCycle = 0;}
+  if (dutyCycle < 0.5 || dutyCycle > 20) {
+    dutyCycle = 0;
+  }
   OCR0B = dutyCycle;
 }
 
 uint8_t median(uint8_t *mesurements) {
-  sort(mesurements[0] ,mesurements[2]);
-  sort(mesurements[0] ,mesurements[1]);
+  sort(mesurements[0], mesurements[2]);
+  sort(mesurements[0], mesurements[1]);
   return mesurements[1];
 }
-
 
 ////////////////// INTERUPTS HANDLING ///////////////
 
@@ -158,7 +162,6 @@ int main(int argc, char const *argv[]) {
   while (1) {
 
     TinyWireS_stop_check();
-
   }
 
   return 0;

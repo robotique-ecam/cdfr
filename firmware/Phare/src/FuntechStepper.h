@@ -5,8 +5,7 @@
 
 class FuntechStepper {
 public:
-  FuntechStepper(int pin_enable, int pin_direction, int pin_step,
-                 int direction);
+  FuntechStepper(int pin_enable, int pin_direction, int pin_step, int direction);
   void enable(void);
   void disable(void);
   void setDirection(int direction);
