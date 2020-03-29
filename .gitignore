@@ -110,6 +110,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-*.pio
+*.pio/*
 *.gcc-flags.json
 *.clang_complete
