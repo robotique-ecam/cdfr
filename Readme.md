@@ -23,7 +23,7 @@ cd path/to/ros
 
 ### Changelog
 
-##### v0.7. 0
+#### v0.7. 0
 - Full support for asterix, obelix, assurancetourix and pharaon running simultaneously
 - Upstreamed navigation2 stack to master branch
 - Refactored behavior trees with full strategy engine support
@@ -32,9 +32,13 @@ cd path/to/ros
 - Added transformix service for transformations
 - Added firmware for microcontrolers and pharaon
 - Consistent code formatting through the whole repository
+- Refactored setup script and updated docs
+- Default build type for cmake is now Release
+- Updated CI to use setup script in simulation mode
 - Added changelog
 
-##### v0.6.0b
+
+#### v0.6.0b
 - Added actuators node, with full support for Arbotix-M and actuators board
 - Partial namespacing for asterix
 - Assurancetourix node fine tuning
@@ -44,31 +48,31 @@ cd path/to/ros
 - Created panoramix server node
 
 
-##### v0.5.0
+#### v0.5.0
 - Pharaon interface as ROS 2 service
 - URDF XACRO templating for asterix and obelix
 - Added support for MIPI_CAMERA in assurancetourix
 - Higher accuracy in navigation
 
 
-##### v0.4.0
+#### v0.4.0
 - Created assurancetourix ARUCO detection Node
 - Added LCD screen driver node
 - Tuning the navigation stack
 
 
-##### v0.3.0
+#### v0.3.0
 - Fixes inside drive node for odometry
 - Added sensors inside URDF
 - Adding support for ROS 2 navigation stack
 
 
-##### v0.2.0
+#### v0.2.0
 - Adding odometry to drive node
 - Adding sensors node with support for custom HCSR04 over I2C
 - Adding parameters file
 
 
-##### v0.1.0
+#### v0.1.0
 - Drive node creation. Supports receiving speed commands
 - Range sensors PoC using ARM mbed on FRDM K64F
