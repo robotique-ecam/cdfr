@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <string>
+//#include <cmath>
 #include <bits/stdc++.h>
 #include <rclcpp/rclcpp.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -24,6 +25,8 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include "transformix_services/srv/transformix_parameters_transform_stamped.hpp"
+#include "transformix_services/srv/transformix_parameters_transfrom_pose.hpp"
 
 
 using namespace rclcpp;
@@ -41,6 +44,7 @@ private:
   void _detect_aruco(Mat img);
   void _anotate_image(Mat img);
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
+  void getTransformation(geometry_msgs::msg::TransformStamped& transformation);
 
   #ifdef MIPI_CAMERA
   arducam::CAMERA_INSTANCE camera_instance;
@@ -77,13 +81,7 @@ private:
   visualization_msgs::msg::Marker transformed_marker;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr transformed_marker_pub_;
 
-  geometry_msgs::msg::PointStamped coordonate;
-  geometry_msgs::msg::PointStamped tmpStampedPoint;
-
-  geometry_msgs::msg::TransformStamped transformation;
-
-  //tf2_ros::TransformListener tf2_listener = new tf2_ros::TransformListener(tfBuffer);
-  geometry_msgs::msg::TransformStamped assurancetourix_map_to_map;
+  geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
   // Parameters
   int _camera_id, mode, lifetime_sec, lifetime_nano_sec, exposure;
@@ -92,6 +90,8 @@ private:
   double contrast;
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale;
   std::string base_frame, header_frame_id;
+
+  rclcpp::Client<transformix_services::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;
 
 };
 

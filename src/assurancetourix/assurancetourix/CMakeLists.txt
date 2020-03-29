@@ -23,6 +23,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(transformix_services REQUIRED)
 
 
 ################################################################################
@@ -42,6 +43,7 @@ set(dependencies
   "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
+  "transformix_services"
 )
 
 set(EXEC_NAME "assurancetourix")
@@ -74,7 +76,7 @@ install(TARGETS ${EXEC_NAME}
 )
 
 install(
-  DIRECTORY launch map
+  DIRECTORY launch map param
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -82,9 +84,6 @@ install(DIRECTORY include/
   DESTINATION include/
 )
 
-install(DIRECTORY param/
-  DESTINATION share/${PROJECT_NAME}/param
-)
 
 ################################################################################
 # Macro for ament package
