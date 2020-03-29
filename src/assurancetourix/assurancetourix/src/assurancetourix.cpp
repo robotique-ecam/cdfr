@@ -4,32 +4,32 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-  transformClient = this->create_client<transformix_services::srv::TransformixParametersTransformStamped>("get_transform");
+  transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("get_transform");
 
   getTransformation(assurancetourix_to_map_transformation);
 
-  #ifdef MIPI_CAMERA
-    RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
-    if ((mode > 6) || (mode < 0)) {
-      RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
-      exit(-1);
-    }
+#ifdef MIPI_CAMERA
+  RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
+  if ((mode > 6) || (mode < 0)) {
+    RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
+    exit(-1);
+  }
 
-    arducam::arducam_init_camera(&camera_instance);
-    arducam::arducam_set_mode(camera_instance, mode);
-    arducam::arducam_reset_control(camera_instance, 0x00980911);
-    arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
-    arducam::arducam_software_auto_white_balance(camera_instance, 1);
-    arducam::arducam_manual_set_awb_compensation( rgain, bgain);
+  arducam::arducam_init_camera(&camera_instance);
+  arducam::arducam_set_mode(camera_instance, mode);
+  arducam::arducam_reset_control(camera_instance, 0x00980911);
+  arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
+  arducam::arducam_software_auto_white_balance(camera_instance, 1);
+  arducam::arducam_manual_set_awb_compensation(rgain, bgain);
 
-  /*#else
+/*#else
 
-    _cap.open(_api_id + _camera_id);
-    if (!_cap.isOpened()) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
-      exit(-1);
-    } */
-  #endif //MIPI_CAMERA
+  _cap.open(_api_id + _camera_id);
+  if (!_cap.isOpened()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
+    exit(-1);
+  } */
+#endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
   transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("coordonate_position_transform", qos);
@@ -46,18 +46,18 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
 #ifdef MIPI_CAMERA
 void Assurancetourix::get_image() {
-    arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
-    arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
-    if (buffer) {
-      width = VCOS_ALIGN_UP(3280, 32);
-      height = VCOS_ALIGN_UP(2464, 16);
-      cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
-      cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
-      arducam::arducam_release_buffer(buffer);
-      cv::flip(*image, *image, -1);
-      _frame = *image;
-      delete image;
-    }
+  arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
+  arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
+  if (buffer) {
+    width = VCOS_ALIGN_UP(3280, 32);
+    height = VCOS_ALIGN_UP(2464, 16);
+    cv::Mat *image = new cv::Mat(cv::Size(width, (int)(height * 1.5)), CV_8UC1, buffer->data);
+    cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
+    arducam::arducam_release_buffer(buffer);
+    cv::flip(*image, *image, -1);
+    _frame = *image;
+    delete image;
+  }
 }
 #endif // MIPI_CAMERA
 
@@ -66,18 +66,18 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("image.show_image");
   this->get_parameter_or<bool>("image.show_image", show_image, false);
 
-  #ifdef MIPI_CAMERA
-    this->declare_parameter("camera.exposure");
-    this->declare_parameter("camera.rgain");
-    this->declare_parameter("camera.bgain");
-    this->declare_parameter("camera.mode");
-    this->get_parameter_or<int>("camera.exposure", exposure,250);
-    this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
-    this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
-    this->get_parameter_or<int>("camera.mode", mode, 0);
-  #endif
+#ifdef MIPI_CAMERA
+  this->declare_parameter("camera.exposure");
+  this->declare_parameter("camera.rgain");
+  this->declare_parameter("camera.bgain");
+  this->declare_parameter("camera.mode");
+  this->get_parameter_or<int>("camera.exposure", exposure, 250);
+  this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
+  this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
+  this->get_parameter_or<int>("camera.mode", mode, 0);
+#endif
 
-  //declare variables from yml
+  // declare variables from yml
   this->declare_parameter("image.contrast");
   this->declare_parameter("rviz_settings.blue_color_ArUco");
   this->declare_parameter("rviz_settings.yellow_color_ArUco");
@@ -138,12 +138,12 @@ void Assurancetourix::detect() {
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
 
-  #ifdef MIPI_CAMERA
-    get_image();
-  #else
-    _frame = imread("/home/phileas/covid_home.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-    //_cap.read(_frame);
-  #endif //MIPI_CAMERA
+#ifdef MIPI_CAMERA
+  get_image();
+#else
+  _frame = imread("/home/phileas/covid_home.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+  //_cap.read(_frame);
+#endif // MIPI_CAMERA
   auto end_camera = std::chrono::high_resolution_clock::now();
 
   cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
@@ -181,11 +181,10 @@ void Assurancetourix::detect() {
     // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
-
 }
 
-void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped& transformation){
-  auto request = std::make_shared<transformix_services::srv::TransformixParametersTransformStamped::Request>();
+void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &transformation) {
+  auto request = std::make_shared<transformix_msgs::srv::TransformixParametersTransformStamped::Request>();
 
   std_msgs::msg::String fromFrame, toFrame;
   fromFrame.data = header_frame_id;
@@ -204,9 +203,7 @@ void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped& tr
 
   auto result = transformClient->async_send_request(request);
 
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-    rclcpp::executor::FutureReturnCode::SUCCESS)
-  {
+  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::executor::FutureReturnCode::SUCCESS) {
     transformation = result.get()->transform_stamped;
     RCLCPP_INFO(this->get_logger(), "Get transform");
   } else {
@@ -251,10 +248,10 @@ void Assurancetourix::_anotate_image(Mat img) {
         cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
       }
 
-      double x,y,z;
-      x= _tvecs[i].operator[](0) - 0.15;
-      y= _tvecs[i].operator[](1) + 0.15;
-      z= _tvecs[i].operator[](2) - 0.15;
+      double x, y, z;
+      x = _tvecs[i].operator[](0) - 0.15;
+      y = _tvecs[i].operator[](1) + 0.15;
+      z = _tvecs[i].operator[](2) - 0.15;
 
       marker.pose.position.x = x;
       marker.pose.position.y = y;
@@ -292,7 +289,7 @@ void Assurancetourix::_anotate_image(Mat img) {
       transformed_marker.header = tmpPoseOut.header;
       transformed_marker.pose = tmpPoseOut.pose;
 
-      transformed_marker_pub_ -> publish(transformed_marker);
+      transformed_marker_pub_->publish(transformed_marker);
       marker_pub_->publish(marker);
       RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }

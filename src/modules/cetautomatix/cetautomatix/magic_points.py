@@ -57,10 +57,6 @@ ZONES = {
 }
 
 
-ELEMENTS = {
-    
-}
-
 elements = {
     "ECUEIL_BLEU": (0, 0.4, 180, 0),
     "ECUEIL_JAUNE": (3, 0.4, 0, 0),

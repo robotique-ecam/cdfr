@@ -23,7 +23,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(transformix_services REQUIRED)
+find_package(transformix_msgs REQUIRED)
 
 
 ################################################################################
@@ -43,7 +43,7 @@ set(dependencies
   "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
-  "transformix_services"
+  "transformix_msgs"
 )
 
 set(EXEC_NAME "assurancetourix")
@@ -74,7 +74,7 @@ install(TARGETS ${EXEC_NAME}
 )
 
 install(
-  DIRECTORY launch map param
+  DIRECTORY launch param
   DESTINATION share/${PROJECT_NAME}
 )
 
