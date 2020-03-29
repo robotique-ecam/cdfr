@@ -4,7 +4,7 @@ To enable all 6 I2C interfaces on Raspberry Pi 4, add this to boot config.txt
 # Uncomment some or all of these to enable the optional hardware interfaces
 #dtparam=spi=on
 #dtparam=i2s=on
-dtparam=i2c_arm=on
+dtparam=i2c_arm=on,i2c_arm_baudrate=400000
 dtoverlay=i2c6
 dtoverlay=i2c5
 dtoverlay=i2c4
