@@ -20,6 +20,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
 
 
 ################################################################################
@@ -36,6 +37,7 @@ set(dependencies
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
+  "diagnostic_msgs"
 )
 
 set(EXEC_NAME "drive")
@@ -83,10 +85,5 @@ install(DIRECTORY include/
 # Macro for ament package
 ################################################################################
 ament_export_include_directories(include)
-ament_export_dependencies(geometry_msgs)
-ament_export_dependencies(nav_msgs)
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(sensor_msgs)
-ament_export_dependencies(tf2)
-ament_export_dependencies(tf2_msgs)
+ament_export_dependencies(${dependencies})
 ament_package()

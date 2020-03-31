@@ -12,6 +12,8 @@
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <diagnostic_msgs/msg/diagnostic_array.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
 
 #define LEFT 0
 #define RIGHT 1
@@ -73,9 +75,12 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_states_pub_;
   rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr tf_pub_;
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_pub_;
 
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+
+  rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
   rclcpp::TimerBase::SharedPtr timer_;
@@ -88,6 +93,8 @@ private:
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
+  diagnostic_msgs::msg::DiagnosticArray diagnostics_array_;
+  diagnostic_msgs::msg::DiagnosticStatus diagnostics_status_;
 
   double accel_;
   double wheel_separation_;
@@ -130,6 +137,7 @@ private:
   void update_joint_states();
   void update_odometry();
   void update_velocity();
+  void update_diagnostic();
   void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
   void steps_received_callback(int32_t steps, uint8_t id);

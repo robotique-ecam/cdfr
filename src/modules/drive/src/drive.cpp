@@ -21,13 +21,16 @@ Drive::Drive() : Node("drive_node") {
 #endif /* USE_SPEEDRAMP */
 
   /* Init ROS Publishers and Subscribers */
-  auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+  auto qos = rclcpp::QoS(rclcpp::KeepLast(5));
 
   odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", qos);
   joint_states_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", qos);
   tf_pub_ = this->create_publisher<tf2_msgs::msg::TFMessage>("tf", qos);
+  diagnostics_pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", 1);
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
+
+  diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
@@ -92,6 +95,14 @@ void Drive::init_variables() {
   old_cmd_vel_.right = 0;
   old_cmd_vel_.left = 0;
 #endif /* SIMULATION */
+
+  diagnostics_status_.level = diagnostics_status_.OK;
+  diagnostics_status_.name = get_fully_qualified_name();
+  diagnostics_status_.message = "Running";
+  diagnostics_status_.hardware_id = get_fully_qualified_name();
+
+  diagnostics_array_.status.push_back(diagnostics_status_);
+  diagnostics_array_.header.stamp = this->get_clock()->now();
 
   time_since_last_sync_ = this->get_clock()->now();
 }
@@ -221,6 +232,10 @@ void Drive::update_joint_states() {
   joint_states_.velocity[LEFT] = attiny_steps_returned_.left * rads_per_step / dt;
   joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
+}
+
+void Drive::update_diagnostic() {
+  diagnostics_pub_->publish(diagnostics_array_);
 }
 
 Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }
