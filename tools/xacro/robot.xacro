@@ -2,7 +2,7 @@
 
 <robot name="${robot}" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:property name="tf_prefix" value="${robot}/"/>
+  <xacro:property name="tf_prefix" value=""/>
 
   <xacro:include filename="colors.xacro"/>
   <xacro:include filename="inertias.xacro"/>

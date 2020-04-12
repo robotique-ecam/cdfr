@@ -2,7 +2,7 @@
 
 <robot name="asterix" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:property name="robot" value="obelix"/>
+  <xacro:property name="robot" value="asterix"/>
 
   <xacro:property name="robotbase_lenght" value="0.2"/>
   <xacro:property name="robotbase_width" value="0.26"/>
