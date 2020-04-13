@@ -141,7 +141,7 @@ void Assurancetourix::detect() {
 #ifdef MIPI_CAMERA
   get_image();
 #else
-  _frame = imread("/home/phileas/covid_home.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+  _frame = imread("/home/phileas/covid_home.jpg", cv::IMREAD_GRAYSCALE);
   //_cap.read(_frame);
 #endif // MIPI_CAMERA
   auto end_camera = std::chrono::high_resolution_clock::now();
