@@ -20,10 +20,18 @@
                 toastr.success('Connected to api')
             });
 
-            socket.on('console_out', function(msg, cb) {
-                $('#console').append(msg.text + '\n');
-                if (cb)
-                    cb();
+            socket.on('console_out', function(msg) {
+                $('#console').append(msg.text);
+                if($('#console').length)
+                    $('#console').scrollTop($('#console')[0].scrollHeight - $('#console').height());
+            });
+
+            socket.on('console_msg', function(msg) {
+              if (msg.level == 'ERROR' || msg.level == 'FATAL') {
+                toastr.error(msg.msg, msg.name, {timeOut: 0, extendedTimeout: 0, closeButton: true})
+              } else if (msg.level == 'WARN') {
+                toastr.warning(msg.msg, msg.name, {timeOut: 0, extendedTimeout: 0, closeButton: true})
+              }
             });
         });
     </script>
@@ -33,6 +41,13 @@
     <h1>Panoramix</h1>
 
     <h5>Console</h2>
-    <textarea class="form-control" id="console" rows="10" readonly></textarea>
+    <div class="form-control" id="console" readonly></div>
+
+    <style>
+      #console {
+        height: 300px;
+        overflow-y: scroll;
+      }
+    </style>
 </body>
 </html>
