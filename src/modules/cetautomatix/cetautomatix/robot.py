@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 
-import rclpy
-import py_trees
 import numpy as np
-from rclpy.node import Node
-from nav_msgs.msg import Odometry
+
+import py_trees
+import rclpy
 from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
+from nav_msgs.msg import Odometry
+from rclpy.node import Node
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
 
@@ -24,7 +25,7 @@ class Robot(Node):
         self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
-        self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
 
     def _synchronous_call(self, client, request):
         """Synchronous service call util function."""
@@ -45,7 +46,7 @@ class Robot(Node):
         """Preempt an action for the BT."""
         self.get_goal_pose()
         self._change_action_status_request.action = action
-        self._change_action_status_request.request = "PREEMPT"
+        self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
@@ -57,7 +58,7 @@ class Robot(Node):
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
-        self._change_action_status_request.request = "DROP"
+        self._change_action_status_request.request = 'DROP'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
@@ -69,7 +70,7 @@ class Robot(Node):
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
-        self._change_action_status_request.request = "CONFIRM"
+        self._change_action_status_request.request = 'CONFIRM'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False

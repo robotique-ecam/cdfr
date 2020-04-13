@@ -31,8 +31,9 @@
 
 # @file arbotix.py Low-level code to control an ArbotiX.
 
-import serial
 from threading import RLock
+
+import serial
 from actuators.arbotix import ax12
 
 # @brief ArbotiX errors. Used by now to handle broken serial connections.
@@ -56,7 +57,7 @@ class ArbotiX:
     # increase this.
     ##
     # @param open Whether to open immediately the serial port.
-    def __init__(self, port="/dev/ttyUSB0", baud=115200, timeout=0.1, open_port=True):
+    def __init__(self, port='/dev/ttyUSB0', baud=115200, timeout=0.1, open_port=True):
         self._mutex = RLock()
         self._ser = serial.Serial()
 
@@ -123,9 +124,9 @@ class ArbotiX:
         elif mode == 4:         # read error
             self.error = ord(d)
             if leng == 2:
-                return self.getPacket(6, id, leng, ord(d), list())
+                return self.getPacket(6, id, leng, ord(d), [])
             else:
-                return self.getPacket(5, id, leng, ord(d), list())
+                return self.getPacket(5, id, leng, ord(d), [])
         elif mode == 5:         # read params
             params.append(ord(d))
             if len(params) + 2 == leng:
@@ -206,7 +207,7 @@ class ArbotiX:
     # @param values The data to write, in a list of lists. Format should be
     # [(id1, val1, val2), (id2, val1, val2)]
     def syncWrite(self, start, values):
-        output = list()
+        output = []
         for i in values:
             output = output + i
         length = len(output) + 4                # length of overall packet
@@ -532,7 +533,7 @@ class ArbotiX:
         if index > 7:
             return -1
         if value != 0 and (value < 500 or value > 2500):
-            print("ArbotiX Error: Servo value out of range:", value)
+            print('ArbotiX Error: Servo value out of range:', value)
         else:
             self.write(253, self._SERVO_BASE + 2 *
                        index, [value % 256, value >> 8])

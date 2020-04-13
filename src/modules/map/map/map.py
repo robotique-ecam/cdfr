@@ -6,6 +6,7 @@
 
 import sys
 from os import path
+
 from PIL import Image, ImageDraw
 
 noir = (0, 0, 0)
@@ -25,7 +26,7 @@ def cm_pix(taille_cm, cmpar_pixel):
 
 
 def creamap():
-    """Function for creating basemap."""
+    """Create basemap."""
     map = Image.new('RGB', (cm_pix(longueur_cm, reso),
                             cm_pix(largeur_cm, reso)), blanc)
 
@@ -50,7 +51,8 @@ def creamap():
 
 def add_background(img):
     """Create background for map."""
-    back = Image.new('RGB', (cm_pix(longueur_cm+offset_cm, reso), cm_pix(largeur_cm+offset_cm, reso)), bg_color)
+    back = Image.new('RGB', (cm_pix(longueur_cm+offset_cm, reso),
+                             cm_pix(largeur_cm+offset_cm, reso)), bg_color)
     bg_w, bg_h = back.size
     img_w, img_h = img.size
     offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
@@ -64,7 +66,7 @@ def creamapbleu():
     draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
                                         cm_pix(largeur_cm, reso))), noir, 1)
     mapbleu = add_background(mapbleu)
-    mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.pgm"))
+    mapbleu.save(path.join(sys.argv[1], 'map', 'mapbleu.pgm'))
 
 
 def creamapjaune():
@@ -73,7 +75,7 @@ def creamapjaune():
     draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
                                        cm_pix(largeur_cm, reso))), noir, 1)
     mapjaune = add_background(mapjaune)
-    mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.pgm"))
+    mapjaune.save(path.join(sys.argv[1], 'map', 'mapjaune.pgm'))
 
 
 if __name__ == '__main__':

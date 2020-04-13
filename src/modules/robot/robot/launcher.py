@@ -5,20 +5,20 @@
 
 
 import os
-import launch
 import tempfile
-from launch.conditions import IfCondition
-from launch.actions import GroupAction
-from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
-from launch_ros.actions import Node, PushRosNamespace
-from launch.substitutions import LaunchConfiguration
+
+import launch
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import (DeclareLaunchArgument, GroupAction,
+                            IncludeLaunchDescription)
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node, PushRosNamespace
 
 
 def generate_robot_launch_description(robot_namespace: str):
-
+    """Generate robot launch description based on namespace."""
     map = LaunchConfiguration('map')
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
@@ -27,7 +27,8 @@ def generate_robot_launch_description(robot_namespace: str):
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
     robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
-    navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
+    navigation_params = os.path.join(
+        get_package_share_directory('robot'), 'param', 'robot.yml')
     with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
         for f in (r, n):
             params.file.write(f.read())
@@ -81,7 +82,8 @@ def generate_robot_launch_description(robot_namespace: str):
 
         GroupAction([
 
-            PushRosNamespace(condition=IfCondition(use_namespace), namespace=namespace),
+            PushRosNamespace(condition=IfCondition(
+                use_namespace), namespace=namespace),
 
             Node(
                 package='lcd_driver',

@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
-import rclpy
 import py_trees
 import py_trees_ros
+import rclpy
+from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
+                                            NewAction, PavillonAction,
+                                            ReleaseAction, SetupTimersAction)
+from cetautomatix.robot import Robot
+from nav2_msgs.action import NavigateToPose
+
 try:
     import RPi.GPIO as GPIO
 except ImportError:
     from cetautomatix.utils.simulation import GPIOSim
-    print("Not running on RPI. Fallback to simulation !!!", flush=True)
+    print('Not running on RPI. Fallback to simulation !!!', flush=True)
     GPIO = GPIOSim()
-from cetautomatix.robot import Robot
-from nav2_msgs.action import NavigateToPose
-from cetautomatix.custom_behaviours import NewAction, ConfirmAction, ReleaseAction, SetupTimersAction, PavillonAction, EndOfGameAction
 
 
 rclpy.init(args=None)
@@ -24,13 +27,13 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     # Execute
     navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
-        action_name="navigate_to_pose",
-        name="NavigateToPose",
+        action_name='navigate_to_pose',
+        name='NavigateToPose',
         key='goal',
         generate_feedback_message=robot.get_goal_pose()
     )
 
-    actuator = py_trees.behaviours.Success(name="Actuators")
+    actuator = py_trees.behaviours.Success(name='Actuators')
 
     execute = py_trees.composites.Sequence(
         name='ExecuteAction',
@@ -49,12 +52,12 @@ def create_tree() -> py_trees.behaviour.Behaviour:
     )
 
     release_action = ReleaseAction(
-        name="ReleaseAction",
+        name='ReleaseAction',
         robot=robot
     )
 
     failure_handler = py_trees.composites.Selector(
-        name="FailureHandler",
+        name='FailureHandler',
         children=[execute, release_action]
     )
 
@@ -67,7 +70,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
 
     # Asterix Root
     all_actions = py_trees.composites.Parallel(
-        name="All Actions",
+        name='All Actions',
         policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
         children=[pavillon, actions]
     )
@@ -79,7 +82,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         actions={pavillon: 95.0, end_of_game: 100.0}
     )
     asterix = py_trees.composites.Selector(
-        name="Asterix",
+        name='Asterix',
         children=[setup_timers, end_of_game, all_actions]
     )
 
@@ -88,7 +91,7 @@ def create_tree() -> py_trees.behaviour.Behaviour:
         return False if GPIO.input(27) else True
 
     guardGoupille = py_trees.decorators.EternalGuard(
-        name="Goupille?",
+        name='Goupille?',
         condition=conditionGoupille,
         child=asterix
     )

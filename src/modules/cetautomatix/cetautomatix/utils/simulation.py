@@ -6,7 +6,8 @@
 
 import sys
 from threading import Thread
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
 
 def create_app():
@@ -22,7 +23,6 @@ def create_app():
 
 
 class GPIOSim:
-
     """GPIO emulation."""
 
     def __init__(self):

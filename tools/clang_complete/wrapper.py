@@ -3,7 +3,7 @@
 # Copyright 2018  Ternaris.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Compiler wrapper for creating .clang_complete"""
+"""Compiler wrapper for creating .clang_complete ."""
 
 import os
 import subprocess
@@ -11,7 +11,7 @@ import sys
 
 
 def find_root():
-    """Find root of colcon workspace"""
+    """Find root of colcon workspace."""
     path = os.path.dirname(os.path.abspath(__file__))
     while path != '/':
         if os.path.exists(os.path.join(path, 'build', 'COLCON_IGNORE')):
@@ -21,9 +21,8 @@ def find_root():
 
 
 def wrapper():
-    """Update .clang_complete and forward call"""
-
-    cache = os.path.join(find_root(), ".clang_complete")
+    """Update .clang_complete and forward call."""
+    cache = os.path.join(find_root(), '.clang_complete')
     binary = os.path.basename(__file__)
 
     addargs = set()
