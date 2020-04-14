@@ -1,0 +1,32 @@
+#VRML_SIM R2020a utf8
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.9969814099807393 -0.05742651662219471 0.05225192189247999 5.238200395786997
+  position 0.27079531972741633 2.7237691442796415 1.1429074663406324
+  followType "Pan and Tilt Shot"
+}
+TexturedBackground {
+  texture "empty_office"
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  name "table border"
+  floorSize 3 2
+  floorTileSize 3 2
+  floorAppearance Appearance {
+    material Material {
+      diffuseColor 0 0 0
+      shininess 0.1
+    }
+    texture ImageTexture {
+      url [
+        "Eurobot2020_vinyl_plateau_v1.png"
+      ]
+      repeatS FALSE
+      repeatT FALSE
+    }
+  }
+  wallThickness 0.02
+}
