@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 
+
+"""Behavior tree definition."""
+
+
 import py_trees
 import py_trees_ros
 import rclpy
 from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
                                             NewAction, PavillonAction,
                                             ReleaseAction, SetupTimersAction)
-from cetautomatix.robot import Robot
 from nav2_msgs.action import NavigateToPose
 
 try:
     import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 except ImportError:
-    from cetautomatix.utils.simulation import GPIOSim
-    print('Not running on RPI. Fallback to simulation !!!', flush=True)
-    GPIO = GPIOSim()
+    print('Not running on RPI. Fallback to ros service call !!!', flush=True)
+    GPIO = None
 
 
 rclpy.init(args=None)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-robot = Robot()
 
 
-def create_tree() -> py_trees.behaviour.Behaviour:
-    # Execute
+def create_tree(robot) -> py_trees.behaviour.Behaviour:
+    """Create py_tree nodes."""
     navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
         action_name='navigate_to_pose',
@@ -88,7 +89,10 @@ def create_tree() -> py_trees.behaviour.Behaviour:
 
     # Goupille Guard
     def conditionGoupille():
-        return False if GPIO.input(27) else True
+        """Guard condition for goupille."""
+        if GPIO is None:
+            return robot.triggered()
+        return not GPIO.input(27) or robot.triggered()
 
     guardGoupille = py_trees.decorators.EternalGuard(
         name='Goupille?',

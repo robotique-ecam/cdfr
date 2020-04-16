@@ -3,14 +3,17 @@
 
 import sys
 
-import py_trees.console as console
-import py_trees_ros
 import rclpy
-from cetautomatix import tree as t
+import py_trees_ros
+import py_trees.console as console
+from cetautomatix.robot import Robot
+from cetautomatix.tree import create_tree
+from rclpy.executors import SingleThreadedExecutor
 
 
 def main():
-    root = t.create_tree()
+    robot = Robot()
+    root = create_tree(robot)
     tree = py_trees_ros.trees.BehaviourTree(
         root=root,
         unicode_tree_debug=False
@@ -32,13 +35,18 @@ def main():
 
     tree.tick_tock(period_ms=100)
 
+    executor = SingleThreadedExecutor()
+    executor.add_node(robot)
+    executor.add_node(tree.node)
+
     try:
-        rclpy.spin(tree.node)
+        executor.spin()
     except KeyboardInterrupt:
         pass
 
-    tree.shutdown()
+    executor.shutdown()
     tree.node.destroy_node()
+    robot.destroy_node()
     rclpy.shutdown()
 
 

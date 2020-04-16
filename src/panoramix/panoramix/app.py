@@ -10,6 +10,7 @@ from flask_socketio import SocketIO
 try:
     from panoramix.panoramix import ros_events_thread
 except ImportError:
+    print('[!] ROS 2 was not found')
     def ros_events_thread(*args, **kwargs): return None
 
 
