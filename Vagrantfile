@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -84,7 +84,8 @@ Vagrant.configure("2") do |config|
     sudo apt-get install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-nav2-bringup ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-py-trees ros-$ROS_DISTRO-py-trees-ros libopencv-dev libboost-dev
 
     echo "Installing optional argcomplete \n"
-    sudo apt-get install -y python3-argcomplete python3-colcon-common-extensions
+    sudo apt-get install -y python3-argcomplete python3-colcon-common-extensions python3-pip
+    python3 -m pip install flask flask-socketio
     . /opt/ros/$ROS_DISTRO/setup.bash
     echo ". /opt/ros/$ROS_DISTRO/setup.bash" >> /home/vagrant/.bashrc
 

@@ -2,23 +2,25 @@
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.9969814099807393 -0.05742651662219471 0.05225192189247999 5.238200395786997
-  position 0.27079531972741633 2.7237691442796415 1.1429074663406324
+  orientation 0.9951184204137342 -0.09029518648176406 -0.03982597960500143 5.448769299144775
+  position 0.3104560239774314 2.2932818215526978 1.5987901795321926
   followType "Pan and Tilt Shot"
 }
 TexturedBackground {
   texture "empty_office"
+  luminosity 2
 }
 TexturedBackgroundLight {
+  texture "empty_office"
+  luminosity 15
 }
 RectangleArena {
-  name "table border"
+  name "TableDeJeu"
   floorSize 3 2
   floorTileSize 3 2
   floorAppearance Appearance {
     material Material {
-      diffuseColor 0 0 0
-      shininess 0.1
+      emissiveColor 0.9 0.9 1
     }
     texture ImageTexture {
       url [
@@ -26,7 +28,11 @@ RectangleArena {
       ]
       repeatS FALSE
       repeatT FALSE
+      filtering 1
     }
   }
   wallThickness 0.02
+  wallAppearance DEF TABLE_COLOR PaintedWood {
+    colorOverride 0.68 0.68 0.61
+  }
 }

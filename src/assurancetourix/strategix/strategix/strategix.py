@@ -40,7 +40,10 @@ class StrategixActionServer(Node):
 def main(args=None):
     rclpy.init(args=args)
     strategix = StrategixActionServer()
-    rclpy.spin(strategix)
+    try:
+        rclpy.spin(strategix)
+    except KeyboardInterrupt:
+        pass
     strategix.destroy_node()
     rclpy.shutdown()
 
