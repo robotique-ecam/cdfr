@@ -1,0 +1,12 @@
+{
+  "RED_SIGNAL": {
+    "target node": "Solid",
+    "physics": {
+      "density": 946,
+      "damping": "Damping {}"
+    },
+    "boundingObject": {
+      "custom": "USE SHAPE"
+    }
+  }
+}
