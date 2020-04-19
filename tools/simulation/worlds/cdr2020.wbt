@@ -1,0 +1,21 @@
+#VRML_SIM R2020a utf8
+WorldInfo {
+  basicTimeStep 8
+  FPS 30
+  defaultDamping Damping {
+  }
+}
+Viewpoint {
+  orientation -0.5724844320413851 -0.8073926413421939 -0.14275397639550375 0.5991021045576786
+  position 0.8261987168147235 2.332515255433141 3.8402148851799005
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Table {
+}
+RedSignal {
+  translation 1.43 1.38198 1.53
+  rotation 9.58979e-09 -1 1.27237e-14 -3.1415853071795863
+}
