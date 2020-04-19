@@ -6,7 +6,12 @@
 *.gch
 *.pgm
 *.urdf
+
 *.wbproj
+*.cache
+*.blend1
+*.bak.*
+*(2)*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
