@@ -1,15 +1,15 @@
 <!DOCTYPE HTML>
 <html>
-<!--Commentaire test de j-l-->
+
 <head>
   <title>Panoramix</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/static/js/jquery-3.4.1.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/js/toastr.min.js"></script>
   <script src="/static/js/socket.io.js"></script>
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   <link href="/static/css/toastr.min.css" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="static/css/style.css">
 
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
@@ -50,10 +50,8 @@
 
 <body>
   <div class="container-fluid">
-    <div class="d-none d-lg-block">
-      <h3 class="text-center">Panoramix</h3>
-      <h6 class="text-center">Club Robotique ECAM - v0.7.0</h6>
-    </div>
+    <h3 class="text-center">Panoramix</h3>
+    <h6 class="text-center">Club Robotique ECAM - CDR2020 - v0.7.0</h6>
 
     <hr>
 
@@ -81,16 +79,15 @@
       </div>
       <div class="col-sm">
         <div class="card">
-          <h5 class="card-title text-center">Score</h5>
+          <h5 class="card-title text-center" id="titreScore">Score</h5>
           <div class="card-body">
-            <p class="card-text">
+            <p class="card-text" id="affichageScore">42</p>
 
-            </p>
           </div>
         </div>
       </div>
       <div class="col-sm">
-        <div class="card">
+        <div class="card" id="frameSide">
           <h5 class="card-title text-center">Side</h5>
           <div class="card-body">
             <p class="card-text">
