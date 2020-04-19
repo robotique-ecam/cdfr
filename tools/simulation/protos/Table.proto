@@ -1,8 +1,10 @@
 #VRML_SIM R2020a utf8
 PROTO Table [
-  field SFVec3f    translation       1.5 1 0
-  field SFRotation rotation          0 1 0 0
-  field SFString   name              "table2020"
+  field SFVec3f    translation        0 -0.0219 0
+  field SFRotation rotation           0 1 0 0
+  field SFFloat    rotation_girouette 0
+  field SFString   name               "table2020"
+
 ]
 {
   Solid {
@@ -290,6 +292,9 @@ PROTO Table [
               emissiveColor 0 0 0
               metalness 0
               roughness 0.2
+              textureTransform TextureTransform {
+                rotation IS rotation_girouette
+              }
             }
             geometry IndexedFaceSet {
               texCoordIndex [

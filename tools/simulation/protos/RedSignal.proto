@@ -1,7 +1,7 @@
 #VRML_SIM R2019a utf8
 PROTO RedSignal [
-  field SFVec3f    translation       0 0 0
-  field SFRotation rotation          0 1 0 3.14159
+  field SFVec3f    translation       1 0 1
+  field SFRotation rotation          0 1 0 0
   field SFString   name              "red_signal"
 ]
 {
