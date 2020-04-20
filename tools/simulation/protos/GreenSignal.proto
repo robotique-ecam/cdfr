@@ -45,7 +45,7 @@ PROTO GreenSignal [
     ]
     boundingObject USE BODY
     physics Physics {
-      density 946
+      density 50
       damping Damping {
       }
     }
