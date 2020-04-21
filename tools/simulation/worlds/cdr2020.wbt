@@ -16,6 +16,10 @@ TexturedBackgroundLight {
 Table {
   rotation_girouette 3.14
 }
+Asterix {
+  translation 0.29 0.17 0.67
+  rotation 1 0 0 -1.57
+}
 RedSignal {
    name "GOB2"
    translation 0.3 0 0.4

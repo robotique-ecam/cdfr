@@ -27,6 +27,10 @@ TexturedBackgroundLight {
 Table {
   rotation_girouette 3.14
 }
+Asterix {
+  translation 0.29 0.17 0.67
+  rotation 1 0 0 -1.57
+}
 """
 
 file = open('worlds/cdr2020.wbt', 'w')
