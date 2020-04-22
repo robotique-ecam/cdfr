@@ -16,6 +16,22 @@ TexturedBackgroundLight {
 Table {
   rotation_girouette 3.14
 }
+Robot {
+  translation 1.36 1 0
+  rotation 1 0 0 0.2617996938995747
+  children [
+    Camera {
+      rotation 3.4339994638889944e-07 -0.9659258492010602 -0.2588189595935602 -3.1415853071795863
+      name "camera_assurancetourix"
+      width 1024
+      height 600
+      far 3
+      antiAliasing TRUE
+    }
+  ]
+  name "assurancetourix"
+  controller "assurancetourix"
+}
 Asterix {
   translation 0.29 0.17 0.67
   rotation 1 0 0 -1.57
