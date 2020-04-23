@@ -7,7 +7,7 @@
 from magic_points import GREEN_CUPS, RED_CUPS
 
 z = 0
-reversed_cup = 0.131
+reversed_cup = 0.132
 
 header = """#VRML_SIM R2020a utf8
 WorldInfo {

@@ -45,8 +45,10 @@ PROTO RedSignal [
     ]
     boundingObject USE BODY
     physics Physics {
-      density 50
+      density 20
       damping Damping {
+        linear 0.8
+        angular 0.8
       }
     }
   }

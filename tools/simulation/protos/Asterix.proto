@@ -12,7 +12,7 @@ PROTO Asterix [
   field SFString   controllerArgs  ""                    # Is `Robot.controllerArgs`.
   field SFString   customData      ""                    # Is `Robot.customData`.
   field SFBool     supervisor      FALSE                 # Is `Robot.supervisor`.
-  field SFBool     synchronization TRUE                  # Is `Robot.synchronization`.
+  field SFBool     synchronization FALSE                 # Is `Robot.synchronization`.
 ]
 {
   Robot {
@@ -29,12 +29,11 @@ PROTO Asterix [
         jointParameters HingeJointParameters {
           axis 0 1 0
           anchor 0 0.130000 -0.13
-          dampingConstant 0.7
-          staticFriction 0.0
         }
         device [
           RotationalMotor {
             name "wheel_left_joint"
+            maxVelocity 20
           }
           PositionSensor {
             name "wheel_left_joint_sensor"
@@ -64,7 +63,6 @@ PROTO Asterix [
           ]
           name "wheel_left_link"
           physics DEF WHEEL_PHYSICS Physics {
-            density 945
           }
           boundingObject USE WHEEL
         }
@@ -73,12 +71,11 @@ PROTO Asterix [
         jointParameters HingeJointParameters {
           axis 0 1 0
           anchor 0 -0.13 -0.13
-          dampingConstant 0.7
-          staticFriction 0.0
         }
         device [
           RotationalMotor {
             name "wheel_right_joint"
+            maxVelocity 20
           }
           PositionSensor {
             name "wheel_right_joint_sensor"
@@ -155,7 +152,6 @@ PROTO Asterix [
           }
         ]
         physics Physics {
-          density 1200
         }
         boundingObject USE FREE_WHEEL
       }
@@ -165,7 +161,6 @@ PROTO Asterix [
           USE FREE_WHEEL
         ]
         physics Physics {
-          density 1200
         }
         boundingObject USE FREE_WHEEL
       }
@@ -182,7 +177,8 @@ PROTO Asterix [
     name "robotbase"
     boundingObject USE BODY
     physics Physics {
-      density 1200
+      density -1
+      mass 6
     }
   }
 }

@@ -50,18 +50,18 @@ add_executable(${EXEC_NAME}
 )
 
 option(SIMULATION "Simulation mode" OFF)
-option(SPEEDRAMP "Enable speedramp" OFF)
 option(TIMER "Enable Wall Timer for odometry" ON)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
+  # Link with the Webots controller library.
+  set (LIBRARIES $ENV{WEBOTS_HOME}/lib/controller/${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX} $ENV{WEBOTS_HOME}/lib/controller/${CMAKE_SHARED_LIBRARY_PREFIX}CppController${CMAKE_SHARED_LIBRARY_SUFFIX})
+  include_directories($ENV{WEBOTS_HOME}/include/controller/c $ENV{WEBOTS_HOME}/include/controller/cpp)
+  target_link_libraries(${EXEC_NAME} ${LIBRARIES})
 else()
   target_link_libraries(${EXEC_NAME} i2c)
 endif()
 
-if(SPEEDRAMP)
-  add_definitions(-DUSE_SPEEDRAMP)
-endif()
 
 if(TIMER)
   add_definitions(-DUSE_TIMER)

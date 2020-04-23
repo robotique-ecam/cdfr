@@ -16,22 +16,6 @@ TexturedBackgroundLight {
 Table {
   rotation_girouette 3.14
 }
-Robot {
-  translation 1.36 1 0
-  rotation 1 0 0 0.2617996938995747
-  children [
-    Camera {
-      rotation 3.4339994638889944e-07 -0.9659258492010602 -0.2588189595935602 -3.1415853071795863
-      name "camera_assurancetourix"
-      width 1024
-      height 600
-      far 3
-      antiAliasing TRUE
-    }
-  ]
-  name "assurancetourix"
-  controller "assurancetourix"
-}
 Asterix {
   translation 0.29 0.17 0.67
   rotation 1 0 0 -1.57
@@ -86,52 +70,52 @@ RedSignal {
 }
 RedSignal {
    name "GOB25"
-   translation -0.067 0.131 1.45
+   translation -0.067 0.132 1.45
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB27"
-   translation -0.067 0.131 1.6
+   translation -0.067 0.132 1.6
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB29"
-   translation -0.067 0.131 1.75
+   translation -0.067 0.132 1.75
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB31"
-   translation 3.067 0.131 1.525
+   translation 3.067 0.132 1.525
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB33"
-   translation 3.067 0.131 1.675
+   translation 3.067 0.132 1.675
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB36"
-   translation 0.775 0.131 -0.067
+   translation 0.775 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB39"
-   translation 1 0.131 -0.067
+   translation 1 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB41"
-   translation 2.075 0.131 -0.067
+   translation 2.075 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB42"
-   translation 2.15 0.131 -0.067
+   translation 2.15 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 RedSignal {
    name "GOB44"
-   translation 2.3 0.131 -0.067
+   translation 2.3 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 GreenSignal {
@@ -184,51 +168,51 @@ GreenSignal {
 }
 GreenSignal {
    name "GOB26"
-   translation -0.067 0.131 1.525
+   translation -0.067 0.132 1.525
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB28"
-   translation -0.067 0.131 1.675
+   translation -0.067 0.132 1.675
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB30"
-   translation 3.067 0.131 1.45
+   translation 3.067 0.132 1.45
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB32"
-   translation 3.067 0.131 1.6
+   translation 3.067 0.132 1.6
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB34"
-   translation 3.067 0.131 1.75
+   translation 3.067 0.132 1.75
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB35"
-   translation 0.7 0.131 -0.067
+   translation 0.7 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB37"
-   translation 0.85 0.131 -0.067
+   translation 0.85 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB38"
-   translation 0.925 0.131 -0.067
+   translation 0.925 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB40"
-   translation 2 0.131 -0.067
+   translation 2 0.132 -0.067
    rotation 1 0 0 3.1415
 }
 GreenSignal {
    name "GOB43"
-   translation 2.225 0.131 -0.067
+   translation 2.225 0.132 -0.067
    rotation 1 0 0 3.1415
 }

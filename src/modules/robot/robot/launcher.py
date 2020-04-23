@@ -17,7 +17,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, PushRosNamespace
 
 
-def generate_robot_launch_description(robot_namespace: str):
+def generate_robot_launch_description(robot_namespace: str, simulation=False):
     """Generate robot launch description based on namespace."""
     map = LaunchConfiguration('map')
     namespace = LaunchConfiguration('namespace')
@@ -35,6 +35,7 @@ def generate_robot_launch_description(robot_namespace: str):
 
     urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
+    robot_launch_file_dir = os.path.dirname(__file__)
     map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
     nav2_bt_xml_file = os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml')
@@ -94,14 +95,6 @@ def generate_robot_launch_description(robot_namespace: str):
             ),
 
             Node(
-                package='drive',
-                node_executable='drive',
-                output='screen',
-                parameters=[params.name],
-                remappings=remappings,
-            ),
-
-            Node(
                 package='robot_state_publisher',
                 node_executable='robot_state_publisher',
                 output='screen',
@@ -133,6 +126,16 @@ def generate_robot_launch_description(robot_namespace: str):
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
                 'bt_xml_file': bt_xml_file,
+                'params_file': params.name}.items(),
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([robot_launch_file_dir, '/interfaces.py']),
+            condition=IfCondition(str(not simulation)),
+            launch_arguments={
+                'namespace': namespace,
+                'use_namespace': use_namespace,
+                'use_sim_time': use_sim_time,
                 'params_file': params.name}.items(),
         )
     ])
