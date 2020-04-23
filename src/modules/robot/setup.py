@@ -4,6 +4,8 @@
 """Robot base package."""
 
 
+from os import path
+from glob import glob
 from setuptools import setup, find_packages
 
 
@@ -15,7 +17,8 @@ setup(
     version='0.7.0',
     packages=find_packages(),
     data_files=[
-        ('share/' + package_name, ['package.xml']),
+        (path.join('share', package_name), ['package.xml']),
+        (path.join('share', package_name, 'param'), glob('param/*')),
     ],
     zip_safe=True,
     install_requires=['setuptools'],
