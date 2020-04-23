@@ -53,7 +53,7 @@ elif [ $robot = "simulation-core" ]; then
 
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up robot interfaces"
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-select drive robot asterix obelix && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-select drive robot supervisor asterix obelix && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 else
     print_failure "No such component"

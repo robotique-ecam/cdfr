@@ -152,10 +152,6 @@ void Drive::update_velocity() {
   attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / rads_per_step;
   old_steps_returned.left = lsteps;
   old_steps_returned.right = rsteps;
-  std::cout << old_steps_returned.left << std::endl;
-  std::cout << old_steps_returned.right << std::endl;
-  std::cout << attiny_steps_returned_.left << std::endl;
-  std::cout << attiny_steps_returned_.right << std::endl;
 #endif /* SIMULATION */
 
   compute_pose_velocity(attiny_steps_returned_);
