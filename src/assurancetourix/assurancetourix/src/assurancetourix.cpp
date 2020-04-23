@@ -32,7 +32,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("coordonate_position_transform", qos);
+  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("coordonate_position_transform", qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -238,6 +238,7 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
 
 void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
+    visualization_msgs::msg::MarkerArray marker_array_pub;
 
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
@@ -289,10 +290,12 @@ void Assurancetourix::_anotate_image(Mat img) {
       transformed_marker.header = tmpPoseOut.header;
       transformed_marker.pose = tmpPoseOut.pose;
 
-      transformed_marker_pub_->publish(transformed_marker);
+      marker_array_pub.markers.push_back(transformed_marker);
+
       marker_pub_->publish(marker);
       RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
+    transformed_marker_pub_->publish(marker_array_pub);
   }
 }
 

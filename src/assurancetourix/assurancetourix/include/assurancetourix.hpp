@@ -16,7 +16,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
 #include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
@@ -79,7 +79,7 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
   visualization_msgs::msg::Marker transformed_marker;
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr transformed_marker_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_;
 
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
