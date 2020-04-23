@@ -12,10 +12,6 @@
  */
 #include <webots/robot.h>
 
-/*
- * You may want to add macros here.
- */
-#define TIME_STEP 64
 
 /*
  * This is the main program.
@@ -42,7 +38,7 @@ int main(int argc, char **argv) {
    * Perform simulation steps of TIME_STEP milliseconds
    * and leave the loop when the simulation is over
    */
-  while (wb_robot_step(TIME_STEP) != -1) {
+  while (wb_robot_step(timestep) != -1) {
     /*
      * Read the sensors :
      * Enter here functions to read sensor data, like:
