@@ -106,7 +106,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 package='tf2_ros',
                 node_executable='static_transform_publisher',
                 output='screen',
-                arguments=['0.15', '1.0', '0', '0', '0', '0', 'map', 'odom'],
+                arguments=['0.29', '1.33', '0', '0', '0', '0', 'map', 'odom'],
                 remappings=remappings,
             ),
 

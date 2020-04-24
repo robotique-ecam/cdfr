@@ -67,13 +67,18 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         children=[new_action, failure_handler, confirm_action]
     )
 
+    actions_loop = py_trees.decorators.SuccessIsRunning(
+        actions,
+        name='ActionsLoop'
+    )
+
     pavillon = PavillonAction(name='Pavillon Action')
 
     # Asterix Root
     all_actions = py_trees.composites.Parallel(
         name='All Actions',
-        policy=py_trees.common.ParallelPolicy.SuccessOnAll(),
-        children=[pavillon, actions]
+        policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
+        children=[pavillon, actions_loop]
     )
 
     end_of_game = EndOfGameAction(name='End Of Game?')

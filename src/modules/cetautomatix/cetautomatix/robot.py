@@ -94,7 +94,7 @@ class Robot(Node):
     def _odom_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
 
-    def euler_to_quaternion(self, yaw, pitch, roll):
+    def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
         qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
         qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
@@ -128,9 +128,13 @@ class Robot(Node):
         if self._current_action is not None:
             value = elements[self._current_action]
             msg.pose.pose.position.z = 0.0
-            msg.pose.pose.position.x = value[0]
-            msg.pose.pose.position.y = value[1]
-            q = self.euler_to_quaternion(value[2] if value[2] is not None else 0, 0, 0)
+            msg.pose.pose.position.x = float(value[0])
+            msg.pose.pose.position.y = float(value[1])
+            try:
+                q = self.euler_to_quaternion(value[2] if value[2] is not None else 0)
+            except IndexError:
+                # TODO: robot angle
+                q = self.euler_to_quaternion(0)
             msg.pose.pose.orientation.x = q[0]
             msg.pose.pose.orientation.y = q[1]
             msg.pose.pose.orientation.z = q[2]
