@@ -142,12 +142,13 @@ PROTO Asterix [
       }
       Solid {
         translation -0.08 0 -0.15
+        contactMaterial "free_wheel"
         children [
           DEF FREE_WHEEL Shape {
             appearance USE dark
             geometry Sphere {
               radius 0.02
-              subdivision 1
+              subdivision 2
             }
           }
         ]
@@ -157,6 +158,7 @@ PROTO Asterix [
       }
       Solid {
         translation 0.08 0 -0.15
+        contactMaterial "free_wheel"
         children [
           USE FREE_WHEEL
         ]

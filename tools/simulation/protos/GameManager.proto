@@ -1,0 +1,14 @@
+#VRML_SIM R2019a utf8
+PROTO GameManager [
+  field SFString   name            "game_manager"        # Is `Solid.name`.
+  field SFString   controller      "<extern>"            # Is `Robot.controller`.
+  field SFBool     supervisor      TRUE                 # Is `Robot.supervisor`.
+]
+{
+  Robot {
+    name IS name
+    controller IS controller
+    supervisor IS supervisor
+    synchronisation FALSE
+  }
+}

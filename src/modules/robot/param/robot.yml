@@ -84,8 +84,8 @@ controller_server:
       - RotateToGoal
       - Oscillation
       - BaseObstacle
-      - GoalAlign
-      - PathAlign
+      #- GoalAlign
+      #- PathAlign
       - PathDist
       - GoalDist
       BaseObstacle.scale: 0.02

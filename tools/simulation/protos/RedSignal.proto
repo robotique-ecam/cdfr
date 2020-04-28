@@ -47,8 +47,8 @@ PROTO RedSignal [
     physics Physics {
       density 20
       damping Damping {
-        linear 0.8
-        angular 0.8
+        linear 0.5
+        angular 0.5
       }
     }
   }

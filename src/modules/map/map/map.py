@@ -63,8 +63,8 @@ def add_background(img):
 def creamapbleu():
     """Add blue side specific elements."""
     mapbleu, draw = creamap()
-    draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
-                                        cm_pix(largeur_cm, reso))), noir, 1)
+    # draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
+    #                                     cm_pix(largeur_cm, reso))), noir, 1)
     mapbleu = add_background(mapbleu)
     mapbleu.save(path.join(sys.argv[1], 'map', 'mapbleu.pgm'))
 
@@ -72,8 +72,8 @@ def creamapbleu():
 def creamapjaune():
     """Add yellow side specific elements."""
     mapjaune, draw = creamap()
-    draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
-                                       cm_pix(largeur_cm, reso))), noir, 1)
+    # draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
+    #                                    cm_pix(largeur_cm, reso))), noir, 1)
     mapjaune = add_background(mapjaune)
     mapjaune.save(path.join(sys.argv[1], 'map', 'mapjaune.pgm'))
 

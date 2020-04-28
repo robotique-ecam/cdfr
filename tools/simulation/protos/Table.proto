@@ -12,6 +12,7 @@ PROTO Table [
     translation IS translation
     rotation IS rotation
     scale 0.01 0.01 0.01
+    contactMaterial "table_vinyl"
     children [
       DEF BASE Shape {
         appearance DEF TABLE_TEXTURE PBRAppearance {
@@ -317,7 +318,6 @@ PROTO Table [
     boundingObject Group {
       children [
         USE GIROUETTE
-        USE SUPPORT_PHARE
         USE BORDERS
         USE ECCEUILS
         USE ECCEUIL_BLEU
