@@ -42,7 +42,7 @@ def generate_rviz_launch_description(namespace='robot'):
     start_namespaced_rviz_cmd = Node(
         condition=IfCondition(use_namespace),
         package='rviz2',
-        node_executable='rviz2',
+        executable='rviz2',
         name='rviz2',
         namespace=namespace,
         # TODO: FIX onload MUTEX ERROR

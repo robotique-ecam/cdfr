@@ -13,6 +13,7 @@ PROTO Asterix [
   field SFString   customData      ""                    # Is `Robot.customData`.
   field SFBool     supervisor      FALSE                 # Is `Robot.supervisor`.
   field SFBool     synchronization FALSE                 # Is `Robot.synchronization`.
+  field MFNode     arucoTag        [ Aruco { } ]         # Is `Robot.arucoTag`.
 ]
 {
   Robot {
@@ -174,6 +175,10 @@ PROTO Asterix [
         geometry Box {
            size 0.2 0.26 0.32
         }
+      }
+      Transform {
+        translation 0 0 0.17
+        children IS arucoTag
       }
     ]
     name "robotbase"

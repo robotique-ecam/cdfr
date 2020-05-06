@@ -88,7 +88,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
 
             Node(
                 package='lcd_driver',
-                node_executable='lcd_driver',
+                executable='lcd_driver',
                 output='screen',
                 parameters=[params.name],
                 remappings=remappings,
@@ -96,7 +96,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
 
             Node(
                 package='robot_state_publisher',
-                node_executable='robot_state_publisher',
+                executable='robot_state_publisher',
                 output='screen',
                 arguments=[urdf],
                 remappings=remappings,
@@ -104,7 +104,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
 
             Node(
                 package='tf2_ros',
-                node_executable='static_transform_publisher',
+                executable='static_transform_publisher',
                 output='screen',
                 arguments=['0.29', '1.33', '0', '0', '0', '0', 'map', 'odom'],
                 remappings=remappings,
@@ -112,7 +112,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
 
             Node(
                 package='cetautomatix',
-                node_executable='cetautomatix',
+                executable='cetautomatix',
                 output='screen',
                 remappings=remappings,
             ),
