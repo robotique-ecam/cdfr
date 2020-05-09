@@ -4,7 +4,7 @@
 """Launch namespaced Rviz2 for asterix."""
 
 
-from supervisor.rviz2 import generate_rviz_launch_description
+from titan.rviz2 import generate_rviz_launch_description
 
 
 def generate_launch_description():

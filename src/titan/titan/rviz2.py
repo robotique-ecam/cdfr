@@ -24,14 +24,14 @@ from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from supervisor.utils.replace_string import ReplaceString
+from titan.utils.replace_string import ReplaceString
 
 
 def generate_rviz_launch_description(namespace='robot'):
     # Get the launch directory
-    supervisor_dir = get_package_share_directory('supervisor')
+    titan_dir = get_package_share_directory('titan')
 
-    rviz_config_file = os.path.join(supervisor_dir, 'rviz', 'namespaced_view.rviz')
+    rviz_config_file = os.path.join(titan_dir, 'rviz', 'namespaced_view.rviz')
 
     use_namespace = 'true'
 
