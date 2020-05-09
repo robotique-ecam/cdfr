@@ -5,20 +5,20 @@
 
 
 import os
-import launch
 import tempfile
-from launch.conditions import IfCondition
-from launch.actions import GroupAction
-from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
-from launch_ros.actions import Node, PushRosNamespace
-from launch.substitutions import LaunchConfiguration
+
+import launch
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import (DeclareLaunchArgument, GroupAction,
+                            IncludeLaunchDescription)
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node, PushRosNamespace
 
 
-def generate_robot_launch_description(robot_namespace: str):
-
+def generate_robot_launch_description(robot_namespace: str, simulation=False):
+    """Generate robot launch description based on namespace."""
     map = LaunchConfiguration('map')
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
@@ -27,13 +27,15 @@ def generate_robot_launch_description(robot_namespace: str):
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
     robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
-    navigation_params = os.path.join(get_package_share_directory('robot'), 'param', 'robot.yml')
+    navigation_params = os.path.join(
+        get_package_share_directory('robot'), 'param', 'robot.yml')
     with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
         for f in (r, n):
             params.file.write(f.read())
 
     urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
+    robot_launch_file_dir = os.path.dirname(__file__)
     map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
     nav2_bt_xml_file = os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml')
@@ -81,19 +83,12 @@ def generate_robot_launch_description(robot_namespace: str):
 
         GroupAction([
 
-            PushRosNamespace(condition=IfCondition(use_namespace), namespace=namespace),
+            PushRosNamespace(condition=IfCondition(
+                use_namespace), namespace=namespace),
 
             Node(
                 package='lcd_driver',
-                node_executable='lcd_driver',
-                output='screen',
-                parameters=[params.name],
-                remappings=remappings,
-            ),
-
-            Node(
-                package='drive',
-                node_executable='drive',
+                executable='lcd_driver',
                 output='screen',
                 parameters=[params.name],
                 remappings=remappings,
@@ -101,7 +96,7 @@ def generate_robot_launch_description(robot_namespace: str):
 
             Node(
                 package='robot_state_publisher',
-                node_executable='robot_state_publisher',
+                executable='robot_state_publisher',
                 output='screen',
                 arguments=[urdf],
                 remappings=remappings,
@@ -109,15 +104,15 @@ def generate_robot_launch_description(robot_namespace: str):
 
             Node(
                 package='tf2_ros',
-                node_executable='static_transform_publisher',
+                executable='static_transform_publisher',
                 output='screen',
-                arguments=['0.15', '1.0', '0', '0', '0', '0', 'map', 'odom'],
+                arguments=['0.29', '1.33', '0', '0', '0', '0', 'map', 'odom'],
                 remappings=remappings,
             ),
 
             Node(
                 package='cetautomatix',
-                node_executable='cetautomatix',
+                executable='cetautomatix',
                 output='screen',
                 remappings=remappings,
             ),
@@ -131,6 +126,16 @@ def generate_robot_launch_description(robot_namespace: str):
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
                 'bt_xml_file': bt_xml_file,
+                'params_file': params.name}.items(),
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([robot_launch_file_dir, '/interfaces.py']),
+            condition=IfCondition(str(not simulation)),
+            launch_arguments={
+                'namespace': namespace,
+                'use_namespace': use_namespace,
+                'use_sim_time': use_sim_time,
                 'params_file': params.name}.items(),
         )
     ])

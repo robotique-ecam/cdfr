@@ -3,15 +3,22 @@
 
 #ifndef SIMULATION
 #include "i2c.hpp"
+#else
+#include <limits>
+#include <webots/Motor.hpp>
+#include <webots/Robot.hpp>
+#include <webots/Supervisor.hpp>
+#include <webots/PositionSensor.hpp>
 #endif
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
-#include "speedramp.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
 #include <chrono>
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <diagnostic_msgs/msg/diagnostic_array.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
 
 #define LEFT 0
 #define RIGHT 1
@@ -62,7 +69,15 @@ private:
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
-
+#else
+  std::shared_ptr<webots::Supervisor> wb_supervisor;
+  webots::Motor * wb_left_motor;
+  webots::Motor * wb_right_motor;
+  webots::PositionSensor * wp_left_encoder;
+  webots::PositionSensor * wp_right_encoder;
+  Differential old_steps_returned;
+  double timestep;
+  rclcpp::TimerBase::SharedPtr time_stepper_;
 #endif
 
   // ROS time
@@ -73,21 +88,21 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_states_pub_;
   rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr tf_pub_;
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_pub_;
 
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+
+  rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
   rclcpp::TimerBase::SharedPtr timer_;
 #endif /* USE_TIMER */
 
-#ifdef USE_SPEEDRAMP
-  std::shared_ptr<Speedramp> speedramp_left_;
-  std::shared_ptr<Speedramp> speedramp_right_;
-#endif /* USE_SPEEDRAMP */
-
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
+  diagnostic_msgs::msg::DiagnosticArray diagnostics_array_;
+  diagnostic_msgs::msg::DiagnosticStatus diagnostics_status_;
 
   double accel_;
   double wheel_separation_;
@@ -117,7 +132,6 @@ private:
   TinyCMD differential_speed_cmd_;
   OdometricPose odom_pose_;
   Differential cmd_vel_;
-  Differential old_cmd_vel_;
   Differential differential_speed_;
   Differential differential_move_;
   Instantaneous instantaneous_speed_;
@@ -130,11 +144,17 @@ private:
   void update_joint_states();
   void update_odometry();
   void update_velocity();
+  void update_diagnostic();
   void read_from_serial();
   void compute_pose_velocity(TinyData steps_returned);
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
+  rclcpp::Time get_sim_time();
+
+  #ifdef SIMULATION
+  void sim_step();
+  #endif /* SIMULATION */
 };
 
 #endif /* DRIVE_NODE_HPP */

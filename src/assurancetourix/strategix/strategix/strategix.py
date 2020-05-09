@@ -13,11 +13,11 @@ class StrategixActionServer(Node):
         self.score = Score()
         self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
-        self.get_logger().info("Strategix is ready")
+        self.get_logger().info('Strategix is ready')
 
     def available_callback(self, request, response):
         response.available = self.score.todoList
-        self.get_logger().info("GET %s" % (request.sender))
+        self.get_logger().info('GET %s' % (request.sender))
         return response
 
     def action_callback(self, request, response):
@@ -30,9 +30,9 @@ class StrategixActionServer(Node):
                 response.success = self.score.finish(request.action)
             else:
                 raise BaseException
-            self.get_logger().info("%s %s %s" % (request.sender, request.request, request.action))
+            self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
         except BaseException:
-            self.get_logger().warn("Invalid call : %s %s %s" % (request.sender, request.request, request.action))
+            self.get_logger().warn('Invalid call : %s %s %s' % (request.sender, request.request, request.action))
             response.success = False
         return response
 
@@ -40,7 +40,10 @@ class StrategixActionServer(Node):
 def main(args=None):
     rclpy.init(args=args)
     strategix = StrategixActionServer()
-    rclpy.spin(strategix)
+    try:
+        rclpy.spin(strategix)
+    except KeyboardInterrupt:
+        pass
     strategix.destroy_node()
     rclpy.shutdown()
 

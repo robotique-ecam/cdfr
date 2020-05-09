@@ -13,25 +13,50 @@ Drive::Drive() : Node("drive_node") {
 #ifndef SIMULATION
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
+#else
+  /* Init webots supervisor */
+  wb_supervisor = std::make_shared<webots::Supervisor>();
+  /* Initialize motors */
+  wb_left_motor = wb_supervisor->getMotor("wheel_left_joint");
+  wb_right_motor = wb_supervisor->getMotor("wheel_right_joint");
+  wb_left_motor->setPosition(std::numeric_limits<double>::infinity());
+  wb_right_motor->setPosition(std::numeric_limits<double>::infinity());
+  wb_left_motor->setVelocity(0);
+  wb_right_motor->setVelocity(0);
+  /* initialize odometry */
+  timestep = wb_supervisor->getBasicTimeStep();
+  wp_left_encoder = wb_left_motor->getPositionSensor();
+  wp_right_encoder = wb_right_motor->getPositionSensor();
+  wp_left_encoder->enable(timestep);
+  wp_right_encoder->enable(timestep);
+
+  time_stepper_ = this->create_wall_timer(std::chrono::milliseconds((int) timestep), std::bind(&Drive::sim_step, this));
 #endif /* SIMULATION */
 
-#ifdef USE_SPEEDRAMP
-  speedramp_left_ = std::make_shared<Speedramp>();
-  speedramp_right_ = std::make_shared<Speedramp>();
-#endif /* USE_SPEEDRAMP */
-
   /* Init ROS Publishers and Subscribers */
-  auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+  auto qos = rclcpp::QoS(rclcpp::KeepLast(5));
 
   odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", qos);
   joint_states_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", qos);
   tf_pub_ = this->create_publisher<tf2_msgs::msg::TFMessage>("tf", qos);
+  diagnostics_pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", 1);
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
+
+  diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
 #endif
+
+#ifndef SIMULATION
+  do {
+    old_steps_returned.left = wp_left_encoder->getValue();
+    old_steps_returned.right = wp_left_encoder->getValue();
+    RCLCPP_INFO(this->get_logger(), "Waiting for webots robot wheel encoders data...");
+    std::this_thread::sleep_for(1s);
+  } while (std::isnan(old_steps_returned.left) || std::isnan(old_steps_returned.right));
+#endif /* SIMULATION */
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
@@ -73,27 +98,25 @@ void Drive::init_variables() {
   max_speed_ = max_freq_ * meters_per_step_;
   min_speed_ = speed_multiplier_ * meters_per_step_;
 
-#ifdef USE_SPEEDRAMP
-  speedramp_left_->set_acceleration(accel_);
-  speedramp_right_->set_acceleration(accel_);
-  speedramp_left_->set_delay(0.05);
-  speedramp_right_->set_delay(0.05);
-  speedramp_left_->set_speed_limits(-max_speed_, max_speed_);
-  speedramp_right_->set_speed_limits(-max_speed_, max_speed_);
-#endif /* SPEEDRAMP */
-
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
   joint_states_.position.resize(2, 0.0);
   joint_states_.velocity.resize(2, 0.0);
   joint_states_.effort.resize(2, 0.0);
 
-#ifdef SIMULATION
-  old_cmd_vel_.right = 0;
-  old_cmd_vel_.left = 0;
-#endif /* SIMULATION */
+  diagnostics_status_.level = diagnostics_status_.OK;
+  diagnostics_status_.name = get_fully_qualified_name();
+  diagnostics_status_.message = "Running";
+  diagnostics_status_.hardware_id = get_fully_qualified_name();
 
+  diagnostics_array_.status.push_back(diagnostics_status_);
+  diagnostics_array_.header.stamp = this->get_clock()->now();
+
+#ifndef SIMULATION
   time_since_last_sync_ = this->get_clock()->now();
+#else
+  time_since_last_sync_ = get_sim_time();
+#endif /* SIMULATION */
 }
 
 int8_t Drive::compute_velocity_cmd(double velocity) {
@@ -109,18 +132,13 @@ int8_t Drive::compute_velocity_cmd(double velocity) {
 }
 
 void Drive::update_velocity() {
-#ifdef USE_SPEEDRAMP
-  double differential_speed_left = speedramp_left_->compute(cmd_vel_.left);
-  double differential_speed_right = speedramp_right_->compute(cmd_vel_.right);
-#else
-  double differential_speed_left = cmd_vel_.left;
-  double differential_speed_right = cmd_vel_.right;
-#endif
+  differential_speed_cmd_.left = compute_velocity_cmd(cmd_vel_.left);
+  differential_speed_cmd_.right = compute_velocity_cmd(cmd_vel_.right);
 
-  differential_speed_cmd_.left = compute_velocity_cmd(differential_speed_left);
-  differential_speed_cmd_.right = compute_velocity_cmd(differential_speed_right);
+  previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
+  time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
   attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.left);
@@ -131,12 +149,18 @@ void Drive::update_velocity() {
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
 #else
-  cmd_vel_.right = differential_speed_right;
-  cmd_vel_.left = differential_speed_left;
+  time_since_last_sync_ = get_sim_time();
+
+  wb_left_motor->setVelocity(cmd_vel_.left / wheel_radius_);
+  wb_right_motor->setVelocity(cmd_vel_.right / wheel_radius_);
+  double lsteps = wp_left_encoder->getValue();
+  double rsteps = wp_right_encoder->getValue();
+  attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / rads_per_step;
+  attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / rads_per_step;
+  old_steps_returned.left = lsteps;
+  old_steps_returned.right = rsteps;
 #endif /* SIMULATION */
 
-  previous_time_since_last_sync_ = time_since_last_sync_;
-  time_since_last_sync_ = this->get_clock()->now();
   compute_pose_velocity(attiny_steps_returned_);
   update_odometry();
   update_tf();
@@ -153,21 +177,11 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-#ifndef SIMULATION
   differential_move_.left = meters_per_step_ * steps_returned.left;
   differential_move_.right = meters_per_step_ * steps_returned.right;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
-#else
-  differential_speed_.left = old_cmd_vel_.left;
-  differential_speed_.right = old_cmd_vel_.right;
-
-  differential_move_.left = differential_speed_.left * dt;
-  differential_move_.right = differential_speed_.right * dt;
-
-  old_cmd_vel_ = cmd_vel_;
-#endif /* SIMULATION */
 
   instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
   instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (wheel_separation_);
@@ -222,5 +236,21 @@ void Drive::update_joint_states() {
   joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
+
+void Drive::update_diagnostic() {
+  diagnostics_pub_->publish(diagnostics_array_);
+}
+
+rclcpp::Time Drive::get_sim_time() {
+  double seconds = 0;
+  double nanosec = modf(wb_supervisor->getTime(), &seconds) * 1e9;
+  return rclcpp::Time((uint32_t) seconds, (uint32_t) nanosec);
+}
+
+#ifdef SIMULATION
+void Drive::sim_step() {
+  this->wb_supervisor->step(timestep);
+}
+#endif /* SIMULATION */
 
 Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }

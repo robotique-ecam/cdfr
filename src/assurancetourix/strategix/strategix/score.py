@@ -1,17 +1,17 @@
-from strategix.actions import MancheAir, Gobelet, Phare, BonPort, Pavillon
-from cetautomatix.magic_points import RED_CUPS, GREEN_CUPS
+from cetautomatix.magic_points import GREEN_CUPS, RED_CUPS
+from strategix.actions import BonPort, Gobelet, MancheAir, Pavillon, Phare
 
 
 class Score:
     def __init__(self):
-        self.cups = [Gobelet(k, "R") for k in RED_CUPS]
-        self.cups += [Gobelet(k, "V") for k in GREEN_CUPS]
-        self.mancheAir1 = MancheAir("MANCHE1")
-        self.mancheAir2 = MancheAir("MANCHE2")
-        self.phare = Phare("PHARE")
-        self.bonPortGros = BonPort("BonPortGros")
-        self.bonPortPetit = BonPort("BonPortPetit")
-        self.pavillon = Pavillon("Pavillon")
+        self.cups = [Gobelet(k, 'R') for k in RED_CUPS]
+        self.cups += [Gobelet(k, 'V') for k in GREEN_CUPS]
+        self.mancheAir1 = MancheAir('MANCHE1')
+        self.mancheAir2 = MancheAir('MANCHE2')
+        self.phare = Phare('PHARE')
+        self.bonPortGros = BonPort('BonPortGros')
+        self.bonPortPetit = BonPort('BonPortPetit')
+        self.pavillon = Pavillon('Pavillon')
         self.todoList = [a.name for a in self.cups] + [self.phare.name, self.mancheAir1.name, self.mancheAir2.name]
         self.wipList = []
         self.doneList = []
@@ -19,10 +19,10 @@ class Score:
     def updateScore(self):
         self.score = 0
         # Manche à Air
-        numMancheAir = len([action for action in self.doneList if "MancheAir" in action])
+        numMancheAir = len([action for action in self.doneList if 'MancheAir' in action])
         self.score += 5 if numMancheAir == 1 else 15 if numMancheAir == 2 else 0
         # Gobelets
-        gobeletsInBase = [action for action in self.doneList if "Gobelet" in action]
+        gobeletsInBase = [action for action in self.doneList if 'Gobelet' in action]
         numGobRouge = len([gob for gob in gobeletsInBase if gob.inChenal and gob.color == 'R'])
         numGobVert = len([gob for gob in gobeletsInBase if gob.inChenal and gob.color == 'V'])
         pair = 2 * numGobRouge if numGobRouge < numGobVert else 2 * numGobVert
@@ -33,13 +33,13 @@ class Score:
         else:
             self.score += 2
         # Bon Port
-        if self.bonPortGros.pos == self.bonPortPetit.pos == "Good":
+        if self.bonPortGros.pos == self.bonPortPetit.pos == 'Good':
             self.score += 10
-        elif self.bonPortGros.pos == self.bonPortPetit.pos == "Wrong":
+        elif self.bonPortGros.pos == self.bonPortPetit.pos == 'Wrong':
             self.score += 5
-        elif self.bonPortGros.pos == "Good" and self.bonPortPetit.pos == "Out":
+        elif self.bonPortGros.pos == 'Good' and self.bonPortPetit.pos == 'Out':
             self.score += 5
-        elif self.bonPortGros.pos == "Out" and self.bonPortPetit.pos == "Good":
+        elif self.bonPortGros.pos == 'Out' and self.bonPortPetit.pos == 'Good':
             self.score += 5
         else:
             self.score += 0

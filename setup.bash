@@ -45,6 +45,12 @@ elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
     generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
+elif [ $robot = "simulation-core" ]; then
+    print_info "Setting up simulation environment"
+    xacro ros/tools/xacro/asterix.xacro -o ros/src/asterix/robot/asterix.urdf
+    xacro ros/tools/xacro/obelix.xacro -o ros/src/obelix/robot/obelix.urdf
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors drive && print_success "Built packages for $robot" || print_failure "Packages build failed"
+
 else
     print_failure "No such component"
 

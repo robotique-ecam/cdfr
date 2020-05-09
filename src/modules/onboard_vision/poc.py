@@ -31,13 +31,13 @@ def min_area_boxes(mask, threshold=300):
 
 
 # Read image
-print("[+] Preparing camera")
+print('[+] Preparing camera')
 cap = cv2.VideoCapture(0)
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1640)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1232)
 # cap.set(cv2.CAP_PROP_EXPOSURE,-10)
 
-print("[+] Capturing frame")
+print('[+] Capturing frame')
 frame = cv2.flip(cap.read()[1], 0).astype(np.uint8)
 im = cv2.blur(frame, (3, 3))
 hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
@@ -45,7 +45,7 @@ hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 img = im.copy()
 global_mask = np.zeros(im.shape[:-1], np.uint8)
 
-print("[+] Processing")
+print('[+] Processing')
 t = time.time()
 
 for body in body_colors:
@@ -56,7 +56,7 @@ for body in body_colors:
         cv2.drawContours(im, rects, -1, body_colors[body]['color'], 2)
 
 
-print("[i] Processing took", (time.time() - t) * 1000, "ms")
+print('[i] Processing took', (time.time() - t) * 1000, 'ms')
 
 cv2.imwrite('contours.png', im)
 cv2.imwrite('original.png', img)

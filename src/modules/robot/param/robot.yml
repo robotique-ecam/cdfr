@@ -14,11 +14,6 @@ amcl_rclcpp_node:
     use_sim_time: True
 
 
-bt_navigator_rclcpp_node:
-  ros__parameters:
-    use_sim_time: True
-
-
 bt_navigator:
   ros__parameters:
     use_sim_time: True
@@ -36,77 +31,72 @@ bt_navigator:
     - nav2_reinitialize_global_localization_service_bt_node
     - nav2_rate_controller_bt_node
     - nav2_pipeline_sequence_bt_node
+    - nav2_transform_available_condition_bt_node
+
+
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
 
 
 controller_server:
   ros__parameters:
     use_sim_time: True
-    # Trajectory Scoring Parameters
-    critics:
-    - BaseObstacle
-    #- GoalAlign
-    - GoalDist
-    - Oscillation
-    #- PathAlign
-    - PathDist
-    #- RotateToGoal
-    BaseObstacle.scale: 0.02
-    PathAlign.scale: 0.0
-    GoalAlign.scale: 0.0
-    PathDist.scale: 32.0
-    GoalDist.scale: 24.0
-    RotateToGoal.scale: 32.0
-
-    # Robot Configuration Parameters
-    acc_lim_theta: 2.0
-    acc_lim_x: 1.0
-    acc_lim_y: 0.0
-    decel_lim_theta: -2.0
-    decel_lim_x: -1.0
-    decel_lim_y: 0.0
-    max_vel_theta: 1.0
-    max_vel_x: 0.79
-    max_vel_y: 0.0
-    min_speed_theta: 0.01
-    min_speed_xy: 0.006
-    max_speed_xy: 0.80
-    min_vel_x: -0.79
-    min_vel_y: 0.0
+    controller_frequency: 20.0
+    controller_plugin_types: ["dwb_core::DWBLocalPlanner"]
+    controller_plugin_ids: ["FollowPath"]
     min_theta_velocity_threshold: 0.05
     min_x_velocity_threshold: 0.006
     min_y_velocity_threshold: 1.0
 
-    debug_trajectory_details: false
-    discretize_by_time: false
-    goal_checker_name: dwb_plugins::SimpleGoalChecker
-    local_controller_plugin: dwb_core::DWBLocalPlanner
-    publish_cost_grid_pc: true
-    publish_evaluation: true
-    publish_global_plan: true
-    publish_local_plan: true
-    publish_trajectories: true
-    publish_transformed_plan: true
-    trajectory_generator_name: "dwb_plugins::StandardTrajectoryGenerator"
-    transform_tolerance: 0.2
+    # DWB parameters
+    FollowPath:
+      # Robot Configuration Parameters (Asterix ONLY)
+      acc_lim_x: 1.0
+      acc_lim_y: 0.0
+      acc_lim_theta: 2.0
+      decel_lim_x: -1.0
+      decel_lim_y: 0.0
+      decel_lim_theta: -2.0
+      max_vel_x: 0.79
+      max_vel_y: 0.0
+      max_vel_theta: 1.0
+      max_speed_xy: 0.80
+      min_speed_xy: 0.006
+      min_speed_theta: 0.01
+      min_vel_x: -0.79
+      min_vel_y: 0.0
 
-    # Forward Simulation Parameters
-    vx_samples: 20
-    vy_samples: 5
-    vtheta_samples: 20
-    sim_time: 1.7
-    linear_granularity: 0.05
-    xy_goal_tolerance: 0.25
-    transform_tolerance: 0.2
-    controller_frequency: 20.0
+      # Forward Simulation Parameters
+      vx_samples: 20
+      vy_samples: 5
+      vtheta_samples: 20
+      sim_time: 1.7
+      linear_granularity: 0.05
+      angular_granularity: 0.025
+      transform_tolerance: 0.2
+      trans_stopped_velocity: 0.25 # No Idea
+      short_circuit_trajectory_evaluation: True
+      stateful: True
 
-    # Goal Tolerance Parameters
-    xy_goal_tolerance: 0.05
-    yaw_goal_tolerance: 0.05
-    latch_xy_goal_tolerance: true
-
-    # Global Plan Parameters
-    prune_plan: true
-    prune_distance: 1.0
+      # Trajectory Scoring Parameters
+      critics: # NOTE in past, GoalAlign, PathAlign and RotateToGoal where disable to allow higher accuracy
+      - RotateToGoal
+      - Oscillation
+      - BaseObstacle
+      #- GoalAlign
+      #- PathAlign
+      - PathDist
+      - GoalDist
+      BaseObstacle.scale: 0.02
+      PathAlign.scale: 0.0
+      GoalAlign.scale: 0.0
+      PathDist.scale: 32.0
+      GoalDist.scale: 24.0
+      RotateToGoal:
+        scale: 32.0
+        slowing_factor: 5.0
+        lookahead_time: -1.0
 
 
 controller_server_rclcpp_node:
@@ -127,7 +117,7 @@ local_costmap:
       resolution: 0.02
       # robot_radius: 0.15
       footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
-      inflation_layer.cost_scaling_factor: 3.0
+      inflation_layer.cost_scaling_factor: 1.0
       obstacle_layer:
         enabled: False
         scan:
@@ -137,7 +127,7 @@ local_costmap:
           marking: True
       static_layer:
         map_subscribe_transient_local: True
-      always_send_full_costmap: False
+      always_send_full_costmap: True
       observation_sources: scan
   local_costmap_client:
     ros__parameters:
@@ -180,11 +170,12 @@ map_server:
 
 planner_server:
   ros__parameters:
-    allow_unknown: true
-    planner_plugin: nav2_navfn_planner/NavfnPlanner
-    tolerance: 0.0
-    use_astar: false
-    use_sim_time: true
+    planner_plugin_types: ["nav2_navfn_planner/NavfnPlanner"]
+    planner_plugin_ids: ["GridBased"]
+    use_sim_time: True
+    GridBased.tolerance: 2.0  # switch to 0
+    GridBased.use_astar: false
+    GridBased.allow_unknown: true
 
 
 planner_server_rclcpp_node:

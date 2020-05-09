@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 
-import rclpy
-import py_trees
 import numpy as np
-from rclpy.node import Node
-from nav_msgs.msg import Odometry
+
+import py_trees
+import rclpy
 from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
+from nav_msgs.msg import Odometry
+from rclpy.node import Node
+from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
 
@@ -15,16 +17,18 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
+        self._triggered = False
         self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
+        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self._get_available_request = GetAvailableActions.Request()
         self._change_action_status_request = ChangeActionStatus.Request()
         self._get_available_request.sender = robot
         self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
-        self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
 
     def _synchronous_call(self, client, request):
         """Synchronous service call util function."""
@@ -45,7 +49,7 @@ class Robot(Node):
         """Preempt an action for the BT."""
         self.get_goal_pose()
         self._change_action_status_request.action = action
-        self._change_action_status_request.request = "PREEMPT"
+        self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
@@ -57,7 +61,7 @@ class Robot(Node):
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
-        self._change_action_status_request.request = "DROP"
+        self._change_action_status_request.request = 'DROP'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
@@ -69,17 +73,28 @@ class Robot(Node):
         if self._current_action is None:
             return False
         self._change_action_status_request.action = self._current_action
-        self._change_action_status_request.request = "CONFIRM"
+        self._change_action_status_request.request = 'CONFIRM'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
         self._current_action = None
         return response.success
 
+    def _start_robot_callback(self, req, resp):
+        """Start robot."""
+        self._triggered = True
+        self.get_logger().info('Triggered robot starter')
+        resp.success = True
+        return resp
+
+    def triggered(self):
+        """Triggered var."""
+        return self._triggered
+
     def _odom_callback(self, msg):
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
 
-    def euler_to_quaternion(self, yaw, pitch, roll):
+    def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
         qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
         qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
@@ -113,9 +128,13 @@ class Robot(Node):
         if self._current_action is not None:
             value = elements[self._current_action]
             msg.pose.pose.position.z = 0.0
-            msg.pose.pose.position.x = value[0]
-            msg.pose.pose.position.y = value[1]
-            q = self.euler_to_quaternion(value[2] if value[2] is not None else 0, 0, 0)
+            msg.pose.pose.position.x = float(value[0])
+            msg.pose.pose.position.y = float(value[1])
+            try:
+                q = self.euler_to_quaternion(value[2] if value[2] is not None else 0)
+            except IndexError:
+                # TODO: robot angle
+                q = self.euler_to_quaternion(0)
             msg.pose.pose.orientation.x = q[0]
             msg.pose.pose.orientation.y = q[1]
             msg.pose.pose.orientation.z = q[2]

@@ -7,6 +7,12 @@
 *.pgm
 *.urdf
 
+*.wbproj
+*.cache
+*.blend1
+*.bak.*
+*(2)*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -113,3 +119,13 @@ venv.bak/
 *.pio/*
 *.gcc-flags.json
 *.clang_complete
+
+### Vagrant ###
+# General
+.vagrant/*
+
+# Log files (if you are creating logs in debug mode, uncomment this)
+# *.log
+
+### Vagrant Patch ###
+*.box
