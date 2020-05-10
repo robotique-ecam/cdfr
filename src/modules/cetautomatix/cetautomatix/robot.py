@@ -51,7 +51,7 @@ class Robot(Node):
     def preempt_action(self, action):
         """Preempt an action for the BT."""
         self.get_goal_pose()
-        self._change_action_status_request.action = action
+        self._change_action_status_request.action = str(action)
         self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
