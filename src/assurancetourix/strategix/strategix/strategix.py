@@ -6,6 +6,8 @@ from rclpy.node import Node
 from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
+color = 'blue'
+
 
 class StrategixActionServer(Node):
     def __init__(self):
@@ -15,8 +17,11 @@ class StrategixActionServer(Node):
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
         self.get_logger().info('Strategix is ready')
 
+    def excludeList(self):
+        return self.score.excludeFromBlue if color == 'blue' else self.score.excludeFromYellow
+
     def available_callback(self, request, response):
-        response.available = self.score.todoList
+        response.available = [todo for todo in self.score.todoList if todo not in self.excludeList()]
         self.get_logger().info('GET %s' % (request.sender))
         return response
 
@@ -34,6 +39,7 @@ class StrategixActionServer(Node):
         except BaseException:
             self.get_logger().warn('Invalid call : %s %s %s' % (request.sender, request.request, request.action))
             response.success = False
+        self.score.updateScore()
         return response
 
 

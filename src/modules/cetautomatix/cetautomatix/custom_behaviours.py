@@ -38,6 +38,15 @@ class ReleaseAction(py_trees.behaviour.Behaviour):
         return py_trees.common.Status.SUCCESS if self.robot.drop_current_action() else py_trees.common.Status.FAILURE
 
 
+class ActuatorAction(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot):
+        super().__init__(name=name)
+        self.robot = robot
+
+    def update(self):
+        return py_trees.common.Status.SUCCESS if self.robot.start_actuator_action() else py_trees.common.Status.FAILURE
+
+
 class SetupTimersAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, actions):
         super().__init__(name=name)

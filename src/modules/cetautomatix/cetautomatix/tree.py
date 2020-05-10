@@ -9,7 +9,8 @@ import py_trees_ros
 import rclpy
 from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
                                             NewAction, PavillonAction,
-                                            ReleaseAction, SetupTimersAction)
+                                            ReleaseAction, SetupTimersAction,
+                                            ActuatorAction)
 from nav2_msgs.action import NavigateToPose
 
 try:
@@ -34,7 +35,10 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         generate_feedback_message=robot.get_goal_pose()
     )
 
-    actuator = py_trees.behaviours.Success(name='Actuators')
+    actuator = ActuatorAction(
+        name='ActuatorsAction',
+        robot=robot
+    )
 
     execute = py_trees.composites.Sequence(
         name='ExecuteAction',

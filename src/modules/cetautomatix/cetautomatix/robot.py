@@ -22,8 +22,10 @@ class Robot(Node):
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
+        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy/')
         self._get_available_request = GetAvailableActions.Request()
         self._change_action_status_request = ChangeActionStatus.Request()
+        self._get_trigger_deploy_pharaon_request = Trigger.Request()
         self._get_available_request.sender = robot
         self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
@@ -79,6 +81,13 @@ class Robot(Node):
             return False
         self._current_action = None
         return response.success
+
+    def start_actuator_action(self):
+        if 'PHARE' in self._current_action:
+            response = self._synchronous_call(self._get_trigger_deploy_pharaon_client, self._get_trigger_deploy_pharaon_request)
+            return response.success
+        else:
+            return True
 
     def _start_robot_callback(self, req, resp):
         """Start robot."""
