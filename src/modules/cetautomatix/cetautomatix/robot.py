@@ -19,10 +19,11 @@ class Robot(Node):
         robot = self.get_namespace()
         self._triggered = False
         self._current_action = None
+        self.position = (0.29, 0.67)
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
-        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy/')
+        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_available_request = GetAvailableActions.Request()
         self._change_action_status_request = ChangeActionStatus.Request()
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
@@ -83,6 +84,7 @@ class Robot(Node):
         return response.success
 
     def start_actuator_action(self):
+        self.get_logger().info('START ACTUATOR %s' % (self._current_action))
         if 'PHARE' in self._current_action:
             response = self._synchronous_call(self._get_trigger_deploy_pharaon_client, self._get_trigger_deploy_pharaon_request)
             return response.success
@@ -111,10 +113,10 @@ class Robot(Node):
         qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
         return [qx, qy, qz, qw]
 
-    def compute_best_action(self, list):
+    def compute_best_action(self, action_list):
         action_coeff_list = []
         # start = timeEndOfGame.time - 100.0
-        for action in list:
+        for action in action_list:
             for key, value in elements.items():
                 if key == action:
                     distance = np.sqrt(
@@ -122,11 +124,11 @@ class Robot(Node):
                     coeff_distance = distance * 100 / 3.6
                     action_coeff_list.append((key, coeff_distance))
                     break
-        max = 0
+        max_action = 0
         best_action = None
         for action in action_coeff_list:
-            if action[1] > max:
-                max = action[1]
+            if action[1] > max_action:
+                max_action = action[1]
                 best_action = action[0]
         self._current_action = best_action
         return best_action
@@ -136,9 +138,13 @@ class Robot(Node):
         msg = NavigateToPose_Goal()
         if self._current_action is not None:
             value = elements[self._current_action]
-            msg.pose.pose.position.z = 0.0
+            # msg.pose.pose.position.x = float(value[0])
+            # msg.pose.pose.position.y = float(value[1])
+            # msg.pose.pose.position.z = 0.0
+            # For WeBots Simulation:
             msg.pose.pose.position.x = float(value[0])
-            msg.pose.pose.position.y = float(value[1])
+            msg.pose.pose.position.y = float(value[1] - 0.2 / 2)
+            msg.pose.pose.position.z = 0.0
             try:
                 q = self.euler_to_quaternion(value[2] if value[2] is not None else 0)
             except IndexError:

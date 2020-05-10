@@ -24,8 +24,10 @@ class Pharaon(WebotsNode):
 
     def deploy_pharaon(self, req, resp):
         """Deploy pharaon on service call."""
+        self.get_logger().info('Started deployment')
         self.robot.getMotor('primary_joint').setPosition(0)
         self.robot.getMotor('secondary_joint').setPosition(0)
+        self.get_logger().info('Finished deployment')
         resp.success = True
         return resp
 

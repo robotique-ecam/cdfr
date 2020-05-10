@@ -21,12 +21,14 @@ class StrategixActionServer(Node):
         return self.score.excludeFromBlue if color == 'blue' else self.score.excludeFromYellow
 
     def available_callback(self, request, response):
-        response.available = [todo for todo in self.score.todoList if todo not in self.excludeList()]
         self.get_logger().info('GET %s' % (request.sender))
+        response.available = [todo for todo in self.score.todoList if todo not in self.excludeList()]
+        self.get_logger().info('AVAILABLE: %s' % (response.available))
         return response
 
     def action_callback(self, request, response):
         try:
+            self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
             if request.request == 'PREEMPT':
                 response.success = self.score.preempt(request.action)
             elif request.request == 'DROP':
@@ -35,7 +37,6 @@ class StrategixActionServer(Node):
                 response.success = self.score.finish(request.action)
             else:
                 raise BaseException
-            self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
         except BaseException:
             self.get_logger().warn('Invalid call : %s %s %s' % (request.sender, request.request, request.action))
             response.success = False
