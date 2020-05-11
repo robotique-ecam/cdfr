@@ -18,11 +18,13 @@ jobs:
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl gnupg2 lsb-release && \
           curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+          curl -s https://cyberbotics.com/Cyberbotics.asc | sudo apt-key add -
           sudo mkdir -p /etc/apt-get/sources.list.d/ && \
+          sudo apt-add-repository 'deb https://cyberbotics.com/debian/ binary-amd64/' && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-eloquent-ros-base python3-colcon-common-extensions \
           libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools \
           ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
-          ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro
+          ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro webots
       - name: Test all CDR packages
-        run: . /opt/ros/eloquent/setup.bash && ./setup.bash simulation
+        run: . /opt/ros/eloquent/setup.bash && WEBOTS_HOME=/usr/local/webots ./setup.bash simulation
