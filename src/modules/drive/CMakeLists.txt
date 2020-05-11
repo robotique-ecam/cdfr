@@ -54,6 +54,9 @@ option(TIMER "Enable Wall Timer for odometry" ON)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
+  if(NOT DEFINED ENV{WEBOTS_HOME})
+    message(FATAL_ERROR "WEBOTS_HOME is not set")
+  endif()
   # Link with the Webots controller library.
   set (LIBRARIES $ENV{WEBOTS_HOME}/lib/controller/${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX} $ENV{WEBOTS_HOME}/lib/controller/${CMAKE_SHARED_LIBRARY_PREFIX}CppController${CMAKE_SHARED_LIBRARY_SUFFIX})
   include_directories($ENV{WEBOTS_HOME}/include/controller/c $ENV{WEBOTS_HOME}/include/controller/cpp)
