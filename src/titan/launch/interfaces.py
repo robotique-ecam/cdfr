@@ -38,19 +38,19 @@ def generate_launch_description():
         GroupAction([
             Node(
                 package='titan',
-                executable='pharaon',
+                node_executable='pharaon',
                 output='screen',
             ),
 
             Node(
                 package='strategix',
-                executable='strategix',
+                node_executable='strategix',
                 output='screen',
             ),
 
             Node(
                 package='webots_ros2_core',
-                executable='webots_launcher',
+                node_executable='webots_launcher',
                 arguments=['--mode=realtime', '--world=tools/simulation/worlds/cdr2020.wbt'],
                 output='screen'
             ),
