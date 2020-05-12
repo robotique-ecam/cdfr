@@ -30,8 +30,9 @@ jobs:
         run: |
           mkdir -p ~/ros_ws/src
           source /opt/ros/eloquent/setup.bash
-          git clone -b master https://github.com/BehaviorTree/BehaviorTree.CPP.git ~/ros_ws/src/
-          git clone -b master https://github.com/ros-planning/navigation2.git ~/ros_ws/src/
+          cd ~/ros_ws/src
+          git clone -b master https://github.com/BehaviorTree/BehaviorTree.CPP.git
+          git clone -b master https://github.com/ros-planning/navigation2.git
           cd ~/ros_ws && colcon build --symlink-install
 
       - name: Build packages
