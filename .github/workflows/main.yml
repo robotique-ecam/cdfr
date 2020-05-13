@@ -63,6 +63,5 @@ jobs:
           source install/setup.bash
           export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
           export WEBOTS_HOME=/usr/local/webots
-          /usr/local/bin/webots --mode=realtime --stdout --stderr --batch tools/simulation/worlds/cdr2020.wbt
           ros2 launch titan titan.py
         timeout-minutes: 6  # Timeout the process if it fails to kill itself
