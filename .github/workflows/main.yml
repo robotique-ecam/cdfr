@@ -62,7 +62,7 @@ jobs:
           export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
           export WEBOTS_HOME=/usr/local/webots
 
-          ros2 run webots_ros2_core webots_launcher --mode=fast --world=tools/simulation/worlds/cdr2020.wbt --noGui &
+          /usr/local/bin/webots --mode=fast --stdout --stderr --batch --no-sandbox --minimize tools/simulation/worlds/cdr2020.wbt &
           echo "Webots is starting..."
           sleep 20
           ros2 launch titan cloud-interfaces.py &
