@@ -51,7 +51,7 @@ def generate_launch_description():
             Node(
                 package='webots_ros2_core',
                 node_executable='webots_launcher',
-                arguments=['--mode=realtime', '--world=tools/simulation/worlds/cdr2020.wbt'],
+                arguments=['--mode=realtime', '--stdout', '--stderr', '--batch', '--no-sandbox', '--world=tools/simulation/worlds/cdr2020.wbt'],
                 output='screen'
             ),
         ])

@@ -1,9 +1,9 @@
-name: colcon build
+name: Automated simulation run
 
 on: [push]
 
 jobs:
-  build:
+  simulation:
 
     runs-on: ubuntu-18.04
 
