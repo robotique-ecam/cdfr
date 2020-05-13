@@ -28,9 +28,18 @@ jobs:
           ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro \
           ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees xvfb webots
 
+      - name: Cache navigation2 and webots_ros2
+        id: cache-rosws
+        uses: actions/cache@v1
+        with:
+          path: ~/ros_ws
+          key: ${{ runner.os }}-rosws
+
       # Keep until foxy
       - name: Build navigation2 from source
+        if: steps.cache-rosws.outputs.cache-hit != 'true'
         run: |
+          echo "No cache of ~/ros_ws found, rebuilding !"
           mkdir -p ~/ros_ws/src
           source /opt/ros/eloquent/setup.bash
           cd ~/ros_ws/src
@@ -45,13 +54,15 @@ jobs:
 
       - name: Run simulation
         run: |
-          source install/setup.bash
           export DEBIAN_FRONTEND=noninteractive
           export AUDIODEV=null
           export DISPLAY=:99
           export LIBGL_ALWAYS_SOFTWARE=true
+          Xvfb :99 -screen 0 1024x768x16 &
+
+          source install/setup.bash
           export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
           export WEBOTS_HOME=/usr/local/webots
-          Xvfb :99 -screen 0 1024x768x16 &
+          /usr/local/bin/webots --mode=realtime --stdout --stderr --batch tools/simulation/worlds/cdr2020.wbt
           ros2 launch titan titan.py
         timeout-minutes: 6  # Timeout the process if it fails to kill itself
