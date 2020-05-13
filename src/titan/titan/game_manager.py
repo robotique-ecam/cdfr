@@ -34,7 +34,7 @@ class GameManager(WebotsNode):
 
     def _timer_callback(self):
         if (self.robot.getTime() - self._startup_time) <= 100:
-            self.get_logger().info(f'Match simulation completion : {(round(self.robot.getTime() - self._startup_time), 1)}%')
+            self.get_logger().info(f'Match simulation completion : {round(self.robot.getTime() - self._startup_time, 1)}%')
         else:
             self.robot.animationStopRecording()
             self.get_logger().info(f'Match simulation completion : 100%')
