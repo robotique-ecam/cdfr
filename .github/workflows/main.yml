@@ -36,7 +36,7 @@ jobs:
           git clone -b master https://github.com/cyberbotics/webots_ros2.git
           git clone -b master https://github.com/ros-planning/navigation2.git
           cd ~/ros_ws/src/navigation2 && git checkout 0c4aea88a
-          cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --package-skip nav2_system_tests
+          cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
 
       - name: Build packages
         run: source /opt/ros/eloquent/setup.bash && source ~/ros_ws/install/setup.bash && WEBOTS_HOME=/usr/local/webots ./setup.bash simulation
