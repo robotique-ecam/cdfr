@@ -25,7 +25,8 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-eloquent-ros-base python3-colcon-common-extensions \
           libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools \
           libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
-          ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro webots
+          ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro \
+          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees xvfb webots
 
       # Keep until foxy
       - name: Build navigation2 from source
@@ -42,5 +43,14 @@ jobs:
         run: source /opt/ros/eloquent/setup.bash && source ~/ros_ws/install/setup.bash && WEBOTS_HOME=/usr/local/webots ./setup.bash simulation
 
       - name: Run simulation
-        run: source install/setup.bash && LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH WEBOTS_HOME=/usr/local/webots ros2 launch titan titan.py
+        run: |
+          source install/setup.bash
+          export DEBIAN_FRONTEND=noninteractive
+          export AUDIODEV=null
+          export DISPLAY=:99
+          export LIBGL_ALWAYS_SOFTWARE=true
+          export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
+          export WEBOTS_HOME=/usr/local/webots
+          Xvfb :99 -screen 0 1024x768x16 &
+          ros2 launch titan titan.py
         timeout-minutes: 6  # Timeout the process if it fails to kill itself
