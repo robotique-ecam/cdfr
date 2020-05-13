@@ -1,4 +1,4 @@
-![colcon build](https://github.com/3wnbr1/ros/workflows/colcon%20build/badge.svg?branch=master)
+![Automated simulation run](https://github.com/3wnbr1/ros/workflows/Automated%20simulation%20run/badge.svg)
 
 ### Build
 
