@@ -30,21 +30,21 @@ def generate_launch_description():
 
         Node(
             package='transformix',
-            executable='transformix',
+            node_executable='transformix',
             output='screen',
             arguments=[]
         ),
 
         Node(
             package='tf2_ros',
-            executable='static_transform_publisher',
+            node_executable='static_transform_publisher',
             output='screen',
             arguments=['1.4', '2', '1', '3.141592654', '0', '-2.35619449', 'map', 'assurancetourix']
         ),
 
         Node(
             package='assurancetourix',
-            executable='assurancetourix',
+            node_executable='assurancetourix',
             output='screen',
             parameters=[params]
         ),

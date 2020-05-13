@@ -33,6 +33,7 @@ setup(
     entry_points={
         'console_scripts': [
             'pharaon = titan.pharaon:main',
+            'game_manager = titan.game_manager:main',
         ],
     },
 )

@@ -1,9 +1,9 @@
-name: colcon build
+name: Automated simulation run
 
 on: [push]
 
 jobs:
-  build:
+  simulation:
 
     runs-on: ubuntu-18.04
 
@@ -11,8 +11,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-          token: ${{ secrets.repo_key }}
 
+      # TODO : update on Foxy release
       - name: Setup ROS2 environment
         run: |
           sudo apt-get update
@@ -24,7 +24,53 @@ jobs:
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y ros-eloquent-ros-base python3-colcon-common-extensions \
           libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools \
-          ros-eloquent-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
-          ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro webots
-      - name: Test all CDR packages
-        run: . /opt/ros/eloquent/setup.bash && WEBOTS_HOME=/usr/local/webots ./setup.bash simulation
+          libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
+          ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro \
+          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees python3-psutil xvfb webots
+
+      - name: Cache navigation2 and webots_ros2
+        id: cache-ws
+        uses: actions/cache@v1
+        with:
+          path: ~/ros_ws/
+          key: cache-ws-0c4aea88a
+
+      # Keep until foxy
+      - name: Build navigation2 from source
+        if: steps.cache-ws.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/ros_ws/src
+          source /opt/ros/eloquent/setup.bash
+          cd ~/ros_ws/src
+          git clone -b master https://github.com/cyberbotics/webots_ros2.git
+          git clone -b master https://github.com/ros-planning/navigation2.git
+          cd ~/ros_ws/src/navigation2 && git checkout 0c4aea88a
+          cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
+
+      - name: Build packages
+        run: source /opt/ros/eloquent/setup.bash && source ~/ros_ws/install/setup.bash && WEBOTS_HOME=/usr/local/webots ./setup.bash simulation
+
+      - name: Run simulation
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          export AUDIODEV=null
+          export DISPLAY=:99
+          export LIBGL_ALWAYS_SOFTWARE=true
+          Xvfb :99 -screen 0 1024x768x16 &
+
+          source install/setup.bash
+          export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
+          export WEBOTS_HOME=/usr/local/webots
+
+          /usr/local/bin/webots --mode=fast --stdout --stderr --batch --no-sandbox --minimize tools/simulation/worlds/cdr2020.wbt &
+          echo "Webots is starting..."
+          sleep 20
+          ros2 launch titan cloud-interfaces.py &
+          ros2 launch titan core.py &
+          ros2 run titan game_manager
+        timeout-minutes: 8  # Timeout the process if it fails to kill itself
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: animation
+          path: ~/animation/

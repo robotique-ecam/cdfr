@@ -11,39 +11,40 @@ repositories:
     type: git
     url: https://github.com/ros-planning/navigation2.git
     version: master
-    py_trees:
-      type: git
-      url: https://github.com/splintered-reality/py_trees.git
-      version: release/2.0.x
-    py_trees_js:
-      type: git
-      url: https://github.com/splintered-reality/py_trees_js.git
-      version: release/0.6.x
-    py_trees_ros:
-      type: git
-      url: https://github.com/splintered-reality/py_trees_ros.git
-      version: release/2.0.x
-    py_trees_ros_interfaces:
-      type: git
-      url: https://github.com/splintered-reality/py_trees_ros_interfaces.git
-      version: release/2.0.x
-    py_trees_ros_tutorials:
-      type: git
-      url: https://github.com/splintered-reality/py_trees_ros_tutorials.git
-      version: release/2.0.x
-    py_trees_ros_viewer:
-      type: git
-      url: https://github.com/splintered-reality/py_trees_ros_viewer.git
-      version: release/0.2.x
-    rqt_robot_monitor:
-      type: git
-      url: https://github.com/ros-visualization/rqt_robot_monitor.git
-      version: dashing-devel
-    webots_ros2:
-      type: git
-      url: https://github.com/cyberbotics/webots_ros2.git
-      version: master
-    xacro:
-      type: git
-      url: https://github.com/ros/xacro.git
-      version: dashing-devel
+  py_trees:
+    type: git
+    url: https://github.com/splintered-reality/py_trees.git
+    version: release/2.0.x
+  py_trees_js:
+    type: git
+    url: https://github.com/splintered-reality/py_trees_js.git
+    version: release/0.6.x
+  py_trees_ros:
+    type: git
+    url: https://github.com/splintered-reality/py_trees_ros.git
+    version: release/2.0.x
+  py_trees_ros_interfaces:
+    type: git
+    url: https://github.com/splintered-reality/py_trees_ros_interfaces.git
+    version: release/2.0.x
+  py_trees_ros_tutorials:
+    type: git
+    url: https://github.com/splintered-reality/py_trees_ros_tutorials.git
+    version: release/2.0.x
+  py_trees_ros_viewer:
+    type: git
+    url: https://github.com/splintered-reality/py_trees_ros_viewer.git
+    version: release/0.2.x
+  rqt_robot_monitor:
+    type: git
+    url: https://github.com/ros-visualization/rqt_robot_monitor.git
+    version: dashing-devel
+  webots_ros2:
+    type: git
+    url: https://github.com/cyberbotics/webots_ros2.git
+    version: master
+  xacro:
+    type: git
+    url: https://github.com/ros/xacro.git
+    version: dashing-devel
+`

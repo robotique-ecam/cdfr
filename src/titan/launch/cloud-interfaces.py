@@ -27,14 +27,6 @@ def generate_launch_description():
             }.items(),
         ) for robot in robots
     ] + [
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([get_package_share_directory('assurancetourix'), '/launch/launch.py']),
-            launch_arguments={
-                'namespace': 'assurancetourix',
-                'params_file': os.path.join(get_package_share_directory('assurancetourix'), 'param', 'assurancetourix.yml')
-            }.items(),
-        )
-    ] + [
         GroupAction([
             Node(
                 package='titan',
@@ -46,13 +38,6 @@ def generate_launch_description():
                 package='strategix',
                 node_executable='strategix',
                 output='screen',
-            ),
-
-            Node(
-                package='webots_ros2_core',
-                node_executable='webots_launcher',
-                arguments=['--mode=realtime', '--world=tools/simulation/worlds/cdr2020.wbt'],
-                output='screen'
             ),
         ])
     ])
