@@ -63,7 +63,8 @@ jobs:
           export WEBOTS_HOME=/usr/local/webots
 
           ros2 run webots_ros2_core webots_launcher --mode=fast --world=tools/simulation/worlds/cdr2020.wbt --noGui &
-          echo "Webots is starting..." && sleep 15
+          echo "Webots is starting..."
+          sleep 20
           ros2 launch titan cloud-interfaces.py &
           ros2 launch titan core.py &
           ros2 run titan game_manager
