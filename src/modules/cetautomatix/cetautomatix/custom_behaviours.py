@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 
-import time
-
 import py_trees
 
 
@@ -48,8 +46,9 @@ class ActuatorAction(py_trees.behaviour.Behaviour):
 
 
 class SetupTimersAction(py_trees.behaviour.Behaviour):
-    def __init__(self, name, actions):
+    def __init__(self, name, robot, actions):
         super().__init__(name=name)
+        self.robot = robot
         self.actions = actions
         self.oneshot = 0
 
@@ -58,19 +57,20 @@ class SetupTimersAction(py_trees.behaviour.Behaviour):
             self.oneshot += 1
             # Setup Timers
             for action, duration in self.actions.items():
-                action.time = time.time() + duration
+                action.time = self.robot.get_clock().now() + duration
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 
 
 class PavillonAction(py_trees.behaviour.Behaviour):
-    def __init__(self, name):
+    def __init__(self, name, robot):
         super().__init__(name=name)
-        self.time = 10000
+        self.robot = robot
+        self.time = 1e5
         self.oneshot = 0
 
     def update(self):
-        if time.time() > self.time:
+        if self.robot.get_clock().now() > self.time:
             if self.oneshot < 1:
                 self.oneshot += 1
                 # Code to activate PavillonAction
@@ -79,13 +79,14 @@ class PavillonAction(py_trees.behaviour.Behaviour):
 
 
 class EndOfGameAction(py_trees.behaviour.Behaviour):
-    def __init__(self, name):
+    def __init__(self, name, robot):
         super().__init__(name=name)
-        self.time = 10000
+        self.robot = robot
+        self.time = 1e5
         self.oneshot = 0
 
     def update(self):
-        if time.time() > self.time:
+        if self.robot.get_clock().now() > self.time:
             if self.oneshot < 1:
                 self.oneshot += 1
                 # Code to end every action

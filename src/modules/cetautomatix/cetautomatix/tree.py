@@ -76,7 +76,10 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         name='ActionsLoop'
     )
 
-    pavillon = PavillonAction(name='Pavillon Action')
+    pavillon = PavillonAction(
+        name='Pavillon Action',
+        robot=robot
+    )
 
     # Asterix Root
     all_actions = py_trees.composites.Parallel(
@@ -85,10 +88,14 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         children=[pavillon, actions_loop]
     )
 
-    end_of_game = EndOfGameAction(name='End Of Game?')
+    end_of_game = EndOfGameAction(
+        name='End Of Game?',
+        robot=robot
+    )
 
     setup_timers = SetupTimersAction(
         name='Setup Timers',
+        robot=robot,
         actions={pavillon: 95.0, end_of_game: 100.0}
     )
     asterix = py_trees.composites.Selector(
