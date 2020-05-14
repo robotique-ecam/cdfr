@@ -57,7 +57,7 @@ class SetupTimersAction(py_trees.behaviour.Behaviour):
             self.oneshot += 1
             # Setup Timers
             for action, duration in self.actions.items():
-                action.time = self.robot.get_clock().now() + duration
+                action.time = self.robot.get_clock().now().nanoseconds * 1e-9 + duration
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 
@@ -70,10 +70,10 @@ class PavillonAction(py_trees.behaviour.Behaviour):
         self.oneshot = 0
 
     def update(self):
-        if self.robot.get_clock().now() > self.time:
+        if self.robot.get_clock().now().nanoseconds * 1e-9 > self.time:
             if self.oneshot < 1:
                 self.oneshot += 1
-                # Code to activate PavillonAction
+                self.robot.trigger_pavillons()
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING
 
@@ -86,7 +86,7 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
         self.oneshot = 0
 
     def update(self):
-        if self.robot.get_clock().now() > self.time:
+        if self.robot.get_clock().now().nanoseconds * 1e-9 > self.time:
             if self.oneshot < 1:
                 self.oneshot += 1
                 # Code to end every action
