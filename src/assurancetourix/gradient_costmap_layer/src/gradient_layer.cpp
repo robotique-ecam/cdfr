@@ -17,9 +17,7 @@ GradientLayer::GradientLayer()
   last_max_x_(std::numeric_limits<float>::max()),
   last_max_y_(std::numeric_limits<float>::max())
 {
-  coord_from_frame.clear();
-  marker_subscriber = node_->create_subscription<visualization_msgs::msg::MarkerArray>(
-      topic, qos, std::bind(&GradientLayer::marker_callback, this, std::placeholders::_1));
+
 }
 
 void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::msg::MarkerArray> msg)
@@ -41,10 +39,19 @@ void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::ms
 void
 GradientLayer::onInitialize()
 {
-  declareParameter("enabled", rclcpp::ParameterValue(true));
+  declareParameter("enabled", rclcpp::ParameterValue(false));
   node_->get_parameter(name_ + "." + "enabled", enabled_);
+  declareParameter("gradient_size", rclcpp::ParameterValue(5));
+  node_->get_parameter(name_ + "." + "gradient_size", GRADIENT_SIZE);
+  declareParameter("gradient_factor", rclcpp::ParameterValue(60));
+  node_->get_parameter(name_ + "." + "gradient_factor", GRADIENT_FACTOR);
+  declareParameter("markers_topic", rclcpp::ParameterValue("coordonate_position_transform"));
+  node_->get_parameter(name_ + "." + "markers_topic", topic);
 
   need_recalculation_ = false;
+  coord_from_frame.clear();
+  marker_subscriber = node_->create_subscription<visualization_msgs::msg::MarkerArray>(
+      topic, qos, std::bind(&GradientLayer::marker_callback, this, std::placeholders::_1));
 }
 
 // The method is called to ask the plugin: which area of costmap it needs to update.
@@ -108,75 +115,35 @@ GradientLayer::updateCosts(
     return;
   }
 
-
-  // master_array - is a direct pointer to the resulting master_grid.
-  // master_grid - is a resulting costmap combined from all layers.
-  // By using this pointer all layers will be overwritten!
-  // To work with costmap layer and merge it with other costmap layers,
-  // please use costmap_ pointer instead (this is pointer to current
-  // costmap layer grid) and then call one of updates methods:
-  // - updateWithAddition()
-  // - updateWithMax()
-  // - updateWithOverwrite()
-  // - updateWithTrueOverwrite()
-  // In this case using master_array pointer is equal to modifying local costmap_
-  // pointer and then calling updateWithTrueOverwrite():
   unsigned char * master_array = master_grid.getCharMap();
   unsigned int size_x = master_grid.getSizeInCellsX(), size_y = master_grid.getSizeInCellsY();
 
-  // {min_i, min_j} - {max_i, max_j} - are update-window coordinates.
-  // These variables are used to update the costmap only within this window
-  // avoiding the updates of whole area.
-
-  // Fixing window coordinates with map size if necessary.
-  min_i = std::max(0, min_i);
-  min_j = std::max(0, min_j);
-  max_i = std::min(static_cast<int>(size_x), max_i);
-  max_j = std::min(static_cast<int>(size_y), max_j);
-
-  /*TODO check if considering x:i and y:j is true*/
-
-  double transform_coeff_x, transform_coeff_y;
-  transform_coeff_x = max_i/3; //3=size of the x play area
-  transform_coeff_y = max_j/2; //2=size of the y play area
-
   std::vector<std::array<double, 2>> coord_from_frame_at_t = coord_from_frame;
-  std::vector<std::array<int, 2>> coord_from_index;
+  std::vector<std::array<double, 2>> coord_from_index;
   for (std::array<double, 2> coord: coord_from_frame_at_t){
-    std::array<int, 2> tmp;
-    tmp[0] = int(coord[0]*transform_coeff_x);
-    tmp[1] = int(coord[1]*transform_coeff_y);
+    std::array<double, 2> tmp;
+    tmp[0] = coord[0]*50+101; //50: celulles by meters, 100: offset to be on the map
+    tmp[1] = coord[1]*50+101; //50: celulles by meters, 100: offset to be on the map
     coord_from_index.push_back(tmp);
   }
 
-  int costs[max_i][max_j] = {};
-  //std::fill(costs[0], costs[0] + max_i * max_j, 0);
-
-  for (std::array<int, 2> cost: coord_from_index){
-    for (int gradient_layer = 0; gradient_layer<int(LETHAL_OBSTACLE/GRADIENT_FACTOR); gradient_layer++){
+  for (std::array<double, 2> cost: coord_from_index){
+    for (int gradient_layer = 0; gradient_layer<LETHAL_OBSTACLE/GRADIENT_FACTOR; gradient_layer++){
       int gradient_cost = LETHAL_OBSTACLE - gradient_layer*GRADIENT_FACTOR;
       int gradient_radius = GRADIENT_SIZE*(gradient_layer+1);
-      int max_rect_i = cost[0]+gradient_radius;
-      int max_rect_j = cost[1]+gradient_radius;
-      int min_rect_i = cost[0]-gradient_radius;
-      int min_rect_j = cost[1]-gradient_radius;
-      if (max_rect_i > max_i){max_rect_i = max_i;}
-      if (max_rect_j > max_j){max_rect_j = max_j;}
-      if (min_rect_i < min_i){min_rect_i = min_i;}
-      if (min_rect_j < min_j){min_rect_j = min_j;}
-      for (int k = min_rect_i; k<max_rect_i; k++){
-        for (int v = min_rect_j; v<max_rect_j; v++){
-          if ( (k-cost[0])*(k-cost[0])+(v-cost[1])*(v-cost[1])<=gradient_radius*gradient_radius && costs[k][v]<gradient_cost ){
-            costs[k][v]=gradient_cost;
+      double max_rect_i = cost[0]+gradient_radius;
+      double max_rect_j = cost[1]+gradient_radius;
+      double min_rect_i = cost[0]-gradient_radius;
+      double min_rect_j = cost[1]-gradient_radius;
+      for (double k = min_rect_i; k<max_rect_i; k++){
+        for (double v = min_rect_j; v<max_rect_j; v++){
+          unsigned char old_cost = master_array[master_grid.getIndex(k, v)];
+          if ( (k-cost[0])*(k-cost[0])+(v-cost[1])*(v-cost[1])<=gradient_radius*gradient_radius
+                && (old_cost == NO_INFORMATION || old_cost <= gradient_cost) ){
+            master_array[master_grid.getIndex(k, v)] = gradient_cost;
           }
         }
       }
-    }
-  }
-
-  for (int j = min_j; j < max_j; j++) {
-    for (int i = min_i; i < max_i; i++) {
-      master_array[master_grid.getIndex(i, j)] = costs[i][j];
     }
   }
 }

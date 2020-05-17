@@ -5,6 +5,7 @@
 #include "nav2_costmap_2d/layer.hpp"
 #include "nav2_costmap_2d/layered_costmap.hpp"
 #include <visualization_msgs/msg/marker_array.hpp>
+#include "nav2_costmap_2d/costmap_layer.hpp"
 
 namespace nav2_gradient_costmap_plugin
 {
@@ -34,7 +35,7 @@ public:
 private:
   void marker_callback(const std::shared_ptr<visualization_msgs::msg::MarkerArray> msg);
 
-  std::string topic = "the_topic";
+  std::string topic = "coordonate_position_transform";
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
   rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr marker_subscriber;
   visualization_msgs::msg::Marker received_marker;
@@ -45,9 +46,9 @@ private:
   bool need_recalculation_;
 
   // Size of gradient in cells
-  int GRADIENT_SIZE = 20;
+  int GRADIENT_SIZE;
   // Step of increasing cost per one cell in gradient
-  int GRADIENT_FACTOR = 10;
+  int GRADIENT_FACTOR;
 };
 
 }  // namespace nav2_gradient_costmap_plugin
