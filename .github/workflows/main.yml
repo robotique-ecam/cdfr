@@ -68,7 +68,7 @@ jobs:
           ros2 launch titan cloud-interfaces.py &
           ros2 launch titan core.py &
           ros2 run titan game_manager
-        timeout-minutes: 8  # Timeout the process if it fails to kill itself
+        timeout-minutes: 10  # Timeout the process if it fails to kill itself
 
       - uses: actions/upload-artifact@v2
         with:
