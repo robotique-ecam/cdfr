@@ -64,7 +64,7 @@ jobs:
 
           /usr/local/bin/webots --mode=fast --stdout --stderr --batch --no-sandbox --minimize tools/simulation/worlds/cdr2020.wbt &
           echo "Webots is starting..."
-          sleep 20
+          sleep 45
           ros2 launch titan cloud-interfaces.py &
           ros2 launch titan core.py &
           ros2 run titan game_manager
