@@ -24,6 +24,7 @@ find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(transformix_msgs REQUIRED)
+find_package(transformix REQUIRED)
 
 
 ################################################################################
@@ -44,6 +45,7 @@ set(dependencies
   "tf2_ros"
   "tf2_geometry_msgs"
   "transformix_msgs"
+  "transformix"
 )
 
 set(EXEC_NAME "assurancetourix")
