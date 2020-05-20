@@ -64,7 +64,7 @@ class GameManager(WebotsNode):
             rbsd.writestr('moves.json', moves)
 
     def _timer_callback(self):
-        if (self.robot.getTime() - self._startup_time) <= 10:
+        if (self.robot.getTime() - self._startup_time) <= 101:
             self.get_logger().info(f'Match simulation completion : {round(self.robot.getTime() - self._startup_time, 1)}%')
         else:
             self.robot.animationStopRecording()
