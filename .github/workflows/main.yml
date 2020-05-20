@@ -77,7 +77,8 @@ jobs:
 
 
   hyperion:
-
+    needs: simulation
+    
     runs-on: ubuntu-18.04
 
     steps:
