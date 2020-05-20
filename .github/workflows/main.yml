@@ -1,4 +1,4 @@
-name: Automated simulation run
+name: Simulation
 
 on: [push]
 
@@ -26,7 +26,7 @@ jobs:
           libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools \
           libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
           ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro \
-          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees python3-psutil xvfb webots
+          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees python3-psutil python3-git xvfb webots
 
       - name: Cache navigation2 and webots_ros2
         id: cache-ws
@@ -72,5 +72,27 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: animation
-          path: ~/animation/
+          name: simulation-results
+          path: ~/animation/*.rbsd
+
+
+  hyperion:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install python3-colorama
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: simulation-results
+
+      - name: Run hyperion
+        run: |
+          cd tools/hyperion
+          python3 hyperion.py

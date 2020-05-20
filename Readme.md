@@ -1,4 +1,4 @@
-![Automated simulation run](https://github.com/3wnbr1/ros/workflows/Automated%20simulation%20run/badge.svg)
+![Simulation](https://github.com/3wnbr1/ros/workflows/Simulation/badge.svg)
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
 ![Webots](https://img.shields.io/badge/webots-2020a%20r2-blue)
 ![Status](https://img.shields.io/badge/status-alpha-blueviolet)
