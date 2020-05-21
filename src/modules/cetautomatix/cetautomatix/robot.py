@@ -17,6 +17,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
+        self.position = (0, 0)
         self._triggered = False
         self._current_action = None
         self.position = (0.29, 0.67)
@@ -34,7 +35,7 @@ class Robot(Node):
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
 
     def _synchronous_call(self, client, request):
-        """Synchronous service call util function."""
+        """Call service synchronously."""
         future = client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         try:

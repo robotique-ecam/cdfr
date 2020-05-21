@@ -1,0 +1,5 @@
+<library path="gradient_costmap_layer_core">
+  <class name="gradient_costmap_layer_plugin/GradientLayer" type="nav2_gradient_costmap_plugin::GradientLayer" base_class_type="nav2_costmap_2d::Layer">
+    <description>Draw cicrcle gradients around markers</description>
+  </class>
+</library>

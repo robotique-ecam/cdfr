@@ -32,7 +32,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("coordonate_position_transform", qos);
+  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("asterix/global_costmap/coordonate_position_transform", qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -41,7 +41,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
-  RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
+  //RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
 }
 
 #ifdef MIPI_CAMERA
@@ -171,11 +171,11 @@ void Assurancetourix::detect() {
   time_taken_camera *= 1e-9;
   time_taken_detection *= 1e-9;
   time_taken_total *= 1e-9;
-
+/*
   RCLCPP_INFO(this->get_logger(), "time of camera: %f", time_taken_camera);
   RCLCPP_INFO(this->get_logger(), "time of detection: %f", time_taken_detection);
   RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
-
+*/
   if (show_image) {
     cv::imshow("anotated", _anotated);
     // cv::imshow("origin", _frame);
@@ -238,6 +238,7 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
 
 void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
+    visualization_msgs::msg::MarkerArray marker_array_pub;
 
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
@@ -289,10 +290,12 @@ void Assurancetourix::_anotate_image(Mat img) {
       transformed_marker.header = tmpPoseOut.header;
       transformed_marker.pose = tmpPoseOut.pose;
 
-      transformed_marker_pub_->publish(transformed_marker);
+      marker_array_pub.markers.push_back(transformed_marker);
+
       marker_pub_->publish(marker);
-      RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
+      //RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
+    transformed_marker_pub_->publish(marker_array_pub);
   }
 }
 
