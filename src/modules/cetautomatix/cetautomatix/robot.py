@@ -91,6 +91,9 @@ class Robot(Node):
         else:
             return True
 
+    def trigger_pavillons(self):
+        self.get_logger().info('Triggered pavillons')
+
     def _start_robot_callback(self, req, resp):
         """Start robot."""
         self._triggered = True
@@ -114,23 +117,19 @@ class Robot(Node):
         return [qx, qy, qz, qw]
 
     def compute_best_action(self, action_list):
-        action_coeff_list = []
+        """Calculate best action to choose from its distance to the robot."""
+        if not action_list:
+            self._current_action = 'ARUCO42'
+            return 'ARUCO42'
+        distance_list = []
         # start = timeEndOfGame.time - 100.0
         for action in action_list:
-            for key, value in elements.items():
-                if key == action:
-                    distance = np.sqrt(
-                        (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
-                    coeff_distance = distance * 100 / 3.6
-                    action_coeff_list.append((key, coeff_distance))
-                    break
-        max_action = 0
-        best_action = None
-        for action in action_coeff_list:
-            if action[1] > max_action:
-                max_action = action[1]
-                best_action = action[0]
-        self._current_action = best_action
+            value = elements[action]
+            distance = np.sqrt(
+                (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
+            coeff_distance = 100 * (1 - distance / 3.6)
+            distance_list.append(coeff_distance)
+        best_action = action_list[distance_list.index(max(distance_list))]
         return best_action
 
     def get_goal_pose(self):
