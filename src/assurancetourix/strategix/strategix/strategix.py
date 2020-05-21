@@ -29,8 +29,10 @@ class StrategixActionServer(Node):
     def action_callback(self, request, response):
         try:
             self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
+            if request.action == 'ARUCO42':
+                response.success = True
             if request.request == 'PREEMPT':
-                response.success = self.score.preempt(request.action) if request.action != 'ARUCO42' else True
+                response.success = self.score.preempt(request.action)
             elif request.request == 'DROP':
                 response.success = self.score.release(request.action)
             elif request.request == 'CONFIRM':

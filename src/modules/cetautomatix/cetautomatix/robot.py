@@ -20,7 +20,6 @@ class Robot(Node):
         self.position = (0, 0)
         self._triggered = False
         self._current_action = None
-        self.position = (0.29, 0.67)
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
