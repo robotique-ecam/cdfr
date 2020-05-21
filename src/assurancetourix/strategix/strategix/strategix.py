@@ -30,7 +30,7 @@ class StrategixActionServer(Node):
         try:
             self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
             if request.request == 'PREEMPT':
-                response.success = self.score.preempt(request.action)
+                response.success = self.score.preempt(request.action) if request.action != 'ARUCO42' else True
             elif request.request == 'DROP':
                 response.success = self.score.release(request.action)
             elif request.request == 'CONFIRM':
