@@ -34,7 +34,7 @@ PROTO Asterix [
         device [
           RotationalMotor {
             name "wheel_left_joint"
-            maxVelocity 20
+            maxVelocity 25
           }
           PositionSensor {
             name "wheel_left_joint_sensor"
@@ -76,7 +76,7 @@ PROTO Asterix [
         device [
           RotationalMotor {
             name "wheel_right_joint"
-            maxVelocity 20
+            maxVelocity 25
           }
           PositionSensor {
             name "wheel_right_joint_sensor"

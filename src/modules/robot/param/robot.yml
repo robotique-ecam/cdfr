@@ -109,8 +109,8 @@ local_costmap:
     ros__parameters:
       use_sim_time: True
       global_frame: odom
-      plugin_names: ["obstacle_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
+      plugin_names: ["gradient_layer", "inflation_layer"]
+      plugin_types: ["gradient_costmap_layer_plugin/GradientLayer", "nav2_costmap_2d::InflationLayer"]
       rolling_window: true
       width: 3
       height: 3
@@ -118,13 +118,10 @@ local_costmap:
       # robot_radius: 0.15
       footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       inflation_layer.cost_scaling_factor: 1.0
-      obstacle_layer:
-        enabled: False
-        scan:
-          topic: /asterix/scan
-          max_obstacle_height: 2.0
-          clearing: True
-          marking: True
+      gradient_layer:
+        enabled: false
+        gradient_size: 5
+        gradient_factor: 60
       static_layer:
         map_subscribe_transient_local: True
       always_send_full_costmap: True
@@ -143,15 +140,23 @@ global_costmap:
       use_sim_time: True
       # robot_radius: 0.15
       footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
-      obstacle_layer:
-        enabled: True
-        scan:
-          topic: /asterix/scan
-          max_obstacle_height: 2.0
-          clearing: True
-          marking: True
+      plugin_names: ["static_layer", "gradient_layer", "inflation_layer"]
+      plugin_types: ["nav2_costmap_2d::StaticLayer", "gradient_costmap_layer_plugin/GradientLayer", "nav2_costmap_2d::InflationLayer"]
+      clearable_layers:
+      - gradient_layer
+      - obstacle_layer
       static_layer:
         map_subscribe_transient_local: True
+      gradient_layer:
+        enabled: true
+        gradient_size: 5
+        gradient_factor: 60
+        markers_topic: "coordonate_position_transform"
+      inflation_layer:
+        cost_scaling_factor: 10.0
+        enabled: true
+        inflate_unknown: false
+        inflation_radius: 0.55
       always_send_full_costmap: True
       observation_sources: scan
   global_costmap_client:
