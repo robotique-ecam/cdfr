@@ -17,7 +17,7 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
-        self.position = (0, 0)
+        self.position = (0.29, 1.33)
         self._triggered = False
         self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
