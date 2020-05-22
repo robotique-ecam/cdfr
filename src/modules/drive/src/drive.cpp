@@ -30,7 +30,7 @@ Drive::Drive() : Node("drive_node") {
   wp_left_encoder->enable(timestep);
   wp_right_encoder->enable(timestep);
 
-  time_stepper_ = this->create_wall_timer(std::chrono::milliseconds((int) timestep), std::bind(&Drive::sim_step, this));
+  time_stepper_ = this->create_wall_timer(std::chrono::milliseconds((int)timestep), std::bind(&Drive::sim_step, this));
 #endif /* SIMULATION */
 
   /* Init ROS Publishers and Subscribers */
@@ -237,20 +237,16 @@ void Drive::update_joint_states() {
   joint_states_pub_->publish(joint_states_);
 }
 
-void Drive::update_diagnostic() {
-  diagnostics_pub_->publish(diagnostics_array_);
-}
+void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_); }
 
 rclcpp::Time Drive::get_sim_time() {
   double seconds = 0;
   double nanosec = modf(wb_supervisor->getTime(), &seconds) * 1e9;
-  return rclcpp::Time((uint32_t) seconds, (uint32_t) nanosec);
+  return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
 }
 
 #ifdef SIMULATION
-void Drive::sim_step() {
-  this->wb_supervisor->step(timestep);
-}
+void Drive::sim_step() { this->wb_supervisor->step(timestep); }
 #endif /* SIMULATION */
 
 Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }

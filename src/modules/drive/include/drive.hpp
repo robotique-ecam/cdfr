@@ -71,10 +71,10 @@ private:
   std::shared_ptr<I2C> i2c;
 #else
   std::shared_ptr<webots::Supervisor> wb_supervisor;
-  webots::Motor * wb_left_motor;
-  webots::Motor * wb_right_motor;
-  webots::PositionSensor * wp_left_encoder;
-  webots::PositionSensor * wp_right_encoder;
+  webots::Motor *wb_left_motor;
+  webots::Motor *wb_right_motor;
+  webots::PositionSensor *wp_left_encoder;
+  webots::PositionSensor *wp_right_encoder;
   Differential old_steps_returned;
   double timestep;
   rclcpp::TimerBase::SharedPtr time_stepper_;
@@ -152,9 +152,9 @@ private:
   int8_t compute_velocity_cmd(double velocity);
   rclcpp::Time get_sim_time();
 
-  #ifdef SIMULATION
+#ifdef SIMULATION
   void sim_step();
-  #endif /* SIMULATION */
+#endif /* SIMULATION */
 };
 
 #endif /* DRIVE_NODE_HPP */
