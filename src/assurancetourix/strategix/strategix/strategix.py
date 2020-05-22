@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 
+from os import environ
+
 import rclpy
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
@@ -13,7 +15,11 @@ class StrategixActionServer(Node):
     def __init__(self):
         super().__init__('strategix_action_server')
         self.side = self.declare_parameter('side', 'blue')
-        self.add_on_set_parameters_callback(self._on_set_parameters)
+        # TODO: remove on foxy release
+        if environ['ROS_DISTRO'] == 'eloquent':
+            self.set_parameters_callback(self._on_set_parameters)
+        else:
+            self.add_on_set_parameters_callback(self._on_set_parameters)
         self.score = Score()
         self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
