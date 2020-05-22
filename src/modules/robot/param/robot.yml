@@ -175,12 +175,10 @@ map_server:
 
 planner_server:
   ros__parameters:
-    planner_plugin_types: ["nav2_navfn_planner/NavfnPlanner"]
+    planner_plugin_types: ["jarvis_planner/Jarvis"]
     planner_plugin_ids: ["GridBased"]
     use_sim_time: True
-    GridBased.tolerance: 2.0  # switch to 0
-    GridBased.use_astar: false
-    GridBased.allow_unknown: true
+    GridBased.interpolation_resolution: 0.1
 
 
 planner_server_rclcpp_node:
