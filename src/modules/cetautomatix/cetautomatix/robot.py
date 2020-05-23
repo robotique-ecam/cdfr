@@ -126,6 +126,7 @@ class Robot(Node):
     def get_goal_pose(self):
         """Get goal pose for action."""
         msg = NavigateToPose_Goal()
+        msg.pose.header.frame_id = 'map'
         if self._current_action is not None:
             value = elements[self._current_action]
             msg.pose.pose.position.z = 0.0
