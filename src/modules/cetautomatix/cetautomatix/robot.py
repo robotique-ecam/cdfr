@@ -21,6 +21,8 @@ class Robot(Node):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
         self.position = (0.29, 1.33)
+        self.length = 0.26
+        self.width = 0.2
         self._triggered = False
         self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
@@ -147,15 +149,22 @@ class Robot(Node):
         msg = NavigateToPose_Goal()
         if self._current_action is not None:
             value = elements[self._current_action]
-            # msg.pose.pose.position.x = float(value[0])
-            # msg.pose.pose.position.y = float(value[1])
-            # msg.pose.pose.position.z = 0.0
-            # For WeBots Simulation:
             msg.pose.pose.position.x = float(value[0])
-            msg.pose.pose.position.y = float(value[1] - 0.2 / 2)
+            msg.pose.pose.position.y = float(value[1])
             msg.pose.pose.position.z = 0.0
             try:
-                q = self.euler_to_quaternion(value[2] if value[2] is not None else 0)
+                if value[2] is not None:
+                    q = self.euler_to_quaternion(value[2])
+                    if value[2] == 0:
+                        msg.pose.pose.position.x -= self.width / 2
+                    elif value[2] == 180:
+                        msg.pose.pose.position.x += self.width / 2
+                    elif value[2] == 90:
+                        msg.pose.pose.position.y -= self.width / 2
+                    elif value[2] == -90:
+                        msg.pose.pose.position.y += self.width / 2
+                else:
+                    q = self.euler_to_quaternion(0)
             except IndexError:
                 # TODO: robot angle
                 q = self.euler_to_quaternion(0)
