@@ -14,6 +14,7 @@ from rclpy.node import Node
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
+from tf2_ros.buffer import Buffer
 
 
 class Robot(Node):
@@ -37,6 +38,8 @@ class Robot(Node):
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
+        self._tf_buffer = Buffer()
+        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
 
     def _synchronous_call(self, client, request):
         """Call service synchronously."""
