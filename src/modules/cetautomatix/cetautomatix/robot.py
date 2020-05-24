@@ -6,10 +6,10 @@ import numpy as np
 import py_trees
 import rclpy
 import tf2_geometry_msgs
-from rclpy.duration import Duration
 from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
+from rclpy.duration import Duration
 from rclpy.node import Node
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
@@ -58,13 +58,14 @@ class Robot(Node):
 
     def preempt_action(self, action):
         """Preempt an action for the BT."""
-        self.get_goal_pose()
         self._change_action_status_request.action = str(action)
         self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
         if response is None:
             return False
         self._current_action = action if response.success else None
+        if self._current_action is not None:
+            self.get_goal_pose()
         return response.success
 
     def drop_current_action(self):
@@ -100,6 +101,7 @@ class Robot(Node):
             return True
 
     def trigger_pavillons(self):
+        # TODO
         self.get_logger().info('Triggered pavillons')
 
     def _start_robot_callback(self, req, resp):

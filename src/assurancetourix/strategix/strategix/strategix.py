@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 
+"""Strategix action server and score counter."""
+
 from os import environ
 
 import rclpy
@@ -46,7 +48,8 @@ class StrategixActionServer(Node):
 
     def available_callback(self, request, response):
         self.get_logger().info('GET %s' % (request.sender))
-        response.available = [todo for todo in self.score.todoList if todo not in self.excludeList()]
+        exclude = self.excludeList()
+        response.available = [todo for todo in self.score.todoList if todo not in exclude]
         self.get_logger().info('AVAILABLE: %s' % (response.available))
         return response
 

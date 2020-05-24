@@ -22,17 +22,13 @@ except ImportError:
     GPIO = None
 
 
-rclpy.init(args=None)
-
-
 def create_tree(robot) -> py_trees.behaviour.Behaviour:
     """Create py_tree nodes."""
     navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
         action_name='navigate_to_pose',
         name='NavigateToPose',
-        key='goal',
-        generate_feedback_message=robot.get_goal_pose()
+        key='goal'
     )
 
     actuator = ActuatorAction(
