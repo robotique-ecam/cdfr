@@ -5,30 +5,33 @@ import numpy as np
 
 import py_trees
 import rclpy
+import tf2_geometry_msgs
+from rclpy.duration import Duration
 from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
+from tf2_ros import LookupException
 
 
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         robot = self.get_namespace()
-        self.position = (0, 0)
+        self.position = (0.29, 1.33)
         self._triggered = False
         self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
+        self._get_available_request = GetAvailableActions.Request()
+        self._get_available_request.sender = robot
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
+        self._change_action_status_request = ChangeActionStatus.Request()
+        self._change_action_status_request.sender = robot
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
-        self._get_available_request = GetAvailableActions.Request()
-        self._change_action_status_request = ChangeActionStatus.Request()
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
-        self._get_available_request.sender = robot
-        self._change_action_status_request.sender = robot
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
@@ -106,7 +109,14 @@ class Robot(Node):
         return self._triggered
 
     def _odom_callback(self, msg):
-        self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+        try:
+            tf = self._tf_buffer.lookup_transform('map', 'odom', msg.header.stamp, timeout=Duration(seconds=1.0))
+            self._odom_pose_stamped.header = msg.header
+            self._odom_pose_stamped.pose = msg.pose.pose
+            tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
+        except LookupException:
+            return
+        self.position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
