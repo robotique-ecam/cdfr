@@ -19,6 +19,7 @@ setup(
     data_files=[
         (path.join('share', package_name), ['package.xml']),
         (path.join('share', package_name, 'param'), glob('param/*')),
+        (path.join('share', package_name, 'behavior_trees'), glob('behavior_trees/*')),
     ],
     zip_safe=True,
     install_requires=['setuptools'],

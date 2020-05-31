@@ -38,7 +38,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     robot_launch_file_dir = os.path.dirname(__file__)
     map_dir = os.path.join(get_package_share_directory('map'), 'map', 'map.yml')
     nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
-    nav2_bt_xml_file = os.path.join(get_package_share_directory('nav2_bt_navigator'), 'behavior_trees', 'navigate_w_replanning.xml')
+    nav2_bt_xml_file = os.path.join(get_package_share_directory('robot'), 'behavior_trees', 'navigate_w_replanning_time.xml')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
