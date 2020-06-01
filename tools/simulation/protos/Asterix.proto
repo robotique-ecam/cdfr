@@ -186,6 +186,7 @@ PROTO Asterix [
     physics Physics {
       density -1
       mass 6
+      centerOfMass 0 0 -0.10
     }
   }
 }

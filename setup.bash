@@ -53,8 +53,9 @@ elif [ $robot = "simulation-core" ]; then
 
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
-
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer jarvis_planner && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib /Users/ewen/Desktop/avenger/ros/install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib /Users/ewen/Desktop/avenger/ros/install/drive/lib/drive/drive
 else
     print_failure "No such component"
 
