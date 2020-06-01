@@ -51,7 +51,8 @@ class GameManager(WebotsNode):
     def get_commit_filename(self):
         """Generate rbsd filename."""
         r = Repo(search_parent_directories=True)
-        return f'ros-{r.active_branch.name}-{r.head.object.hexsha[:8]}.rbsd'
+        branch = r.active_branch.name.replace('/', '-').replace('.', '-')
+        return f'ros-{branch}-{r.head.object.hexsha[:8]}.rbsd'
 
     def write_rbsd(self, filename):
         """Write rbsd file to disk."""
