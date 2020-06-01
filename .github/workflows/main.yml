@@ -26,14 +26,14 @@ jobs:
           libopencv-dev libboost-dev libboost-python-dev ros-eloquent-yaml-cpp-vendor ros-eloquent-cv-bridge ros-eloquent-image-transport libi2c-dev i2c-tools \
           libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-eloquent-test-msgs ros-eloquent-gazebo-ros-pkgs \
           ros-eloquent-behaviortree-cpp-v3 ros-eloquent-laser-geometry ros-eloquent-map-msgs ros-eloquent-rviz2 ros-eloquent-angles ros-eloquent-xacro \
-          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees python3-psutil python3-git xvfb webots
+          ros-eloquent-py-trees-ros-interfaces ros-eloquent-py-trees-ros ros-eloquent-py-trees python3-psutil python3-git xvfb webots ros-eloquent-libg2o ros-eloquent-cv-bridge
 
       - name: Cache navigation2 and webots_ros2
         id: cache-ws
         uses: actions/cache@v1
         with:
           path: ~/ros_ws/
-          key: cache-ws-0c4aea88a
+          key: cache-ws-teb-0c4aea88a
 
       # Keep until foxy
       - name: Build navigation2 from source
@@ -44,6 +44,8 @@ jobs:
           cd ~/ros_ws/src
           git clone -b master https://github.com/cyberbotics/webots_ros2.git
           git clone -b master https://github.com/ros-planning/navigation2.git
+          git clone -b ros2-master https://github.com/rst-tu-dortmund/teb_local_planner.git
+          git clone -b ros2 https://github.com/rst-tu-dortmund/costmap_converter.git
           cd ~/ros_ws/src/navigation2 && git checkout 0c4aea88a
           cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
 
@@ -78,7 +80,7 @@ jobs:
 
   hyperion:
     needs: simulation
-    
+
     runs-on: ubuntu-18.04
 
     steps:
