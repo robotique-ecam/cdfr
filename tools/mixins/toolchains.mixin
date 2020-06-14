@@ -1,0 +1,23 @@
+{
+   "build":{
+      "debug":{
+         "cmake-args":[
+            "-DCMAKE_BUILD_TYPE=Debug"
+         ]
+      },
+      "release-a72":{
+         "cmake-args":[
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_C_FLAGS=-mtune=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits -O2",
+            "-DCMAKE_CXX_FLAGS=-mtune=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits -O2"
+         ]
+      },
+      "release-a53":{
+         "cmake-args":[
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_C_FLAGS=-mtune=cortex-a53 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits -O2",
+            "-DCMAKE_CXX_FLAGS=-mtune=cortex-a53 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits -O2"
+         ]
+      }
+   }
+}

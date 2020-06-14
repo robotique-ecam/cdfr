@@ -49,7 +49,7 @@ Drive::Drive() : Node("drive_node") {
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
 #endif
 
-#ifndef SIMULATION
+#ifdef SIMULATION
   do {
     old_steps_returned.left = wp_left_encoder->getValue();
     old_steps_returned.right = wp_left_encoder->getValue();

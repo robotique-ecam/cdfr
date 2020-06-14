@@ -9,7 +9,6 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rclcpp</buildtool_depend>
-  <build_depend>i2c</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
 
 
