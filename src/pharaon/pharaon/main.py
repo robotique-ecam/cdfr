@@ -4,11 +4,11 @@
 """Service Node for Pharaon."""
 
 
-import rclpy
 import bluetooth
+
+import rclpy
 from rclpy.node import Node
 from std_srvs.srv import Trigger
-
 
 sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
 

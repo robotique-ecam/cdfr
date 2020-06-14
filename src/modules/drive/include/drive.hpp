@@ -150,9 +150,9 @@ private:
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
-  rclcpp::Time get_sim_time();
 
 #ifdef SIMULATION
+  rclcpp::Time get_sim_time();
   void sim_step();
 #endif /* SIMULATION */
 };

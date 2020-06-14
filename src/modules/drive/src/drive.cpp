@@ -239,13 +239,13 @@ void Drive::update_joint_states() {
 
 void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_); }
 
+#ifdef SIMULATION
 rclcpp::Time Drive::get_sim_time() {
   double seconds = 0;
   double nanosec = modf(wb_supervisor->getTime(), &seconds) * 1e9;
   return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
 }
 
-#ifdef SIMULATION
 void Drive::sim_step() { this->wb_supervisor->step(timestep); }
 #endif /* SIMULATION */
 
