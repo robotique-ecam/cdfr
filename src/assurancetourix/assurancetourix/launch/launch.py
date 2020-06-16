@@ -49,11 +49,4 @@ def generate_launch_description():
             parameters=[params]
         ),
 
-        Node(
-            package='webots_positions',
-            node_executable='webots_positions',
-            output='screen',
-            parameters=[params]
-        ),
-
     ])

@@ -5,7 +5,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   init_parameters();
 
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("get_transform");
-
   getTransformation(assurancetourix_to_map_transformation);
 
 #ifdef MIPI_CAMERA
@@ -34,15 +33,27 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
     //cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
 
+
+  #ifdef SIMULATION
+    RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
+    RCLCPP_INFO(this->get_logger(), "Simulated robots:");
+    for (auto robot: robots){
+      RCLCPP_INFO(this->get_logger(), "%s", robot.c_str());
+    }
+
+    char mypath[]="WEBOTS_ROBOT_NAME=game_manager";
+    putenv( mypath );
+
+    wb_supervisor_test = std::make_shared<webots::Supervisor>();
+
+    timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
+  #endif
+
   #ifdef MIPI_CAMERA
     timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
-  #else
-    simulation_subscription_ = this->create_subscription<visualization_msgs::msg::MarkerArray>(
-      "webots_positions", 10, std::bind(&Assurancetourix::simulation_marker_callback, this, _1));
   #endif // MIPI_CAMERA
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
-  //RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
 }
 
 #ifdef MIPI_CAMERA
@@ -61,15 +72,33 @@ void Assurancetourix::get_image() {
     delete image;
   }
 }
-#else
+#endif // MIPI_CAMERA
+
+#ifdef SIMULATION
 // webots element positioning
-void Assurancetourix::simulation_marker_callback(const std::shared_ptr<visualization_msgs::msg::MarkerArray> msg)
+void Assurancetourix::simulation_marker_callback()
 {
   visualization_msgs::msg::MarkerArray marker_array_pub;
-  marker_array_pub.markers = msg->markers;
+
+  for (auto robot : robots) {
+    double x,y;
+    visualization_msgs::msg::Marker webots_marker;
+
+    x = wb_supervisor_test->getFromDef(robot)->getPosition()[0];
+    y = 2 - wb_supervisor_test->getFromDef(robot)->getPosition()[2];
+
+    webots_marker.header.frame_id = "map";
+    webots_marker.header.stamp = this->get_clock()->now();
+    webots_marker.pose.position.x = x;
+    webots_marker.pose.position.y = y;
+    webots_marker.text = robot;
+
+    marker_array_pub.markers.push_back(webots_marker);
+  }
+
   transformed_marker_pub_->publish(marker_array_pub);
 }
-#endif // MIPI_CAMERA
+#endif // SIMULATION
 
 void Assurancetourix::init_parameters() {
 
@@ -86,7 +115,14 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
   this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
   this->get_parameter_or<int>("camera.mode", mode, 0);
-#endif
+#endif // MIPI_CAMERA
+
+#ifdef SIMULATION
+  this->declare_parameter("simulation.robots");
+  this->declare_parameter("simulation.refresh_frequency");
+  robots = this->get_parameter("simulation.robots").as_string_array();
+  this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
+#endif // SIMULATION
 
   this->declare_parameter("image.contrast");
   this->declare_parameter("rviz_settings.blue_color_ArUco");

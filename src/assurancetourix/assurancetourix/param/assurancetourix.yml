@@ -20,8 +20,6 @@ assurancetourix:
         lifetime_sec: 5
         lifetime_nano_sec: 0
         header_frame_id: "assurancetourix"
-
-webots_positions:
-  ros__parameters:
-    robots: ['ASTERIX', 'PHARAON']
-    refresh_frequency: 20
+      simulation:
+        robots : [PHARAON, ASTERIX]
+        refresh_frequency: 20

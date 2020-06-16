@@ -5,11 +5,9 @@
 #include <vector>
 #include <chrono>
 #include <string>
-//#include <cmath>
 #include <bits/stdc++.h>
 #include <chrono>
 #include <geometry_msgs/msg/point.hpp>
-#include <math.h>
 #include <opencv2/aruco.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -28,13 +26,13 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "transformix_msgs/srv/transformix_parameters_transform_stamped.hpp"
 #include "transformix_msgs/srv/transformix_parameters_transfrom_pose.hpp"
+#ifdef SIMULATION
+#include <webots/Supervisor.hpp>
+#endif
 
 using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
-#ifndef MIPI_CAMERA
-  using std::placeholders::_1;
-#endif
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -53,12 +51,20 @@ private:
   arducam::CAMERA_INSTANCE camera_instance;
   void get_image();
   int width, height;
-#else
+#endif
+
+#ifdef EXTERN_CAMERA
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
-  rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr simulation_subscription_;
-  void simulation_marker_callback(const std::shared_ptr<visualization_msgs::msg::MarkerArray> msg);
-#endif // MIPI_CAMERA
+#endif
+
+#ifdef SIMULATION
+  int refresh_frequency;
+  std::vector<std::string> robots;
+  std::shared_ptr<webots::Supervisor> wb_supervisor_test;
+  void simulation_marker_callback();
+#endif
+
 
   Mat _frame, _anotated, raised_contrast, image_minus_t, xor_image, xor_image_inv;
 
