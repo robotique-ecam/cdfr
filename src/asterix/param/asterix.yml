@@ -1,6 +1,8 @@
 asterix:
   drive_node:
     ros__parameters:
+      use_sim_time: True
+
       wheels:
         separation: 0.244
         radius: 0.0405
@@ -18,6 +20,8 @@ asterix:
 
   sensors_node:
     ros__parameters:
+      use_sim_time: True
+
       i2c_bus: 4
 
       hcsr04_names : [front_left, front_right, back_left, back_right]
@@ -68,7 +72,19 @@ asterix:
 
   lcd_driver:
     ros__parameters:
+      use_sim_time: True
+
       i2c_bus: 6
       i2c_addr: 0x27
 
       banner: "Asterix v0.7.0a"
+
+
+  tree:
+    ros__parameters:
+      use_sim_time: True
+
+
+  robot:
+    ros__parameters:
+      use_sim_time: True

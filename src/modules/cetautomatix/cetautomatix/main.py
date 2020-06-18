@@ -11,7 +11,8 @@ from cetautomatix.tree import create_tree
 from rclpy.executors import SingleThreadedExecutor
 
 
-def main():
+def main(args=None):
+    rclpy.init(args=args)
     robot = Robot()
     root = create_tree(robot)
     tree = py_trees_ros.trees.BehaviourTree(

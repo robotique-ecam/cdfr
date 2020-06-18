@@ -9,7 +9,8 @@ import py_trees_ros
 import rclpy
 from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
                                             NewAction, PavillonAction,
-                                            ReleaseAction, SetupTimersAction)
+                                            ReleaseAction, SetupTimersAction,
+                                            ActuatorAction)
 from nav2_msgs.action import NavigateToPose
 
 try:
@@ -21,20 +22,19 @@ except ImportError:
     GPIO = None
 
 
-rclpy.init(args=None)
-
-
 def create_tree(robot) -> py_trees.behaviour.Behaviour:
     """Create py_tree nodes."""
     navigate = py_trees_ros.action_clients.FromBlackboard(
         action_type=NavigateToPose,
         action_name='navigate_to_pose',
         name='NavigateToPose',
-        key='goal',
-        generate_feedback_message=robot.get_goal_pose()
+        key='goal'
     )
 
-    actuator = py_trees.behaviours.Success(name='Actuators')
+    actuator = ActuatorAction(
+        name='ActuatorsAction',
+        robot=robot
+    )
 
     execute = py_trees.composites.Sequence(
         name='ExecuteAction',
@@ -72,7 +72,10 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         name='ActionsLoop'
     )
 
-    pavillon = PavillonAction(name='Pavillon Action')
+    pavillon = PavillonAction(
+        name='Pavillon Action',
+        robot=robot
+    )
 
     # Asterix Root
     all_actions = py_trees.composites.Parallel(
@@ -81,10 +84,14 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         children=[pavillon, actions_loop]
     )
 
-    end_of_game = EndOfGameAction(name='End Of Game?')
+    end_of_game = EndOfGameAction(
+        name='End Of Game?',
+        robot=robot
+    )
 
     setup_timers = SetupTimersAction(
         name='Setup Timers',
+        robot=robot,
         actions={pavillon: 95.0, end_of_game: 100.0}
     )
     asterix = py_trees.composites.Selector(
