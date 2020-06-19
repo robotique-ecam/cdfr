@@ -11,6 +11,7 @@ from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.time import Time
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
@@ -118,7 +119,7 @@ class Robot(Node):
     def _odom_callback(self, msg):
         try:
             # Get latest transform
-            tf = self._tf_buffer.lookup_transform('map', 'odom', 0)
+            tf = self._tf_buffer.lookup_transform('map', 'odom', Time())
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
