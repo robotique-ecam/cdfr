@@ -5,10 +5,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   init_parameters();
 
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("get_transform");
-
   getTransformation(assurancetourix_to_map_transformation);
 
 #ifdef MIPI_CAMERA
+
   RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
   if ((mode > 6) || (mode < 0)) {
     RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
@@ -22,29 +22,42 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   arducam::arducam_software_auto_white_balance(camera_instance, 1);
   arducam::arducam_manual_set_awb_compensation(rgain, bgain);
 
-/*#else
-
-  _cap.open(_api_id + _camera_id);
-  if (!_cap.isOpened()) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to open device : %d : API %d", _camera_id, _api_id);
-    exit(-1);
-  } */
 #endif // MIPI_CAMERA
 
+
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("asterix/global_costmap/coordonate_position_transform", qos);
+  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-    // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
+    //cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
-  timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
+
+
+  #ifdef SIMULATION
+    RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
+    RCLCPP_INFO(this->get_logger(), "Simulated robots:");
+    for (auto robot: robots){
+      RCLCPP_INFO(this->get_logger(), "%s", robot.c_str());
+    }
+
+    char mypath[]="WEBOTS_ROBOT_NAME=game_manager";
+    putenv( mypath );
+
+    wb_supervisor_test = std::make_shared<webots::Supervisor>();
+
+    timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
+  #endif
+
+  #ifdef MIPI_CAMERA
+    timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
+  #endif // MIPI_CAMERA
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
-  // RCLCPP_INFO(this->get_logger(), "contrast: %f", contrast);
 }
 
 #ifdef MIPI_CAMERA
+// image capture trough mipi_camera
 void Assurancetourix::get_image() {
   arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
   arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
@@ -61,8 +74,35 @@ void Assurancetourix::get_image() {
 }
 #endif // MIPI_CAMERA
 
+#ifdef SIMULATION
+// webots element positioning
+void Assurancetourix::simulation_marker_callback()
+{
+  visualization_msgs::msg::MarkerArray marker_array_pub;
+
+  for (auto robot : robots) {
+    double x,y;
+    visualization_msgs::msg::Marker webots_marker;
+
+    x = wb_supervisor_test->getFromDef(robot)->getPosition()[0];
+    y = 2 - wb_supervisor_test->getFromDef(robot)->getPosition()[2];
+
+    webots_marker.header.frame_id = "map";
+    webots_marker.header.stamp = this->get_clock()->now();
+    webots_marker.pose.position.x = x;
+    webots_marker.pose.position.y = y;
+    webots_marker.text = robot;
+
+    marker_array_pub.markers.push_back(webots_marker);
+  }
+
+  transformed_marker_pub_->publish(marker_array_pub);
+}
+#endif // SIMULATION
+
 void Assurancetourix::init_parameters() {
 
+  // declare variables from yml
   this->declare_parameter("image.show_image");
   this->get_parameter_or<bool>("image.show_image", show_image, false);
 
@@ -75,9 +115,15 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
   this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
   this->get_parameter_or<int>("camera.mode", mode, 0);
-#endif
+#endif // MIPI_CAMERA
 
-  // declare variables from yml
+#ifdef SIMULATION
+  this->declare_parameter("simulation.robots");
+  this->declare_parameter("simulation.refresh_frequency");
+  robots = this->get_parameter("simulation.robots").as_string_array();
+  this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
+#endif // SIMULATION
+
   this->declare_parameter("image.contrast");
   this->declare_parameter("rviz_settings.blue_color_ArUco");
   this->declare_parameter("rviz_settings.yellow_color_ArUco");
@@ -88,6 +134,8 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.game_element_type");
   this->declare_parameter("rviz_settings.lifetime_sec");
   this->declare_parameter("rviz_settings.lifetime_nano_sec");
+  this->declare_parameter("rviz_settings.header_frame_id");
+  this->declare_parameter("topic_for_gradient_layer");
 
   this->get_parameter_or<double>("image.contrast", contrast, 1.2);
   this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_ArUco", blue_color_ArUco, {0.0, 0.0, 255.0});
@@ -100,8 +148,9 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
+  this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "default_topic_for_gradient_layer");
 
-  // initialisation of marker message
+  // initialisation of markers
   marker.header.frame_id = header_frame_id;
   marker.color.a = 1.0;
   marker.action = visualization_msgs::msg::Marker::ADD;
@@ -134,17 +183,33 @@ void Assurancetourix::detect() {
   marker.scale.z = 0.05;
   marker.id = 13;
 
+  /*
+  ###
+  lines that are quoted this way are to show the time elapsed to do some actions
+  (capture the image, find the coordonates of the arucos in it and the total)
+  ###
+  */
+
+  /*
+  ###
   auto start_total = std::chrono::high_resolution_clock::now();
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
+  ###
+  */
 
 #ifdef MIPI_CAMERA
   get_image();
 #else
-  _frame = imread("/home/phileas/covid_home.jpg", cv::IMREAD_GRAYSCALE);
-  //_cap.read(_frame);
+  // read an image from an image file
+  _frame = imread("/home/phileas/covid_home.jpg", IMREAD_GRAYSCALE);
 #endif // MIPI_CAMERA
+
+  /*
+  ###
   auto end_camera = std::chrono::high_resolution_clock::now();
+  ###
+  */
 
   cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
   _frame.convertTo(raised_contrast, -1, contrast, 0);
@@ -156,13 +221,20 @@ void Assurancetourix::detect() {
 
   marker_pub_->publish(marker);
 
+  /*
+  ###
   auto start_detection = std::chrono::high_resolution_clock::now();
+  ###
+  */
 
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
+  /*
+  ###
   auto end_detection = std::chrono::high_resolution_clock::now();
   auto end_total = std::chrono::high_resolution_clock::now();
+
 
   double time_taken_camera = std::chrono::duration_cast<std::chrono::nanoseconds>(end_camera - start_camera).count();
   double time_taken_detection = std::chrono::duration_cast<std::chrono::nanoseconds>(end_detection - start_detection).count();
@@ -171,11 +243,13 @@ void Assurancetourix::detect() {
   time_taken_camera *= 1e-9;
   time_taken_detection *= 1e-9;
   time_taken_total *= 1e-9;
-  /*
-    RCLCPP_INFO(this->get_logger(), "time of camera: %f", time_taken_camera);
-    RCLCPP_INFO(this->get_logger(), "time of detection: %f", time_taken_detection);
-    RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
+
+  RCLCPP_INFO(this->get_logger(), "time of camera: %f", time_taken_camera);
+  RCLCPP_INFO(this->get_logger(), "time of detection: %f", time_taken_detection);
+  RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
+  ###
   */
+
   if (show_image) {
     cv::imshow("anotated", _anotated);
     // cv::imshow("origin", _frame);
@@ -293,7 +367,6 @@ void Assurancetourix::_anotate_image(Mat img) {
       marker_array_pub.markers.push_back(transformed_marker);
 
       marker_pub_->publish(marker);
-      // RCLCPP_INFO(this->get_logger(), "id: %d", _detected_ids[i]);
     }
     transformed_marker_pub_->publish(marker_array_pub);
   }

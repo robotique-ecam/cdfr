@@ -39,7 +39,7 @@ def generate_launch_description():
             package='tf2_ros',
             node_executable='static_transform_publisher',
             output='screen',
-            arguments=['1.4', '2', '1', '3.141592654', '0', '-2.35619449', 'map', 'assurancetourix']
+            arguments=['1.4', '2', '1', '-2.35619449', '0', '3.141592654', 'map', 'assurancetourix']
         ),
 
         Node(
@@ -48,4 +48,5 @@ def generate_launch_description():
             output='screen',
             parameters=[params]
         ),
+
     ])
