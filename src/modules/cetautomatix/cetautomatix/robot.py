@@ -117,7 +117,8 @@ class Robot(Node):
 
     def _odom_callback(self, msg):
         try:
-            tf = self._tf_buffer.lookup_transform('map', 'odom', msg.header.stamp, timeout=Duration(seconds=0.0))
+            # Get latest transform
+            tf = self._tf_buffer.lookup_transform('map', 'odom', 0)
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
