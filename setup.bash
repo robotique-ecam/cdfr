@@ -49,13 +49,15 @@ elif [ $robot = "simulation-core" ]; then
     print_info "Setting up simulation environment"
     xacro ros/tools/xacro/asterix.xacro -o ros/src/asterix/robot/asterix.urdf
     xacro ros/tools/xacro/obelix.xacro -o ros/src/obelix/robot/obelix.urdf
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors drive && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors drive assurancetourix && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
     colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer jarvis_planner && print_success "Built packages for $robot" || print_failure "Packages build failed"
-    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib /Users/ewen/Desktop/avenger/ros/install/drive/lib/drive/drive
-    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib /Users/ewen/Desktop/avenger/ros/install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
+    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
 else
     print_failure "No such component"
 

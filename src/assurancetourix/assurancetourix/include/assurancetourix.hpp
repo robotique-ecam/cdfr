@@ -5,7 +5,6 @@
 #include <vector>
 #include <chrono>
 #include <string>
-#include <bits/stdc++.h>
 #include <chrono>
 #include <geometry_msgs/msg/point.hpp>
 #include <opencv2/aruco.hpp>
