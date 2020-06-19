@@ -15,20 +15,22 @@ Drive::Drive() : Node("drive_node") {
   i2c = std::make_shared<I2C>(i2c_bus);
 #else
   /* Init webots supervisor */
-  wb_supervisor = std::make_shared<webots::Supervisor>();
+  wb_robot = std::make_shared<webots::Robot>();
   /* Initialize motors */
-  wb_left_motor = wb_supervisor->getMotor("wheel_left_joint");
-  wb_right_motor = wb_supervisor->getMotor("wheel_right_joint");
+  wb_left_motor = wb_robot->getMotor("wheel_left_joint");
+  wb_right_motor = wb_robot->getMotor("wheel_right_joint");
   wb_left_motor->setPosition(std::numeric_limits<double>::infinity());
   wb_right_motor->setPosition(std::numeric_limits<double>::infinity());
   wb_left_motor->setVelocity(0);
   wb_right_motor->setVelocity(0);
   /* initialize odometry */
-  timestep = wb_supervisor->getBasicTimeStep();
+  timestep = 1;
   wp_left_encoder = wb_left_motor->getPositionSensor();
   wp_right_encoder = wb_right_motor->getPositionSensor();
   wp_left_encoder->enable(timestep);
   wp_right_encoder->enable(timestep);
+
+  time_stepper_ = this->create_wall_timer(std::chrono::milliseconds((int)timestep), std::bind(&Drive::sim_step, this));
 #endif /* SIMULATION */
 
   /* Init ROS Publishers and Subscribers */
@@ -235,9 +237,11 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 #ifdef SIMULATION
 rclcpp::Time Drive::get_sim_time() {
   double seconds = 0;
-  double nanosec = modf(wb_supervisor->getTime(), &seconds) * 1e9;
+  double nanosec = modf(wb_robot->getTime(), &seconds) * 1e9;
   return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
 }
+
+void Drive::sim_step() { this->wb_robot->step(timestep); }
 #endif /* SIMULATION */
 
 Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }

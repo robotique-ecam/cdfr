@@ -7,7 +7,6 @@
 #include <limits>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
-#include <webots/Supervisor.hpp>
 #include <webots/PositionSensor.hpp>
 #endif
 #include "nav_msgs/msg/odometry.hpp"
@@ -70,7 +69,7 @@ private:
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
 #else
-  std::shared_ptr<webots::Supervisor> wb_supervisor;
+  std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;
   webots::Motor *wb_right_motor;
   webots::PositionSensor *wp_left_encoder;
@@ -152,6 +151,7 @@ private:
   int8_t compute_velocity_cmd(double velocity);
 
 #ifdef SIMULATION
+  void sim_step();
   rclcpp::Time get_sim_time();
 #endif /* SIMULATION */
 };
