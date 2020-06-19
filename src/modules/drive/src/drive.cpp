@@ -29,8 +29,6 @@ Drive::Drive() : Node("drive_node") {
   wp_right_encoder = wb_right_motor->getPositionSensor();
   wp_left_encoder->enable(timestep);
   wp_right_encoder->enable(timestep);
-
-  time_stepper_ = this->create_wall_timer(std::chrono::milliseconds((int)timestep), std::bind(&Drive::sim_step, this));
 #endif /* SIMULATION */
 
   /* Init ROS Publishers and Subscribers */
@@ -53,6 +51,8 @@ Drive::Drive() : Node("drive_node") {
   do {
     old_steps_returned.left = wp_left_encoder->getValue();
     old_steps_returned.right = wp_left_encoder->getValue();
+    std::cout << "L" << old_steps_returned.left << std::endl;
+    std::cout << "R" << old_steps_returned.right << std::endl;
     RCLCPP_INFO(this->get_logger(), "Waiting for webots robot wheel encoders data...");
     std::this_thread::sleep_for(1s);
   } while (std::isnan(old_steps_returned.left) || std::isnan(old_steps_returned.right));
@@ -245,8 +245,6 @@ rclcpp::Time Drive::get_sim_time() {
   double nanosec = modf(wb_supervisor->getTime(), &seconds) * 1e9;
   return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
 }
-
-void Drive::sim_step() { this->wb_supervisor->step(timestep); }
 #endif /* SIMULATION */
 
 Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }

@@ -153,7 +153,6 @@ private:
 
 #ifdef SIMULATION
   rclcpp::Time get_sim_time();
-  void sim_step();
 #endif /* SIMULATION */
 };
 
