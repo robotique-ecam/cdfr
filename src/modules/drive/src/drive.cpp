@@ -47,17 +47,6 @@ Drive::Drive() : Node("drive_node") {
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
 #endif
 
-#ifdef SIMULATION
-  do {
-    old_steps_returned.left = wp_left_encoder->getValue();
-    old_steps_returned.right = wp_left_encoder->getValue();
-    std::cout << "L" << old_steps_returned.left << std::endl;
-    std::cout << "R" << old_steps_returned.right << std::endl;
-    RCLCPP_INFO(this->get_logger(), "Waiting for webots robot wheel encoders data...");
-    std::this_thread::sleep_for(1s);
-  } while (std::isnan(old_steps_returned.left) || std::isnan(old_steps_returned.right));
-#endif /* SIMULATION */
-
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
 }
 
@@ -155,6 +144,10 @@ void Drive::update_velocity() {
   wb_right_motor->setVelocity(cmd_vel_.right / wheel_radius_);
   double lsteps = wp_left_encoder->getValue();
   double rsteps = wp_right_encoder->getValue();
+  if (std::isnan(lsteps) || std::isnan(rsteps)) {
+    lsteps = rsteps = 0;
+    RCLCPP_WARN(this->get_logger(), "Robot wheel encoders return NaN");
+  }
   attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / rads_per_step;
   attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / rads_per_step;
   old_steps_returned.left = lsteps;
