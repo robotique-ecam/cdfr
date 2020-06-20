@@ -10,7 +10,7 @@ repositories:
   pending_release/g2o:
     type: git
     url: https://github.com/ros2-gbp/libg2o-release.git
-    version: release/foxy/libg2o
+    version: debian/foxy/focal/libg2o
   pending_release/py_trees:
     type: git
     url: https://github.com/splintered-reality/py_trees.git
