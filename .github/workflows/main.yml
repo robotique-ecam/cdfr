@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/ros_ws/
-          key: cache-teb-foxy-ws
+          key: cache-teb-foxy-ws-0c4aea88a
 
       # Keep until foxy
       - name: Build navigation2 from source
