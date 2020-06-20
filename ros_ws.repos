@@ -23,3 +23,7 @@ repositories:
     type: git
     url: https://github.com/robotique-ecam/teb_local_planner.git
     version: ros2-master
+  webots_ros2:
+    type: git
+    url: https://github.com/cyberbotics/webots_ros2.git
+    version: foxy
