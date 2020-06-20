@@ -9,7 +9,6 @@ import tf2_geometry_msgs
 from cetautomatix.magic_points import elements
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
-from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.time import Time
 from std_srvs.srv import Trigger

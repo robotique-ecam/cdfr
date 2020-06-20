@@ -6,7 +6,6 @@
 
 import py_trees
 import py_trees_ros
-import rclpy
 from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
                                             NewAction, PavillonAction,
                                             ReleaseAction, SetupTimersAction,

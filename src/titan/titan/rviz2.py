@@ -16,13 +16,12 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, EmitEvent,
-                            RegisterEventHandler)
+from launch.actions import EmitEvent, RegisterEventHandler
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from titan.utils.replace_string import ReplaceString
 
@@ -42,7 +41,7 @@ def generate_rviz_launch_description(namespace='robot'):
     start_namespaced_rviz_cmd = Node(
         condition=IfCondition(use_namespace),
         package='rviz2',
-        node_executable='rviz2',
+        executable='rviz2',
         name='rviz2',
         namespace=namespace,
         # TODO: FIX onload MUTEX ERROR

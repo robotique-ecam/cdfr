@@ -52,7 +52,7 @@ def generate_launch_description():
 
             Node(
                 package='drive',
-                node_executable='drive',
+                executable='drive',
                 output='screen',
                 parameters=[params],
                 remappings=remappings,

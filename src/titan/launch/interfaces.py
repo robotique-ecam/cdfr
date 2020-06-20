@@ -6,13 +6,12 @@
 
 import os
 
-import launch
 from ament_index_python.packages import get_package_share_directory
-from launch.actions import (GroupAction, IncludeLaunchDescription,
-                            SetEnvironmentVariable)
+
+import launch
+from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from robot import interfaces
 
 robots = ['asterix']
 
@@ -38,19 +37,19 @@ def generate_launch_description():
         GroupAction([
             Node(
                 package='titan',
-                node_executable='pharaon',
+                executable='pharaon',
                 output='screen',
             ),
 
             Node(
                 package='strategix',
-                node_executable='strategix',
+                executable='strategix',
                 output='screen',
             ),
 
             Node(
                 package='webots_ros2_core',
-                node_executable='webots_launcher',
+                executable='webots_launcher',
                 arguments=['--mode=realtime', '--world=tools/simulation/worlds/cdr2020.wbt'],
                 output='screen'
             ),
