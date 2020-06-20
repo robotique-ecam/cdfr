@@ -17,6 +17,7 @@ setup(
     packages=find_packages(),
     data_files=[
         (path.join('share', package_name), ['package.xml']),
+        ('share/ament_index/resource_index/packages', ['resource/' + package_name])
     ],
     zip_safe=True,
     install_requires=['setuptools'],

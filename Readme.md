@@ -10,9 +10,9 @@
 
 ```bash
 cd ~/ros
-. /opt/ros/eloquent/setup.bash
+source /opt/ros/foxy/setup.bash
 ./setup.bash robot_name
-. install/setup.bash
+source install/setup.bash
 ```
 
 #### Dev / Simulation build
