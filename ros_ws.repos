@@ -9,7 +9,7 @@ repositories:
     version: master
   pending_release/g2o:
     type: git
-    url: https://github.com/ros2-gbp/libg2o-release/tree/release/foxy/libg2o
+    url: https://github.com/ros2-gbp/libg2o-release.git
     version: release/foxy/libg2o
   pending_release/py_trees:
     type: git
