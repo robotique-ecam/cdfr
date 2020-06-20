@@ -6,13 +6,11 @@
 
 import os
 
-import launch
 from ament_index_python.packages import get_package_share_directory
-from launch.actions import (GroupAction, IncludeLaunchDescription,
-                            SetEnvironmentVariable)
+
+import launch
+from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
-from robot import interfaces
 
 robots = ['asterix']
 
