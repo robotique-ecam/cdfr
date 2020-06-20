@@ -60,10 +60,9 @@ private:
 #ifdef SIMULATION
   int refresh_frequency;
   std::vector<std::string> robots;
-  std::shared_ptr<webots::Supervisor> wb_supervisor_test;
+  std::shared_ptr<webots::Supervisor> wb_supervisor;
   void simulation_marker_callback();
 #endif
-
 
   Mat _frame, _anotated, raised_contrast, image_minus_t, xor_image, xor_image_inv;
 

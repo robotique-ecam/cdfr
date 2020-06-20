@@ -24,34 +24,32 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
 #endif // MIPI_CAMERA
 
-
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
   transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-    //cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
+    // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
 
+#ifdef SIMULATION
+  RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
+  RCLCPP_INFO(this->get_logger(), "Simulated robots:");
+  for (auto robot : robots) {
+    RCLCPP_INFO(this->get_logger(), "%s", robot.c_str());
+  }
 
-  #ifdef SIMULATION
-    RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
-    RCLCPP_INFO(this->get_logger(), "Simulated robots:");
-    for (auto robot: robots){
-      RCLCPP_INFO(this->get_logger(), "%s", robot.c_str());
-    }
+  char mypath[] = "WEBOTS_ROBOT_NAME=game_manager";
+  putenv(mypath);
 
-    char mypath[]="WEBOTS_ROBOT_NAME=game_manager";
-    putenv( mypath );
+  wb_supervisor = std::make_shared<webots::Supervisor>();
 
-    wb_supervisor_test = std::make_shared<webots::Supervisor>();
+  timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
+#endif
 
-    timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
-  #endif
-
-  #ifdef MIPI_CAMERA
-    timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
-  #endif // MIPI_CAMERA
+#ifdef MIPI_CAMERA
+  timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
+#endif // MIPI_CAMERA
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
@@ -76,16 +74,15 @@ void Assurancetourix::get_image() {
 
 #ifdef SIMULATION
 // webots element positioning
-void Assurancetourix::simulation_marker_callback()
-{
+void Assurancetourix::simulation_marker_callback() {
   visualization_msgs::msg::MarkerArray marker_array_pub;
 
   for (auto robot : robots) {
-    double x,y;
+    double x, y;
     visualization_msgs::msg::Marker webots_marker;
 
-    x = wb_supervisor_test->getFromDef(robot)->getPosition()[0];
-    y = 2 - wb_supervisor_test->getFromDef(robot)->getPosition()[2];
+    x = wb_supervisor->getFromDef(robot)->getPosition()[0];
+    y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
 
     webots_marker.header.frame_id = "map";
     webots_marker.header.stamp = this->get_clock()->now();
