@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "ubuntu/focal64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -68,7 +68,7 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update && sudo apt-get upgrade -y
-    echo "Installing ROS 2 Eloquent \n\n"
+    echo "Installing ROS 2 Foxy \n\n"
     echo "Setting up Locale \n"
     sudo locale-gen en_US en_US.UTF-8
     sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
@@ -77,8 +77,9 @@ Vagrant.configure("2") do |config|
     sudo apt-get install -y curl gnupg2 lsb-release ntp
     curl http://repo.ros2.org/repos.key | sudo apt key add -
     sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
+    sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2-testing/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
-    export ROS_DISTRO=eloquent
+    export ROS_DISTRO=foxy
     echo "Installing ROS 2 $ROS_DISTRO packages\n"
     sudo apt-get update
     sudo apt-get install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-nav2-bringup ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-py-trees ros-$ROS_DISTRO-py-trees-ros libopencv-dev libboost-dev
