@@ -1,50 +1,33 @@
 repositories:
-  angles:
+  costmap_converter:
     type: git
-    url: https://github.com/ros/angles.git
+    url: https://github.com/rst-tu-dortmund/costmap_converter.git
     version: ros2
-  BehaviorTree.CPP:
-    type: git
-    url: https://github.com/BehaviorTree/BehaviorTree.CPP.git
-    version: ros2-version-2.x
   navigation2:
     type: git
     url: https://github.com/ros-planning/navigation2.git
     version: master
-  py_trees:
+  pending_release/g2o:
+    type: git
+    url: https://github.com/robotique-ecam/g2o.git
+    version: ros2-devel
+  pending_release/py_trees:
     type: git
     url: https://github.com/splintered-reality/py_trees.git
     version: release/2.0.x
-  py_trees_js:
-    type: git
-    url: https://github.com/splintered-reality/py_trees_js.git
-    version: release/0.6.x
-  py_trees_ros:
+  pending_release/py_trees_ros:
     type: git
     url: https://github.com/splintered-reality/py_trees_ros.git
     version: release/2.0.x
-  py_trees_ros_interfaces:
+  pending_release/py_trees_ros_interfaces:
     type: git
     url: https://github.com/splintered-reality/py_trees_ros_interfaces.git
     version: release/2.0.x
-  py_trees_ros_tutorials:
-    type: git
-    url: https://github.com/splintered-reality/py_trees_ros_tutorials.git
-    version: release/2.0.x
-  py_trees_ros_viewer:
-    type: git
-    url: https://github.com/splintered-reality/py_trees_ros_viewer.git
-    version: release/0.2.x
-  rqt_robot_monitor:
-    type: git
-    url: https://github.com/ros-visualization/rqt_robot_monitor.git
-    version: dashing-devel
-  webots_ros2:
-    type: git
-    url: https://github.com/cyberbotics/webots_ros2.git
-    version: master
-  xacro:
+  pending_release/xacro:
     type: git
     url: https://github.com/ros/xacro.git
     version: dashing-devel
-`
+  teb_local_planner:
+    type: git
+    url: https://github.com/rst-tu-dortmund/teb_local_planner.git
+    version: ros2-master
