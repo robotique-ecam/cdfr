@@ -74,27 +74,41 @@ Vagrant.configure("2") do |config|
     sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
     export LANG=en_US.UTF-8
     echo "Setting up Sources \n"
-    sudo apt-get install -y curl gnupg2 lsb-release ntp
-    curl http://repo.ros2.org/repos.key | sudo apt key add -
+    sudo apt-get install -y curl gnupg2 lsb-release software-properties-common ntp
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
     sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
     sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2-testing/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
     export ROS_DISTRO=foxy
     echo "Installing ROS 2 $ROS_DISTRO packages\n"
     sudo apt-get update
-    sudo apt-get install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-nav2-bringup ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-py-trees ros-$ROS_DISTRO-py-trees-ros libopencv-dev libboost-dev
+    sudo apt-get install -y ros-$ROS_DISTRO-ros-base \
+    ros-$ROS_DISTRO-xacro libopencv-dev libboost-dev libboost-python-dev \
+    ros-$ROS_DISTRO-yaml-cpp-vendor ros-$ROS_DISTRO-cv-bridge ros-$ROS_DISTRO-image-transport ros-$ROS_DISTRO-rviz2 \
+    ros-$ROS_DISTRO-behaviortree-cpp-v3 ros-$ROS_DISTRO-laser-geometry ros-$ROS_DISTRO-map-msgs ros-$ROS_DISTRO-angles \
+    ros-$ROS_DISTRO-tf2-geometry-msgs ros-$ROS_DISTRO-test-msgs ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-libg2o\
+    libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev libboost-program-options-dev \
+    libsuitesparse-dev python3-psutil python3-pykdl python3-vcstool python3-pydot
 
     echo "Installing optional argcomplete \n"
-    sudo apt-get install -y python3-argcomplete python3-colcon-common-extensions python3-pip
+    sudo apt-get install -y python3-argcomplete python3-colcon-common-extensions python3-pip python3-vcstool
     python3 -m pip install flask flask-socketio
     . /opt/ros/$ROS_DISTRO/setup.bash
     echo ". /opt/ros/$ROS_DISTRO/setup.bash" >> /home/vagrant/.bashrc
 
-    echo "Installing ROS 2 navigation from master branch"
-    git clone https://github.com/ros-planning/navigation2.git /home/vagrant/ros_ws/navigation2
-    cd /home/vagrant/ros_ws/
-    colcon build --symlink-install --packages-skip nav2_system_tests
+    echo "Installing external repos \n"
+    mkdir -p /home/vagrant/ros_ws
+    cd /home/vagrant/ros_ws && vcs import < /home/vagrant/ros/ros/ros_ws.repos
+    cd /home/vagrant/ros_ws/costmap_converter && git cherry-pick -n abf10d7
+    rm -rf /home/vagrant/ros_ws/webots_ros2
+    cd /home/vagrant/ros_ws && colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
 
+    echo "Building packages \n"
+    ln -s /home/vagrant/ros/ros/setup.bash /home/vagrant/ros/setup.bash
+    . /home/vagrant/ros_ws/install/setup.bash
+    cd /home/vagrant/ros && ./setup.bash simulation-core
+    echo ". /home/vagrant/ros/install/setup.bash" >> /home/vagrant/.bashrc
 
+    echo "Success\n"
   SHELL
 end
