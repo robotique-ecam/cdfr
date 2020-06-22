@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/ros_ws/
-          key: cache-patched-teb-foxy
+          key: cache-foxy
 
       # Keep until foxy
       - name: Build navigation2 from source
@@ -43,7 +43,6 @@ jobs:
           mkdir -p ~/ros_ws/src
           vcs import ~/ros_ws/src < ros_ws.repos
           source /opt/ros/foxy/setup.bash
-          cd ~/ros_ws/src/costmap_converter && git cherry-pick -n abf10d7
           cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
 
       - name: Build packages

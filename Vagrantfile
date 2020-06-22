@@ -99,7 +99,6 @@ Vagrant.configure("2") do |config|
     echo "Installing external repos \n"
     mkdir -p /home/vagrant/ros_ws
     cd /home/vagrant/ros_ws && vcs import < /home/vagrant/ros/ros/ros_ws.repos
-    cd /home/vagrant/ros_ws/costmap_converter && git cherry-pick -n abf10d7
     rm -rf /home/vagrant/ros_ws/webots_ros2
     cd /home/vagrant/ros_ws && colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
 
