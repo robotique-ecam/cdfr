@@ -23,7 +23,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
-    bt_xml_file = LaunchConfiguration('bt_xml_file')
+    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
     robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
@@ -69,7 +69,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
         ),
 
         DeclareLaunchArgument(
-            'bt_xml_file',
+            'default_bt_xml_filename',
             default_value=nav2_bt_xml_file,
             description='Full path to the behavior tree xml file to use'
         ),
@@ -128,7 +128,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 'namespace': namespace,
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,
-                'bt_xml_file': bt_xml_file,
+                'default_bt_xml_filename': default_bt_xml_filename,
                 'params_file': params.name}.items(),
         ),
 
