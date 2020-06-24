@@ -13,7 +13,6 @@ class Score:
         # self.bonPortPetit = BonPort('BonPortPetit')
         # self.pavillon = Pavillon('Pavillon')
         self.todoList = [elements.keys()]
-        self.todoList = ['PHARE_BLEU']
         self.excludeFromBlue = ['PHARE_JAUNE', 'MANCHE3', 'MANCHE4', 'ECUEIL_JAUNE']
         self.excludeFromYellow = ['PHARE_BLEU', 'MANCHE1', 'MANCHE2', 'ECUEIL_BLEU']
         self.wipList = ['PAVILLON']
