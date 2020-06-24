@@ -48,18 +48,18 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 50.0
+    controller_frequency: 80.0
     controller_plugin_types: ["teb_local_planner::TebLocalPlannerROS"]
     controller_plugin_ids: ["DynamicFollowPath"]
 
     DynamicFollowPath:
-      footprint_model.type: circular
-      footprint_model.radius: 0.17
+      footprint_model.type: polygon
+      footprint_model.vertices: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       min_obstacle_dist: 0.1
       inflation_dist: 0.1
       costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       costmap_converter_spin_thread: True
-      costmap_converter_rate: 15
+      costmap_converter_rate: 2
       enable_homotopy_class_planning: True
       enable_multithreading: True
       #weight_obstacle: 100.0
@@ -68,11 +68,11 @@ controller_server:
       min_samples: 3
       max_samples: 20
       max_global_plan_lookahead_dist: 1.0
-      visualize_hc_graph: True
+      visualize_hc_graph: False
       max_vel_x: 0.79
       max_vel_theta: 3.0
       acc_lim_x: 2.5
-      acc_lim_theta: 3.2
+      acc_lim_theta: 2.5
 
 
 controller_server_rclcpp_node:

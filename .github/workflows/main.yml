@@ -59,6 +59,7 @@ jobs:
           source install/setup.bash
           export LD_LIBRARY_PATH=/usr/local/webots/lib/controller:$LD_LIBRARY_PATH
           export WEBOTS_HOME=/usr/local/webots
+          export RCUTILS_LOGGING_USE_STDOUT=1
           export RCUTILS_LOGGING_BUFFERED_STREAM=1
           export PYTHONPATH=$PYTHONPATH:~/ros_ws/build/python_orocos_kdl
 
