@@ -48,7 +48,7 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 80.0
+    controller_frequency: 60.0
     controller_plugin_types: ["teb_local_planner::TebLocalPlannerROS"]
     controller_plugin_ids: ["DynamicFollowPath"]
 
@@ -58,16 +58,16 @@ controller_server:
       footprint_model.vertices: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
 
       # Goal tolerance
-      xy_goal_tolerance: 0.01
-      yaw_goal_tolerance: 0.01
+      xy_goal_tolerance: 0.02
+      yaw_goal_tolerance: 0.05
 
       # Robot
       min_turning_radius: 0.0
       max_vel_x: 0.678
       max_vel_x_backwards: 0.678
-      max_vel_theta: 1.0
+      max_vel_theta: 2.0
       acc_lim_x: 1.0
-      acc_lim_theta: 1.0
+      acc_lim_theta: 2.0
 
       # Obstacles
       min_obstacle_dist: 0.1
