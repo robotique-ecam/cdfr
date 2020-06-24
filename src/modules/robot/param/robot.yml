@@ -69,10 +69,10 @@ controller_server:
       max_samples: 20
       max_global_plan_lookahead_dist: 1.0
       visualize_hc_graph: False
-      max_vel_x: 0.79
-      max_vel_theta: 3.0
-      acc_lim_x: 2.5
-      acc_lim_theta: 2.5
+      max_vel_x: 0.678
+      max_vel_theta: 1.0
+      acc_lim_x: 1.0
+      acc_lim_theta: 1.0
 
 
 controller_server_rclcpp_node:
