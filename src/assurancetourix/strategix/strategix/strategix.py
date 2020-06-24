@@ -40,7 +40,6 @@ class StrategixActionServer(Node):
     def available_callback(self, request, response):
         self.get_logger().info('GET %s' % (request.sender))
         exclude = self.score.excludeFromBlue if self.side.value == 'blue' else self.score.excludeFromYellow
-        print([todo for todo in self.score.todoList if todo not in exclude], flush=True)
         response.available = [todo for todo in self.score.todoList if todo not in exclude]
         self.get_logger().info('AVAILABLE: %s' % (response.available))
         return response
