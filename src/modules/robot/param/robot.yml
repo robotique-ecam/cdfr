@@ -48,11 +48,11 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 60.0
-    controller_plugin_types: ["teb_local_planner::TebLocalPlannerROS"]
-    controller_plugin_ids: ["DynamicFollowPath"]
+    controller_frequency: 40.0
+    controller_plugins: ["DynamicFollowPath"]
 
     DynamicFollowPath:
+      plugin: "teb_local_planner::TebLocalPlannerROS"
       # Robot footprint
       footprint_model.type: polygon
       footprint_model.vertices: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"

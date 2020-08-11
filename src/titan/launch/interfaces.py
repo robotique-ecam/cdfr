@@ -12,6 +12,8 @@ import launch
 from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from webots_ros2_core.webots_launcher import WebotsLauncher
+
 
 robots = ['asterix']
 
@@ -47,11 +49,9 @@ def generate_launch_description():
                 output='screen',
             ),
 
-            Node(
-                package='webots_ros2_core',
-                executable='webots_launcher',
-                arguments=['--mode=realtime', '--world=tools/simulation/worlds/cdr2020.wbt'],
-                output='screen'
+            WebotsLauncher(
+                mode='realtime',
+                world='tools/simulation/worlds/cdr2020.wbt',
             ),
         ])
     ])

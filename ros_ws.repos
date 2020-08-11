@@ -3,22 +3,6 @@ repositories:
     type: git
     url: https://github.com/rst-tu-dortmund/costmap_converter.git
     version: ros2
-  navigation2:
-    type: git
-    url: https://github.com/ros-planning/navigation2.git
-    version: master
-  pending_release/py_trees:
-    type: git
-    url: https://github.com/splintered-reality/py_trees.git
-    version: release/2.0.x
-  pending_release/py_trees_ros:
-    type: git
-    url: https://github.com/splintered-reality/py_trees_ros.git
-    version: release/2.0.x
-  pending_release/py_trees_ros_interfaces:
-    type: git
-    url: https://github.com/splintered-reality/py_trees_ros_interfaces.git
-    version: release/2.0.x
   teb_local_planner:
     type: git
     url: https://github.com/rst-tu-dortmund/teb_local_planner.git
