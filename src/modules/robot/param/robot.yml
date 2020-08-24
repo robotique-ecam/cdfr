@@ -48,31 +48,52 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 80.0
-    controller_plugin_types: ["teb_local_planner::TebLocalPlannerROS"]
-    controller_plugin_ids: ["DynamicFollowPath"]
+    controller_frequency: 40.0
+    controller_plugins: ["DynamicFollowPath"]
 
     DynamicFollowPath:
+      plugin: "teb_local_planner::TebLocalPlannerROS"
+      # Robot footprint
       footprint_model.type: polygon
       footprint_model.vertices: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
+
+      # Goal tolerance
+      xy_goal_tolerance: 0.02
+      yaw_goal_tolerance: 0.05
+
+      # Robot
+      min_turning_radius: 0.0
+      max_vel_x: 0.678
+      max_vel_x_backwards: 0.678
+      max_vel_theta: 2.0
+      acc_lim_x: 1.0
+      acc_lim_theta: 2.0
+
+      # Obstacles
       min_obstacle_dist: 0.1
       inflation_dist: 0.1
       costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 2
+      #weight_obstacle: 100.0
+
+      # Homotopy Class Planner
       enable_homotopy_class_planning: True
       enable_multithreading: True
-      #weight_obstacle: 100.0
+      visualize_hc_graph: False
+
+      # Optimisation
+      optimization_activate: True
       optimization_verbose: False
+
+      # Trajectory
       teb_autoresize: True
+      exact_arc_length: False
       min_samples: 3
       max_samples: 20
       max_global_plan_lookahead_dist: 1.0
-      visualize_hc_graph: False
-      max_vel_x: 0.79
-      max_vel_theta: 3.0
-      acc_lim_x: 2.5
-      acc_lim_theta: 2.5
+      allow_init_with_backwards_motion: True
+      global_plan_overwrite_orientation: True
 
 
 controller_server_rclcpp_node:
@@ -151,7 +172,7 @@ planner_server:
     planner_plugin_types: ["nav2_navfn_planner/NavfnPlanner"]
     planner_plugin_ids: ["GridBased"]
     use_sim_time: True
-    GridBased.tolerance: 2.0  # switch to 0
+    GridBased.tolerance: 0.0
     GridBased.use_astar: false
     GridBased.allow_unknown: true
 

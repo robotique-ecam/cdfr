@@ -54,10 +54,11 @@ elif [ $robot = "simulation-core" ]; then
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
     colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer jarvis_planner && print_success "Built packages for $robot" || print_failure "Packages build failed"
-    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib install/drive/lib/drive/drive
-    install_name_tool -change @rpath/lib/controller/libController.dylib /Applications/Webots.app/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
-    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib install/drive/lib/drive/drive
-    install_name_tool -change @rpath/lib/controller/libCppController.dylib /Applications/Webots.app/lib/controller/libCppController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
+    print_info "Linking webots controllers"
+    install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
+    install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/drive/lib/drive/drive
+    install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
 else
     print_failure "No such component"
 

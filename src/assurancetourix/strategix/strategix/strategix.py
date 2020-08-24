@@ -22,9 +22,6 @@ class StrategixActionServer(Node):
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Strategix is ready')
 
-    def excludeList(self):
-        return self.score.excludeFromBlue if self.side.value == 'blue' else self.score.excludeFromYellow
-
     def _on_set_parameters(self, params):
         """Handle Parameter events especially for side."""
         result = SetParametersResult()
@@ -42,7 +39,7 @@ class StrategixActionServer(Node):
 
     def available_callback(self, request, response):
         self.get_logger().info('GET %s' % (request.sender))
-        exclude = self.excludeList()
+        exclude = self.score.excludeFromBlue if self.side.value == 'blue' else self.score.excludeFromYellow
         response.available = [todo for todo in self.score.todoList if todo not in exclude]
         self.get_logger().info('AVAILABLE: %s' % (response.available))
         return response
