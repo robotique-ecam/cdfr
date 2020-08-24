@@ -1,7 +1,7 @@
 ![Simulation](https://github.com/3wnbr1/ros/workflows/Simulation/badge.svg)
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
-![Webots](https://img.shields.io/badge/webots-2020a%20r2-blue)
-![Status](https://img.shields.io/badge/status-alpha-blueviolet)
+![Webots](https://img.shields.io/badge/webots-2020b-blue)
+![Status](https://img.shields.io/badge/status-beta-blueviolet)
 ![Version](https://img.shields.io/badge/version-v0.8.0-blue)
 
 ### Build
@@ -27,7 +27,19 @@ cd path/to/ros
 
 ### Changelog
 
-#### v0.7. 0
+### v0.8.0
+- Updated linux distro to ubuntu 20.04 LTS
+- Updated ROS2 distro to Foxy
+- Added webots simulation world for Physical based simulation
+- Automated cloud based simulation on Github Actions CI
+- New Timed Elastic Band (TEB) Controller achieving high speed and precision
+- Added package Titan for simulation mode
+- Compatibility with ros2_cross_compile for packaging x86_64/arm64 ros2 packages
+- Refactored cetautomatix
+- Simulation mode for assurancetourix, drive and pharaon
+- Fixed many bugs thanks to simulation mode, including race conditions between modules
+
+#### v0.7.0
 - Full support for asterix, obelix, assurancetourix and pharaon running simultaneously
 - Upstreamed navigation2 stack to master branch
 - Refactored behavior trees with full strategy engine support
