@@ -71,4 +71,21 @@ obelix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Obelix v0.7.0a"
+      banner: "Obelix v0.8.0"
+
+
+controller_server:
+  ros__parameters:
+    DynamicFollowPath.footprint_model.vertices: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
+
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      footprint: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
+
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      footprint: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"

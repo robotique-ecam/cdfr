@@ -9,9 +9,7 @@ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo ap
 
 sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
-sudo apt update && sudo apt install -y ros-foxy-ros-base python3-rpi.gpio i2c-tools libi2c-dev git python3-argcomplete python3-colcon-common-extensions ros-foxy-behaviortree-cpp-v3 libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev ros-foxy-test-msgs v4l-utils ros-foxy-cv-bridge ros-foxy-angles #ros-foxy-py-trees-ros-viewer ros-foxy-py-trees-ros ros-foxy-xacro
-
-sudo curl -L --output /usr/bin/rpi-update https://raw.githubusercontent.com/Hexxeh/rpi-update/master/rpi-update && sudo chmod +x /usr/bin/rpi-update
+sudo apt update && sudo apt install -y ros-foxy-ros-base ros-foxy-nav2-bringup python3-rpi.gpio i2c-tools libi2c-dev git python3-argcomplete python3-colcon-common-extensions ros-foxy-test-msgs ros-foxy-py-trees-ros-viewer ros-foxy-py-trees-ros ros-foxy-py-trees-ros-interfaces ros-foxy-xacro
 
 sudo apt remove -y --autoremove snapd unattended-upgrades plymouth
 
