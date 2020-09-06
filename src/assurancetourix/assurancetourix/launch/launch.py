@@ -36,6 +36,13 @@ def generate_launch_description():
         ),
 
         Node(
+            package='panoramix',
+            executable='panoramix',
+            output='screen',
+            arguments=[]
+        ),
+
+        Node(
             package='tf2_ros',
             executable='static_transform_publisher',
             output='screen',
