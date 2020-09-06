@@ -1,0 +1,21 @@
+.card-body{
+  text-align: center;
+  color: black;
+  font-size: 1.8em;
+  font-weight: bold;
+  margin:auto;
+  padding: 0px;
+}
+.card{
+  min-height: 70px;
+}
+#frameSide{
+  background-color: rgb(0, 91, 140);
+  color: white;
+
+  background-color: rgb(247, 181, 0);
+  color: black;
+}
+#titreScore{
+  margin: 0px;
+}
