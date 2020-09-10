@@ -40,6 +40,7 @@ class Robot(Node):
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
         self._tf_buffer = Buffer()
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
         """Call service synchronously."""

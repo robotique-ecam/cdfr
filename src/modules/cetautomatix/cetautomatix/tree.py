@@ -9,16 +9,8 @@ import py_trees_ros
 from cetautomatix.custom_behaviours import (ConfirmAction, EndOfGameAction,
                                             NewAction, PavillonAction,
                                             ReleaseAction, SetupTimersAction,
-                                            ActuatorAction)
+                                            ActuatorAction, GoupilleWatchdog)
 from nav2_msgs.action import NavigateToPose
-
-try:
-    import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-except ImportError:
-    print('Not running on RPI. Fallback to ros service call !!!', flush=True)
-    GPIO = None
 
 
 def create_tree(robot) -> py_trees.behaviour.Behaviour:
@@ -98,23 +90,15 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         children=[setup_timers, end_of_game, all_actions]
     )
 
-    # Goupille Guard
-    def conditionGoupille():
-        """Guard condition for goupille."""
-        if GPIO is None:
-            return robot.triggered()
-        return not GPIO.input(27) or robot.triggered()
-
-    guardGoupille = py_trees.decorators.EternalGuard(
+    guardGoupille = GoupilleWatchdog(
         name='Goupille?',
-        condition=conditionGoupille,
-        child=asterix
+        robot=robot
     )
 
     # Root of the Tree
     root = py_trees.composites.Sequence(
         name='Root',
-        children=[guardGoupille]
+        children=[guardGoupille, asterix]
     )
 
     return root

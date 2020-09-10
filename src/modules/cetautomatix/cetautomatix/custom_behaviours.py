@@ -3,6 +3,12 @@
 
 import py_trees
 
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    print('Not running on RPI. Fallback to ros service call !!!', flush=True)
+    GPIO = None
+
 
 class NewAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
@@ -50,11 +56,11 @@ class SetupTimersAction(py_trees.behaviour.Behaviour):
         super().__init__(name=name)
         self.robot = robot
         self.actions = actions
-        self.oneshot = 0
+        self.visited = False
 
     def update(self):
-        if self.oneshot < 1:
-            self.oneshot += 1
+        if not self.visited:
+            self.visited = True
             # Setup Timers
             for action, duration in self.actions.items():
                 action.time = self.robot.get_clock().now().nanoseconds * 1e-9 + duration
@@ -66,13 +72,13 @@ class PavillonAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
         super().__init__(name=name)
         self.robot = robot
-        self.time = 1e5
-        self.oneshot = 0
+        self.time = 95000
+        self.visited = False
 
     def update(self):
         if self.robot.get_clock().now().nanoseconds * 1e-9 > self.time:
-            if self.oneshot < 1:
-                self.oneshot += 1
+            if not self.visited:
+                self.visited = True
                 self.robot.trigger_pavillons()
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING
@@ -83,12 +89,34 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
         super().__init__(name=name)
         self.robot = robot
         self.time = 1e5
-        self.oneshot = 0
+        self.visited = False
 
     def update(self):
         if self.robot.get_clock().now().nanoseconds * 1e-9 > self.time:
-            if self.oneshot < 1:
-                self.oneshot += 1
+            if not self.visited:
+                self.visited = True
                 # Code to end every action
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
+
+
+class GoupilleWatchdog(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot):
+        super().__init__(name=name)
+        self.robot = robot
+
+    def setup(self, node):
+        """Setup GPIOs if existing."""
+        if GPIO is None:
+            return
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    def update(self):
+        """Guard condition for goupille."""
+        if GPIO is None:
+            if self.robot.triggered():
+                return py_trees.common.Status.SUCCESS
+        elif GPIO.input(27) or self.robot.triggered():
+            return py_trees.common.Status.SUCCESS
+        return py_trees.common.Status.RUNNING

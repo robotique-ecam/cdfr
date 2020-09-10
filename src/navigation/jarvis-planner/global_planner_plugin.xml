@@ -1,5 +1,0 @@
-<library path="jarvis_planner_plugin">
-	<class name="jarvis_planner/Jarvis" type="jarvis_planner::Jarvis" base_class_type="nav2_core::GlobalPlanner">
-	  <description>Our custom path planning algorithm.</description>
-	</class>
-</library>
