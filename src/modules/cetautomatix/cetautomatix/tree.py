@@ -22,6 +22,11 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
         key='goal'
     )
 
+    wait_for_goal = py_trees.behaviours.WaitForBlackboardVariable(
+        name='Wait for goal',
+        key='goal'
+    )
+
     actuator = ActuatorAction(
         name='ActuatorsAction',
         robot=robot
@@ -29,7 +34,7 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
 
     execute = py_trees.composites.Sequence(
         name='ExecuteAction',
-        children=[navigate, actuator]
+        children=[wait_for_goal, navigate, actuator]
     )
 
     # Actions
