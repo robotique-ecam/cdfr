@@ -40,6 +40,8 @@ class Robot(Node):
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
         self._tf_buffer = Buffer()
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        while not self._get_available_client.wait_for_service(timeout_sec=5):
+            self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
