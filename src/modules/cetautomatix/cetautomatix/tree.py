@@ -24,7 +24,7 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
 
     wait_for_goal = py_trees.behaviours.WaitForBlackboardVariable(
         name='Wait for goal',
-        key='goal'
+        variable_name='goal'
     )
 
     actuator = ActuatorAction(
