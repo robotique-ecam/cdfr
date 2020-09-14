@@ -31,7 +31,7 @@ void setup() {
 void step() {
   PORTB |= (1 << PIN_STEP);
   steps++;
-  _delay_us(2);
+  _delay_us(4);
   PORTB &= ~(1 << PIN_STEP);
 }
 
