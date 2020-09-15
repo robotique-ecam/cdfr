@@ -5,6 +5,9 @@ obelix:
         separation: 0.282
         radius: 0.061
 
+      microsteps: 16
+      steps_per_turn: 400
+
       microcontroler:
         max_steps_frequency: 10000
         speedramp_resolution: 128

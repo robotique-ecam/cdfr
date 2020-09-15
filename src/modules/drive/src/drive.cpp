@@ -58,6 +58,8 @@ void Drive::init_parameters() {
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
+  this->declare_parameter("steps_per_turn");
+  this->declare_parameter("microsteps");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
   this->declare_parameter("microcontroler.max_steps_frequency");
@@ -71,23 +73,25 @@ void Drive::init_parameters() {
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
-  this->get_parameter_or<double>("wheels.separation", wheel_separation_, 0.25);
-  this->get_parameter_or<double>("wheels.radius", wheel_radius_, 0.080);
-  this->get_parameter_or<int>("microcontroler.max_steps_frequency", max_freq_, 10000);
-  this->get_parameter_or<int>("microcontroler.speedramp_resolution", speed_resolution_, 128);
-  this->get_parameter_or<double>("speedramp.accel", accel_, 9.81);
+  this->get_parameter_or<int>("steps_per_turn", _steps_per_turn, 200);
+  this->get_parameter_or<int>("microsteps", _microsteps, 16);
+  this->get_parameter_or<double>("wheels.separation", _wheel_separation, 0.25);
+  this->get_parameter_or<double>("wheels.radius", _wheel_radius, 0.080);
+  this->get_parameter_or<int>("microcontroler.max_steps_frequency", _max_freq, 10000);
+  this->get_parameter_or<int>("microcontroler.speedramp_resolution", _speed_resolution, 128);
+  this->get_parameter_or<double>("speedramp.accel", _accel, 9.81);
 }
 
 void Drive::init_variables() {
   /* Compute initial values */
-  steps_per_turn_ = 200 * 16;
-  rads_per_step = 2 * M_PI / steps_per_turn_;
-  meters_per_turn_ = 2 * M_PI * wheel_radius_;
-  meters_per_step_ = meters_per_turn_ / steps_per_turn_;
+  _total_steps_per_turn = _microsteps * _steps_per_turn;
+  _rads_per_step = 2 * M_PI / _total_steps_per_turn;
+  _meters_per_turn = 2 * M_PI * _wheel_radius;
+  _meters_per_step = _meters_per_turn / _total_steps_per_turn;
 
-  speed_multiplier_ = max_freq_ / speed_resolution_;
-  max_speed_ = max_freq_ * meters_per_step_;
-  min_speed_ = speed_multiplier_ * meters_per_step_;
+  _speed_multiplier = _max_freq / _speed_resolution;
+  _max_speed = _max_freq * _meters_per_step;
+  _min_speed = _speed_multiplier * _meters_per_step;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -113,12 +117,12 @@ void Drive::init_variables() {
 int8_t Drive::compute_velocity_cmd(double velocity) {
   /* Compute absolute velocity command to be sent to microcontroler */
   double abs_velocity = abs(velocity);
-  if (abs_velocity >= max_speed_) {
-    return (int8_t)((velocity < 0) ? (-1) : (1)) * (speed_resolution_ - 1);
-  } else if (abs_velocity < min_speed_) {
+  if (abs_velocity >= _max_speed) {
+    return (int8_t)((velocity < 0) ? (-1) : (1)) * (_speed_resolution - 1);
+  } else if (abs_velocity < _min_speed) {
     return 0;
   } else {
-    return (int8_t)round(velocity * (speed_resolution_ - 1) / max_speed_) - ((velocity < 0) ? (1) : (0));
+    return (int8_t)round(velocity * (_speed_resolution - 1) / _max_speed) - ((velocity < 0) ? (1) : (0));
   }
 }
 
@@ -142,16 +146,16 @@ void Drive::update_velocity() {
 #else
   time_since_last_sync_ = get_sim_time();
 
-  wb_left_motor->setVelocity(cmd_vel_.left / wheel_radius_);
-  wb_right_motor->setVelocity(cmd_vel_.right / wheel_radius_);
+  wb_left_motor->setVelocity(cmd_vel_.left / _wheel_radius);
+  wb_right_motor->setVelocity(cmd_vel_.right / _wheel_radius);
   double lsteps = wp_left_encoder->getValue();
   double rsteps = wp_right_encoder->getValue();
   if (std::isnan(lsteps) || std::isnan(rsteps)) {
     lsteps = rsteps = 0;
     RCLCPP_WARN(this->get_logger(), "Robot wheel encoders return NaN");
   }
-  attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / rads_per_step;
-  attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / rads_per_step;
+  attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / _rads_per_step;
+  attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / _rads_per_step;
   old_steps_returned.left = lsteps;
   old_steps_returned.right = rsteps;
 #endif /* SIMULATION */
@@ -163,8 +167,8 @@ void Drive::update_velocity() {
 }
 
 void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg) {
-  cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * wheel_separation_) / 2;
-  cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * wheel_separation_) / 2;
+  cmd_vel_.left = cmd_vel_msg->linear.x - (cmd_vel_msg->angular.z * _wheel_separation) / 2;
+  cmd_vel_.right = cmd_vel_msg->linear.x + (cmd_vel_msg->angular.z * _wheel_separation) / 2;
 
   update_velocity();
 }
@@ -172,17 +176,17 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(TinyData steps_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = meters_per_step_ * steps_returned.left;
-  differential_move_.right = meters_per_step_ * steps_returned.right;
+  differential_move_.left = _meters_per_step * steps_returned.left;
+  differential_move_.right = _meters_per_step * steps_returned.right;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
 
   instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
-  instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (wheel_separation_);
+  instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (_wheel_separation);
 
   instantaneous_speed_.linear = (differential_speed_.right + differential_speed_.left) / 2;
-  instantaneous_speed_.angular = (differential_speed_.right - differential_speed_.left) / (wheel_separation_);
+  instantaneous_speed_.angular = (differential_speed_.right - differential_speed_.left) / (_wheel_separation);
 
   odom_pose_.x += instantaneous_move_.linear * cos(odom_pose_.thetha + (instantaneous_move_.angular / 2));
   odom_pose_.y += instantaneous_move_.linear * sin(odom_pose_.thetha + (instantaneous_move_.angular / 2));
@@ -225,10 +229,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] += attiny_steps_returned_.left * rads_per_step;
-  joint_states_.position[RIGHT] += attiny_steps_returned_.right * rads_per_step;
-  joint_states_.velocity[LEFT] = attiny_steps_returned_.left * rads_per_step / dt;
-  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * rads_per_step / dt;
+  joint_states_.position[LEFT] += attiny_steps_returned_.left * _rads_per_step;
+  joint_states_.position[RIGHT] += attiny_steps_returned_.right * _rads_per_step;
+  joint_states_.velocity[LEFT] = attiny_steps_returned_.left * _rads_per_step / dt;
+  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * _rads_per_step / dt;
   joint_states_pub_->publish(joint_states_);
 }
 

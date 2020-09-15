@@ -103,20 +103,22 @@ private:
   diagnostic_msgs::msg::DiagnosticArray diagnostics_array_;
   diagnostic_msgs::msg::DiagnosticStatus diagnostics_status_;
 
-  double accel_;
-  double wheel_separation_;
-  double wheel_radius_;
-  int max_freq_;
-  int speed_resolution_;
+  double _accel;
+  double _wheel_separation;
+  double _wheel_radius;
+  int _max_freq;
+  int _speed_resolution;
+  int _steps_per_turn;
+  int _microsteps;
 
   /* Computed values */
-  uint16_t steps_per_turn_;
-  double rads_per_step;
-  double meters_per_turn_;
-  double meters_per_step_;
-  double speed_multiplier_;
-  double max_speed_;
-  double min_speed_;
+  uint16_t _total__steps_per_turn;
+  double _rads_per_step;
+  double _meters_per_turn;
+  double _meters_per_step;
+  double _speed_multiplier;
+  double _max_speed;
+  double _min_speed;
 
   /* Temporary values */
   double dt = 1; /* us */
