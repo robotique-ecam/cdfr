@@ -10,8 +10,8 @@ class Score:
         self.actions = {'MANCHE1': MancheAir('MANCHE1'), 'MANCHE2': MancheAir('MANCHE2'),
                         'MANCHE3': MancheAir('MANCHE3'), 'MANCHE4': MancheAir('MANCHE4'),
                         'PHARE': Phare('PHARE'), 'PAVILLON': Pavillon('PAVILLON')}
-        + {cup: Gobelet(cup, 'R') for cup in list(RED_CUPS.keys())}
-        + {cup: Gobelet(cup, 'G') for cup in list(GREEN_CUPS.keys())}
+        self.actions.update({cup: Gobelet(cup, 'R') for cup in list(RED_CUPS.keys())})
+        self.actions.update({cup: Gobelet(cup, 'G') for cup in list(GREEN_CUPS.keys())})
         self.excludeFromBlue = ['PHARE_JAUNE', 'MANCHE3', 'MANCHE4', 'ECUEIL_JAUNE']
         self.excludeFromYellow = ['PHARE_BLEU', 'MANCHE1', 'MANCHE2', 'ECUEIL_BLEU']
         self.todoList = list(elements.keys())
