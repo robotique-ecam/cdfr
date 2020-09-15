@@ -70,7 +70,7 @@ controller_server:
       acc_lim_theta: 2.0
 
       # Obstacles
-      min_obstacle_dist: 0.1
+      min_obstacle_dist: 0.01
       inflation_dist: 0.1
       costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       costmap_converter_spin_thread: True
