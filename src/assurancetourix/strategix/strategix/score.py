@@ -9,7 +9,8 @@ class Score:
         # self.bonPortPetit = BonPort('BonPortPetit')
         self.actions = {'MANCHE1': MancheAir('MANCHE1'), 'MANCHE2': MancheAir('MANCHE2'),
                         'MANCHE3': MancheAir('MANCHE3'), 'MANCHE4': MancheAir('MANCHE4'),
-                        'PHARE': Phare('PHARE'), 'PAVILLON': Pavillon('PAVILLON')}
+                        'PHARE_BLEU': Phare('PHARE'), 'PHARE_JAUNE': Phare('PHARE'),
+                        'PAVILLON': Pavillon('PAVILLON')}
         self.actions.update({cup: Gobelet(cup, 'R') for cup in list(RED_CUPS.keys())})
         self.actions.update({cup: Gobelet(cup, 'G') for cup in list(GREEN_CUPS.keys())})
         self.excludeFromBlue = ['PHARE_JAUNE', 'MANCHE3', 'MANCHE4', 'ECUEIL_JAUNE']
