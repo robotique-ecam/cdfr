@@ -112,7 +112,7 @@ private:
   int _microsteps;
 
   /* Computed values */
-  uint16_t _total__steps_per_turn;
+  uint16_t _total_steps_per_turn;
   double _rads_per_step;
   double _meters_per_turn;
   double _meters_per_step;
