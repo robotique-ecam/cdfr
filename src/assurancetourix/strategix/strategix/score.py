@@ -1,20 +1,20 @@
-from cetautomatix.magic_points import elements
-# from strategix.actions import BonPort, Gobelet, MancheAir, Pavillon, Phare
+from cetautomatix.magic_points import elements, RED_CUPS, GREEN_CUPS
+from strategix.actions import BonPort, Gobelet, MancheAir, Pavillon, Phare
 
 
 class Score:
     def __init__(self):
-        # self.cups = [Gobelet(k, 'R') for k in RED_CUPS]
-        # self.cups += [Gobelet(k, 'V') for k in GREEN_CUPS]
-        # self.mancheAir1 = MancheAir('MANCHE1')
-        # self.mancheAir2 = MancheAir('MANCHE2')
-        # self.phare = Phare('PHARE')
+        self.score = 0
         # self.bonPortGros = BonPort('BonPortGros')
         # self.bonPortPetit = BonPort('BonPortPetit')
-        # self.pavillon = Pavillon('Pavillon')
-        self.todoList = list(elements.keys())
+        self.actions = {'MANCHE1': MancheAir('MANCHE1'), 'MANCHE2': MancheAir('MANCHE2'),
+                        'MANCHE3': MancheAir('MANCHE3'), 'MANCHE4': MancheAir('MANCHE4'),
+                        'PHARE': Phare('PHARE'), 'PAVILLON': Pavillon('PAVILLON')}
+        + {cup: Gobelet(cup, 'R') for cup in list(RED_CUPS.keys())}
+        + {cup: Gobelet(cup, 'G') for cup in list(GREEN_CUPS.keys())}
         self.excludeFromBlue = ['PHARE_JAUNE', 'MANCHE3', 'MANCHE4', 'ECUEIL_JAUNE']
         self.excludeFromYellow = ['PHARE_BLEU', 'MANCHE1', 'MANCHE2', 'ECUEIL_BLEU']
+        self.todoList = list(elements.keys())
         self.wipList = ['PAVILLON']
         self.doneList = []
 
@@ -24,11 +24,11 @@ class Score:
         numMancheAir = len([action for action in self.doneList if 'MANCHE' in action])
         self.score += 5 if numMancheAir == 1 else 15 if numMancheAir == 2 else 0
         # Gobelets
-        # gobeletsInBase = [action for action in self.doneList if 'Gobelet' in action]
-        # numGobRouge = len([gob for gob in gobeletsInBase if gob.inChenal and gob.color == 'R'])
-        # numGobVert = len([gob for gob in gobeletsInBase if gob.inChenal and gob.color == 'V'])
-        # pair = 2 * numGobRouge if numGobRouge < numGobVert else 2 * numGobVert
-        # self.score += len(gobeletsInBase) + numGobRouge + numGobVert + pair
+        gobeletsInBase = [action for action in self.doneList if 'GOB' in action]
+        numRedCups = len([self.actions[gob] for gob in gobeletsInBase if self.actions[gob].inChenal and self.actions[gob].color == 'R'])
+        numGreenCups = len([self.actions[gob] for gob in gobeletsInBase if self.actions[gob].inChenal and self.actions[gob].color == 'G'])
+        pair = 2 * numRedCups if numRedCups < numGreenCups else 2 * numGreenCups
+        self.score += len(gobeletsInBase) + numRedCups + numGreenCups + pair
         # Phare
         self.score += 15 if 'PHARE_BLEU' or 'PHARE_JAUNE' in self.doneList else 2
         # Bon Port
@@ -45,17 +45,19 @@ class Score:
         # Pavillon
         self.score += 10 if 'PAVILLON' in self.doneList else 0
 
-    def preempt(self, action):
+    def preempt(self, action, sender):
+        self.actions[action].executer = sender
         self.todoList.remove(action)
         self.wipList.append(action)
         return True
 
-    def release(self, action):
+    def release(self, action, sender):
+        self.actions[action].executer = None
         self.wipList.remove(action)
         # Don't add failing action again
         return True
 
-    def finish(self, action):
+    def finish(self, action, sender):
         self.wipList.remove(action)
         self.doneList.append(self.ecueil_to_gob(action))
         return True

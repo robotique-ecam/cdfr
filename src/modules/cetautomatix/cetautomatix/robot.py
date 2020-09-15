@@ -139,9 +139,6 @@ class Robot(Node):
 
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
-        if not action_list:
-            self._current_action = 'ARUCO42'
-            return 'ARUCO42'
         distance_list = []
         # start = timeEndOfGame.time - 100.0
         for action in action_list:

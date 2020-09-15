@@ -9,6 +9,7 @@ from rclpy.node import Node
 from strategix.exceptions import MatchStartedException
 from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
+from lcd_msgs.msg import Lcd
 
 
 class StrategixActionServer(Node):
@@ -19,6 +20,7 @@ class StrategixActionServer(Node):
         self.score = Score()
         self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
+        self.lcd_driver = self.create_publisher(Lcd, '/obelix/lcd', 1)
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Strategix is ready')
 
@@ -38,29 +40,33 @@ class StrategixActionServer(Node):
         return result
 
     def available_callback(self, request, response):
-        self.get_logger().info('GET %s' % (request.sender))
+        """Callback function when a robot needs the list of available actions"""
+        self.get_logger().info(f'{request.sender}')
         exclude = self.score.excludeFromBlue if self.side.value == 'blue' else self.score.excludeFromYellow
         response.available = [todo for todo in self.score.todoList if todo not in exclude]
-        self.get_logger().info('AVAILABLE: %s' % (response.available))
+        self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
 
     def action_callback(self, request, response):
+        """Callback function when a robot has to change its current action"""
         try:
-            self.get_logger().info('%s %s %s' % (request.sender, request.request, request.action))
-            if request.action == 'ARUCO42':
-                response.success = True
-            elif request.request == 'PREEMPT':
-                response.success = self.score.preempt(request.action)
+            self.get_logger().info(f'{request.sender} {request.request} {request.action}')
+            if request.request == 'PREEMPT':
+                response.success = self.score.preempt(request.action, request.sender)
             elif request.request == 'DROP':
-                response.success = self.score.release(request.action)
+                response.success = self.score.release(request.action, request.sender)
             elif request.request == 'CONFIRM':
-                response.success = self.score.finish(request.action)
+                response.success = self.score.finish(request.action, request.sender)
             else:
                 raise BaseException
         except BaseException:
-            self.get_logger().warn('Invalid call : %s %s %s' % (request.sender, request.request, request.action))
+            self.get_logger().warn(f'Invalid call : {request.sender} {request.request} {request.action}')
             response.success = False
         self.score.updateScore()
+        lcd_msg = Lcd()
+        lcd_msg.line = 1
+        lcd_msg.text = f'Score: {self.score.score}'
+        self.lcd_driver.publish(lcd_msg)
         return response
 
 
