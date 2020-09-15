@@ -79,7 +79,16 @@ obelix:
 
 controller_server:
   ros__parameters:
-    DynamicFollowPath.footprint_model.vertices: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
+    DynamicFollowPath.:
+      footprint_model.vertices: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
+
+      # Robot
+      min_turning_radius: 0.0
+      max_vel_x: 0.4
+      max_vel_x_backwards: 0.4
+      max_vel_theta: 1.0
+      acc_lim_x: 0.5
+      acc_lim_theta: 0.5
 
 
 local_costmap:
