@@ -10,6 +10,7 @@ from strategix.exceptions import MatchStartedException
 from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from lcd_msgs.msg import Lcd
+from threading import Thread
 
 
 class StrategixActionServer(Node):
@@ -57,17 +58,22 @@ class StrategixActionServer(Node):
                 response.success = self.score.release(request.action, request.sender)
             elif request.request == 'CONFIRM':
                 response.success = self.score.finish(request.action, request.sender)
+                # Detach update_score coroutine
+                Thread(target=self.update_score).start()
             else:
                 raise BaseException
         except BaseException:
             self.get_logger().warn(f'Invalid call : {request.sender} {request.request} {request.action}')
             response.success = False
+        return response
+
+    def update_score(self):
+        """Update global score."""
         self.score.updateScore()
         lcd_msg = Lcd()
         lcd_msg.line = 1
         lcd_msg.text = f'Score: {self.score.score}'
         self.lcd_driver.publish(lcd_msg)
-        return response
 
 
 def main(args=None):
