@@ -16,6 +16,12 @@ class BonPort(Action):
         self.pos = 'Out'
 
 
+class Ecueil(Action):
+    def __init__(self, name, gobelets):
+        super().__init__(name)
+        self.gobelets = gobelets
+
+
 class Gobelet(Action):
     def __init__(self, name, color):
         super().__init__(name)

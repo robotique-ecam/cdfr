@@ -1,5 +1,5 @@
 from cetautomatix.magic_points import elements, RED_CUPS, GREEN_CUPS
-from strategix.actions import BonPort, Gobelet, MancheAir, Pavillon, Phare
+from strategix.actions import Ecueil, Gobelet, MancheAir, Pavillon, Phare
 
 
 class Score:
@@ -9,8 +9,13 @@ class Score:
         # self.bonPortPetit = BonPort('BonPortPetit')
         self.actions = {'MANCHE1': MancheAir('MANCHE1'), 'MANCHE2': MancheAir('MANCHE2'),
                         'MANCHE3': MancheAir('MANCHE3'), 'MANCHE4': MancheAir('MANCHE4'),
-                        'PHARE_BLEU': Phare('PHARE'), 'PHARE_JAUNE': Phare('PHARE'),
-                        'PAVILLON': Pavillon('PAVILLON')}
+                        'PHARE_BLEU': Phare('PHARE_BLEU'), 'PHARE_JAUNE': Phare('PHARE_JAUNE'),
+                        'PAVILLON': Pavillon('PAVILLON'),
+                        'ECUEIL_1': Ecueil('ECUEIL_1', ['GOB35', 'GOB36', 'GOB37', 'GOB38', 'GOB39']),
+                        'ECUEIL_2': Ecueil('ECUEIL_2', ['GOB40', 'GOB41', 'GOB42', 'GOB43', 'GOB44']),
+                        'ECUEIL_JAUNE': Ecueil('ECUEIL_JAUNE', ['GOB30', 'GOB31', 'GOB32', 'GOB33', 'GOB34']),
+                        'ECUEIL_BLEU': Ecueil('ECUEIL_BLEU', ['GOB25', 'GOB26', 'GOB27', 'GOB28', 'GOB29'])
+                        }
         self.actions.update({cup: Gobelet(cup, 'R') for cup in list(RED_CUPS.keys())})
         self.actions.update({cup: Gobelet(cup, 'G') for cup in list(GREEN_CUPS.keys())})
         self.excludeFromBlue = ['PHARE_JAUNE', 'MANCHE3', 'MANCHE4', 'ECUEIL_JAUNE']
@@ -64,13 +69,8 @@ class Score:
         return True
 
     def ecueil_to_gob(self, action):
-        if action == 'ECUEIL_1':
-            return ['GOB35', 'GOB36', 'GOB37', 'GOB38', 'GOB39']
-        elif action == 'ECUEIL_2':
-            return ['GOB40', 'GOB41', 'GOB42', 'GOB43', 'GOB44']
-        elif action == 'ECUEIL_BLEU':
-            return ['GOB25', 'GOB26', 'GOB27', 'GOB28', 'GOB29']
-        elif action == 'ECUEIL_JAUNE':
-            return ['GOB30', 'GOB31', 'GOB32', 'GOB33', 'GOB34']
+        new_action = self.actions[action]
+        if isinstance(new_action, Ecueil):
+            return new_action.gobelets
         else:
             return action
