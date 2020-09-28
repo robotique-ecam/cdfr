@@ -79,6 +79,10 @@ if(EXTERN_CAMERA)
   add_definitions(-DEXTERN_CAMERA)
 endif()
 
+if(EXTRALOG)
+  add_definitions(-DEXTRALOG)
+endif()
+
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 
 

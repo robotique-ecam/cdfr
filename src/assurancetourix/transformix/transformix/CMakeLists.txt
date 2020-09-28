@@ -44,6 +44,10 @@ add_executable(${EXEC_NAME}
   src/transformix_node.cpp
 )
 
+if(EXTRALOG)
+  add_definitions(-DEXTRALOG)
+endif()
+
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 
 ################################################################################

@@ -83,7 +83,12 @@ void Assurancetourix::simulation_marker_callback() {
 
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
     y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
-
+    webots_marker.type = robot_type;
+    webots_marker.color.r = 255;
+    webots_marker.color.a = 1;
+    webots_marker.scale.x = 0.1;
+    webots_marker.scale.y = 0.1;
+    webots_marker.scale.z = 0.1;
     webots_marker.header.frame_id = "map";
     webots_marker.header.stamp = this->get_clock()->now();
     webots_marker.pose.position.x = x;
@@ -180,20 +185,11 @@ void Assurancetourix::detect() {
   marker.scale.z = 0.05;
   marker.id = 13;
 
-  /*
-  ###
-  lines that are quoted this way are to show the time elapsed to do some actions
-  (capture the image, find the coordonates of the arucos in it and the total)
-  ###
-  */
-
-  /*
-  ###
+#ifdef EXTRALOG //if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
   auto start_total = std::chrono::high_resolution_clock::now();
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
-  ###
-  */
+#endif
 
 #ifdef MIPI_CAMERA
   get_image();
@@ -202,11 +198,9 @@ void Assurancetourix::detect() {
   _frame = imread("/home/phileas/covid_home.jpg", IMREAD_GRAYSCALE);
 #endif // MIPI_CAMERA
 
-  /*
-  ###
+#ifdef EXTRALOG
   auto end_camera = std::chrono::high_resolution_clock::now();
-  ###
-  */
+#endif
 
   cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
   _frame.convertTo(raised_contrast, -1, contrast, 0);
@@ -218,17 +212,14 @@ void Assurancetourix::detect() {
 
   marker_pub_->publish(marker);
 
-  /*
-  ###
+#ifdef EXTRALOG
   auto start_detection = std::chrono::high_resolution_clock::now();
-  ###
-  */
+#endif
 
   _detect_aruco(_anotated);
   _anotate_image(_anotated);
 
-  /*
-  ###
+#ifdef EXTRALOG
   auto end_detection = std::chrono::high_resolution_clock::now();
   auto end_total = std::chrono::high_resolution_clock::now();
 
@@ -244,8 +235,7 @@ void Assurancetourix::detect() {
   RCLCPP_INFO(this->get_logger(), "time of camera: %f", time_taken_camera);
   RCLCPP_INFO(this->get_logger(), "time of detection: %f", time_taken_detection);
   RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
-  ###
-  */
+#endif
 
   if (show_image) {
     cv::imshow("anotated", _anotated);
