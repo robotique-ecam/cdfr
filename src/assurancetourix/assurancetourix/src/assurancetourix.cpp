@@ -76,26 +76,30 @@ void Assurancetourix::get_image() {
 // webots element positioning
 void Assurancetourix::simulation_marker_callback() {
   visualization_msgs::msg::MarkerArray marker_array_pub;
+  visualization_msgs::msg::Marker webots_marker;
+  webots_marker.type = robot_type;
+  webots_marker.color.r = 255;
+  webots_marker.color.a = 1;
+  webots_marker.scale.x = 0.1;
+  webots_marker.scale.y = 0.1;
+  webots_marker.scale.z = 0.1;
+  webots_marker.header.frame_id = "map";
+  int id = 0;
 
   for (auto robot : robots) {
     double x, y;
-    visualization_msgs::msg::Marker webots_marker;
 
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
     y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
-    webots_marker.type = robot_type;
-    webots_marker.color.r = 255;
-    webots_marker.color.a = 1;
-    webots_marker.scale.x = 0.1;
-    webots_marker.scale.y = 0.1;
-    webots_marker.scale.z = 0.1;
-    webots_marker.header.frame_id = "map";
+
     webots_marker.header.stamp = this->get_clock()->now();
     webots_marker.pose.position.x = x;
     webots_marker.pose.position.y = y;
     webots_marker.text = robot;
+    webots_marker.id = id;
 
     marker_array_pub.markers.push_back(webots_marker);
+    id++;
   }
 
   transformed_marker_pub_->publish(marker_array_pub);
