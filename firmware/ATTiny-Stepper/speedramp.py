@@ -6,7 +6,7 @@ max_freq = 10e3
 resolution = 128
 prescaller_bitsize = 14
 
-step = round(max_freq / resolution)
+step = max_freq / resolution
 
 speed_frequencies = [step * i for i in range(resolution)]
 speed_delays = [1/x for x in speed_frequencies if x != 0]

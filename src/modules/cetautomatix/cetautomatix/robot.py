@@ -147,6 +147,8 @@ class Robot(Node):
                 (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
             coeff_distance = 100 * (1 - distance / 3.6)
             distance_list.append(coeff_distance)
+        if len(distance_list) < 1:
+            return None
         best_action = action_list[distance_list.index(max(distance_list))]
         return best_action
 
