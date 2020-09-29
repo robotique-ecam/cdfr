@@ -100,67 +100,55 @@ controller_server_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
-local_costmap:
-  local_costmap:
-    ros__parameters:
-      use_sim_time: False
-      global_frame: odom
-      plugin_names: ["gradient_layer", "inflation_layer"]
-      plugin_types: ["gradient_costmap_layer_plugin/GradientLayer", "nav2_costmap_2d::InflationLayer"]
-      rolling_window: true
-      width: 3
-      height: 3
-      resolution: 0.02
-      # robot_radius: 0.15
-      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
-      inflation_layer.cost_scaling_factor: 1.0
-      gradient_layer:
-        enabled: false
-        gradient_size: 5
-        gradient_factor: 60
-      static_layer:
-        map_subscribe_transient_local: True
-      always_send_full_costmap: True
-      observation_sources: scan
-  local_costmap_client:
-    ros__parameters:
-      use_sim_time: False
-  local_costmap_rclcpp_node:
-    ros__parameters:
-      use_sim_time: False
-
-
 global_costmap:
   global_costmap:
     ros__parameters:
-      use_sim_time: False
-      # robot_radius: 0.15
       footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
-      plugin_names: ["static_layer", "gradient_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::StaticLayer", "gradient_costmap_layer_plugin/GradientLayer", "nav2_costmap_2d::InflationLayer"]
-      clearable_layers:
-      - gradient_layer
-      - obstacle_layer
-      static_layer:
+      update_frequency: 5.0
+      publish_frequency: 5.0
+      global_frame: map
+      robot_base_frame: base_link
+      use_sim_time: True
+      resolution: 0.05
+      plugins: ["static_layer", "gradient_layer", "inflation_layer"]
+      static_layer: #subscribe to map
+        plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
-      gradient_layer:
+        enabled: true
+        subscribe_to_updates: true
+        transform_tolerance: 0.1
+      gradient_layer: #draw radians circle around ennemies
+        plugin: "gradient_costmap_layer_plugin/GradientLayer"
         enabled: true
         gradient_size: 5
         gradient_factor: 60
         markers_topic: "coordonate_position_transform"
-      inflation_layer:
-        cost_scaling_factor: 10.0
+      inflation_layer: #inflate map
+        plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflate_unknown: false
         inflation_radius: 0.55
+        cost_scaling_factor: 10.0
+        inflate_unknown: false
+        inflate_around_unknown: true
       always_send_full_costmap: True
-      observation_sources: scan
-  global_costmap_client:
+
+local_costmap: #just enough parameters to disable it
+  local_costmap:
     ros__parameters:
-      use_sim_time: False
-  global_costmap_rclcpp_node:
-    ros__parameters:
-      use_sim_time: False
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: odom
+      robot_base_frame: base_link
+      use_sim_time: True
+      rolling_window: true
+      width: 3
+      height: 3
+      resolution: 0.05
+      plugins: ["static_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        enabled: false
+
 map_server:
   ros__parameters:
     use_sim_time: False

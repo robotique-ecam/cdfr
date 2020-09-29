@@ -25,7 +25,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
+  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("asterix/global_costmap/" + topic_for_gradient_layer, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
