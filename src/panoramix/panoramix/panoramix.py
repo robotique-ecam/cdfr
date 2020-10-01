@@ -20,7 +20,9 @@ class Panoramix(Node):
         self._socketio = socketio
         self._namespace = namespace
         self._ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
-        self.subscription = self.create_subscription(Log, '/rosout', self.log_callback, 5)
+        self._subscriptions = []
+        for ns in ['', '/asterix', '/obelix', '/assurancetourix']:
+            self._subscriptions.append(self.create_subscription(Log, f'{ns}/rosout', self.log_callback, 5))
 
     def _escape_ansi(self, txt):
         """Return ANSI escaped text."""
