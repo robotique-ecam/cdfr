@@ -9,6 +9,7 @@
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
 #endif
+#include "std_srvs/srv/set_bool.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -91,6 +92,9 @@ private:
 
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+
+  // Steppers disable service
+  rclcpp::Service<std_srvs::srv::SetBool> _enable_drivers;
 
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 

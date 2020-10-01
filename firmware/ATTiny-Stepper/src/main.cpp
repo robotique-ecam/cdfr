@@ -52,17 +52,29 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void on_receive_command(uint8_t n) {
-  TCNT1 = 0;
-  old_steps = steps;
-  steps = 0;
-  int8_t data = TinyWireS.receive();
-  /* Send direction according to data sign */
-  PORTB ^= (-(sign(data) ^ INVERT) ^ PORTB) & (1 << PIN_DIR);
-  uint8_t data_index = abs(data) - sign(data);
-  OCR1A = comparator[data_index];
-  TCCR1 = (TCCR1 & 0xf0) | prescaler[data_index];
-  TinyWireS.send((uint8_t)old_steps);
-  TinyWireS.send(old_steps >> 8);
+  if (n == 1) {
+    TCNT1 = 0;
+    old_steps = steps;
+    steps = 0;
+    int8_t data = TinyWireS.receive();
+    /* Send direction according to data sign */
+    PORTB ^= (-(sign(data) ^ INVERT) ^ PORTB) & (1 << PIN_DIR);
+    uint8_t data_index = abs(data) - sign(data);
+    OCR1A = comparator[data_index];
+    TCCR1 = (TCCR1 & 0xf0) | prescaler[data_index];
+    TinyWireS.send((uint8_t)old_steps);
+    TinyWireS.send(old_steps >> 8);
+  } else if (n == 2) {
+    uint8_t header = TinyWireS.receive();
+    uint8_t data = TinyWireS.receive();
+    if (header == 0xFF) {
+      if (data > 0) {
+        PORTB |= (1 << PIN_ENA);
+      } else {
+        PORTB &= ~(1 << PIN_ENA);
+      }
+    }
+  }
 }
 
 int main(int argc, char const *argv[]) {

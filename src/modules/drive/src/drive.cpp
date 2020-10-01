@@ -43,7 +43,9 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
+  _enable_drivers = this->create_service<std_srvs::srv::SetBool>("enable_drivers", handle_drivers_enable)
+
+                        diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
   timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_velocity, this));
@@ -243,6 +245,23 @@ rclcpp::Time Drive::get_sim_time() {
   double seconds = 0;
   double nanosec = modf(wb_robot->getTime(), &seconds) * 1e9;
   return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
+}
+
+void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                  const std::shared_ptr<std_srvs::srv::SetBool::Response> response) {
+  #ifndef SIMULATION
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->write_byte_data(0xFF, (uint8_t) request->data);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->write_byte_data(0xFF, (uint8_t) request->data);
+  #endif
+
+  if (request->data) {
+    this->get_logger->warn("Stepper drivers are enabled");
+  } else {
+    this->get_logger->warn("Stepper drivers are disabled");
+  }
 }
 
 void Drive::sim_step() { this->wb_robot->step(timestep); }
