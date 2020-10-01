@@ -258,10 +258,13 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
   #endif
 
   if (request->data) {
+    response->message = "Stepper drivers are enabled"
     RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
   } else {
+    response->message = "Stepper drivers are disabled"
     RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
   }
+  response->success = true;
 }
 
 void Drive::sim_step() { this->wb_robot->step(timestep); }
