@@ -155,6 +155,8 @@ private:
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
+  void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                             const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
 #ifdef SIMULATION
   void sim_step();
