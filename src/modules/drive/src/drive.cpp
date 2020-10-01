@@ -43,7 +43,7 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  _enable_drivers = this->create_service<std_srvs::srv::SetBool>("enable_drivers", std::bind(&Drive::handle_drivers_enable, this));
+  _enable_drivers = this->create_service<std_srvs::srv::SetBool>("enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
@@ -258,9 +258,9 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
   #endif
 
   if (request->data) {
-    this->get_logger->warn("Stepper drivers are enabled");
+    this->get_logger()->warn("Stepper drivers are enabled");
   } else {
-    this->get_logger->warn("Stepper drivers are disabled");
+    this->get_logger()->warn("Stepper drivers are disabled");
   }
 }
 
