@@ -94,7 +94,7 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
   // Steppers disable service
-  rclcpp::Service<std_srvs::srv::SetBool> _enable_drivers;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
 
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 

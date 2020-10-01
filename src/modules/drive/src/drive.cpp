@@ -258,9 +258,9 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
   #endif
 
   if (request->data) {
-    this->get_logger()->warn("Stepper drivers are enabled");
+    RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
   } else {
-    this->get_logger()->warn("Stepper drivers are disabled");
+    RCLCPP_WARN(this->get_logger(), ("Stepper drivers are disabled");
   }
 }
 
