@@ -4,23 +4,30 @@
 """Pumps Hardware Interface."""
 
 
-from smbus import SMBus
+try:
+    from smbus import SMBus
+except ImportError:
+    SMBus = int
 
 
 class PumpDriver:
 
     def __init__(self, bus_id=1, addrs=[0x40]):
+        self._bus_id = bus_id
         self._i2c = SMBus(bus_id)
         self._addrs = addrs
         self._len = len(self._addrs)
 
     def __read__(self, addr: int):
         """Read pump driver outputs state."""
-        self._i2c.read_byte(addr)
+        if self._i2c != self._bus_id:
+            return self._i2c.read_byte(addr)
+        return 0
 
     def __write__(self, addr: int, value: int):
         """Write pump driver outputs state."""
-        self._i2c.write_byte(addr, value)
+        if self._i2c != self._bus_id:
+            self._i2c.write_byte(addr, value)
 
     def _get_state(self):
         """Get outputs state from all drivers."""
