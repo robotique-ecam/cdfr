@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 
+from importlib import import_module
+
 import numpy as np
 
+import import_module
 import py_trees
 import rclpy
 import tf2_geometry_msgs
@@ -20,7 +23,8 @@ from tf2_ros.buffer import Buffer
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
-        robot = self.get_namespace()
+        robot = self.get_namespace().strip('/')
+        self.actuators = import_module(f'actuators.{robot}').actuators
         self.position = (0.29, 1.33)
         self.length = 0.26
         self.width = 0.2
