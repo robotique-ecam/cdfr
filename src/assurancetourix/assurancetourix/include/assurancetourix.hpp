@@ -28,6 +28,7 @@
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>
 #endif
+#include "std_srvs/srv/set_bool.hpp"
 
 using namespace rclcpp;
 using namespace cv;
@@ -47,9 +48,13 @@ private:
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
 
 #ifdef MIPI_CAMERA
+  //service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
+  void handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                         const std_srvs::srv::SetBool::Response::SharedPtr response);
   arducam::CAMERA_INSTANCE camera_instance;
   void get_image();
   int width, height;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
 #endif
 
 #ifdef EXTERN_CAMERA
