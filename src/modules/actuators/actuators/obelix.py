@@ -4,7 +4,7 @@
 """Actuator definition for robot Obelix."""
 
 
-from actuators.actuators import Actuators, NO, NC
+from actuators.actuators import DYNA_DOWN, DYNA_UP, NC, NO, Actuators
 
 # Pumps and valves adresses
 PUMPS = {

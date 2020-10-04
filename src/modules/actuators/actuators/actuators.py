@@ -9,11 +9,15 @@ from time import sleep
 from .arbotix.arbotix import ArbotiX
 from .pumps.pumps import PumpDriver
 
-
 NO, NC = False, True
+DYNA_UP, DYNA_DOWN = 950, 800
+
+DYNAMIXELS_SPEED = 100
 
 
 class Actuators:
+
+    """Actuators base class."""
 
     def __init__(self, pump_addr=[0x40], FANS=[7], PUMPS=[], DYNAMIXELS=None, SERVOS=[]):
         """."""
@@ -22,6 +26,13 @@ class Actuators:
         self.pump_driver = PumpDriver(addrs=pump_addr)
         if DYNAMIXELS is not None:
             self.arbotix = Arbotix()
+            self._setupDynamixels()
+
+    def _setupDynamixels(self):
+        """Setup dynamixels speed."""
+        for dyna in self.DYNAMIXELS:
+            self.arbotix.setSpeed(dyna, DYNAMIXELS_SPEED)
+            self.arbotix.setPosition(dyna, DYNA_DOWN)
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
@@ -48,6 +59,11 @@ class Actuators:
         if len(relax) > 0:
             sleep(.1)
             self.pump_driver.bytes_clear(relax)
+
+    def setDynamixelsPositions(self, addrs: list, positions: list):
+        """Set list of pumps as enabled or not."""
+        for addr, position in zip(addrs, positions):
+            self.arbotix.setPosition(addr, position)
 
     def setFansEnabled(self, enabled: bool):
         """Set fans on and off."""

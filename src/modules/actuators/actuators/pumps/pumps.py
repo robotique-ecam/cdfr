@@ -7,12 +7,15 @@
 try:
     from smbus import SMBus
 except ImportError:
+    print('[!] Actuators are in simulation mode. No python3-smbus was found !')
     SMBus = int
 
 
 class PumpDriver:
+    """Driver interacting over I2C with pump boards."""
 
     def __init__(self, bus_id=1, addrs=[0x40]):
+        """Create driver with default values."""
         self._bus_id = bus_id
         self._i2c = SMBus(bus_id)
         self._addrs = addrs
