@@ -5,7 +5,6 @@ from importlib import import_module
 
 import numpy as np
 
-import import_module
 import py_trees
 import rclpy
 import tf2_geometry_msgs
