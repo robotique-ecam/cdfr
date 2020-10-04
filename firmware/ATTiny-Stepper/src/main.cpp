@@ -34,6 +34,7 @@ void setup() {
   /* Setup IO */
   PORTB = 0;
   DDRB |= (1 << PIN_DIR) | (1 << PIN_STEP) | (1 << PIN_ENA);
+  PORTB |= (1 << PIN_ENA);
 
   /* setup timer 1 */
   TIMSK |= (1 << OCIE1A);
