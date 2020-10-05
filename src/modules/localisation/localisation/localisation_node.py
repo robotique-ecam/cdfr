@@ -15,8 +15,8 @@ from tf2_ros import StaticTransformBroadcaster
 class Localisation(rclpy.node.Node):
     """Robot localisation node."""
 
-    def __init__(self, args=None):
-        super().__init__('localisation_node', args)
+    def __init__(self):
+        super().__init__('localisation_node')
         self.robot = self.get_namespace().strip('/')
         self.side = self.declare_parameter('side', 'blue')
         self.add_on_set_parameters_callback(self._on_set_parameters)
