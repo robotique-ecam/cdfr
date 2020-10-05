@@ -18,6 +18,11 @@ asterix:
       base_frame: "base_link"
 
 
+  localisation_node:
+    ros__parameters:
+      use_sim_time: True
+
+
   sensors_node:
     ros__parameters:
       use_sim_time: True

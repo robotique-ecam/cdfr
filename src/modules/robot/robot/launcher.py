@@ -104,11 +104,10 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             ),
 
             Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
+                package='localisation',
+                executable='localisation',
                 output='screen',
                 parameters=[params.name],
-                arguments=['0.29', '1.33', '0', '0', '0', '0', 'map', 'odom'],
                 remappings=remappings,
             ),
 

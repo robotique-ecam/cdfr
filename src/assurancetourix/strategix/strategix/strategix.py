@@ -32,7 +32,7 @@ class StrategixActionServer(Node):
         try:
             for param in params:
                 if param.name == 'side':
-                    self.get_logger().info(f'Side changed {param.value}')
+                    self.get_logger().warn(f'Side changed {param.value}')
                     self.side = param
                 else:
                     setattr(self, param.name, param)

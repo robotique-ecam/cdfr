@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>localisation</name>
+  <version>0.7.0</version>
+  <description>Robot localisation module</description>
+  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
+  <license>ECAM Makers :: CDFR 2020</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
