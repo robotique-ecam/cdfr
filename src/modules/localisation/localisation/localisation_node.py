@@ -36,9 +36,9 @@ class Localisation(rclpy.node.Node):
             for param in params:
                 if param.name == 'side':
                     self.get_logger().warn(f'Side changed {param.value}')
-                    self.side = param.value
+                    self.side = param
                 else:
-                    setattr(self, param.name, param.value)
+                    setattr(self, param.name, param)
             self._x, self._y, self._theta = self.fetchStartPosition()
             result.successful = True
         except BaseException as e:
@@ -50,14 +50,14 @@ class Localisation(rclpy.node.Node):
         # TODO : Calibrate the start position using VL53L1X
         print(self.robot, self.side)
         if self.robot == 'asterix':
-            if self.side == 'blue':
+            if self.side.value == 'blue':
                 return (0.29, 1.33, 0)
-            elif self.side == 'yellow':
+            elif self.side.value == 'yellow':
                 return (0.29, 1.33, 0)
         elif self.robot == 'obelix':
-            if self.side == 'blue':
+            if self.side.value == 'blue':
                 return (0.29, 1.33, 0)
-            elif self.side == 'yellow':
+            elif self.side.value == 'yellow':
                 return (0.29, 1.33, 0)
         # Make it crash in case of undefined parameters
         return None

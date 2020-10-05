@@ -33,9 +33,9 @@ class StrategixActionServer(Node):
             for param in params:
                 if param.name == 'side':
                     self.get_logger().warn(f'Side changed {param.value}')
-                    self.side = param.value
+                    self.side = param
                 else:
-                    setattr(self, param.name, param.value)
+                    setattr(self, param.name, param)
             result.successful = True
         except MatchStartedException as e:
             result.reason = e
