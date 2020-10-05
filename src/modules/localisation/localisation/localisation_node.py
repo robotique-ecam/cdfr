@@ -48,6 +48,7 @@ class Localisation(rclpy.node.Node):
     def fetchStartPosition(self):
         """Fetch start position for side and robot."""
         # TODO : Calibrate the start position using VL53L1X
+        print(self.robot, self.side)
         if self.robot == 'asterix':
             if self.side == 'blue':
                 return (0.29, 1.33, 0)
