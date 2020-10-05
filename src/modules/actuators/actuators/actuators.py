@@ -23,6 +23,8 @@ class Actuators:
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
+        self.SERVOS = SERVOS
+        self.DYNAMIXELS = DYNAMIXELS
         self.pump_driver = PumpDriver(addrs=pump_addr)
         if DYNAMIXELS is not None:
             self.arbotix = Arbotix()
