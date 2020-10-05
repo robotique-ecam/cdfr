@@ -77,7 +77,7 @@ class Localisation(rclpy.node.Node):
 def main(args=None):
     """Entrypoint."""
     rclpy.init(args=args)
-    localisation = Localisation(args=args)
+    localisation = Localisation()
     try:
         rclpy.spin(localisation)
     except KeyboardInterrupt:
