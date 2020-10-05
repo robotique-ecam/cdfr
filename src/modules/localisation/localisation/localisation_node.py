@@ -4,7 +4,7 @@
 """Robot localisation node."""
 
 
-from transforms3d.euler import euler2quat
+import numpy as np
 
 import rclpy
 from geometry_msgs.msg import TransformStamped
@@ -48,7 +48,6 @@ class Localisation(rclpy.node.Node):
     def fetchStartPosition(self):
         """Fetch start position for side and robot."""
         # TODO : Calibrate the start position using VL53L1X
-        print(self.robot, self.side)
         if self.robot == 'asterix':
             if self.side.value == 'blue':
                 return (0.29, 1.33, 0)
@@ -60,14 +59,22 @@ class Localisation(rclpy.node.Node):
             elif self.side.value == 'yellow':
                 return (0.29, 1.33, 0)
         # Make it crash in case of undefined parameters
-        return None
+        return (0.29, 1.33, 0)
+
+    def euler_to_quaternion(self, yaw, pitch=0, roll=0):
+        """Conversion between euler angles and quaternions."""
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        return [qx, qy, qz, qw]
 
     def update_transform(self):
         """Update and publish transform callback."""
         self._tf.header.stamp = self.get_clock().now().to_msg()
         self._tf.transform.translation.x = float(self._x)
         self._tf.transform.translation.y = float(self._y)
-        qx, qy, qz, qw = euler2quat(0, 0, self._theta, 'rxyz')
+        qx, qy, qz, qw = self.euler_to_quaternion(self._theta)
         self._tf.transform.rotation.x = float(qx)
         self._tf.transform.rotation.y = float(qy)
         self._tf.transform.rotation.z = float(qz)
