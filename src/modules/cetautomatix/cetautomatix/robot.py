@@ -64,6 +64,8 @@ class Robot(Node):
 
     def preempt_action(self, action):
         """Preempt an action for the BT."""
+        if action is None:
+            return False
         self._change_action_status_request.action = str(action)
         self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
@@ -107,8 +109,8 @@ class Robot(Node):
             return True
 
     def trigger_pavillons(self):
-        # TODO
         self.get_logger().info('Triggered pavillons')
+        self.actuators.raiseTheFlag()
 
     def _start_robot_callback(self, req, resp):
         """Start robot."""
