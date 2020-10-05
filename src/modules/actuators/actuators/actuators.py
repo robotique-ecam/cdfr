@@ -19,7 +19,7 @@ class Actuators:
 
     """Actuators base class."""
 
-    def __init__(self, pump_addr=[0x40], FANS=[7], PUMPS=[], DYNAMIXELS=None, SERVOS=[]):
+    def __init__(self, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=None, SERVOS={}):
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
