@@ -23,7 +23,7 @@ def get_footprint(length=.20, width=.15, wheels_excentration=0):
 
 def compute_speeds(config: dict):
     """Compute kinemtics limits for each robot."""
-    step = config.get('max_steps_frequency') / config.get('resolution')
+    step = config.get('max_steps_frequency') / config.get('speedramp_resolution')
     steps_per_turn = config.get('steps_per_turn') * config.get('microsteps')
     meters_per_turn = 2 * pi * config.get('wheel_radius')
     max_turns_per_sec = config.get('max_steps_frequency') / steps_per_turn
