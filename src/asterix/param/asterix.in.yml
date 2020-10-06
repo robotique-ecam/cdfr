@@ -1,15 +1,34 @@
+!Defaults
+footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
+use_sim_time: True
+max_steps_frequency: 10000
+speedramp_resolution: 128
+microsteps: 16
+steps_per_turn: 200
+wheel_separation: 0.244
+wheel_radius: 0.0405
+min_turning_radius: 0.0
+max_vel_x: 0.4
+max_vel_x_backwards: 0.4
+max_vel_theta: 1.0
+acc_lim_x: 0.5
+acc_lim_theta: 0.5
+---
 asterix:
   drive_node:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: !Var use_sim_time
 
       wheels:
         separation: 0.244
         radius: 0.0405
 
+      microsteps: !Var microsteps
+      steps_per_turn: !Var steps_per_turn
+
       microcontroler:
-        max_steps_frequency: 10000
-        speedramp_resolution: 128
+        max_steps_frequency: !Var max_steps_frequency
+        speedramp_resolution: !Var speedramp_resolution
 
       i2c_bus: 1
 
@@ -18,14 +37,9 @@ asterix:
       base_frame: "base_link"
 
 
-  localisation_node:
-    ros__parameters:
-      use_sim_time: True
-
-
   sensors_node:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: !Var use_sim_time
 
       i2c_bus: 4
 
@@ -77,7 +91,7 @@ asterix:
 
   lcd_driver:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: !Var use_sim_time
 
       i2c_bus: 6
       i2c_addr: 0x27
@@ -87,9 +101,35 @@ asterix:
 
   tree:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: !Var use_sim_time
 
 
   robot:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: !Var use_sim_time
+
+
+  controller_server:
+    ros__parameters:
+      DynamicFollowPath.:
+        footprint_model.vertices: !Var footprint
+
+        # Robot
+        min_turning_radius: !Var min_turning_radius
+        max_vel_x: !Var max_vel_x
+        max_vel_x_backwards: !Var max_vel_x_backwards
+        max_vel_theta: !Var max_vel_theta
+        acc_lim_x: !Var acc_lim_x
+        acc_lim_theta: !Var acc_lim_theta
+
+
+  local_costmap:
+    local_costmap:
+      ros__parameters:
+        footprint: !Var footprint
+
+
+  global_costmap:
+    global_costmap:
+      ros__parameters:
+        footprint: !Var footprint
