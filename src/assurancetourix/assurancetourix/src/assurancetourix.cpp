@@ -226,7 +226,7 @@ void Assurancetourix::detect() {
   auto end_camera = std::chrono::high_resolution_clock::now();
 #endif
 
-  cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
+  //cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
   _frame.convertTo(raised_contrast, -1, contrast, 0);
 
   raised_contrast.copyTo(_anotated);
@@ -335,9 +335,9 @@ void Assurancetourix::_anotate_image(Mat img) {
       }
 
       double x, y, z;
-      x = _tvecs[i].operator[](0) - 0.15;
-      y = _tvecs[i].operator[](1) + 0.15;
-      z = _tvecs[i].operator[](2) - 0.15;
+      x = _tvecs[i].operator[](0);
+      y = _tvecs[i].operator[](1);
+      z = _tvecs[i].operator[](2);
 
       marker.pose.position.x = x;
       marker.pose.position.y = y;
@@ -370,6 +370,7 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
+      tmpPoseOut.pose.position.x += 0.15;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
