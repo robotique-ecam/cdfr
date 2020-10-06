@@ -1,22 +1,25 @@
+!Defaults
+use_sim_time: False
+---
 amcl:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
     robot_model_type: "differential"
 
 
 amcl_map_client:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
 
 
 amcl_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
 
 
 bt_navigator:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
     default_bt_xml_filename: "navigate_w_replanning_time.xml"
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
@@ -42,12 +45,12 @@ bt_navigator:
 
 bt_navigator_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
 
 
 controller_server:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
     controller_frequency: 40.0
     controller_plugins: ["DynamicFollowPath"]
 
@@ -55,19 +58,10 @@ controller_server:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       # Robot footprint
       footprint_model.type: polygon
-      footprint_model.vertices: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
 
       # Goal tolerance
       xy_goal_tolerance: 0.02
       yaw_goal_tolerance: 0.05
-
-      # Robot
-      min_turning_radius: 0.0
-      max_vel_x: 0.678
-      max_vel_x_backwards: 0.678
-      max_vel_theta: 2.0
-      acc_lim_x: 1.0
-      acc_lim_theta: 2.0
 
       # Obstacles
       min_obstacle_dist: 0.01
@@ -75,7 +69,6 @@ controller_server:
       costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 2
-      #weight_obstacle: 100.0
 
       # Homotopy Class Planner
       enable_homotopy_class_planning: True
@@ -98,12 +91,11 @@ controller_server:
 
 controller_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
 
 global_costmap:
   global_costmap:
     ros__parameters:
-      footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
       update_frequency: 5.0
       publish_frequency: 5.0
       global_frame: map
@@ -151,7 +143,7 @@ local_costmap: #just enough parameters to disable it
 
 map_server:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
     yaml_filename: "map.yml"
 
 
@@ -159,7 +151,7 @@ planner_server:
   ros__parameters:
     planner_plugin_types: ["nav2_navfn_planner/NavfnPlanner"]
     planner_plugin_ids: ["GridBased"]
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
     GridBased.tolerance: 0.0
     GridBased.use_astar: false
     GridBased.allow_unknown: true
@@ -167,9 +159,9 @@ planner_server:
 
 planner_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
 
 
 robot_state_publisher:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: !Var use_sim_time
