@@ -15,11 +15,11 @@ class Score:
         phare_raised = False
         pavillon_raised = False
         for action in actions:
-            if action.get('STATUS') == 'FINISHED':
+            if actions[action].get('STATUS') == 'FINISHED':
                 if 'MANCHE' in action:
                     num_manche_air += 1
                 if 'GOB' in action:
-                    if action.get("COLOR") == 'RED':
+                    if actions[action].get("COLOR") == 'RED':
                         num_red_cups += 1
                     else:
                         num_green_cups += 1
