@@ -46,17 +46,18 @@ class Actuators:
         relax = []
         for p in pumps:
             pump = self.PUMPS.get(p)
-            if enabled and pump.get('type') == NC:
-                self.pump_driver.bytes_set([pump.get('pump')])
-            elif enabled and pump.get('type') == NO:
-                self.pump_driver.bytes_set([pump.get('pump'), pump.get('valve')])
-            elif not enabled and pump.get('type') == NC:
-                self.pump_driver.bytes_clear([pump.get('pump')])
-                self.pump_driver.bytes_set([pump.get('valve')])
-                relax.append(pump.get('valve'))
-                self.pump_driver.bytes_clear([pump.get('valve')])
-            elif not enabled and pump.get('type') == NO:
-                self.pump_driver.bytes_clear([pump.get('pump'), pump.get('valve')])
+            if pump is not None:
+                if enabled and pump.get('type') == NC:
+                    self.pump_driver.bytes_set([pump.get('pump')])
+                elif enabled and pump.get('type') == NO:
+                    self.pump_driver.bytes_set([pump.get('pump'), pump.get('valve')])
+                elif not enabled and pump.get('type') == NC:
+                    self.pump_driver.bytes_clear([pump.get('pump')])
+                    self.pump_driver.bytes_set([pump.get('valve')])
+                    relax.append(pump.get('valve'))
+                    self.pump_driver.bytes_clear([pump.get('valve')])
+                elif not enabled and pump.get('type') == NO:
+                    self.pump_driver.bytes_clear([pump.get('pump'), pump.get('valve')])
         # Relax valves to normal state after 100ms minimum delay
         if len(relax) > 0:
             sleep(.1)
