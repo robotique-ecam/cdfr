@@ -20,8 +20,8 @@ asterix:
       use_sim_time: !Var use_sim_time
 
       wheels:
-        separation: 0.244
-        radius: 0.0405
+        separation: !Var wheels_separation
+        radius: !Var wheels_radius
 
       microsteps: !Var microsteps
       steps_per_turn: !Var steps_per_turn
