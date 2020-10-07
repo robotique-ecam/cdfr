@@ -14,7 +14,7 @@ package_name = 'robot'
 
 setup(
     name=package_name,
-    version='0.7.0',
+    version='0.8.1',
     packages=find_packages(),
     data_files=[
         (path.join('share', package_name), ['package.xml']),

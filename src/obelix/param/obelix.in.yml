@@ -89,7 +89,7 @@ obelix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Obelix v0.8.0"
+      banner: "Obelix v0.8.1"
 
 
 controller_server:
