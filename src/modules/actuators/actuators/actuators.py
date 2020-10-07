@@ -19,13 +19,13 @@ class Actuators:
 
     """Actuators base class."""
 
-    def __init__(self, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=None, SERVOS={}):
+    def __init__(self, i2c_bus=5, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=None, SERVOS={}):
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
         self.SERVOS = SERVOS
         self.DYNAMIXELS = DYNAMIXELS
-        self.pump_driver = PumpDriver(addrs=pump_addr)
+        self.pump_driver = PumpDriver(addrs=pump_addr, bus_id=i2c_bus)
         if DYNAMIXELS is not None:
             self.arbotix = Arbotix()
             self._setupDynamixels()

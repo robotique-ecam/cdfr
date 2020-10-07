@@ -9,7 +9,7 @@ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo ap
 
 sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 
-sudo apt update && sudo apt install -y ros-foxy-ros-base ros-foxy-nav2-bringup ros-foxy-cv-bridge ros-foxy-libg2o python3-pykdl python3-rpi.gpio python3-pip i2c-tools libi2c-dev git python3-argcomplete python3-colcon-common-extensions ros-foxy-test-msgs ros-foxy-py-trees-ros-viewer ros-foxy-py-trees-ros ros-foxy-py-trees-ros-interfaces ros-foxy-xacro
+sudo apt update && sudo apt install -y ros-foxy-ros-base ros-foxy-nav2-bringup ros-foxy-cv-bridge ros-foxy-libg2o python3-pykdl python3-smbus python3-rpi.gpio python3-pip i2c-tools libi2c-dev git python3-argcomplete python3-colcon-common-extensions ros-foxy-test-msgs ros-foxy-py-trees-ros-viewer ros-foxy-py-trees-ros ros-foxy-py-trees-ros-interfaces ros-foxy-xacro
 sudo -H pip3 install emrichen hiyapyco
 
 sudo apt remove -y --autoremove snapd unattended-upgrades plymouth
