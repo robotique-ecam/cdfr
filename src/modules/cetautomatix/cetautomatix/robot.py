@@ -35,7 +35,6 @@ class Robot(Node):
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
-        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
@@ -45,6 +44,7 @@ class Robot(Node):
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
