@@ -94,7 +94,7 @@ obelix:
 
 controller_server:
   ros__parameters:
-    DynamicFollowPath.:
+    DynamicFollowPath:
       footprint_model.vertices: !Var footprint
 
       # Robot
