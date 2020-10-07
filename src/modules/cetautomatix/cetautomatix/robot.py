@@ -111,6 +111,12 @@ class Robot(Node):
     def trigger_pavillons(self):
         self.get_logger().info('Triggered pavillons')
         self.actuators.raiseTheFlag()
+        self._change_action_status_request.action = "PAVILLON"
+        self._change_action_status_request.request = 'CONFIRM'
+        response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
+        if response is None:
+            return False
+        return response.success
 
     def _start_robot_callback(self, req, resp):
         """Start robot."""

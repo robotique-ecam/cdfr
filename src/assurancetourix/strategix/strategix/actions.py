@@ -5,7 +5,7 @@ actions = {
     "MANCHE2": {"ONLY_BLUE": True},
     "MANCHE3": {"ONLY_YELLOW": True},
     "MANCHE4": {"ONLY_YELLOW": True},
-    "PAVILLON": {},
+    "PAVILLON": {"STATUS": "PREEMPTED"},
     "ECUEIL_1": {"GOBS": ['GOB35', 'GOB36', 'GOB37', 'GOB38', 'GOB39']},
     "ECUEIL_2": {"GOBS": ['GOB40', 'GOB41', 'GOB42', 'GOB43', 'GOB44']},
     "ECUEIL_JAUNE": {"GOBS": ['GOB30', 'GOB31', 'GOB32', 'GOB33', 'GOB34']},
