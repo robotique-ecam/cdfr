@@ -32,9 +32,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     navigation_params = os.path.join(
         get_package_share_directory('robot'), 'param', 'robot.yml')
     merged_params = hiyapyco.load([navigation_params, robot_params], method=hiyapyco.METHOD_MERGE)
-    p = hiyapyco.dump(merged_params)
-    print(p, flush=True)
-    params.file.write(p)
+    params.file.write(hiyapyco.dump(merged_params))
 
     urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
