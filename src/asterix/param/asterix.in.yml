@@ -5,8 +5,8 @@ max_steps_frequency: 10000
 speedramp_resolution: 128
 microsteps: 16
 steps_per_turn: 200
-wheel_separation: 0.244
-wheel_radius: 0.0405
+wheels_separation: 0.244
+wheels_radius: 0.0405
 min_turning_radius: 0.0
 max_vel_x: 0.4
 max_vel_x_backwards: 0.4
