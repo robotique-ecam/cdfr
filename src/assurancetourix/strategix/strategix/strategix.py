@@ -46,9 +46,9 @@ class StrategixActionServer(Node):
         """Callback function when a robot needs the list of available actions"""
         self.get_logger().info(f'GET {request.sender}')
         if self.side.value == 'blue':
-            response.available = [action for action in actions if not action.get("ONLY_YELLOW") and not action.get("STATUS")]
+            response.available = [action for action in actions if not actions[action].get("ONLY_YELLOW") and not action.get("STATUS")]
         else:
-            response.available = [action for action in actions if not action.get("ONLY_BLUE") and not action.get("STATUS")]
+            response.available = [action for action in actions if not actions[action].get("ONLY_BLUE") and not action.get("STATUS")]
         self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
 
