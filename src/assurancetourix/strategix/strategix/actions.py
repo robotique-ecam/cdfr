@@ -1,46 +1,65 @@
 #!/usr/bin/env python3
 
-
-class Action:
-    def __init__(self, name):
-        self.name = name
-        self.executer = None
-
-    def __repr__(self):
-        return self.name
-
-
-class BonPort(Action):
-    def __init__(self, name):
-        super().__init__(name)
-        self.pos = 'Out'
-
-
-class Ecueil(Action):
-    def __init__(self, name, gobelets):
-        super().__init__(name)
-        self.gobelets = gobelets
-
-
-class Gobelet(Action):
-    def __init__(self, name, color):
-        super().__init__(name)
-        self.color = color
-        self.inChenal = False
-
-
-class MancheAir(Action):
-    def __init__(self, name):
-        super().__init__(name)
-
-
-class Pavillon(Action):
-    def __init__(self, name):
-        super().__init__(name)
-        self.raised = False
-
-
-class Phare(Action):
-    def __init__(self, name):
-        super().__init__(name)
-        self.state = 0
+actions = {
+    "MANCHE1": {"ONLY_BLUE": True},
+    "MANCHE2": {"ONLY_BLUE": True},
+    "MANCHE3": {"ONLY_YELLOW": True},
+    "MANCHE4": {"ONLY_YELLOW": True},
+    "PAVILLON": {},
+    "ECUEIL_1": {"GOBS": ['GOB35', 'GOB36', 'GOB37', 'GOB38', 'GOB39']},
+    "ECUEIL_2": {"GOBS": ['GOB40', 'GOB41', 'GOB42', 'GOB43', 'GOB44']},
+    "ECUEIL_JAUNE": {"GOBS": ['GOB30', 'GOB31', 'GOB32', 'GOB33', 'GOB34']},
+    "ECUEIL_BLEU": {"GOBS": ['GOB25', 'GOB26', 'GOB27', 'GOB28', 'GOB29']},
+    "PHARE_BLEU": {"ONLY_BLUE": True},
+    "PHARE_JAUNE": {"ONLY_YELLOW": True},
+    'GOB2': {"COLOR": "RED"},
+    'GOB3': {"COLOR": "RED"},
+    'GOB5': {"COLOR": "RED"},
+    'GOB7': {"COLOR": "RED"},
+    'GOB9': {"COLOR": "RED"},
+    'GOB11': {"COLOR": "RED"},
+    'GOB13': {"COLOR": "RED"},
+    'GOB15': {"COLOR": "RED"},
+    'GOB17': {"COLOR": "RED"},
+    'GOB19': {"COLOR": "RED"},
+    'GOB22': {"COLOR": "RED"},
+    'GOB23': {"COLOR": "RED"},
+    # Cups in ECUEIL_BLEU:
+    'GOB25': {"COLOR": "RED"},
+    'GOB27': {"COLOR": "RED"},
+    'GOB29': {"COLOR": "RED"},
+    # Cups in ECUEIL_JAUNE:
+    'GOB31': {"COLOR": "RED"},
+    'GOB33': {"COLOR": "RED"},
+    # Cups in ECUEIL_1 & ECUEIL_2 following the Scenario 1:
+    'GOB36': {"COLOR": "RED"},
+    'GOB39': {"COLOR": "RED"},
+    'GOB41': {"COLOR": "RED"},
+    'GOB42': {"COLOR": "RED"},
+    'GOB44': {"COLOR": "RED"},
+    'GOB1': {"COLOR": "GREEN"},
+    'GOB4': {"COLOR": "GREEN"},
+    'GOB6': {"COLOR": "GREEN"},
+    'GOB8': {"COLOR": "GREEN"},
+    'GOB10': {"COLOR": "GREEN"},
+    'GOB12': {"COLOR": "GREEN"},
+    'GOB14': {"COLOR": "GREEN"},
+    'GOB16': {"COLOR": "GREEN"},
+    'GOB18': {"COLOR": "GREEN"},
+    'GOB20': {"COLOR": "GREEN"},
+    'GOB21': {"COLOR": "GREEN"},
+    'GOB24': {"COLOR": "GREEN"},
+    # Cups in ECUEIL_BLEU:
+    'GOB26': {"COLOR": "GREEN"},
+    'GOB28': {"COLOR": "GREEN"},
+    # Cups in ECUEIL_JAUNE:
+    'GOB30': {"COLOR": "GREEN"},
+    'GOB32': {"COLOR": "GREEN"},
+    'GOB34': {"COLOR": "GREEN"},
+    # Cups in ECUEIL_1 & ECUEIL_2 following the Scenario 1:
+    'GOB35': {"COLOR": "GREEN"},
+    'GOB37': {"COLOR": "GREEN"},
+    'GOB38': {"COLOR": "GREEN"},
+    'GOB40': {"COLOR": "GREEN"},
+    'GOB43': {"COLOR": "GREEN"},
+}
