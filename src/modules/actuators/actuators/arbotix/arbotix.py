@@ -186,7 +186,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def setBaud(self, index, baud):
-        return self.write(index, ax12.P_BAUD_RATE, [baud, ])
+        return self.setReg(index, ax12.P_BAUD_RATE, [baud, ])
 
     # @brief Get the return level of a device.
     ##
@@ -195,7 +195,7 @@ class ArbotiX:
     # @return The return level, .
     def getReturnLevel(self, index):
         try:
-            return int(self.read(index, ax12.P_RETURN_LEVEL, 1)[0])
+            return int(self.getReg(index, ax12.P_RETURN_LEVEL, 1)[0])
         except OSError:
             return -1
 
@@ -207,7 +207,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def setReturnLevel(self, index, value):
-        return self.write(index, ax12.P_RETURN_LEVEL, [value])
+        return self.setReg(index, ax12.P_RETURN_LEVEL, [value])
 
     # @brief Turn on the torque of a servo.
     ##
@@ -215,7 +215,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def enableTorque(self, index):
-        return self.write(index, ax12.P_TORQUE_ENABLE, [1])
+        return self.setReg(index, ax12.P_TORQUE_ENABLE, [1])
 
     # @brief Turn on the torque of a servo.
     ##
@@ -223,7 +223,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def disableTorque(self, index):
-        return self.write(index, ax12.P_TORQUE_ENABLE, [0])
+        return self.setReg(index, ax12.P_TORQUE_ENABLE, [0])
 
     # @brief Set the status of the LED on a servo.
     ##
@@ -233,7 +233,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def setLed(self, index, value):
-        return self.write(index, ax12.P_LED, [value])
+        return self.setReg(index, ax12.P_LED, [value])
 
     # @brief Set the position of a servo.
     ##
@@ -243,7 +243,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def setPosition(self, index, value):
-        return self.write(index, ax12.P_GOAL_POSITION_L, [value % 256, value >> 8])
+        return self.setReg(index, ax12.P_GOAL_POSITION_L, [value % 256, value >> 8])
 
     # @brief Set the speed of a servo.
     ##
@@ -253,7 +253,7 @@ class ArbotiX:
     ##
     # @return The error level.
     def setSpeed(self, index, value):
-        return self.write(index, ax12.P_GOAL_SPEED_L, [value % 256, value >> 8])
+        return self.setReg(index, ax12.P_GOAL_SPEED_L, [value % 256, value >> 8])
 
     # @brief Get the position of a servo.
     ##
@@ -261,7 +261,7 @@ class ArbotiX:
     ##
     # @return The servo position.
     def getPosition(self, index):
-        values = self.read(index, ax12.P_PRESENT_POSITION_L, 2)
+        values = self.getReg(index, ax12.P_PRESENT_POSITION_L, 2)
         try:
             return int(values[0]) + (int(values[1]) << 8)
         except OSError:
@@ -273,7 +273,7 @@ class ArbotiX:
     ##
     # @return The servo speed.
     def getSpeed(self, index):
-        values = self.read(index, ax12.P_PRESENT_SPEED_L, 2)
+        values = self.getReg(index, ax12.P_PRESENT_SPEED_L, 2)
         try:
             return int(values[0]) + (int(values[1]) << 8)
         except OSError:
@@ -285,7 +285,7 @@ class ArbotiX:
     ##
     # @return The servo goal speed.
     def getGoalSpeed(self, index):
-        values = self.read(index, ax12.P_GOAL_SPEED_L, 2)
+        values = self.getReg(index, ax12.P_GOAL_SPEED_L, 2)
         try:
             return int(values[0]) + (int(values[1]) << 8)
         except OSError:
@@ -298,7 +298,7 @@ class ArbotiX:
     # @return The voltage, in Volts.
     def getVoltage(self, index):
         try:
-            return int(self.read(index, ax12.P_PRESENT_VOLTAGE, 1)[0]) / 10.0
+            return int(self.getReg(index, ax12.P_PRESENT_VOLTAGE, 1)[0]) / 10.0
         except OSError:
             return -1
 
@@ -309,7 +309,7 @@ class ArbotiX:
     # @return The temperature, in degrees C.
     def getTemperature(self, index):
         try:
-            return int(self.read(index, ax12.P_PRESENT_TEMPERATURE, 1)[0])
+            return int(self.getReg(index, ax12.P_PRESENT_TEMPERATURE, 1)[0])
         except OSError:
             return -1
 
@@ -320,7 +320,7 @@ class ArbotiX:
     # @return True if servo is moving.
     def isMoving(self, index):
         try:
-            d = self.read(index, ax12.P_MOVING, 1)[0]
+            d = self.getReg(index, ax12.P_MOVING, 1)[0]
         except OSError:
             return True
         return d != 0
@@ -329,7 +329,7 @@ class ArbotiX:
     ##
     # @param index The ID of the device to write.
     def enableWheelMode(self, index):
-        self.write(index, ax12.P_CCW_ANGLE_LIMIT_L, [0, 0])
+        self.setReg(index, ax12.P_CCW_ANGLE_LIMIT_L, [0, 0])
 
     # @brief Put a servo into servo mode.
     ##
@@ -341,7 +341,7 @@ class ArbotiX:
     # @return
     def disableWheelMode(self, index, resolution=10):
         resolution = (2 ** resolution) - 1
-        self.write(index, ax12.P_CCW_ANGLE_LIMIT_L, [
+        self.setReg(index, ax12.P_CCW_ANGLE_LIMIT_L, [
                    resolution % 256, resolution >> 8])
 
     # Direction definition for setWheelSpeed
@@ -363,11 +363,11 @@ class ArbotiX:
             speed = 1023
         if direction == self.FORWARD:
             # 0~1023 is forward, it is stopped by setting to 0 while rotating to CCW direction.
-            self.write(index, ax12.P_GOAL_SPEED_L, [speed % 256, speed >> 8])
+            self.setReg(index, ax12.P_GOAL_SPEED_L, [speed % 256, speed >> 8])
         else:
             # 1024~2047 is backward, it is stopped by setting to 1024 while rotating to CW direction.
             speed += 1024
-            self.write(index, ax12.P_GOAL_SPEED_L, [speed % 256, speed >> 8])
+            self.setReg(index, ax12.P_GOAL_SPEED_L, [speed % 256, speed >> 8])
 
     ###########################################################################
     # Extended ArbotiX Driver
@@ -402,7 +402,7 @@ class ArbotiX:
 
     # @brief Force the ArbotiX2 to rescan the Dynamixel busses.
     def rescan(self):
-        self.write(253, self.REG_RESCAN, [1, ])
+        self.setReg(253, self.REG_RESCAN, [1, ])
 
     # @brief Get the value of an analog input pin.
     ##
@@ -413,7 +413,7 @@ class ArbotiX:
     # @return 8-bit/16-bit analog value of the pin, -1 if error.
     def getAnalog(self, index, leng=1):
         try:
-            val = self.read(253, self.ANA_BASE + int(index), leng)
+            val = self.getReg(253, self.ANA_BASE + int(index), leng)
             return sum(val[i] << (i * 8) for i in range(leng))
         except OSError:
             return -1
@@ -426,7 +426,7 @@ class ArbotiX:
     def getDigital(self, index):
         try:
             if index < 32:
-                x = self.read(253, self.REG_DIGITAL_IN0 + int(index / 8), 1)[0]
+                x = self.getReg(253, self.REG_DIGITAL_IN0 + int(index / 8), 1)[0]
             else:
                 return -1
         except OSError:
@@ -449,13 +449,13 @@ class ArbotiX:
         if index > 31:
             return -1
         if value == 0 and direction > 0:
-            self.write(253, self.REG_DIGITAL_OUT0 + int(index), [1])
+            self.setReg(253, self.REG_DIGITAL_OUT0 + int(index), [1])
         elif value > 0 and direction > 0:
-            self.write(253, self.REG_DIGITAL_OUT0 + int(index), [3])
+            self.setReg(253, self.REG_DIGITAL_OUT0 + int(index), [3])
         elif value > 0 and direction == 0:
-            self.write(253, self.REG_DIGITAL_OUT0 + int(index), [2])
+            self.setReg(253, self.REG_DIGITAL_OUT0 + int(index), [2])
         else:
-            self.write(253, self.REG_DIGITAL_OUT0 + int(index), [0])
+            self.setReg(253, self.REG_DIGITAL_OUT0 + int(index), [0])
         return 0
 
     # @brief Set the position of a hobby servo.
@@ -472,6 +472,7 @@ class ArbotiX:
         if value != 0 and (value < 500 or value > 2500):
             print('ArbotiX Error: Servo value out of range:', value)
         else:
-            self.write(253, self._SERVO_BASE + 2 *
+            self.setReg
+(253, self._SERVO_BASE + 2 *
                        index, [value % 256, value >> 8])
         return 0
