@@ -58,47 +58,42 @@ class ArbotiX:
     # increase this.
     ##
     # @param open Whether to open immediately the serial port.
-    def __init__(self, port='/dev/ttyUSB0', baud=115200, timeout=0.1, open_port=True):
-        self._mutex = RLock()
-        self._ser = serial.Serial()
-
-        self._ser.port = port
-        self._ser.baudrate = baud
-        self._ser.timeout = timeout
-
-        if open_port:
-            self._ser.open()
-
-        # The last error level read back
+    def __init__(self, port="/dev/ttyUSB0", baud=115200, interpolation=False, direct=False):
+        """ This may throw errors up the line -- that's a good thing. """
+        self.ser = serial.Serial()
+        self.ser.baudrate = baud
+        self.ser.port = port
+        self.ser.timeout = 0.5
+        self.ser.open()
         self.error = 0
+        self.hasInterpolation = interpolation
+        self.direct = direct
 
-    def __write__(self, msg):
-        try:
-            self._ser.write(msg.encode())
-        except serial.SerialException as e:
-            self._mutex.release()
-            raise ArbotiXException(e)
+    def execute(self, index, ins, params):
+        """ Send an instruction to a device."""
+        self.ser.flushInput()
+        packet = bytes()
+        length = 2 + len(params)
+        checksum = 255 - ((index + length + ins + sum(params)) % 256)
+        packet += bytes([0xFF, 0xFF, index, length, ins])
+        for val in params:
+            packet += bytes([val])
+        packet += bytes([checksum])
+        self.ser.write(packet)
+        return self.getPacket(0)
 
-    def openPort(self):
-        self._ser.close()
-        try:
-            self._ser.open()
-        except serial.SerialException as e:
-            raise ArbotiXException(e)
+    def setReg(self, index, regstart, values):
+        """ Set the value of registers. Should be called as such:
+        ax12.setReg(1,1,(0x01,0x05)) """
+        self.execute(index, ax12.AX_WRITE_DATA, [regstart] + values)
+        return self.error
 
-    def closePort(self):
-        self._ser.close()
-
-    # @brief Read a dynamixel return packet in an iterative attempt.
-    ##
-    # @param mode This should be 0 to start reading packet.
-    ##
-    # @return The error level returned by the device.
     def getPacket(self, mode, id=-1, leng=-1, error=-1, params=None):
         """ Read a return packet, iterative attempt """
         # need a positive byte
-        b = self._ser.read()
+        b = self.ser.read()
         if b == b'':
+            print("Fail Read")
             return None
 
         d = b[0]
@@ -123,9 +118,9 @@ class ArbotiX:
         elif mode == 4:         # read error
             self.error = d
             if leng == 2:
-                return self.getPacket(6, id, leng, d, list())
+                return self.getPacket(6, id, leng, d, [])
             else:
-                return self.getPacket(5, id, leng, d, list())
+                return self.getPacket(5, id, leng, d, [])
         elif mode == 5:         # read params
             params.append(d)
             if len(params) + 2 == leng:
@@ -140,93 +135,36 @@ class ArbotiX:
         # fail
         return None
 
-    # @brief Send an instruction to the device.
-    ##
-    # @param index The ID of the servo to write.
-    ##
-    # @param ins The instruction to send.
-    ##
-    # @param params A list of the params to send.
-    ##
-    # @param ret Whether to read a return packet.
-    ##
-    # @return The return packet, if read.
-    def execute(self, index, ins, params, ret=True):
-        values = None
-        self._mutex.acquire()
-        try:
-            self._ser.flushInput()
-        except Exception as e:
-            print(e)
-        length = 2 + len(params)
-        checksum = 255 - ((index + length + ins + sum(params)) % 256)
-        self.__write__(chr(0xFF) + chr(0xFF) +
-                       chr(index) + chr(length) + chr(ins))
-        for val in params:
-            self.__write__(chr(val))
-        self.__write__(chr(checksum))
-        if ret:
-            values = self.getPacket(0)
-        self._mutex.release()
-        return values
-
-    # @brief Read values of registers.
-    ##
-    # @param index The ID of the servo.
-    ##
-    # @param start The starting register address to begin the read at.
-    ##
-    # @param length The number of bytes to read.
-    ##
-    # @return A list of the bytes read, or -1 if failure.
-    def read(self, index, start, length):
-        values = self.execute(index, ax12.AX_READ_DATA, [start, length])
-        if values is None:
+    def getReg(self, index, regstart, rlength):
+        """Get the value of registers, should be called as such:
+        ax12.getReg(1,1,1)."""
+        vals = self.execute(index, ax12.AX_READ_DATA, [regstart, rlength])
+        if vals is None:
             return -1
-        else:
-            return values
+        if rlength == 1:
+            return vals[0]
+        return vals
 
-    # @brief Write values to registers.
-    ##
-    # @param index The ID of the servo.
-    ##
-    # @param start The starting register address to begin writing to.
-    ##
-    # @param values The data to write, in a list.
-    ##
-    # @return The error level.
-    def write(self, index, start, values):
-        self.execute(index, ax12.AX_WRITE_DATA, [start] + values)
-        return self.error
-
-    # @brief Write values to registers on many servos.
-    ##
-    # @param start The starting register address to begin writing to.
-    ##
-    # @param values The data to write, in a list of lists. Format should be
-    # [(id1, val1, val2), (id2, val1, val2)]
-    def syncWrite(self, start, values):
-        output = []
-        for i in values:
-            output = output + i
-        length = len(output) + 4                # length of overall packet
-        # length of bytes to write to a servo
-        lbytes = len(values[0]) - 1
-        self._mutex.acquire()
-        try:
-            self._ser.flushInput()
-        except OSError:
-            pass
-        self.__write__(chr(0xFF) + chr(0xFF) + chr(254) +
-                       chr(length) + chr(ax12.AX_SYNC_WRITE))
-        self.__write__(chr(start))              # start address
-        self.__write__(chr(lbytes))             # bytes to write each servo
-        for i in output:
-            self.__write__(chr(i))
+    def syncWrite(self, regstart, vals):
+        """Set the value of registers. Should be called as such:
+        ax12.syncWrite(reg, ((id1, val1, val2), (id2, val1, val2))) """
+        self.ser.flushInput()
+        length = 4
+        valsum = 0
+        packet = ""
+        for i in vals:
+            length = length + len(i)
+            valsum = valsum + sum(i)
         checksum = 255 - ((254 + length + ax12.AX_SYNC_WRITE +
-                           start + lbytes + sum(output)) % 256)
-        self.__write__(chr(checksum))
-        self._mutex.release()
+                           regstart + len(vals[0]) - 1 + valsum) % 256)
+        # packet: FF FF ID LENGTH INS(0x03) PARAM .. CHECKSUM
+        packet += chr(0xFF) + chr(0xFF) + chr(0xFE) + chr(length) + chr(ax12.AX_SYNC_WRITE) + chr(regstart) + chr(len(vals[0]) - 1)
+        for servo in vals:
+            for value in servo:
+                packet += chr(value)
+        packet += chr(checksum)
+        self.ser.write(packet.encode())
+        # no return info...
 
     # @brief Read values of registers on many servos.
     ##
