@@ -97,9 +97,8 @@ class ArbotiX:
     def getPacket(self, mode, id=-1, leng=-1, error=-1, params=None):
         """ Read a return packet, iterative attempt """
         # need a positive byte
-        b = self.ser.read()
+        b = self._ser.read()
         if b == b'':
-            print("Fail Read")
             return None
 
         d = b[0]
