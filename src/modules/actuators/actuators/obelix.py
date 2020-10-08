@@ -40,5 +40,6 @@ actuators = Actuators(
     pump_addr=[0x40, 0x41],
     FANS=FANS,
     PUMPS=PUMPS,
-    SERVOS=SERVOS
+    SERVOS=SERVOS,
+    DYNAMIXELS=DYNAMIXELS
 )

@@ -34,6 +34,7 @@
 from threading import RLock
 
 import serial
+
 from actuators.arbotix import ax12
 
 # @brief ArbotiX errors. Used by now to handle broken serial connections.
@@ -94,47 +95,46 @@ class ArbotiX:
     ##
     # @return The error level returned by the device.
     def getPacket(self, mode, id=-1, leng=-1, error=-1, params=None):
-        try:
-            d = self._ser.read()
-        except Exception as e:
-            print(e)
-            return None
+        """ Read a return packet, iterative attempt """
         # need a positive byte
-        if d == '':
+        b = self.ser.read()
+        if b == b'':
+            print("Fail Read")
             return None
 
+        d = b[0]
         # now process our byte
         if mode == 0:           # get our first 0xFF
-            if ord(d) == 0xff:
+            if d == 0xff:
                 return self.getPacket(1)
             else:
                 return self.getPacket(0)
         elif mode == 1:         # get our second 0xFF
-            if ord(d) == 0xff:
+            if d == 0xff:
                 return self.getPacket(2)
             else:
                 return self.getPacket(0)
         elif mode == 2:         # get id
             if d != 0xff:
-                return self.getPacket(3, ord(d))
+                return self.getPacket(3, d)
             else:
                 return self.getPacket(0)
         elif mode == 3:         # get length
-            return self.getPacket(4, id, ord(d))
+            return self.getPacket(4, id, d)
         elif mode == 4:         # read error
-            self.error = ord(d)
+            self.error = d
             if leng == 2:
-                return self.getPacket(6, id, leng, ord(d), [])
+                return self.getPacket(6, id, leng, d, list())
             else:
-                return self.getPacket(5, id, leng, ord(d), [])
+                return self.getPacket(5, id, leng, d, list())
         elif mode == 5:         # read params
-            params.append(ord(d))
+            params.append(d)
             if len(params) + 2 == leng:
                 return self.getPacket(6, id, leng, error, params)
             else:
                 return self.getPacket(5, id, leng, error, params)
         elif mode == 6:         # read checksum
-            checksum = id + leng + error + sum(params) + ord(d)
+            checksum = id + leng + error + sum(params) + d
             if checksum % 256 != 255:
                 return None
             return params

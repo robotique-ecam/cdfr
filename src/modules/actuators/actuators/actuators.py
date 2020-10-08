@@ -27,7 +27,7 @@ class Actuators:
         self.DYNAMIXELS = DYNAMIXELS
         self.pump_driver = PumpDriver(addrs=pump_addr, bus_id=i2c_bus)
         if DYNAMIXELS is not None:
-            self.arbotix = Arbotix()
+            self.arbotix = ArbotiX()
             self._setupDynamixels()
 
     def _setupDynamixels(self):
