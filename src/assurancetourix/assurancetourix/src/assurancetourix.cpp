@@ -4,7 +4,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-  transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("get_transform");
+  transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("transformix/get_transform");
   getTransformation(assurancetourix_to_map_transformation);
 
 
@@ -51,7 +51,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-
+  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this));
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 

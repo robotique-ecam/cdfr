@@ -1,6 +1,6 @@
 #include <transformix.hpp>
 
-Transformix::Transformix() : Node("Transformix") {
+Transformix::Transformix() : Node("transformix", "transformix") {
   RCLCPP_INFO(rclcpp::get_logger("transformix"), "Starting the services...");
 
   service_all = this->create_service<transformix_msgs::srv::TransformixParameters>("transform_poseStamped", &generate_buffer_and_transform_my_pose_stamped);
