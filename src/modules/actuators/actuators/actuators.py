@@ -80,15 +80,13 @@ class Actuators:
             if servo in self.DYNAMIXELS:
                 servos.append(servo)
                 positions.append(self.DYNAMIXELS[servo].get('down'))
-        self.setDynamixelsPositions(servos, positions, disableTorque=True)
+        self.setDynamixelsPositions(servos, positions)
         self.setPumpsEnabled(False, ports)
 
-    def setDynamixelsPositions(self, addrs: list, positions: list, disableTorque=False):
+    def setDynamixelsPositions(self, addrs: list, positions: list):
         """Set list of pumps as enabled or not."""
         for addr, position in zip(addrs, positions):
             self.arbotix.setPosition(addr, position)
-            if disableTorque:
-                self.arbotix.disableTorque(addr)
 
     def setFansEnabled(self, enabled: bool):
         """Set fans on and off."""
