@@ -10,9 +10,6 @@ from .arbotix.arbotix import ArbotiX
 from .pumps.pumps import PumpDriver
 
 NO, NC = False, True
-DYNA_UP, DYNA_DOWN = 950, 800
-
-DYNAMIXELS_SPEED = 100
 
 
 class Actuators:
@@ -33,8 +30,9 @@ class Actuators:
     def _setupDynamixels(self):
         """Setup dynamixels speed."""
         for dyna in self.DYNAMIXELS:
-            self.arbotix.setSpeed(dyna, DYNAMIXELS_SPEED)
-            self.arbotix.setPosition(dyna, DYNA_DOWN)
+            d = self.DYNAMIXELS[dyna]
+            self.arbotix.setSpeed(dyna, d.get('speed'))
+            self.arbotix.setPosition(dyna, d.get('down'))
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""

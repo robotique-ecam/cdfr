@@ -536,5 +536,5 @@ class ArbotiX:
         if value != 0 and (value < 500 or value > 2500):
             print('ArbotiX Error: Servo value out of range:', value)
         else:
-            self.write(253, self._SERVO_BASE + 2 * index, [value % 256, value >> 8])
+            self.write(253, self.SERVO_BASE + 2 * index, [value % 256, value >> 8])
         return 0
