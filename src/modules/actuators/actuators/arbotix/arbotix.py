@@ -106,6 +106,9 @@ class ArbotiX:
         if d == b'':
             return None
 
+        # Need int, not byte
+        d = d[0]
+
         # now process our byte
         if mode == 0:           # get our first 0xFF
             if d == 0xff:
@@ -131,7 +134,7 @@ class ArbotiX:
             else:
                 return self.getPacket(5, id, leng, d, [])
         elif mode == 5:         # read params
-            params.append(ord(d))
+            params.append(d)
             if len(params) + 2 == leng:
                 return self.getPacket(6, id, leng, error, params)
             else:
@@ -382,7 +385,7 @@ class ArbotiX:
     # @return True if servo is moving.
     def isMoving(self, index):
         try:
-            d = self.read(index, P_MOVING, 1)[0]
+            d = self.read(index, ax12.P_MOVING, 1)[0]
         except BaseException:
             return True
         return d != 0
@@ -391,7 +394,7 @@ class ArbotiX:
     ##
     # @param index The ID of the device to write.
     def enableWheelMode(self, index):
-        self.write(index, P_CCW_ANGLE_LIMIT_L, [0, 0])
+        self.write(index, ax12.P_CCW_ANGLE_LIMIT_L, [0, 0])
 
     # @brief Put a servo into servo mode.
     ##
