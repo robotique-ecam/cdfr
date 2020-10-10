@@ -8,7 +8,7 @@ from actuators.actuators import NC, NO, Actuators
 
 
 DYNA_UP = 290
-DYNA_DOWN = 370
+DYNA_DOWN = 380
 DYNA_SPEED = 120
 
 

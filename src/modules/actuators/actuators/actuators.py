@@ -33,7 +33,6 @@ class Actuators:
             d = self.DYNAMIXELS[dyna]
             self.arbotix.setSpeed(dyna, d.get('speed'))
             self.arbotix.setPosition(dyna, d.get('down'))
-            self.arbotix.disableTorque(dyna)
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
