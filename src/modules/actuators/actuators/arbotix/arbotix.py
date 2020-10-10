@@ -164,10 +164,11 @@ class ArbotiX:
             print(e)
         length = 2 + len(params)
         checksum = 255 - ((index + length + ins + sum(params)) % 256)
-        self.__write__(pack('H3B', 0xFFFF, index, length, ins))
+        packet = bytes([0xFF, 0xFF, index, length, ins])
         for val in params:
-            self.__write__(pack('B', val))
-        self.__write__(pack('B', checksum))
+            packet += bytes([val])
+        packet += bytes([checksum])
+        self.__write__(packet)
         if ret:
             values = self.getPacket(0)
         self._mutex.release()
@@ -219,13 +220,12 @@ class ArbotiX:
             self.ser.flushInput()
         except BaseException:
             pass
-        self.__write__(pack('H3B', 0xFFFF, 254, length, ax12.AX_SYNC_WRITE))
-        self.__write__(pack('B', start))              # start address
-        self.__write__(pack('B', lbytes))             # bytes to write each servo
+        packet = bytes([0xFF, 0xFF, 254, length, ax12.AX_SYNC_WRITE, start, lbytes])
         for i in output:
-            self.__write__(pack('B', i))
+            packet += bytes([i])
         checksum = 255 - ((254 + length + ax12.AX_SYNC_WRITE + start + lbytes + sum(output)) % 256)
-        self.__write__(pack('B', checksum))
+        packet += bytes([checksum])
+        self.__write__(packet)
         self._mutex.release()
 
     # @brief Read values of registers on many servos.
