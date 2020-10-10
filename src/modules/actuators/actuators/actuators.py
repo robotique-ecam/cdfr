@@ -33,6 +33,7 @@ class Actuators:
             d = self.DYNAMIXELS[dyna]
             self.arbotix.setSpeed(dyna, d.get('speed'))
             self.arbotix.setPosition(dyna, d.get('down'))
+            self.arbotix.disableTorque(dyna)
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
@@ -61,10 +62,33 @@ class Actuators:
             sleep(.1)
             self.pump_driver.bytes_clear(relax)
 
-    def setDynamixelsPositions(self, addrs: list, positions: list):
+    def grabCups(self, ports: list):
+        """Grab cups at specified indexes."""
+        self.setPumpsEnabled(True, ports)
+        sleep(.5)
+        positions, servos = [], []
+        for servo in ports:
+            if servo in self.DYNAMIXELS:
+                servos.append(servo)
+                positions.append(self.DYNAMIXELS[servo].get('up'))
+        self.setDynamixelsPositions(servos, positions)
+
+    def dropCups(self, ports: list):
+        """Drop cups at specified indexes."""
+        positions, servos = [], []
+        for servo in ports:
+            if servo in self.DYNAMIXELS:
+                servos.append(servo)
+                positions.append(self.DYNAMIXELS[servo].get('down'))
+        self.setDynamixelsPositions(servos, positions, disableTorque=True)
+        self.setPumpsEnabled(False, ports)
+
+    def setDynamixelsPositions(self, addrs: list, positions: list, disableTorque=False):
         """Set list of pumps as enabled or not."""
         for addr, position in zip(addrs, positions):
             self.arbotix.setPosition(addr, position)
+            if disableTorque:
+                self.arbotix.disableTorque(addr)
 
     def setFansEnabled(self, enabled: bool):
         """Set fans on and off."""
