@@ -25,6 +25,7 @@
 
 #define STEPPER_LEFT 1
 #define STEPPER_RIGHT 2
+#define STEPPER_CMD -128
 
 using namespace rclcpp;
 using namespace std::chrono;

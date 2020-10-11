@@ -244,10 +244,10 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
 #ifndef SIMULATION
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(0xFF, (uint8_t) request->data);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t) 1 << 4 | request->data);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(0xFF, (uint8_t) request->data);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t) 1 << 4 | request->data);
 #endif
 
   if (request->data) {
