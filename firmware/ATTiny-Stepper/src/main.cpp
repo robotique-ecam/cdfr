@@ -14,10 +14,10 @@
 #endif
 
 #ifdef OBELIX
-// #define I2C_ADDR 0x10
-// #define INVERT 0
-#define I2C_ADDR 0x11
-#define INVERT 1
+#define I2C_ADDR 0x10
+#define INVERT 0
+// #define I2C_ADDR 0x11
+// #define INVERT 1
 #endif
 
 #define PIN_DIR 4
