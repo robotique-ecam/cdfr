@@ -9,6 +9,7 @@
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
 #endif
+#include "std_srvs/srv/set_bool.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -24,6 +25,7 @@
 
 #define STEPPER_LEFT 1
 #define STEPPER_RIGHT 2
+#define STEPPER_CMD -128
 
 using namespace rclcpp;
 using namespace std::chrono;
@@ -92,6 +94,9 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
+  // Steppers disable service
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
+
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
@@ -151,6 +156,8 @@ private:
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
+  void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                             const std_srvs::srv::SetBool::Response::SharedPtr response);
 
 #ifdef SIMULATION
   void sim_step();

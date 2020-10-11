@@ -15,6 +15,8 @@ uint16_t I2C::read_word(uint8_t cmd) { return i2c_smbus_read_word_data(i2c_fd_, 
 
 void I2C::write_byte(uint8_t cmd) { i2c_smbus_write_byte(i2c_fd_, cmd); }
 
+void I2C::write_byte_data(uint8_t cmd, uint8_t val) { i2c_smbus_write_byte_data(i2c_fd_, cmd, val); }
+
 uint8_t I2C::bus_read(uint8_t *buff, uint8_t lenght) { return (read(i2c_fd_, buff, lenght) == lenght) ? 0 : 1; }
 
 uint8_t I2C::bus_write(uint8_t *buff, uint8_t lenght) { return (write(i2c_fd_, buff, lenght) == lenght) ? 0 : 1; }
