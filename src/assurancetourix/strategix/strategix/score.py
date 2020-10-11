@@ -1,4 +1,4 @@
-from cetautomatix.magic_points import elements, RED_CUPS, GREEN_CUPS
+from cetautomatix.magic_points import GREEN_CUPS, RED_CUPS, elements
 from strategix.actions import Ecueil, Gobelet, MancheAir, Pavillon, Phare
 
 

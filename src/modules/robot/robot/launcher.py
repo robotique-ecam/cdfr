@@ -7,8 +7,10 @@
 import os
 import tempfile
 
-import launch
+import hiyapyco
 from ament_index_python.packages import get_package_share_directory
+
+import launch
 from launch.actions import (DeclareLaunchArgument, GroupAction,
                             IncludeLaunchDescription)
 from launch.conditions import IfCondition
@@ -29,9 +31,8 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
     navigation_params = os.path.join(
         get_package_share_directory('robot'), 'param', 'robot.yml')
-    with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
-        for f in (r, n):
-            params.file.write(f.read())
+    merged_params = hiyapyco.load([navigation_params, robot_params], method=hiyapyco.METHOD_MERGE)
+    params.file.write(hiyapyco.dump(merged_params))
 
     urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
@@ -104,11 +105,10 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             ),
 
             Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
+                package='localisation',
+                executable='localisation',
                 output='screen',
                 parameters=[params.name],
-                arguments=['0.29', '1.33', '0', '0', '0', '0', 'map', 'odom'],
                 remappings=remappings,
             ),
 

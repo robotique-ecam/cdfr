@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>transformix</name>
-  <version>0.7.0</version>
+  <version>0.8.1</version>
   <description>Transformix package</description>
   <maintainer email="phileas.lambert@gmail.com">Phileas LAMBERT</maintainer>
   <license>Club Robotique ECAM :: CDFR 2020</license>

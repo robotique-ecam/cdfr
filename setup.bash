@@ -25,6 +25,19 @@ function generate_urdfs {
     fi
 }
 
+function generate_yamls {
+    python3 tools/compute_robots_kinematics.py
+    emrichen -f obelix.vars --output-file src/obelix/param/obelix.yml src/obelix/param/obelix.in.yml
+    emrichen -f asterix.vars --output-file src/asterix/param/asterix.yml src/asterix/param/asterix.in.yml
+    emrichen --output-file src/modules/robot/param/robot.yml src/modules/robot/param/robot.in.yml
+    if [[ $? -eq 0 ]]; then
+        print_success "Generated YAMLs files from templates"
+        return 0
+    else
+        print_failure "Failled to generate YAMLs"
+        exit 1
+    fi
+}
 
 if [ -n "$1" ]; then
     robot=$1
@@ -35,15 +48,15 @@ fi
 
 if [ $robot = "asterix" ] || [ $robot = "obelix" ]; then
     print_info "Setting up $robot"
-    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix strategix pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix strategix panoramix transformix transformix_msgs pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "assurancetourix" ]; then
     print_info "Setting up $robot"
-    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix pharaon_msgs pharaon assurancetourix && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix pharaon_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
-    generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation-core" ]; then
     print_info "Setting up simulation environment"
@@ -53,7 +66,8 @@ elif [ $robot = "simulation-core" ]; then
 
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer jarvis_planner && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
     print_info "Linking webots controllers"
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 
-"""I2C Interface ROS::2 package build tool."""
+"""Robot localisation module."""
 
 
 from os import path
 from setuptools import setup, find_packages
 
 
-package_name = 'strategix'
+package_name = 'localisation'
 
 
 setup(
@@ -26,11 +26,11 @@ setup(
     maintainer='Ewen BRUN',
     maintainer_email='ewen.brun@ecam.fr',
     keywords=['ROS2', '', 'CDFR'],
-    description='Code node strategix.',
+    description='Code node cetautomatix.',
     license='ECAM Makers :: CDFR 2020',
     entry_points={
         'console_scripts': [
-            'strategix = strategix.strategix:main',
+            'localisation = localisation.localisation_node:main',
         ],
     },
 )

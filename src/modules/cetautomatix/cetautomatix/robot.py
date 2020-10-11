@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 
+from importlib import import_module
+
 import numpy as np
 
 import py_trees
@@ -20,7 +22,8 @@ from tf2_ros.buffer import Buffer
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
-        robot = self.get_namespace()
+        robot = self.get_namespace().strip('/')
+        self.actuators = import_module(f'actuators.{robot}').actuators
         self.position = (0.29, 1.33)
         self.length = 0.26
         self.width = 0.2
@@ -32,7 +35,6 @@ class Robot(Node):
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
-        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
@@ -42,6 +44,7 @@ class Robot(Node):
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
@@ -61,6 +64,8 @@ class Robot(Node):
 
     def preempt_action(self, action):
         """Preempt an action for the BT."""
+        if action is None:
+            return False
         self._change_action_status_request.action = str(action)
         self._change_action_status_request.request = 'PREEMPT'
         response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
@@ -104,8 +109,8 @@ class Robot(Node):
             return True
 
     def trigger_pavillons(self):
-        # TODO
         self.get_logger().info('Triggered pavillons')
+        self.actuators.raiseTheFlag()
 
     def _start_robot_callback(self, req, resp):
         """Start robot."""

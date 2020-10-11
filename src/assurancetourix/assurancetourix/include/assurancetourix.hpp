@@ -28,6 +28,7 @@
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>
 #endif
+#include "std_srvs/srv/set_bool.hpp"
 
 using namespace rclcpp;
 using namespace cv;
@@ -47,9 +48,13 @@ private:
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
 
 #ifdef MIPI_CAMERA
+  //service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
+  void handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                         const std_srvs::srv::SetBool::Response::SharedPtr response);
   arducam::CAMERA_INSTANCE camera_instance;
   void get_image();
   int width, height;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
 #endif
 
 #ifdef EXTERN_CAMERA
@@ -71,8 +76,8 @@ private:
 
   std::vector<cv::Vec3d> _rvecs, _tvecs;
 
-  double mat_dist_coeffs[1][5] = {{-0.05507153604545092, -0.036754144220704506, 0.004500420597462287, -0.01843020862512126, 0.017075316951618093}};
-  double mat_camera_matrix_coeff[3][3] = {{978.2290511854844, 0.0, 722.0173011119409}, {0.0, 982.4076393453565, 653.1296070005849}, {0.0, 0.0, 1.0}};
+  double mat_dist_coeffs[1][5] = {{0.5 * -0.05507153604545092, -0.036754144220704506, 0.004500420597462287, -0.01843020862512126, 0.017075316951618093}};
+  double mat_camera_matrix_coeff[3][3] = {{1.2 * 978.2290511854844, 0.0, 1.2 * 722.0173011119409}, {0.0, 1.2 * 982.4076393453565, 1.2 * 653.1296070005849}, {0.0, 0.0, 1.0}};
 
   cv::Mat _distCoeffs = Mat(5, 1, CV_64F, mat_dist_coeffs);
   cv::Mat _cameraMatrix = Mat(3, 3, CV_64F, mat_camera_matrix_coeff);

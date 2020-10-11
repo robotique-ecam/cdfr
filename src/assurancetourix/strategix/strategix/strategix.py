@@ -3,14 +3,15 @@
 
 """Strategix action server and score counter."""
 
+from threading import Thread
+
 import rclpy
+from lcd_msgs.msg import Lcd
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
 from strategix.exceptions import MatchStartedException
 from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
-from lcd_msgs.msg import Lcd
-from threading import Thread
 
 
 class StrategixActionServer(Node):
@@ -31,7 +32,7 @@ class StrategixActionServer(Node):
         try:
             for param in params:
                 if param.name == 'side':
-                    self.get_logger().info(f'Side changed {param.value}')
+                    self.get_logger().warn(f'Side changed {param.value}')
                     self.side = param
                 else:
                     setattr(self, param.name, param)

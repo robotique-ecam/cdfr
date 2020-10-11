@@ -7,6 +7,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("get_transform");
   getTransformation(assurancetourix_to_map_transformation);
 
+
 #ifdef MIPI_CAMERA
 
   RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
@@ -21,6 +22,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
   arducam::arducam_software_auto_white_balance(camera_instance, 1);
   arducam::arducam_manual_set_awb_compensation(rgain, bgain);
+
+  timer_ = NULL;
+
+  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>("enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 #endif // MIPI_CAMERA
 
@@ -47,12 +52,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
 
-#ifdef MIPI_CAMERA
-  timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
-#endif // MIPI_CAMERA
-
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
+
+
 
 #ifdef MIPI_CAMERA
 // image capture trough mipi_camera
@@ -69,6 +72,23 @@ void Assurancetourix::get_image() {
     _frame = *image;
     delete image;
   }
+}
+
+//service enabling/disabling aruco detection, enabled by default
+//service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
+void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                                  const std_srvs::srv::SetBool::Response::SharedPtr response) {
+
+  if (request->data) {
+    timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this));
+    response->message = "Aruco detection is enabled";
+    RCLCPP_WARN(this->get_logger(), "Aruco detection is enabled");
+  } else {
+    timer_ = NULL;
+    response->message = "Aruco detection is disabled";
+    RCLCPP_WARN(this->get_logger(), "Aruco detection is disabled");
+  }
+  response->success = true;
 }
 #endif // MIPI_CAMERA
 
@@ -206,7 +226,7 @@ void Assurancetourix::detect() {
   auto end_camera = std::chrono::high_resolution_clock::now();
 #endif
 
-  cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
+  //cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
   _frame.convertTo(raised_contrast, -1, contrast, 0);
 
   raised_contrast.copyTo(_anotated);
@@ -315,9 +335,9 @@ void Assurancetourix::_anotate_image(Mat img) {
       }
 
       double x, y, z;
-      x = _tvecs[i].operator[](0) - 0.15;
-      y = _tvecs[i].operator[](1) + 0.15;
-      z = _tvecs[i].operator[](2) - 0.15;
+      x = _tvecs[i].operator[](0);
+      y = _tvecs[i].operator[](1);
+      z = _tvecs[i].operator[](2);
 
       marker.pose.position.x = x;
       marker.pose.position.y = y;
@@ -350,6 +370,7 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
+      tmpPoseOut.pose.position.x += 0.15;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
