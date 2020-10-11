@@ -95,6 +95,9 @@ private:
   visualization_msgs::msg::Marker transformed_marker;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_;
 
+  rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
+
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
   // Parameters
@@ -103,7 +106,7 @@ private:
   uint rgain, bgain, robot_type, game_element_type;
   double contrast;
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale;
-  std::string base_frame, header_frame_id, topic_for_gradient_layer;
+  std::string base_frame, header_frame_id, topic_for_gradient_layer, side;
 
   rclcpp::Client<transformix_msgs::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;
 };

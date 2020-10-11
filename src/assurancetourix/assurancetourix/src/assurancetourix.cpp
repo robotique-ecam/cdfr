@@ -4,6 +4,28 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
+  auto on_parameter_event_callback =
+    [this](const rcl_interfaces::msg::ParameterEvent::SharedPtr event) -> void
+    {
+
+      for (auto & new_parameter : event->new_parameters) {
+        if (new_parameter.name == "side" && (new_parameter.value.string_value == "blue" || new_parameter.value.string_value == "yellow")){
+          RCLCPP_INFO(this->get_logger(), "new_parameter from node %s, side = %s \n", event->node.c_str(), new_parameter.value.string_value.c_str());
+          side = new_parameter.value.string_value;
+        }
+      }
+
+      for (auto & changed_parameter : event->changed_parameters) {
+        if (changed_parameter.name == "side" && (changed_parameter.value.string_value == "blue" || changed_parameter.value.string_value == "yellow")){
+          RCLCPP_INFO(this->get_logger(), "changed_parameter from node %s, side = %s \n", event->node.c_str(), changed_parameter.value.string_value.c_str());
+          side = changed_parameter.value.string_value;
+        }
+      }
+    };
+
+  parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
+  parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
+
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("transformix/get_transform");
   getTransformation(assurancetourix_to_map_transformation);
 
@@ -51,11 +73,9 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this));
+  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
-
-
 
 #ifdef MIPI_CAMERA
 // image capture trough mipi_camera
@@ -162,6 +182,7 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.lifetime_nano_sec");
   this->declare_parameter("rviz_settings.header_frame_id");
   this->declare_parameter("topic_for_gradient_layer");
+  this->declare_parameter("side");
 
   this->get_parameter_or<double>("image.contrast", contrast, 1.2);
   this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_ArUco", blue_color_ArUco, {0.0, 0.0, 255.0});
@@ -175,6 +196,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
   this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "default_topic_for_gradient_layer");
+  this->get_parameter_or<std::string>("side", side, "blue");
 
   // initialisation of markers
   marker.header.frame_id = header_frame_id;
