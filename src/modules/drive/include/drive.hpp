@@ -70,6 +70,7 @@ private:
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
+  std::mutex i2c_mutex;
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;
