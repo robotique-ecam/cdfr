@@ -33,11 +33,15 @@ class Actuators:
             d = self.DYNAMIXELS[dyna]
             self.arbotix.setSpeed(dyna, d.get('speed'))
             self.arbotix.setPosition(dyna, d.get('down'))
+        for s in self.SERVOS:
+            servo = self.SERVOS[s]
+            self.arbotix.setSpeed(servo.get('addr'), servo.get('speed'))
+            self.arbotix.setSpeed(servo.get('addr'), servo.get('down'))
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
         if flag_servo := self.SERVOS.get('flags') is not None:
-            self.arbotix.setServo(flag_servo['addr'], flag_servo['high'])
+            self.arbotix.setPosition(flag_servo['addr'], flag_servo['high'])
 
     def setPumpsEnabled(self, enabled: bool, pumps: list):
         """Set list of pumps as enabled or not."""

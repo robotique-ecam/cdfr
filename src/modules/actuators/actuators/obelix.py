@@ -30,7 +30,7 @@ FANS = [7, 15]
 
 # Servo
 SERVOS = {
-    'flags': {'addr': 1, 'low': 1000, 'high': 2000}
+    'flags': {'addr': 5, 'down': 485, 'up': 200, 'speed': 250}
 }
 
 # Dynamixels
