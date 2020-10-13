@@ -61,7 +61,7 @@ class Selftest:
         code = 0x40
         self.__write__(code)
         try:
-            bus = SMBus(1)
+            bus = SMBus(5)
             for addr in self.node.actuators.pump_addr:
                 code += 1
                 self.__write__(code)
