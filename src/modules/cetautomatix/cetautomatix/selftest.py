@@ -87,6 +87,8 @@ class Selftest:
             if self.node.actuators.arbotix.getPosition(servo.get('addr')) == -1:
                 return
 
+        self.__write(0xFF)
+
     def __write__(self, code):
         """Write current testing code to LCD."""
         lcd_msg = Lcd()
