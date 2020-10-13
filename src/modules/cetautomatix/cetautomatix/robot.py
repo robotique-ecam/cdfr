@@ -162,7 +162,7 @@ class Robot(Node):
             distance = np.sqrt(
                 (element["X"] - self.position[0])**2 + (element["Y"] - self.position[1])**2)
             coefficient += 100 * (1 - distance / 3.6)
-            coefficient += get_time_coeff(self.robot.get_clock().now().nanoseconds * 1e-9 - self.start_time, action, self.strategy_mode)
+            coefficient += get_time_coeff(self.get_clock().now().nanoseconds * 1e-9 - self.start_time, action, self.strategy_mode)
             coefficient_list.append(coefficient)
         best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
