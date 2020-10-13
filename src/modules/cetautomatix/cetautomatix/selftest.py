@@ -31,7 +31,7 @@ class Selftest:
         # Testing for CPU Throttling
         vcgm = Vcgencmd()
         self.__write__(0x11)
-        if vcgm.get_throttled() != 0:
+        if int(vcgm.get_throttled().get('raw_data'), 16) != 0:
             return
 
         # Testing devices on Drive I2C Bus
