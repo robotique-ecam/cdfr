@@ -150,17 +150,19 @@ class Robot(Node):
 
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
-        distance_list = []
+        if not action_list:
+            return None
+        coefficient_list = []
         # start = timeEndOfGame.time - 100.0
         for action in action_list:
-            value = elements[action]
+            coefficient = 0
+            element = elements[action]
             distance = np.sqrt(
-                (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
-            coeff_distance = 100 * (1 - distance / 3.6)
-            distance_list.append(coeff_distance)
-        if len(distance_list) < 1:
-            return None
-        best_action = action_list[distance_list.index(max(distance_list))]
+                (element["X"] - self.position[0])**2 + (element["Y"] - self.position[1])**2)
+            coefficient += 100 * (1 - distance / 3.6)
+            # Calculate based on other things
+            coefficient_list.append(coefficient)
+        best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
 
     def get_goal_pose(self):
@@ -168,20 +170,20 @@ class Robot(Node):
         msg = NavigateToPose_Goal()
         msg.pose.header.frame_id = 'map'
         if self._current_action is not None:
-            value = elements[self._current_action]
-            msg.pose.pose.position.x = float(value[0])
-            msg.pose.pose.position.y = float(value[1])
+            element = elements[self._current_action]
+            msg.pose.pose.position.x = float(element["X"])
+            msg.pose.pose.position.y = float(element["Y"])
             msg.pose.pose.position.z = 0.0
             try:
-                if value[2] is not None:
-                    q = self.euler_to_quaternion(value[2])
-                    if value[2] == 0:
+                if element["Rot"] is not None:
+                    q = self.euler_to_quaternion(element["Rot"])
+                    if element["Rot"] == 0:
                         msg.pose.pose.position.x -= self.width / 2
-                    elif value[2] == 180:
+                    elif element["Rot"] == 180:
                         msg.pose.pose.position.x += self.width / 2
-                    elif value[2] == 90:
+                    elif element["Rot"] == 90:
                         msg.pose.pose.position.y -= self.width / 2
-                    elif value[2] == -90:
+                    elif element["Rot"] == -90:
                         msg.pose.pose.position.y += self.width / 2
                 else:
                     q = self.euler_to_quaternion(0)
