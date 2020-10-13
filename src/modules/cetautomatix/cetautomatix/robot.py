@@ -9,6 +9,7 @@ import py_trees
 import rclpy
 import tf2_geometry_msgs
 from cetautomatix.magic_points import elements
+from cetautomatix.selftest import Selftest
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
@@ -24,6 +25,7 @@ class Robot(Node):
         super().__init__(node_name='robot')
         robot = self.get_namespace().strip('/')
         self.actuators = import_module(f'actuators.{robot}').actuators
+        self.selftest = Selftest(self)
         self.position = (0.29, 1.33)
         self.length = 0.26
         self.width = 0.2
