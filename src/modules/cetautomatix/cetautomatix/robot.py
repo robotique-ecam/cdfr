@@ -175,15 +175,16 @@ class Robot(Node):
             msg.pose.pose.position.y = float(element["Y"])
             msg.pose.pose.position.z = 0.0
             try:
-                if element["Rot"] is not None:
+                rot = element.get("Rot")
+                if rot:
                     q = self.euler_to_quaternion(element["Rot"])
-                    if element["Rot"] == 0:
+                    if rot == 0:
                         msg.pose.pose.position.x -= self.width / 2
-                    elif element["Rot"] == 180:
+                    elif rot == 180:
                         msg.pose.pose.position.x += self.width / 2
-                    elif element["Rot"] == 90:
+                    elif rot == 90:
                         msg.pose.pose.position.y -= self.width / 2
-                    elif element["Rot"] == -90:
+                    elif rot == -90:
                         msg.pose.pose.position.y += self.width / 2
                 else:
                     q = self.euler_to_quaternion(0)
