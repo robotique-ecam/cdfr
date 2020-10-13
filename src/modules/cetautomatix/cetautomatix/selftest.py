@@ -23,7 +23,7 @@ class Selftest:
         self.node = node
         self.lcd_driver = self.node.create_publisher(Lcd, 'lcd', 1)
         self.__write__(0)  # Report selftest init
-        if 'arm' not in machine():
+        if 'aarch64' not in machine():
             return
 
         self.__write__(0x10)  # Started Hardware tests
