@@ -9,6 +9,7 @@ import py_trees
 import rclpy
 import tf2_geometry_msgs
 from cetautomatix.magic_points import elements
+from cetautomatix.strategy_modes import get_time_coeff
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
@@ -24,6 +25,8 @@ class Robot(Node):
         super().__init__(node_name='robot')
         robot = self.get_namespace().strip('/')
         self.actuators = import_module(f'actuators.{robot}').actuators
+        self.strategy_mode = 'NORMAL'
+        self.start_time = self.get_clock().now().nanoseconds * 1e-9
         self.position = (0.29, 1.33)
         self.length = 0.26
         self.width = 0.2
@@ -153,14 +156,13 @@ class Robot(Node):
         if not action_list:
             return None
         coefficient_list = []
-        # start = timeEndOfGame.time - 100.0
         for action in action_list:
             coefficient = 0
             element = elements[action]
             distance = np.sqrt(
                 (element["X"] - self.position[0])**2 + (element["Y"] - self.position[1])**2)
             coefficient += 100 * (1 - distance / 3.6)
-            # Calculate based on other things
+            coefficient += get_time_coeff(self.robot.get_clock().now().nanoseconds * 1e-9 - self.start_time, action, self.strategy_mode)
             coefficient_list.append(coefficient)
         best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
