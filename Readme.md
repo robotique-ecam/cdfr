@@ -2,7 +2,7 @@
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
 ![Webots](https://img.shields.io/badge/webots-2020b-blue)
 ![Status](https://img.shields.io/badge/status-beta-blueviolet)
-![Version](https://img.shields.io/badge/version-v0.8.1-blue)
+![Version](https://img.shields.io/badge/version-v0.8.2-blue)
 
 ### Build
 
@@ -39,7 +39,7 @@ cd path/to/ros
 - Simulation mode for assurancetourix, drive and pharaon
 - Fixed many bugs thanks to simulation mode, including race conditions between modules
 
-#### v0.8.1
+#### v0.8.2
 - Full support for asterix, obelix, assurancetourix and pharaon running simultaneously
 - Upstreamed navigation2 stack to master branch
 - Refactored behavior trees with full strategy engine support

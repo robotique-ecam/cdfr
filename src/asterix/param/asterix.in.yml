@@ -96,7 +96,7 @@ asterix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Asterix v0.8.1"
+      banner: "Asterix v0.8.2"
 
 
   tree:
