@@ -13,7 +13,7 @@ package_name = 'actuators'
 
 setup(
     name=package_name,
-    version='0.8.1',
+    version='0.8.2',
     packages=[package_name],
     data_files=[
         (path.join('share', package_name), ['package.xml']),
