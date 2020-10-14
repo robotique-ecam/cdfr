@@ -27,20 +27,11 @@ Sensors::Sensors() : Node("sensors_node") {
 void Sensors::init_parameters() {
   // Declare parameters that may be set on this node
   this->declare_parameter("i2c_bus");
-  this->declare_parameter("hcsr04_names");
   this->declare_parameter("vl53l1x_names");
 
   // Get parameters from yaml
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 4);
-  std::vector<std::string> hcsr04_names = this->get_parameter("hcsr04_names").as_string_array();
   std::vector<std::string> vl53l1x_names = this->get_parameter("vl53l1x_names").as_string_array();
-
-  for (auto name : hcsr04_names) {
-    this->declare_parameter("hcsr04." + name + ".frame_id");
-    this->declare_parameter("hcsr04." + name + ".addr");
-    hcsr04_frames.push_back(this->get_parameter("hcsr04." + name + ".frame_id").as_string());
-    hcsr04_addresses.push_back(this->get_parameter("hcsr04." + name + ".addr").as_int());
-  }
 
   for (auto name : vl53l1x_names) {
     this->declare_parameter("vl53l1x." + name + ".frame_id");
@@ -51,11 +42,6 @@ void Sensors::init_parameters() {
 }
 
 void Sensors::init_variables() {
-  hcsr_range_msg.radiation_type = 0;
-  hcsr_range_msg.min_range = 0.01;
-  hcsr_range_msg.max_range = 2.55;
-  hcsr_range_msg.field_of_view = 1;
-
   vl53l1x_range_msg.radiation_type = 1;
   vl53l1x_range_msg.min_range = 0.005;
   vl53l1x_range_msg.max_range = 3.5;
@@ -70,14 +56,6 @@ void Sensors::init_sensors() {
 
 void Sensors::receive_distance() {
 #ifndef SIMULATION
-  for (unsigned int i = 0; i < hcsr04_addresses.size(); i++) {
-    hcsr_range_msg.header.stamp = this->get_clock()->now();
-    this->i2c->set_address(hcsr04_addresses[i]);
-    uint8_t distance = this->i2c->read_byte();
-    hcsr_range_msg.range = (float)distance / 100;
-    sensors_pub_->publish(hcsr_range_msg);
-  }
-
   for (auto sensor : vl53l1x_sensors) {
     vl53l1x_range_msg.header.stamp = this->get_clock()->now();
     vl53l1x_range_msg.range = (float)sensor.getDistance() / 1000;
