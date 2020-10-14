@@ -25,6 +25,32 @@ cd path/to/ros
 ```
 
 
+### Few service calls
+
+##### Enable stepper drivers
+
+```
+ros2 service call /obelix/enable_drivers  std_srvs/SetBool "{data: true}"
+```
+
+##### Send action goal
+
+```
+ros2 action send_goal /obelix/navigate_to_pose nav2_msgs/action/NavigateToPose "{'pose': {'pose': {'position': {'x': 1, 'y': 1}}}}"
+```
+
+##### Deploy pharaon
+
+```
+ros2 service call /pharaon/deploy std_srvs/srv/Trigger
+```
+
+##### Disable Aruco detection
+
+```
+ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
+```
+
 ### Changelog
 
 ### v0.8.0
