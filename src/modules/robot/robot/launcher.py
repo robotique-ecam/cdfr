@@ -25,6 +25,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    autostart = LaunchConfiguration('autostart')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
@@ -55,6 +56,12 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             'use_namespace',
             default_value='true',
             description='Whether to apply a namespace to the robot stack including navigation2'
+        ),
+
+        DeclareLaunchArgument(
+            'autostart',
+            default_value='false',
+            description='Autostart the nav stack'
         ),
 
         DeclareLaunchArgument(
@@ -133,6 +140,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
             launch_arguments={
                 'map': map,
+                'autostart': autostart,
                 'namespace': namespace,
                 'use_namespace': use_namespace,
                 'use_sim_time': use_sim_time,

@@ -21,7 +21,7 @@ Sensors::Sensors() : Node("sensors_node") {
 
   timer_ = this->create_wall_timer(200ms, std::bind(&Sensors::receive_distance, this));
 
-  RCLCPP_INFO(this->get_logger(), "Sensor node initialised");
+  RCLCPP_INFO(this->get_logger(), "Sensor node initialised !");
 }
 
 void Sensors::init_parameters() {
