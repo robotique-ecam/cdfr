@@ -80,8 +80,8 @@ class Selftest:
             self.__write__(code)
             if self.node.actuators.arbotix.getPosition(dyna) == -1:
                 return
-        for servo in self.node.actuators.DYNAMIXELS:
-            servo = self.node.actuators.DYNAMIXELS.get(servo)
+        for servo in self.node.actuators.SERVOS:
+            servo = self.node.actuators.SERVOS.get(servo)
             code += 1
             self.__write__(code)
             if self.node.actuators.arbotix.getPosition(servo.get('addr')) == -1:

@@ -38,7 +38,6 @@ obelix:
     ros__parameters:
       i2c_bus: 3
 
-      hcsr04_names : []
       vl53l1x_names : [front_left, front_right, side_left, side_right, back_left, back_right]
 
       vl53l1x:
