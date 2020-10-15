@@ -47,9 +47,10 @@ class StrategixActionServer(Node):
         self.get_logger().info(f'GET {request.sender}')
         available = []
         for action in actions:
-            if actions[action].get("ONLY_SIDE") is None or actions[action].get("ONLY_SIDE") == self.side:
-                if actions[action].get("ONLY_ROBOT") is None or actions[action].get("ONLY_ROBOT") == request.sender:
-                    available.append(action)
+            if actions[action].get("STATUS") is None:
+                if actions[action].get("ONLY_SIDE") is None or actions[action].get("ONLY_SIDE") == self.side.value:
+                    if actions[action].get("ONLY_ROBOT") is None or actions[action].get("ONLY_ROBOT") == request.sender:
+                        available.append(action)
         response.available = available
         self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
