@@ -57,7 +57,7 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void on_receive_command(uint8_t n) {
-  if ((n > 1) | (n < TWI_RX_BUFFER_SIZE)) {
+  if ((n > 0) | (n < TWI_RX_BUFFER_SIZE)) {
     int8_t data = TinyWireS.receive();
     if (data != -128) {
       TCNT1 = 0;

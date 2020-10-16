@@ -37,7 +37,7 @@ def compute_speeds(config: dict):
 globals = {
     'use_sim_time': False,
 
-    'max_steps_frequency': 5000,
+    'max_steps_frequency': 10000,
     'speedramp_resolution': 128,
     'microsteps': 16,
 

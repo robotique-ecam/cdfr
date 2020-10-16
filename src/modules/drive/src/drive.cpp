@@ -43,7 +43,8 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
-  _enable_drivers = this->create_service<std_srvs::srv::SetBool>("enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  _enable_drivers = this->create_service<std_srvs::srv::SetBool>(
+      "enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
@@ -249,10 +250,10 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
   this->i2c_mutex.lock();
 
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t) 1 << 4 | request->data);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t) 1 << 4 | request->data);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
 
   this->i2c_mutex.unlock();
 #endif

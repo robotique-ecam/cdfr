@@ -2,8 +2,8 @@
 
 
 cpu_freq = 16e6
-max_freq = 2e3
-resolution = 32
+max_freq = 5e3
+resolution = 64
 prescaller_bitsize = 14
 
 step = round(max_freq / resolution)

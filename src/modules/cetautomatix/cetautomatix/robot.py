@@ -176,13 +176,13 @@ class Robot(Node):
                     elif value[2] == 180:
                         msg.pose.pose.position.x += self.width / 2
                     elif value[2] == 90:
-                        msg.pose.pose.position.y -= self.width / 2
+                        msg.pose.pose.position.y -= self.length / 2
                     elif value[2] == -90:
-                        msg.pose.pose.position.y += self.width / 2
+                        msg.pose.pose.position.y += self.length / 2
                 else:
                     q = self.euler_to_quaternion(0)
             except IndexError:
-                # TODO: robot angle
+                self.get_logger().warn(f'Action {self._current_action} has no angle')
                 q = self.euler_to_quaternion(0)
             msg.pose.pose.orientation.x = q[0]
             msg.pose.pose.orientation.y = q[1]
