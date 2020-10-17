@@ -55,15 +55,14 @@ class Robot(Node):
         self._tf_buffer = Buffer()
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
+        # Hacky way to init position
+        self._odom_callback(self._odom_pose_stamped)
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
-        while self._position is None:
-            self.get_logger().warn('Waiting for robot location to be published')
-            sleep(1)
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Reached initialised state
