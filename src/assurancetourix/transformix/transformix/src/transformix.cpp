@@ -34,9 +34,9 @@ void Transformix::generate_buffer_and_transform_my_pose_stamped(const std::share
   auto end_total = std::chrono::high_resolution_clock::now();
   double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_total).count();
   time_taken_total *= 1e-9;
-  #ifdef EXTRALOG
+#ifdef EXTRALOG
   RCLCPP_INFO(rclcpp::get_logger("transformix"), "Time given to buffer initialisation: %f", time_taken_total);
-  #endif
+#endif
 
   if (canTransform(tfBuffer, from_frame, to_frame)) {
     get_transform(tfBuffer, from_frame, to_frame, transformStamped);
@@ -67,9 +67,9 @@ void Transformix::get_transform_stamped_from_frames(const std::shared_ptr<transf
   auto end_total = std::chrono::high_resolution_clock::now();
   double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_total).count();
   time_taken_total *= 1e-9;
-  #ifdef EXTRALOG
+#ifdef EXTRALOG
   RCLCPP_INFO(rclcpp::get_logger("transformix"), "Time given to buffer initialisation: %f", time_taken_total);
-  #endif
+#endif
 
   if (canTransform(tfBuffer, from_frame, to_frame)) {
     get_transform(tfBuffer, from_frame, to_frame, transformStamped);
@@ -95,24 +95,24 @@ void Transformix::get_poseStamped_from_transformStamped(const std::shared_ptr<tr
 }
 
 void Transformix::get_transform(tf2_ros::Buffer &tfBuffer, std::string &from_frame, std::string &to_frame, geometry_msgs::msg::TransformStamped &transformStampedOut) {
-  #ifdef EXTRALOG
+#ifdef EXTRALOG
   RCLCPP_INFO(rclcpp::get_logger("transformix"), "We're trying to get the transformation");
-  #endif
+#endif
 
   try {
     transformStampedOut = tfBuffer.lookupTransform(to_frame, from_frame, std::chrono::system_clock::now(), std::chrono::milliseconds(500));
-    #ifdef EXTRALOG
+#ifdef EXTRALOG
     RCLCPP_INFO(rclcpp::get_logger("transformix"), "Transformation get");
-    #endif
+#endif
   } catch (tf2::TransformException &ex) {
     RCLCPP_INFO(rclcpp::get_logger("transformix"), ex.what());
   }
 }
 
 bool Transformix::canTransform(tf2_ros::Buffer &tfBuffer, std::string &from_frame, std::string &to_frame) {
-  #ifdef EXTRALOG
+#ifdef EXTRALOG
   RCLCPP_INFO(rclcpp::get_logger("transformix"), "Is The transformation possible ?");
-  #endif
+#endif
   try {
     auto start_total = std::chrono::high_resolution_clock::now();
 
@@ -121,14 +121,14 @@ bool Transformix::canTransform(tf2_ros::Buffer &tfBuffer, std::string &from_fram
     auto end_total = std::chrono::high_resolution_clock::now();
     double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_total).count();
     time_taken_total *= 1e-9;
-    #ifdef EXTRALOG
+#ifdef EXTRALOG
     RCLCPP_INFO(rclcpp::get_logger("transformix"), "Time of transformation: %f", time_taken_total);
     if (transformation_possible) {
       RCLCPP_INFO(rclcpp::get_logger("transformix"), "True");
     } else {
       RCLCPP_INFO(rclcpp::get_logger("transformix"), "false");
     }
-    #endif
+#endif
     return transformation_possible;
   } catch (tf2::TransformException &ex) {
     return false;

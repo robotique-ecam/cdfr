@@ -1,6 +1,6 @@
 name: Simulation
 
-on: [push]
+on: []
 
 jobs:
   simulation:
@@ -27,7 +27,7 @@ jobs:
           graphicsmagick-libmagick-dev-compat ros-foxy-nav2-bringup ros-foxy-py-trees-ros ros-foxy-py-trees-ros-interfaces \
           libi2c-dev i2c-tools libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev libboost-program-options-dev \
           libsuitesparse-dev python3-psutil python3-pykdl python3-vcstool python3-pydot python3-git xvfb webots python3-pip
-          sudo -H pip3 install transforms3d
+          sudo -H pip3 install transforms3d emrichen hiyapyco
 
       - name: Cache ros_ws
         id: cache-ws

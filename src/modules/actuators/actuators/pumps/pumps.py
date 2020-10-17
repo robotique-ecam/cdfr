@@ -34,7 +34,7 @@ class PumpDriver:
 
     def _get_state(self):
         """Get outputs state from all drivers."""
-        values = bytes(self._len)
+        values = bytearray(self._len)
         for addr, i in zip(self._addrs, range(self._len)):
             values[i] = self.__read__(addr)
         return int.from_bytes(values, 'big')

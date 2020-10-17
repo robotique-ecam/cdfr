@@ -4,7 +4,13 @@
 """Actuator definition for robot Obelix."""
 
 
-from actuators.actuators import DYNA_DOWN, DYNA_UP, NC, NO, Actuators
+from actuators.actuators import NC, NO, Actuators
+
+
+DYNA_UP = 290
+DYNA_DOWN = 380
+DYNA_SPEED = 120
+
 
 # Pumps and valves adresses
 PUMPS = {
@@ -24,20 +30,22 @@ FANS = [7, 15]
 
 # Servo
 SERVOS = {
-    'flags': {'addr': 1, 'low': 1000, 'high': 2000}
+    'flags': {'addr': 5, 'down': 485, 'up': 200, 'speed': 250}
 }
 
 # Dynamixels
 DYNAMIXELS = {
-    1: {},
-    2: {},
-    3: {},
-    4: {},
+    1: {'speed': DYNA_SPEED, 'up': DYNA_UP, 'down': DYNA_DOWN},
+    2: {'speed': DYNA_SPEED, 'up': DYNA_UP, 'down': DYNA_DOWN},
+    3: {'speed': DYNA_SPEED, 'up': DYNA_UP, 'down': DYNA_DOWN},
+    4: {'speed': DYNA_SPEED, 'up': DYNA_UP, 'down': DYNA_DOWN},
 }
 
 actuators = Actuators(
-    pump_addr=[0x41, 0x40],
+    i2c_bus=5,
+    pump_addr=[0x40, 0x41],
     FANS=FANS,
     PUMPS=PUMPS,
-    SERVOS=SERVOS
+    SERVOS=SERVOS,
+    DYNAMIXELS=DYNAMIXELS
 )

@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>map</name>
-  <version>0.7.0</version>
+  <version>0.8.2</version>
   <description>Map package</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
   <license>Club Robotique ECAM :: CDFR 2020</license>

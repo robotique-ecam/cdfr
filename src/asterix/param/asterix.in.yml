@@ -1,11 +1,12 @@
 !Defaults
-footprint: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
+footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
+use_sim_time: True
 max_steps_frequency: 10000
 speedramp_resolution: 128
 microsteps: 16
-steps_per_turn: 400
-wheels_separation: 0.282
-wheels_radius: 0.061
+steps_per_turn: 200
+wheels_separation: 0.244
+wheels_radius: 0.0405
 min_turning_radius: 0.0
 max_vel_x: 0.4
 max_vel_x_backwards: 0.4
@@ -13,9 +14,11 @@ max_vel_theta: 1.0
 acc_lim_x: 0.5
 acc_lim_theta: 0.5
 ---
-obelix:
+asterix:
   drive_node:
     ros__parameters:
+      use_sim_time: !Var use_sim_time
+
       wheels:
         separation: !Var wheels_separation
         radius: !Var wheels_radius
@@ -36,9 +39,29 @@ obelix:
 
   sensors_node:
     ros__parameters:
-      i2c_bus: 3
+      use_sim_time: !Var use_sim_time
 
+      i2c_bus: 4
+
+      hcsr04_names : [front_left, front_right, back_left, back_right]
       vl53l1x_names : [front_left, front_right, side_left, side_right, back_left, back_right]
+
+      hcsr04:
+        front_left:
+          addr: 0x20
+          frame_id: 'sensor_front_left'
+
+        front_right:
+          addr: 0x21
+          frame_id: 'sensor_front_right'
+
+        back_left:
+          addr: 0x22
+          frame_id: 'sensor_back_left'
+
+        back_right:
+          addr: 0x23
+          frame_id: 'sensor_back_right'
 
       vl53l1x:
         front_left:
@@ -68,16 +91,22 @@ obelix:
 
   lcd_driver:
     ros__parameters:
+      use_sim_time: !Var use_sim_time
+
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Obelix v0.8.2"
+      banner: "Asterix v0.8.2"
 
 
-  cetautomatix:
+  tree:
     ros__parameters:
-      width:
-      lenght:
+      use_sim_time: !Var use_sim_time
+
+
+  robot:
+    ros__parameters:
+      use_sim_time: !Var use_sim_time
 
 
 controller_server:

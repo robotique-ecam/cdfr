@@ -7,8 +7,10 @@
 import os
 import tempfile
 
-import launch
+import hiyapyco
 from ament_index_python.packages import get_package_share_directory
+
+import launch
 from launch.actions import (DeclareLaunchArgument, GroupAction,
                             IncludeLaunchDescription)
 from launch.conditions import IfCondition
@@ -23,15 +25,15 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    autostart = LaunchConfiguration('autostart')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
     robot_params = os.path.join(get_package_share_directory(robot_namespace), 'param', f'{robot_namespace}.yml')
     navigation_params = os.path.join(
         get_package_share_directory('robot'), 'param', 'robot.yml')
-    with open(robot_params, 'r') as r, open(navigation_params, 'r') as n:
-        for f in (r, n):
-            params.file.write(f.read())
+    merged_params = hiyapyco.load([navigation_params, robot_params], method=hiyapyco.METHOD_MERGE)
+    params.file.write(hiyapyco.dump(merged_params))
 
     urdf = os.path.join(get_package_share_directory(robot_namespace), 'robot', f'{robot_namespace}.urdf')
 
@@ -57,6 +59,12 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
         ),
 
         DeclareLaunchArgument(
+            'autostart',
+            default_value='true',
+            description='Autostart the nav stack'
+        ),
+
+        DeclareLaunchArgument(
             'map',
             default_value=map_dir,
             description='Full path to map yaml file to load'
@@ -74,13 +82,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             description='Full path to the behavior tree xml file to use'
         ),
 
-        DeclareLaunchArgument(
-            'autostart',
-            default_value='true',
-            description='Automatically startup the nav2 stack'
-        ),
-
-
         GroupAction([
 
             PushRosNamespace(condition=IfCondition(
@@ -89,6 +90,14 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             Node(
                 package='lcd_driver',
                 executable='lcd_driver',
+                output='screen',
+                parameters=[params.name],
+                remappings=remappings,
+            ),
+
+            Node(
+                package='sensors',
+                executable='sensors',
                 output='screen',
                 parameters=[params.name],
                 remappings=remappings,
@@ -118,18 +127,20 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 parameters=[params.name],
                 remappings=remappings,
             ),
-        ]),
 
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
-            launch_arguments={
-                'map': map,
-                'namespace': namespace,
-                'use_namespace': use_namespace,
-                'use_sim_time': use_sim_time,
-                'default_bt_xml_filename': default_bt_xml_filename,
-                'params_file': params.name}.items(),
-        ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([nav2_launch_file_dir, '/navigation_launch.py']),
+                launch_arguments={
+                    'map': map,
+                    'autostart': autostart,
+                    'namespace': namespace,
+                    'use_namespace': use_namespace,
+                    'use_sim_time': use_sim_time,
+                    'use_lifecycle_mgr': 'false',
+                    'default_bt_xml_filename': default_bt_xml_filename,
+                    'params_file': params.name}.items(),
+            ),
+        ]),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([robot_launch_file_dir, '/interfaces.py']),

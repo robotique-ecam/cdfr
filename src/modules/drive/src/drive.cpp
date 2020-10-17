@@ -43,6 +43,9 @@ Drive::Drive() : Node("drive_node") {
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
 
+  _enable_drivers = this->create_service<std_srvs::srv::SetBool>(
+      "enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
@@ -133,6 +136,8 @@ void Drive::update_velocity() {
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
+  this->i2c_mutex.lock();
+
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
@@ -143,6 +148,7 @@ void Drive::update_velocity() {
   attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.right);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
+  this->i2c_mutex.unlock();
 #else
   time_since_last_sync_ = get_sim_time();
 
@@ -237,6 +243,30 @@ void Drive::update_joint_states() {
 }
 
 void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_); }
+
+void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                                  const std_srvs::srv::SetBool::Response::SharedPtr response) {
+#ifndef SIMULATION
+  this->i2c_mutex.lock();
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
+
+  this->i2c_mutex.unlock();
+#endif
+
+  if (request->data) {
+    response->message = "Stepper drivers are enabled";
+    RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
+  } else {
+    response->message = "Stepper drivers are disabled";
+    RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
+  }
+  response->success = true;
+}
 
 #ifdef SIMULATION
 rclcpp::Time Drive::get_sim_time() {
