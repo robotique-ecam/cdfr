@@ -184,13 +184,13 @@ class Robot(Node):
                 q = self.euler_to_quaternion(theta)
                 # TODO : Changement de repère plutot
                 if theta == 0:
-                    msg.pose.pose.position.x -= self.length_param.value / 2
+                    msg.pose.pose.position.x -= self.length_param._value / 2
                 elif theta == 180:
-                    msg.pose.pose.position.x += self.length_param.value / 2
+                    msg.pose.pose.position.x += self.length_param._value / 2
                 elif theta == 90:
-                    msg.pose.pose.position.y -= self.width_param.value / 2
+                    msg.pose.pose.position.y -= self.width_param._value / 2
                 elif theta == 270:
-                    msg.pose.pose.position.y += self.width_param.value / 2
+                    msg.pose.pose.position.y += self.width_param._value / 2
             else:
                 self.get_logger().warn(f'NavigateToPose for action {self._current_action} invoqued without angle')
                 q = self.euler_to_quaternion(0)

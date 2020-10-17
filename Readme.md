@@ -53,7 +53,7 @@ ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
 
 ### Changelog
 
-### v0.8.0
+#### v0.8.0
 - Updated linux distro to ubuntu 20.04 LTS
 - Updated ROS2 distro to Foxy
 - Added webots simulation world for Physical based simulation
