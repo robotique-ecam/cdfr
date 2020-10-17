@@ -20,11 +20,12 @@ from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 
 class Robot(Node):
     def __init__(self):
-        super().__init__(node_name='robot')
+        super().__init__(node_name='cetautomatix')
         self._triggered = False
         self._position = None
         self._start_time = None
@@ -53,6 +54,7 @@ class Robot(Node):
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         # Odometry subscriber
         self._tf_buffer = Buffer()
+        self._tf_listener = TransformListener(self._tf_buffer, self)
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         # Py-Trees blackboard to send NavigateToPose actions
@@ -61,11 +63,6 @@ class Robot(Node):
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
-        while self._position is None:
-            # Hacky way to init position
-            self.get_logger().warn('Waiting for robot position')
-            sleep(1)
-            self._odom_callback(self._odom_pose_stamped)
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Reached initialized state
@@ -157,7 +154,7 @@ class Robot(Node):
     def _odom_callback(self, msg):
         try:
             # Get latest transform
-            tf = self._tf_buffer.lookup_transform('base_link', 'map', Time())
+            tf = self._tf_buffer.lookup_transform('map', 'base_link', Time())
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
