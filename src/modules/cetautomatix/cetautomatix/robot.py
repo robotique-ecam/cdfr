@@ -23,15 +23,15 @@ from tf2_ros.buffer import Buffer
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
+        self._triggered = False
+        self._current_action = None
         robot = self.get_namespace().strip('/')
+        self.length_param = self.get_parameter('length')
+        self.width_param = self.get_parameter('width')
         self.actuators = import_module(f'actuators.{robot}').actuators
         self.strategy_mode = 'NORMAL'
         self.start_time = self.get_clock().now().nanoseconds * 1e-9
         self.position = (0.29, 1.33)
-        self.length = 0.26
-        self.width = 0.2
-        self._triggered = False
-        self._current_action = None
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = robot
@@ -176,22 +176,21 @@ class Robot(Node):
             msg.pose.pose.position.x = float(element["X"])
             msg.pose.pose.position.y = float(element["Y"])
             msg.pose.pose.position.z = 0.0
-            try:
-                rot = element.get("Rot")
-                if rot:
-                    q = self.euler_to_quaternion(element["Rot"])
-                    if rot == 0:
-                        msg.pose.pose.position.x -= self.width / 2
-                    elif rot == 180:
-                        msg.pose.pose.position.x += self.width / 2
-                    elif rot == 90:
-                        msg.pose.pose.position.y -= self.width / 2
-                    elif rot == -90:
-                        msg.pose.pose.position.y += self.width / 2
-                else:
-                    q = self.euler_to_quaternion(0)
-            except IndexError:
-                # TODO: robot angle
+            theta = element.get("Rot")
+            if theta is not None:
+                theta %= 360
+                q = self.euler_to_quaternion(theta)
+                # TODO : Changement de repère plutot
+                if theta == 0:
+                    msg.pose.pose.position.x -= self.length_param.value / 2
+                elif theta == 180:
+                    msg.pose.pose.position.x += self.length_param.value / 2
+                elif theta == 90:
+                    msg.pose.pose.position.y -= self.width_param.value / 2
+                elif theta == 270:
+                    msg.pose.pose.position.y += self.width_param.value / 2
+            else:
+                self.get_logger().warn(f'NavigateToPose for action {self._current_action} invoqued without angle')
                 q = self.euler_to_quaternion(0)
             msg.pose.pose.orientation.x = q[0]
             msg.pose.pose.orientation.y = q[1]
