@@ -15,7 +15,7 @@ from cetautomatix.strategy_modes import get_time_coeff
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from rclpy.time import Time
+from rclpy.time import Time, Duration
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
@@ -56,6 +56,7 @@ class Robot(Node):
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self)
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self._odom_callback(self._odom_pose_stamped)
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
@@ -154,7 +155,7 @@ class Robot(Node):
     def _odom_callback(self, msg):
         try:
             # Get latest transform
-            tf = self._tf_buffer.lookup_transform('map', 'base_link', Time())
+            tf = self._tf_buffer.lookup_transform('map', 'base_link', Time(), timeout=Duration(seconds=1.0))
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
