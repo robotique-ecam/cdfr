@@ -74,11 +74,6 @@ obelix:
       banner: "Obelix v0.8.2"
 
 
-  cetautomatix:
-    ros__parameters:
-      width:
-      lenght:
-
 
 controller_server:
   ros__parameters:
