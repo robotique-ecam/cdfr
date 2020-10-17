@@ -8,6 +8,7 @@ import numpy as np
 import py_trees
 import rclpy
 import tf2_geometry_msgs
+from cetautomatix.selftest import Selftest
 from cetautomatix.magic_points import elements
 from cetautomatix.strategy_modes import get_time_coeff
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
@@ -24,32 +25,44 @@ class Robot(Node):
     def __init__(self):
         super().__init__(node_name='robot')
         self._triggered = False
+        self._position = None
+        self._start_time = None
         self._current_action = None
         robot = self.get_namespace().strip('/')
+        # parameters interfaces
         self.declare_parameter('length')
         self.declare_parameter('width')
+        self.declare_parameter('strategy_mode')
         self.length_param = self.get_parameter('length')
         self.width_param = self.get_parameter('width')
+        self.strategy_mode_param = self.get_parameter('strategy_mode')
+        # Bind actuators
         self.actuators = import_module(f'actuators.{robot}').actuators
-        self.strategy_mode = 'NORMAL'
-        self.start_time = self.get_clock().now().nanoseconds * 1e-9
-        self.position = (0.29, 1.33)
+        # Do selftest
+        self.selftest = Selftest(self)
+        # strategix client interfaces
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = robot
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
+        # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
+        # Phararon delploy client interfaces
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
+        # Odometry subscriber
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
+        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self._tf_buffer = Buffer()
+        # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
-        self._tf_buffer = Buffer()
-        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        # Reached initialised state
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
@@ -127,6 +140,7 @@ class Robot(Node):
         """Start robot."""
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
+        self._start_time = self.get_clock().now().nanoseconds * 1e-9
         resp.success = True
         return resp
 
@@ -143,7 +157,7 @@ class Robot(Node):
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
         except LookupException:
             return
-        self.position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
+        self._position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
@@ -162,9 +176,9 @@ class Robot(Node):
             coefficient = 0
             element = elements[action]
             distance = np.sqrt(
-                (element["X"] - self.position[0])**2 + (element["Y"] - self.position[1])**2)
+                (element["X"] - self._position[0])**2 + (element["Y"] - self._position[1])**2)
             coefficient += 100 * (1 - distance / 3.6)
-            coefficient += get_time_coeff(self.get_clock().now().nanoseconds * 1e-9 - self.start_time, action, self.strategy_mode)
+            coefficient += get_time_coeff(self.get_clock().now().nanoseconds * 1e-9 - self._start_time, action, self.strategy_mode_param.value)
             coefficient_list.append(coefficient)
         best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action

@@ -32,7 +32,6 @@
 # @file arbotix.py Low-level code to control an ArbotiX.
 
 
-from struct import pack
 from threading import RLock
 
 import serial

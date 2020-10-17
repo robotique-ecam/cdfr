@@ -45,6 +45,8 @@ asterix:
       width: !Var robotbase_width
       length: !Var robotbase_length
 
+      strategy_mode: Normal
+
 
   sensors_node:
     ros__parameters:
