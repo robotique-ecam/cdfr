@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+from time import sleep
 from importlib import import_module
 
 import numpy as np
@@ -47,8 +48,6 @@ class Robot(Node):
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
-        # Robot trigger service
-        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Phararon delploy client interfaces
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
@@ -62,6 +61,11 @@ class Robot(Node):
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        while self._position is None:
+            self.get_logger().warn('Waiting for robot location to be published')
+            sleep(1)
+        # Robot trigger service
+        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Reached initialised state
         self.get_logger().info('Cetautomatix ROS node has been started')
 
@@ -150,8 +154,8 @@ class Robot(Node):
 
     def _odom_callback(self, msg):
         try:
-            # Get latest transform
-            tf = self._tf_buffer.lookup_transform('map', 'odom', Time())
+            # Get latest transform with 0
+            tf = self._tf_buffer.lookup_transform('map', 'odom', Time(0))
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
