@@ -1,6 +1,6 @@
 name: Simulation
 
-on: []
+on: [push]
 
 jobs:
   simulation:

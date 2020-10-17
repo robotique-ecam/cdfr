@@ -39,19 +39,22 @@ set(dependencies
 set(EXEC_NAME "sensors")
 
 
-add_executable(${EXEC_NAME}
-  src/sensors_node.cpp
-  src/sensors.cpp
-  src/vl53l1x_class.cpp
-  src/linux_vl53l1x.cpp
-  src/i2c.cpp
-)
-
 option(SIMULATION "Simulation mode" OFF)
 
 if(SIMULATION)
+  add_executable(${EXEC_NAME}
+    src/sensors_node.cpp
+    src/sensors.cpp
+  )
   add_definitions(-DSIMULATION)
 else()
+  add_executable(${EXEC_NAME}
+    src/sensors_node.cpp
+    src/sensors.cpp
+    src/vl53l1x_class.cpp
+    src/linux_vl53l1x.cpp
+    src/i2c.cpp
+  )
   target_link_libraries(${EXEC_NAME} i2c)
 endif()
 
