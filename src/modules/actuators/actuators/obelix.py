@@ -8,10 +8,10 @@ from actuators.actuators import DYNA_DOWN, DYNA_UP, NC, NO, Actuators
 
 # Pumps and valves adresses
 PUMPS = {
-    1: {'pump': 0, 'valve': 1, 'type': NO},
-    2: {'pump': 2, 'valve': 3, 'type': NO},
-    3: {'pump': 4, 'valve': 9, 'type': NO},
-    4: {'pump': 10, 'valve': 11, 'type': NO},
+    1: {'pump': 0, 'valve': 1, 'type': NO, 'pos': (8, -11)},
+    2: {'pump': 2, 'valve': 3, 'type': NO, 'pos': (8, -4)},
+    3: {'pump': 4, 'valve': 9, 'type': NO, 'pos': (8, 4)},
+    4: {'pump': 10, 'valve': 11, 'type': NO, 'pos': (8, 11)},
     5: {'pump': 0, 'valve': 1, 'type': NC},
     6: {'pump': 2, 'valve': 3, 'type': NC},
     7: {'pump': 4, 'valve': 9, 'type': NC},
