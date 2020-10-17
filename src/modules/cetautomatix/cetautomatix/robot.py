@@ -61,14 +61,14 @@ class Robot(Node):
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
-        # Robot trigger service
-        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
-        # Reached initialised state
         while self._position is None:
             # Hacky way to init position
             self.get_logger().warn('Waiting for robot position')
             sleep(1)
             self._odom_callback(self._odom_pose_stamped)
+        # Robot trigger service
+        self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
+        # Reached initialized state
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
@@ -157,7 +157,7 @@ class Robot(Node):
     def _odom_callback(self, msg):
         try:
             # Get latest transform
-            tf = self._tf_buffer.lookup_transform('map', 'odom', Time())
+            tf = self._tf_buffer.lookup_transform('base_link', 'map', Time())
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
