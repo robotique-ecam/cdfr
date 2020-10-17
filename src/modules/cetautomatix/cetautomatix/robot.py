@@ -55,8 +55,6 @@ class Robot(Node):
         self._tf_buffer = Buffer()
         self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
-        # Hacky way to init position
-        self._odom_callback(self._odom_pose_stamped)
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
@@ -66,6 +64,11 @@ class Robot(Node):
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Reached initialised state
+        while self._position is None:
+            # Hacky way to init position
+            self.get_logger().warn('Waiting for robot position')
+            sleep(1)
+            self._odom_callback(self._odom_pose_stamped)
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
@@ -159,6 +162,7 @@ class Robot(Node):
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
         except LookupException:
+            self.get_logger().warn('Failed to lookup_transform from map to odom')
             return
         self._position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
 
