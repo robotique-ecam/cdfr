@@ -9,6 +9,7 @@ import rclpy
 from lcd_msgs.msg import Lcd
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
+from strategix.actions import actions
 from strategix.exceptions import MatchStartedException
 from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
@@ -44,8 +45,13 @@ class StrategixActionServer(Node):
     def available_callback(self, request, response):
         """Callback function when a robot needs the list of available actions"""
         self.get_logger().info(f'GET {request.sender}')
-        exclude = self.score.excludeFromBlue if self.side.value == 'blue' else self.score.excludeFromYellow
-        response.available = [todo for todo in self.score.todoList if todo not in exclude]
+        available = []
+        for action in actions:
+            if actions[action].get("STATUS") is None and not actions[action].get("IN_ECUEIL"):
+                if actions[action].get("ONLY_SIDE") is None or actions[action].get("ONLY_SIDE") == self.side.value:
+                    if actions[action].get("ONLY_ROBOT") is None or actions[action].get("ONLY_ROBOT") == request.sender:
+                        available.append(action)
+        response.available = available
         self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
 
@@ -70,10 +76,10 @@ class StrategixActionServer(Node):
 
     def update_score(self):
         """Update global score."""
-        self.score.updateScore()
+        score = self.score.get_score()
         lcd_msg = Lcd()
         lcd_msg.line = 1
-        lcd_msg.text = f'Score: {self.score.score}'
+        lcd_msg.text = f'Score: {score}'
         self.lcd_driver.publish(lcd_msg)
 
 

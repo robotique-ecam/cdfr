@@ -53,7 +53,7 @@ ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
 
 ### Changelog
 
-### v0.8.0
+#### v0.8.0
 - Updated linux distro to ubuntu 20.04 LTS
 - Updated ROS2 distro to Foxy
 - Added webots simulation world for Physical based simulation
@@ -65,7 +65,7 @@ ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
 - Simulation mode for assurancetourix, drive and pharaon
 - Fixed many bugs thanks to simulation mode, including race conditions between modules
 
-#### v0.8.2
+#### v0.7.0
 - Full support for asterix, obelix, assurancetourix and pharaon running simultaneously
 - Upstreamed navigation2 stack to master branch
 - Refactored behavior trees with full strategy engine support

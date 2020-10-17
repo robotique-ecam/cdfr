@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+from time import sleep
 from importlib import import_module
 
 import numpy as np
@@ -8,45 +9,64 @@ import numpy as np
 import py_trees
 import rclpy
 import tf2_geometry_msgs
-from cetautomatix.magic_points import elements
 from cetautomatix.selftest import Selftest
+from cetautomatix.magic_points import elements
+from cetautomatix.strategy_modes import get_time_coeff
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from rclpy.time import Time
+from rclpy.time import Time, Duration
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 
 class Robot(Node):
     def __init__(self):
-        super().__init__(node_name='robot')
-        robot = self.get_namespace().strip('/')
-        self.actuators = import_module(f'actuators.{robot}').actuators
-        self.selftest = Selftest(self)
-        self.position = (0.29, 1.33)
-        self.length = 0.26
-        self.width = 0.2
+        super().__init__(node_name='cetautomatix')
         self._triggered = False
+        self._position = None
+        self._start_time = None
         self._current_action = None
-        self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
+        robot = self.get_namespace().strip('/')
+        # parameters interfaces
+        self.declare_parameter('length')
+        self.declare_parameter('width')
+        self.declare_parameter('strategy_mode')
+        self.length_param = self.get_parameter('length')
+        self.width_param = self.get_parameter('width')
+        self.strategy_mode_param = self.get_parameter('strategy_mode')
+        # Bind actuators
+        self.actuators = import_module(f'actuators.{robot}').actuators
+        # Do selftest
+        self.selftest = Selftest(self)
+        # strategix client interfaces
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = robot
-        self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
+        self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
-        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
+        self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
+        # Phararon delploy client interfaces
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
+        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
+        # Odometry subscriber
+        self._tf_buffer = Buffer()
+        self._tf_listener = TransformListener(self._tf_buffer, self)
+        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self._odom_callback(self._odom_pose_stamped)
         self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
+        # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
-        self._tf_buffer = Buffer()
-        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
+        # Reached initialized state
         self.get_logger().info('Cetautomatix ROS node has been started')
 
     def _synchronous_call(self, client, request):
@@ -113,11 +133,18 @@ class Robot(Node):
     def trigger_pavillons(self):
         self.get_logger().info('Triggered pavillons')
         self.actuators.raiseTheFlag()
+        self._change_action_status_request.action = "PAVILLON"
+        self._change_action_status_request.request = 'CONFIRM'
+        response = self._synchronous_call(self._change_action_status_client, self._change_action_status_request)
+        if response is None:
+            return False
+        return response.success
 
     def _start_robot_callback(self, req, resp):
         """Start robot."""
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
+        self._start_time = self.get_clock().now().nanoseconds * 1e-9
         resp.success = True
         return resp
 
@@ -128,13 +155,14 @@ class Robot(Node):
     def _odom_callback(self, msg):
         try:
             # Get latest transform
-            tf = self._tf_buffer.lookup_transform('map', 'odom', Time())
+            tf = self._tf_buffer.lookup_transform('map', 'base_link', Time(), timeout=Duration(seconds=1.0))
             self._odom_pose_stamped.header = msg.header
             self._odom_pose_stamped.pose = msg.pose.pose
             tf_pose = tf2_geometry_msgs.do_transform_pose(self._odom_pose_stamped, tf)
         except LookupException:
+            self.get_logger().warn('Failed to lookup_transform from map to odom')
             return
-        self.position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
+        self._position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
@@ -146,17 +174,18 @@ class Robot(Node):
 
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
-        distance_list = []
-        # start = timeEndOfGame.time - 100.0
-        for action in action_list:
-            value = elements[action]
-            distance = np.sqrt(
-                (value[0] - self.position[0])**2 + (value[1] - self.position[1])**2)
-            coeff_distance = 100 * (1 - distance / 3.6)
-            distance_list.append(coeff_distance)
-        if len(distance_list) < 1:
+        if not action_list:
             return None
-        best_action = action_list[distance_list.index(max(distance_list))]
+        coefficient_list = []
+        for action in action_list:
+            coefficient = 0
+            element = elements[action]
+            distance = np.sqrt(
+                (element["X"] - self._position[0])**2 + (element["Y"] - self._position[1])**2)
+            coefficient += 100 * (1 - distance / 3.6)
+            coefficient += get_time_coeff(self.get_clock().now().nanoseconds * 1e-9 - self._start_time, action, self.strategy_mode_param.value)
+            coefficient_list.append(coefficient)
+        best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
 
     def get_goal_pose(self):
@@ -164,25 +193,25 @@ class Robot(Node):
         msg = NavigateToPose_Goal()
         msg.pose.header.frame_id = 'map'
         if self._current_action is not None:
-            value = elements[self._current_action]
-            msg.pose.pose.position.x = float(value[0])
-            msg.pose.pose.position.y = float(value[1])
+            element = elements[self._current_action]
+            msg.pose.pose.position.x = float(element["X"])
+            msg.pose.pose.position.y = float(element["Y"])
             msg.pose.pose.position.z = 0.0
-            try:
-                if value[2] is not None:
-                    q = self.euler_to_quaternion(value[2])
-                    if value[2] == 0:
-                        msg.pose.pose.position.x -= self.width / 2
-                    elif value[2] == 180:
-                        msg.pose.pose.position.x += self.width / 2
-                    elif value[2] == 90:
-                        msg.pose.pose.position.y -= self.length / 2
-                    elif value[2] == -90:
-                        msg.pose.pose.position.y += self.length / 2
-                else:
-                    q = self.euler_to_quaternion(0)
-            except IndexError:
-                self.get_logger().warn(f'Action {self._current_action} has no angle')
+            theta = element.get("Rot")
+            if theta is not None:
+                theta %= 360
+                q = self.euler_to_quaternion(theta)
+                # TODO : Changement de repère plutot
+                if theta == 0:
+                    msg.pose.pose.position.x -= self.length_param.value / 2
+                elif theta == 180:
+                    msg.pose.pose.position.x += self.length_param.value / 2
+                elif theta == 90:
+                    msg.pose.pose.position.y -= self.width_param.value / 2
+                elif theta == 270:
+                    msg.pose.pose.position.y += self.width_param.value / 2
+            else:
+                self.get_logger().warn(f'NavigateToPose for action {self._current_action} invoqued without angle')
                 q = self.euler_to_quaternion(0)
             msg.pose.pose.orientation.x = q[0]
             msg.pose.pose.orientation.y = q[1]

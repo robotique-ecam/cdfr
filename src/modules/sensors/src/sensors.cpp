@@ -10,10 +10,10 @@ Sensors::Sensors() : Node("sensors_node") {
 /* Open I2C connection */
 #ifndef SIMULATION
   i2c = std::make_shared<I2C>(i2c_bus);
-#endif /* SIMULATION */
 
   /* Init VL53L1X Sensors */
   init_sensors();
+#endif /* SIMULATION */
 
   /* Init ROS Publishers and Subscribers */
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -48,11 +48,13 @@ void Sensors::init_variables() {
   vl53l1x_range_msg.field_of_view = 0.26;
 }
 
+#ifndef SIMULATION
 void Sensors::init_sensors() {
   for (auto addr : vl53l1x_addresses) {
     vl53l1x_sensors.push_back(LINUX_VL53L1X(i2c.get(), addr));
   }
 }
+#endif /* SIMULATION */
 
 void Sensors::receive_distance() {
 #ifndef SIMULATION

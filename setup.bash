@@ -56,7 +56,7 @@ elif [ $robot = "assurancetourix" ]; then
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
-    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation-core" ]; then
     print_info "Setting up simulation environment"
@@ -67,7 +67,7 @@ elif [ $robot = "simulation-core" ]; then
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
     generate_yamls
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
     print_info "Linking webots controllers"
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
