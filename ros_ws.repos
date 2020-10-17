@@ -5,9 +5,9 @@ repositories:
     version: ros2
   teb_local_planner:
     type: git
-    url: https://github.com/3wnbr1/teb_local_planner.git
+    url: https://github.com/rst-tu-dortmund/teb_local_planner.git
     version: ros2-master
   webots_ros2:
     type: git
     url: https://github.com/cyberbotics/webots_ros2.git
-    version: master
+    version: foxy
