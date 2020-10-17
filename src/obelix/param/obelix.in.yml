@@ -12,7 +12,7 @@ max_vel_x_backwards: 0.4
 max_vel_theta: 1.0
 acc_lim_x: 0.5
 acc_lim_theta: 0.5
-robotbase_lenght: 0.18
+robotbase_length: 0.18
 robotbase_width: 0.315
 ---
 obelix:
@@ -36,11 +36,11 @@ obelix:
       base_frame: "base_link"
 
 
-    cetautomatix:
-      ros__parameters:
-        use_sim_time: !Var use_sim_time
-        width: !Var robotbase_lenght
-        lenght: !Var robotbase_width
+  cetautomatix:
+    ros__parameters:
+      use_sim_time: !Var use_sim_time
+      width: !Var robotbase_width
+      length: !Var robotbase_length
 
 
   sensors_node:
