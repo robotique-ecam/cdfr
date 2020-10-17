@@ -42,19 +42,19 @@ class Robot(Node):
         # Do selftest
         self.selftest = Selftest(self)
         # strategix client interfaces
-        self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = robot
-        self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
+        self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_request = ChangeActionStatus.Request()
         self._change_action_status_request.sender = robot
+        self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         # Phararon delploy client interfaces
-        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
+        self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
         # Odometry subscriber
-        self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
-        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
         self._tf_buffer = Buffer()
+        self._odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self._odom_sub = self.create_subscription(Odometry, 'odom', self._odom_callback, 1)
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
