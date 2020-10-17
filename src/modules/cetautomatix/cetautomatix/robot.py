@@ -26,6 +26,8 @@ class Robot(Node):
         self._triggered = False
         self._current_action = None
         robot = self.get_namespace().strip('/')
+        self.declare_parameter('length')
+        self.declare_parameter('width')
         self.length_param = self.get_parameter('length')
         self.width_param = self.get_parameter('width')
         self.actuators = import_module(f'actuators.{robot}').actuators
