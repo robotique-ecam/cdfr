@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
 
-from time import sleep
 from importlib import import_module
+from time import sleep
 
 import numpy as np
 
 import py_trees
 import rclpy
 import tf2_geometry_msgs
-from cetautomatix.selftest import Selftest
 from cetautomatix.magic_points import elements
+from cetautomatix.selftest import Selftest
 from cetautomatix.strategy_modes import get_time_coeff
+from lcd_msgs.msg import Lcd
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from rclpy.time import Time, Duration
+from rclpy.time import Duration, Time
 from std_srvs.srv import Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
@@ -30,7 +31,7 @@ class Robot(Node):
         self._position = None
         self._start_time = None
         self._current_action = None
-        robot = self.get_namespace().strip('/')
+        self.robot = self.get_namespace().strip('/')
         # parameters interfaces
         self.declare_parameter('length')
         self.declare_parameter('width')
@@ -39,15 +40,15 @@ class Robot(Node):
         self.width_param = self.get_parameter('width')
         self.strategy_mode_param = self.get_parameter('strategy_mode')
         # Bind actuators
-        self.actuators = import_module(f'actuators.{robot}').actuators
+        self.actuators = import_module(f'actuators.{self.robot}').actuators
         # Do selftest
         self.selftest = Selftest(self)
         # strategix client interfaces
         self._get_available_request = GetAvailableActions.Request()
-        self._get_available_request.sender = robot
+        self._get_available_request.sender = self.robot
         self._get_available_client = self.create_client(GetAvailableActions, '/strategix/available')
         self._change_action_status_request = ChangeActionStatus.Request()
-        self._change_action_status_request.sender = robot
+        self._change_action_status_request.sender = self.robot
         self._change_action_status_client = self.create_client(ChangeActionStatus, '/strategix/action')
         # Phararon delploy client interfaces
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
@@ -61,6 +62,8 @@ class Robot(Node):
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name='NavigateToPose')
         self.blackboard.register_key(key='goal', access=py_trees.common.Access.WRITE)
+        # LCD driver direct access
+        self._lcd_driver_pub = self.create_publisher(Lcd, '/obelix/lcd', 1)
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
@@ -145,6 +148,13 @@ class Robot(Node):
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
         self._start_time = self.get_clock().now().nanoseconds * 1e-9
+        lcd_msg = Lcd()
+        lcd_msg.line = 0
+        lcd_msg.text = f'{self.robot.capitalize()} running'.ljust(16)
+        self._lcd_driver_pub.publish(lcd_msg)
+        lcd_msg.line = 1
+        lcd_msg.text = 'Score: 0'.ljust(16)
+        self._lcd_driver_pub.publish(lcd_msg)
         resp.success = True
         return resp
 
