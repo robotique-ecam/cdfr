@@ -97,6 +97,7 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
             if not self.visited:
                 self.visited = True
                 # Code to end every action
+                self.robot.stop_ros()
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 

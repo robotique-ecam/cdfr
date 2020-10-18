@@ -2,9 +2,10 @@
 
 
 from importlib import import_module
-from time import sleep
 
+import psutil
 import numpy as np
+from signal import SIGINT
 
 import py_trees
 import rclpy
@@ -228,3 +229,14 @@ class Robot(Node):
             msg.pose.pose.orientation.z = q[2]
             msg.pose.pose.orientation.w = q[3]
         self.blackboard.goal = msg
+
+    def stop_ros(self):
+        """Stop ros launch processes."""
+        lcd_msg = Lcd()
+        lcd_msg.line = 0
+        lcd_msg.text = f'{self.robot} is done!'.ljust(16)
+        self._lcd_driver_pub.publish(lcd_msg)
+        for p in psutil.process_iter(['pid', 'name', 'cmdline']):
+            if 'ros2' in p.name() and 'launch' in p.cmdline():
+                self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
+                p.send_signal(SIGINT)
