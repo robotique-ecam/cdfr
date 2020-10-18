@@ -39,6 +39,14 @@ class Actuators:
             self.arbotix.setSpeed(servo.get('addr'), servo.get('speed'))
             self.arbotix.setPosition(servo.get('addr'), servo.get('down'))
 
+    def disableDynamixels(self):
+        """Setup dynamixels speed."""
+        for dyna in self.DYNAMIXELS:
+            self.arbotix.disableTorque(dyna)
+        for s in self.SERVOS:
+            servo = self.SERVOS[s]
+            self.arbotix.disableTorque(servo.get('addr'))
+
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
         if (flag_servo := self.SERVOS.get('flags')) is not None:

@@ -2,10 +2,10 @@
 
 
 from importlib import import_module
-
-import psutil
-import numpy as np
 from signal import SIGINT
+
+import numpy as np
+import psutil
 
 import py_trees
 import rclpy
@@ -18,7 +18,7 @@ from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.time import Duration, Time
-from std_srvs.srv import Trigger
+from std_srvs.srv import SetBool, Trigger
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
@@ -44,6 +44,8 @@ class Robot(Node):
         self.actuators = import_module(f'actuators.{self.robot}').actuators
         # Do selftest
         self.selftest = Selftest(self)
+        # Prechill engines
+        self.actuators.setFansEnabled(True)
         # strategix client interfaces
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = self.robot
@@ -68,6 +70,11 @@ class Robot(Node):
         # Wait for strategix as this can block the behavior Tree
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
+        # Enable stepper drivers
+        self._get_enable_drivers_request = SetBool.Request()
+        self._get_enable_drivers_request.data = True
+        self._get_enable_drivers_client = self.create_client(SetBool, 'enable_drivers')
+        self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         # Reached initialized state
@@ -232,10 +239,17 @@ class Robot(Node):
 
     def stop_ros(self):
         """Stop ros launch processes."""
+        # Publish "Robot is done"
         lcd_msg = Lcd()
         lcd_msg.line = 0
-        lcd_msg.text = f'{self.robot} is done!'.ljust(16)
+        lcd_msg.text = f'{self.robot.capitalize()} is done!'.ljust(16)
         self._lcd_driver_pub.publish(lcd_msg)
+        # Disable stepper drivers
+        self._get_enable_drivers_request.data = False
+        self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
+        # Stop fans and relax servos
+        self.actuators.disableDynamixels()
+        self.actuators.setFansEnabled(False)
         for p in psutil.process_iter(['pid', 'name', 'cmdline']):
             if 'ros2' in p.name() and 'launch' in p.cmdline():
                 self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
