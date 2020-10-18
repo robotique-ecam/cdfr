@@ -96,14 +96,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             ),
 
             Node(
-                package='sensors',
-                executable='sensors',
-                output='screen',
-                parameters=[params.name],
-                remappings=remappings,
-            ),
-
-            Node(
                 package='robot_state_publisher',
                 executable='robot_state_publisher',
                 output='screen',
