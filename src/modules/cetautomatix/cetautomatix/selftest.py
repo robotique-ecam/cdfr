@@ -4,6 +4,7 @@
 """Selftest."""
 
 
+from time import sleep
 from platform import machine
 
 from lcd_msgs.msg import Lcd
@@ -22,6 +23,10 @@ class Selftest:
         """Init selftest with node."""
         self.node = node
         self.lcd_driver = self.node.create_publisher(Lcd, 'lcd', 1)
+        # Wait for subscribers
+        while self.lcd_driver.get_subscription_count() < 1:
+            sleep(1)
+
         self.__write__(0)  # Report selftest init
         if 'aarch64' not in machine():
             return
