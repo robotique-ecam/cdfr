@@ -20,7 +20,11 @@
       var socket = io(namespace);
 
       socket.on('connect', function() {
-        toastr.success('Connected to api')
+        toastr.success('Connected to api');
+      });
+
+      socket.on('score', function(msg) {
+        $('#affichageScore').html(msg.score);
       });
 
       socket.on('console_out', function(msg) {
@@ -34,14 +38,14 @@
           toastr.error(msg.msg, msg.name, {
             timeOut: 0,
             extendedTimeout: 0,
-            closeButton: true
-          })
+            closeButton: true,
+          });
         } else if (msg.level == 'WARN') {
           toastr.warning(msg.msg, msg.name, {
             timeOut: 0,
             extendedTimeout: 0,
-            closeButton: true
-          })
+            closeButton: true,
+          });
         }
       });
     });
@@ -84,8 +88,7 @@
         <div class="card">
           <h5 class="card-title text-center" id="titreScore">Score</h5>
           <div class="card-body">
-            <p class="card-text" id="affichageScore">42</p>
-
+            <p class="card-text" id="affichageScore">0</p>
           </div>
         </div>
       </div>

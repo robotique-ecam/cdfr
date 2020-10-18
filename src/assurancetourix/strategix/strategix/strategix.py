@@ -7,6 +7,7 @@ from threading import Thread
 
 import rclpy
 from lcd_msgs.msg import Lcd
+from std_msgs.msg import UInt8
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
 from strategix.actions import actions
@@ -24,6 +25,7 @@ class StrategixActionServer(Node):
         self.todo_srv = self.create_service(GetAvailableActions, '/strategix/available', self.available_callback)
         self.action_srv = self.create_service(ChangeActionStatus, '/strategix/action', self.action_callback)
         self.lcd_driver = self.create_publisher(Lcd, '/obelix/lcd', 1)
+        self.score_publisher = self.create_publisher(UInt8, '/score', 1)
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Strategix is ready')
 
@@ -80,6 +82,9 @@ class StrategixActionServer(Node):
         lcd_msg = Lcd()
         lcd_msg.line = 1
         lcd_msg.text = f'Score: {score}'
+        score_msg = UInt8()
+        score_msg.data = score
+        self.score_publisher.publish(score_msg)
         self.lcd_driver.publish(lcd_msg)
 
 
