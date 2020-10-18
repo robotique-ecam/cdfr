@@ -19,6 +19,24 @@
 
       var socket = io(namespace);
 
+      toastr.options = {
+        closeButton: false,
+        debug: false,
+        newestOnTop: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        preventDuplicates: true,
+        onclick: null,
+        showDuration: 300,
+        hideDuration: 0,
+        timeOut: 15000,
+        extendedTimeOut: 5000,
+        showEasing: 'linear',
+        hideEasing: 'linear',
+        showMethod: 'show',
+        hideMethod: 'hide',
+      };
+
       socket.on('connect', function() {
         toastr.success('Connected to api');
       });
@@ -79,7 +97,7 @@
           <h5 class="card-title text-center">Strategy</h5>
           <div class="card-body">
             <p class="card-text">
-
+              <input id="strategy_slider" type="range" min="1" max="5" value="3">
             </p>
           </div>
         </div>
