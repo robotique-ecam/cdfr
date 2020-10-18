@@ -50,7 +50,7 @@ obelix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Obelix v0.8.2"
+      banner: "Obelix v0.8.3"
 
 
 

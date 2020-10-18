@@ -2,7 +2,7 @@
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
 ![Webots](https://img.shields.io/badge/webots-2020b-blue)
 ![Status](https://img.shields.io/badge/status-beta-blueviolet)
-![Version](https://img.shields.io/badge/version-v0.8.2-blue)
+![Version](https://img.shields.io/badge/version-v0.8.3-blue)
 
 ### Build
 
