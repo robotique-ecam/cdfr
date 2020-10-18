@@ -63,7 +63,7 @@ jobs:
           export RCUTILS_LOGGING_BUFFERED_STREAM=1
           export PYTHONPATH=$PYTHONPATH:~/ros_ws/build/python_orocos_kdl
 
-          /usr/local/bin/webots --mode=fast --stdout --stderr --batch --no-sandbox --minimize tools/simulation/worlds/cdr2020.wbt &
+          /usr/local/bin/webots --mode=realtime --stdout --stderr --batch --no-sandbox --minimize tools/simulation/worlds/cdr2020.wbt &
           echo "Webots is starting..."
           sleep 45
           ros2 launch titan cloud-interfaces.py &
