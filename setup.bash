@@ -52,7 +52,7 @@ if [ $robot = "asterix" ] || [ $robot = "obelix" ]; then
 
 elif [ $robot = "assurancetourix" ]; then
     print_info "Setting up $robot"
-    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix lcd_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
