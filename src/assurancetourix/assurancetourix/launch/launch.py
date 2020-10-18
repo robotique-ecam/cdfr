@@ -43,8 +43,8 @@ def generate_launch_description():
         ),
 
         Node(
-            package='panoramix',
-            executable='panoramix',
+            package='strategix',
+            executable='strategix',
             output='screen',
             arguments=[]
         ),
