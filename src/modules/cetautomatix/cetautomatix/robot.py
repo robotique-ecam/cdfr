@@ -3,6 +3,7 @@
 
 from importlib import import_module
 from signal import SIGINT
+from subprocess import call
 
 import numpy as np
 import psutil
@@ -250,7 +251,10 @@ class Robot(Node):
         # Stop fans and relax servos
         self.actuators.disableDynamixels()
         self.actuators.setFansEnabled(False)
+        # Shutdown ROS
         for p in psutil.process_iter(['pid', 'name', 'cmdline']):
             if 'ros2' in p.name() and 'launch' in p.cmdline():
                 self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
                 p.send_signal(SIGINT)
+        # shutdown linux
+        call(['shutdown', '-h', 'now'])
