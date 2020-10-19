@@ -62,7 +62,7 @@ class SetupTimersAction(py_trees.behaviour.Behaviour):
         if not self.visited:
             self.visited = True
             # Setup Timers
-            self.robot.start_time = self.robot.get_clock().now().nanoseconds * 1e-9
+            self.robot._start_robot_callback(None, None)
             for action, duration in self.actions.items():
                 action.time = self.robot.get_clock().now().nanoseconds * 1e-9 + duration
             return py_trees.common.Status.SUCCESS
