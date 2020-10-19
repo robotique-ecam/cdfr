@@ -164,7 +164,8 @@ class Robot(Node):
         lcd_msg.line = 1
         lcd_msg.text = 'Score: 0'.ljust(16)
         self._lcd_driver_pub.publish(lcd_msg)
-        resp.success = True
+        if hasattr(resp, 'success'):
+            resp.success = True
         return resp
 
     def triggered(self):
