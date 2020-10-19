@@ -112,13 +112,13 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
         if GPIO is None:
             return
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     def update(self):
         """Guard condition for goupille."""
         if GPIO is None:
             if self.robot.triggered():
                 return py_trees.common.Status.SUCCESS
-        elif GPIO.input(27) or self.robot.triggered():
+        elif not GPIO.input(17) or self.robot.triggered():
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING
