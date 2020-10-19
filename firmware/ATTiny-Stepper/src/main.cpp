@@ -46,22 +46,23 @@ void setup() {
 }
 
 ISR(TIMER1_COMPA_vect) {
+  /* Disable comparator A interrupts */
+  TIMSK &= ~(1 << OCIE1A);
+  OCR1A = 0;
   /* Start the pulse */
   PORTB |= (1 << PIN_STEP);
   steps++;
-  /* Disable comparator to avoid race conditions */
-  OCR1A = 0;
-  OCR1B = 0;
   /* Reset counter */
   TCNT1 = 0;
   /* Delay for x us by dividing clock by 16 (1us per count) and counting */
   TCCR1 = (TCCR1 & 0xf0) | 5;
   OCR1B = 10;
+  TIMSK |= (1 << OCIE1B);
 }
 
 ISR(TIMER1_COMPB_vect) {
-  /* Disable comparator to avoid race conditions */
-  OCR1A = 0;
+  /* Disable comparator B interrupts */
+  TIMSK &= ~(1 << OCIE1B);
   OCR1B = 0;
   /* Reset counter */
   TCNT1 = 0;
@@ -70,6 +71,8 @@ ISR(TIMER1_COMPB_vect) {
   OCR1A = comparator[data_index];
   /* Stop the pulse */
   PORTB &= ~(1 << PIN_STEP);
+  /* Enable compare interrupt */
+  TIMSK |= (1 << OCIE1A);
 }
 
 void on_receive_command(uint8_t n) {
