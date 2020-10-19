@@ -39,7 +39,6 @@ globals = {
 
     'max_steps_frequency': 10000,
     'speedramp_resolution': 128,
-    'microsteps': 16,
 
     'min_turning_radius': 0.0
 }
@@ -48,6 +47,7 @@ asterix = {
     'wheel_separation': .244,
     'wheel_radius': .0405,
     'steps_per_turn': 200,
+    'microsteps': 16,
     'footprint': get_footprint(length=.19, width=.256),
 
     'max_vel_x': 0.4,
@@ -61,6 +61,7 @@ obelix = {
     'wheel_separation': .282,
     'wheel_radius': .061,
     'steps_per_turn': 400,
+    'microsteps': 32,
     'footprint': get_footprint(length=.18, width=.35),
 
     'max_vel_x': 0.4,

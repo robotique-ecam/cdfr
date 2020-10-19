@@ -33,6 +33,7 @@
 
 uint16_t old_steps = 0;
 volatile uint16_t steps = 0;
+volatile uint8_t data_index = 0;
 
 void setup() {
   /* Setup IO */
@@ -44,16 +45,31 @@ void setup() {
   TIMSK |= (1 << OCIE1A);
 }
 
-void step() {
+ISR(TIMER1_COMPA_vect) {
+  /* Start the pulse */
   PORTB |= (1 << PIN_STEP);
   steps++;
-  _delay_us(4);
-  PORTB &= ~(1 << PIN_STEP);
+  /* Disable comparator to avoid race conditions */
+  OCR1A = 0;
+  OCR1B = 0;
+  /* Reset counter */
+  TCNT1 = 0;
+  /* Delay for x us by dividing clock by 16 (1us per count) and counting */
+  TCCR1 = (TCCR1 & 0xf0) | 5;
+  OCR1B = 10;
 }
 
-ISR(TIMER1_COMPA_vect) {
-  step();
+ISR(TIMER1_COMPB_vect) {
+  /* Disable comparator to avoid race conditions */
+  OCR1A = 0;
+  OCR1B = 0;
+  /* Reset counter */
   TCNT1 = 0;
+  /* Restore values */
+  TCCR1 = (TCCR1 & 0xf0) | prescaler[data_index];
+  OCR1A = comparator[data_index];
+  /* Stop the pulse */
+  PORTB &= ~(1 << PIN_STEP);
 }
 
 void on_receive_command(uint8_t n) {
@@ -65,7 +81,7 @@ void on_receive_command(uint8_t n) {
       steps = 0;
       /* Send direction according to data sign */
       PORTB ^= (-(sign(data) ^ INVERT) ^ PORTB) & (1 << PIN_DIR);
-      uint8_t data_index = abs(data);
+      data_index = abs(data);
       OCR1A = comparator[data_index];
       TCCR1 = (TCCR1 & 0xf0) | prescaler[data_index];
       TinyWireS.send((uint8_t)old_steps);

@@ -6,10 +6,12 @@ max_freq = 10e3
 resolution = 128
 prescaller_bitsize = 14
 
+impulsion_time = 10e-6
+
 step = max_freq / resolution
 
 speed_frequencies = [step * i for i in range(resolution)]
-speed_delays = [1/x for x in speed_frequencies if x != 0]
+speed_delays = [(1/x - impulsion_time) for x in speed_frequencies if x != 0]
 
 
 def find_prescaler(delay):
@@ -29,5 +31,5 @@ for delay in speed_delays:
 
 
 with open('src/speedramp.hpp', 'w') as header:
-    header.write('#include <inttypes.h>\n\nconst uint8_t prescaler[%d] = {\n%s};\n\n' % (resolution, prescalers))
-    header.write('const uint8_t comparator[%d] = {\n%s};\n' % (resolution, comparators))
+    header.write('#include <inttypes.h>\n\nvolatile const uint8_t prescaler[%d] = {\n%s};\n\n' % (resolution, prescalers))
+    header.write('volatile const uint8_t comparator[%d] = {\n%s};\n' % (resolution, comparators))

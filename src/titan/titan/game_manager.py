@@ -17,7 +17,6 @@ import rclpy
 from std_srvs.srv import Trigger
 from webots_ros2_core.webots_node import WebotsNode
 
-
 environ['WEBOTS_ROBOT_NAME'] = 'game_manager'
 animation_path = path.expanduser('~/animation/animation.html')
 
@@ -51,7 +50,11 @@ class GameManager(WebotsNode):
     def get_commit_filename(self):
         """Generate rbsd filename."""
         r = Repo(search_parent_directories=True)
-        branch = r.active_branch.name.replace('/', '-').replace('.', '-')
+        try:
+            branch = r.active_branch.name.replace('/', '-').replace('.', '-')
+        except TypeError:
+            # Detached head state for tags
+            branch = next((tag for tag in r.tags if tag.commit == r.head.commit), None)
         return f'ros-{branch}-{r.head.object.hexsha[:8]}.rbsd'
 
     def write_rbsd(self, filename):
@@ -69,7 +72,7 @@ class GameManager(WebotsNode):
             self.get_logger().info(f'Match simulation completion : {round(self.robot.getTime() - self._startup_time, 1)}%')
         else:
             self.robot.animationStopRecording()
-            self.get_logger().info(f'Match simulation completion : 100%')
+            self.get_logger().info('Match simulation completion : 100%')
             filename = self.get_commit_filename()
             self.write_rbsd(path.join(path.dirname(animation_path), filename))
             self.get_logger().info(f'Wrote {filename}')
