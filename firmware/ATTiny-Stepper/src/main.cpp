@@ -48,7 +48,6 @@ void setup() {
 ISR(TIMER1_COMPA_vect) {
   /* Disable comparator A interrupts */
   TIMSK &= ~(1 << OCIE1A);
-  OCR1A = 0;
   /* Start the pulse */
   PORTB |= (1 << PIN_STEP);
   steps++;
@@ -63,7 +62,6 @@ ISR(TIMER1_COMPA_vect) {
 ISR(TIMER1_COMPB_vect) {
   /* Disable comparator B interrupts */
   TIMSK &= ~(1 << OCIE1B);
-  OCR1B = 0;
   /* Reset counter */
   TCNT1 = 0;
   /* Restore values */
