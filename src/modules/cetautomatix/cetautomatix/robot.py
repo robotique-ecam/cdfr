@@ -239,7 +239,7 @@ class Robot(Node):
             msg.pose.pose.orientation.w = q[3]
         self.blackboard.goal = msg
 
-    def stop_ros(self):
+    def stop_ros(self, shutdown=True):
         """Stop ros launch processes."""
         # Publish "Robot is done"
         lcd_msg = Lcd()
@@ -258,4 +258,9 @@ class Robot(Node):
                 self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
                 p.send_signal(SIGINT)
         # shutdown linux
-        call(['shutdown', '-h', 'now'])
+        if shutdown:
+            call(['shutdown', '-h', 'now'])
+
+    def __del__(self):
+        """Handle SIGINT/global destructor."""
+        self.stop_ros(shutdown=False)
