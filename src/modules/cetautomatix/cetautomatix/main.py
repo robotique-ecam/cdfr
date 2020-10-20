@@ -46,8 +46,8 @@ def main(args=None):
         pass
 
     executor.shutdown()
-    tree.node.destroy_node()
     robot.destroy_node()
+    tree.node.destroy_node()
     rclpy.shutdown()
 
 
