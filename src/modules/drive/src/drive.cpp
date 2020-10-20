@@ -158,6 +158,7 @@ void Drive::update_velocity() {
 
   this->i2c_mutex.unlock();
 
+  std::cout << "speed_cmd_.left:" << differential_speed_cmd_.left << " speed_cmd_.right" << differential_speed_cmd_.right << std::endl;
   std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
 #else
   time_since_last_sync_ = get_sim_time();
