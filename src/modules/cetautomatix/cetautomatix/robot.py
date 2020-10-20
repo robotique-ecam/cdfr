@@ -261,6 +261,7 @@ class Robot(Node):
         if shutdown:
             call(['shutdown', '-h', 'now'])
 
-    def __del__(self):
+    def destroy_node(self):
         """Handle SIGINT/global destructor."""
         self.stop_ros(shutdown=False)
+        super().destroy_node()
