@@ -112,6 +112,17 @@ void Drive::init_variables() {
 
 #ifndef SIMULATION
   time_since_last_sync_ = this->get_clock()->now();
+
+  this->i2c_mutex.lock();
+
+  /* Init speed before starting odom */
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->read_word(0);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->read_word(0);
+
+  this->i2c_mutex.unlock();
 #else
   time_since_last_sync_ = get_sim_time();
 #endif /* SIMULATION */
@@ -149,6 +160,8 @@ void Drive::update_velocity() {
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
   this->i2c_mutex.unlock();
+
+  std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
 #else
   time_since_last_sync_ = get_sim_time();
 
