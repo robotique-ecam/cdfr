@@ -13,6 +13,14 @@ Drive::Drive() : Node("drive_node") {
 #ifndef SIMULATION
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
+
+  /* Init speed before starting odom */
+  this->i2c_mutex.lock();
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->read_word(0);
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->read_word(0);
+  this->i2c_mutex.unlock();
 #else
   /* Init webots supervisor */
   wb_robot = std::make_shared<webots::Robot>();
@@ -112,17 +120,6 @@ void Drive::init_variables() {
 
 #ifndef SIMULATION
   time_since_last_sync_ = this->get_clock()->now();
-
-  this->i2c_mutex.lock();
-
-  /* Init speed before starting odom */
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->read_word(0);
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->read_word(0);
-
-  this->i2c_mutex.unlock();
 #else
   time_since_last_sync_ = get_sim_time();
 #endif /* SIMULATION */
