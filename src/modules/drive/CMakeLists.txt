@@ -51,6 +51,7 @@ add_executable(${EXEC_NAME}
   src/i2c.cpp
 )
 
+option(DEBUG "Debug mode" ON)
 option(SIMULATION "Simulation mode" OFF)
 option(TIMER "Enable Wall Timer for odometry" ON)
 
@@ -64,6 +65,9 @@ if(SIMULATION)
   include_directories($ENV{WEBOTS_HOME}/include/controller/c $ENV{WEBOTS_HOME}/include/controller/cpp)
   target_link_libraries(${EXEC_NAME} ${LIBRARIES})
 else()
+  if (DEBUG)
+    add_definitions(-DDEBUG)
+  endif()
   target_link_libraries(${EXEC_NAME} i2c)
 endif()
 

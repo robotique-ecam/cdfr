@@ -158,8 +158,11 @@ void Drive::update_velocity() {
 
   this->i2c_mutex.unlock();
 
+#ifdef DEBUG
+  std::cout << "---" << std::endl;
   std::cout << "speed_cmd_.left:" << static_cast<int>(differential_speed_cmd_.left) << " speed_cmd_.right" << static_cast<int>(differential_speed_cmd_.right) << std::endl;
   std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
+#endif /* DEBUG */
 #else
   time_since_last_sync_ = get_sim_time();
 
@@ -199,8 +202,10 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
 
+#ifdef DEBUG
   std::cout << "cmd_vel_.left:" << cmd_vel_.left << " cmd_vel_.right:" << cmd_vel_.right << std::endl;
   std::cout << "speed_.left:" << differential_speed_.left << " speed_.right:" << differential_speed_.right << std::endl;
+#endif /* DEBUG */
 
   instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
   instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (_wheel_separation);
