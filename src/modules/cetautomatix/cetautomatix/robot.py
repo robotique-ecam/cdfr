@@ -263,5 +263,6 @@ class Robot(Node):
 
     def destroy_node(self):
         """Handle SIGINT/global destructor."""
-        self.stop_ros(shutdown=False)
+        self.actuators.disableDynamixels()
+        self.actuators.setFansEnabled(False)
         super().destroy_node()
