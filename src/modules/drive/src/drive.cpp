@@ -293,11 +293,13 @@ void Drive::sim_step() { this->wb_robot->step(timestep); }
 #endif /* SIMULATION */
 
 Drive::~Drive() {
+#ifndef SIMULATION
   this->i2c_mutex.lock();
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
   this->i2c->write_byte_data(STEPPER_CMD, 0x10);
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
   this->i2c->write_byte_data(STEPPER_CMD, 0x10);
   this->i2c_mutex.unlock();
+#endif /* SIMULATION */
   RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
 }
