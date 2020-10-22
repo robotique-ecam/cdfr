@@ -26,6 +26,7 @@ sudo apt update && sudo apt install -y \
   python3-pykdl \
   python3-smbus \
   python3-rpi.gpio \
+  python3-serial \
   wget \
   i2c-tools \
   libi2c-dev \

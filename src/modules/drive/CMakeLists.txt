@@ -51,7 +51,7 @@ add_executable(${EXEC_NAME}
   src/i2c.cpp
 )
 
-option(DEBUG "Debug mode" ON)
+option(DEBUG "Debug mode" OFF)
 option(SIMULATION "Simulation mode" OFF)
 option(TIMER "Enable Wall Timer for odometry" ON)
 
