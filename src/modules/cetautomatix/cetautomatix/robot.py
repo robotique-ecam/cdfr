@@ -10,7 +10,7 @@ import psutil
 
 import py_trees
 import rclpy
-import tf2_geometry_msgs
+from cetautomatix import tf2_geometry_msgs
 from cetautomatix.magic_points import elements
 from cetautomatix.selftest import Selftest
 from cetautomatix.strategy_modes import get_time_coeff

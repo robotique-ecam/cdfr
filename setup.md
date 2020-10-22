@@ -52,7 +52,7 @@ dtoverlay=i2c0,baudrate=400000
 
 iw wlan0 set power_save off
 source /home/ubuntu/ros/install/setup.bash
-HOME=/home/ubuntu /opt/ros/foxy/bin/ros2 launch asterix launch.py > /home/ubuntu/ros2-system.log 2>&1 &
+HOME=/home/ubuntu /opt/ros/foxy/bin/ros2 launch asterix launch.py > /home/ubuntu/ros2-system-$(date "+%Y.%m.%d-%H.%M.%S").log 2>&1 &
 ```
 
 *~/.bashrc*
