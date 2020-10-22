@@ -392,7 +392,12 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
-      tmpPoseOut.pose.position.x += 0.15;
+      float colorSideCoeff = 0;
+      if (side.compare("yellow") == 0){
+        colorSideCoeff = 0.2;
+      }
+
+      tmpPoseOut.pose.position.x += 0.15 + colorSideCoeff;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
