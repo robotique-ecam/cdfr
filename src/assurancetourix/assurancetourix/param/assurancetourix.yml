@@ -1,7 +1,7 @@
 ---
 assurancetourix:
   ros__parameters:
-    topic_for_gradient_layer: "coordonate_position_transform"
+    topic_for_gradient_layer: "/coordonate_position_transform"
     camera:
       bgain: 5160
       exposure: 250

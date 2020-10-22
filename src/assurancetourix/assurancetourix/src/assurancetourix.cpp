@@ -52,7 +52,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("asterix/global_costmap/" + topic_for_gradient_layer, qos);
+  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -195,7 +195,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
-  this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "default_topic_for_gradient_layer");
+  this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
   this->get_parameter_or<std::string>("side", side, "blue");
 
   // initialisation of markers

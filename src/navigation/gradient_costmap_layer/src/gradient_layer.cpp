@@ -35,7 +35,7 @@ void GradientLayer::onInitialize() {
   node_->get_parameter(name_ + "." + "gradient_size", GRADIENT_SIZE);
   declareParameter("gradient_factor", rclcpp::ParameterValue(60));
   node_->get_parameter(name_ + "." + "gradient_factor", GRADIENT_FACTOR);
-  declareParameter("markers_topic", rclcpp::ParameterValue("coordonate_position_transform"));
+  declareParameter("markers_topic", rclcpp::ParameterValue("/coordonate_position_transform"));
   node_->get_parameter(name_ + "." + "markers_topic", topic);
 
   need_recalculation_ = false;
