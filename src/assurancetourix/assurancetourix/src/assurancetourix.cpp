@@ -52,7 +52,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #endif // MIPI_CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
-  transformed_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
+  transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
+  transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -115,7 +116,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
 #ifdef SIMULATION
 // webots element positioning
 void Assurancetourix::simulation_marker_callback() {
-  visualization_msgs::msg::MarkerArray marker_array_pub;
+  visualization_msgs::msg::MarkerArray marker_array;
   visualization_msgs::msg::Marker webots_marker;
   webots_marker.type = robot_type;
   webots_marker.color.r = 255;
@@ -138,11 +139,11 @@ void Assurancetourix::simulation_marker_callback() {
     webots_marker.text = robot;
     webots_marker.id = id;
 
-    marker_array_pub.markers.push_back(webots_marker);
+    marker_array.markers.push_back(webots_marker);
     id++;
   }
 
-  transformed_marker_pub_->publish(marker_array_pub);
+  transformed_marker_pub_ennemies_->publish(marker_array);
 }
 #endif // SIMULATION
 
@@ -182,6 +183,7 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.lifetime_nano_sec");
   this->declare_parameter("rviz_settings.header_frame_id");
   this->declare_parameter("topic_for_gradient_layer");
+  this->declare_parameter("topic_for_allies_position");
   this->declare_parameter("side");
 
   this->get_parameter_or<double>("image.contrast", contrast, 1.2);
@@ -196,6 +198,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
   this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
+  this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
   this->get_parameter_or<std::string>("side", side, "blue");
 
   // initialisation of markers
@@ -215,6 +218,8 @@ void Assurancetourix::init_parameters() {
 
 void Assurancetourix::detect() {
 
+#ifdef EXTRALOG //if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
+//will also show a marker at the assurancetourix origin frame position
   marker.pose.orientation.x = 0.70711;
   marker.pose.orientation.y = 0;
   marker.pose.orientation.z = 0.70711;
@@ -231,7 +236,6 @@ void Assurancetourix::detect() {
   marker.scale.z = 0.05;
   marker.id = 13;
 
-#ifdef EXTRALOG //if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
   auto start_total = std::chrono::high_resolution_clock::now();
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
@@ -253,12 +257,12 @@ void Assurancetourix::detect() {
 
   raised_contrast.copyTo(_anotated);
 
+#ifdef EXTRALOG
   marker.header.stamp = this->get_clock()->now();
   transformed_marker.header.stamp = this->get_clock()->now();
 
   marker_pub_->publish(marker);
 
-#ifdef EXTRALOG
   auto start_detection = std::chrono::high_resolution_clock::now();
 #endif
 
@@ -345,7 +349,7 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
 
 void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
-    visualization_msgs::msg::MarkerArray marker_array_pub;
+    visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
     cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
@@ -403,11 +407,24 @@ void Assurancetourix::_anotate_image(Mat img) {
       transformed_marker.header = tmpPoseOut.header;
       transformed_marker.pose = tmpPoseOut.pose;
 
-      marker_array_pub.markers.push_back(transformed_marker);
+      if ( (side.compare("blue")==0) && (marker.id <= 10) && (6 <= marker.id) ){
+        marker_array_ennemies.markers.push_back(transformed_marker);
+      }
+      else if ( (side.compare("yellow")==0) && (marker.id <= 5) && (1 <= marker.id) ){
+        marker_array_ennemies.markers.push_back(transformed_marker);
+      }
+
+      if ( (side.compare("yellow")==0) && (marker.id <= 10) && (6 <= marker.id) ){
+        marker_array_allies.markers.push_back(transformed_marker);
+      }
+      else if ( (side.compare("blue")==0) && (marker.id <= 5) && (1 <= marker.id) ){
+        marker_array_allies.markers.push_back(transformed_marker);
+      }
 
       marker_pub_->publish(marker);
     }
-    transformed_marker_pub_->publish(marker_array_pub);
+    transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
+    transformed_marker_pub_allies_->publish(marker_array_allies);
   }
 }
 
