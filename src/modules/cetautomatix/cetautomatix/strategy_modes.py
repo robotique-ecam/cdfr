@@ -27,7 +27,8 @@ def get_time_coeff(time, action, strategy):
         action = 'ECUEIL_GENERAL'
     elif 'PHARE' in action:
         action = 'PHARE'
-    if (element := strategies.get(strategy).get(action)) is None:
+    element = strategies.get(strategy).get(action)
+    if element is None:
         return 0
     for i in range(len(element)):
         if time < element[i][0]:

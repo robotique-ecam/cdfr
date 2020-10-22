@@ -49,7 +49,8 @@ class Actuators:
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
-        if (flag_servo := self.SERVOS.get('flags')) is not None:
+        flag_servo = self.SERVOS.get('flags')
+        if flag_servo is not None:
             self.arbotix.setPosition(flag_servo['addr'], flag_servo['up'])
 
     def setPumpsEnabled(self, enabled: bool, pumps: list):
