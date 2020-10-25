@@ -35,7 +35,6 @@ volatile uint8_t right_prescaler = 0;
 volatile uint16_t left_steps = 0;
 volatile uint16_t right_steps = 0;
 
-
 ISR(TIMER0_COMPA_vect) {
   /* Disable comparator Timer0 A interrupts */
   TIMSK0 &= ~(1 << OCIE0A);
@@ -47,7 +46,7 @@ ISR(TIMER0_COMPA_vect) {
   /* Delay for x us by dividing clock by 8 (0.5us per count) and counting */
   TCCR0B = (TCCR0B & 0xF8) | 2;
   OCR0B = 20;
-  TIMSK0 |= (1 << OCIE0A);
+  TIMSK0 |= (1 << OCIE0B);
 }
 
 ISR(TIMER0_COMPB_vect) {
@@ -79,7 +78,7 @@ ISR(TIMER2_COMPA_vect) {
 
 ISR(TIMER2_COMPB_vect) {
   /* Disable comparator Timer 2 B interrupts */
-  TIMSK2 &= ~(1 << OCIE1B);
+  TIMSK2 &= ~(1 << OCIE2B);
   /* Reset counter */
   TCNT1 = 0;
   /* Restore values */
@@ -104,7 +103,7 @@ void onReceive(int n) {
   /* Fetch packet from buffer */
   if (Wire.available() >= 4) {
     uint8_t cmd = Wire.read();
-    for (int i = 0; i<3; i++) {
+    for (int i = 0; i < 3; i++) {
       buffer[i] = Wire.read();
     }
     /* Unpack data */
@@ -161,6 +160,4 @@ void setup() {
   Wire.onRequest(onRequest);
 }
 
-void loop() {
-
-}
+void loop() {}
