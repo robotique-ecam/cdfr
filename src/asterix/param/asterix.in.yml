@@ -2,7 +2,7 @@
 footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
 use_sim_time: False
 max_steps_frequency: 10000
-speedramp_resolution: 128
+speedramp_resolution: 1024
 microsteps: 16
 steps_per_turn: 200
 wheels_separation: 0.244

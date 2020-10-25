@@ -1,7 +1,7 @@
 !Defaults
 footprint: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
 max_steps_frequency: 10000
-speedramp_resolution: 128
+speedramp_resolution: 1024
 microsteps: 16
 steps_per_turn: 400
 wheels_separation: 0.282

@@ -1,7 +1,6 @@
 #include <drive.hpp>
 
-#define I2C_ADDR_MOTOR_LEFT 0x10
-#define I2C_ADDR_MOTOR_RIGHT 0x11
+#define I2C_ADDR_MOTOR 0x10
 
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
@@ -16,10 +15,8 @@ Drive::Drive() : Node("drive_node") {
 
   /* Init speed before starting odom */
   this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->read_word_data(0);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->read_word_data(0);
+  this->i2c->set_address(I2C_ADDR_MOTOR);
+  this->i2c->write_bus(this->_i2c_write_buffer);
   this->i2c_mutex.unlock();
 #else
   /* Init webots supervisor */
@@ -148,13 +145,17 @@ void Drive::update_velocity() {
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * this->i2c->read_word_data(differential_speed_cmd_.left);
-  this->sign_steps_left = signbit(differential_speed_cmd_.left);
+  this->i2c->set_address(I2C_ADDR_MOTOR);
+  _i2c_write_buffer[0] = _enabled << 7 | signbit(differential_speed_cmd_.left) << 5 | signbit(differential_speed_cmd_.right) << 4 | (differential_speed_cmd_.left >> 6 & 0x0F);
+  _i2c_write_buffer[1] = differential_speed_cmd_.left << 2 | (differential_speed_cmd_.right >> 8 & 0x02);
+  _i2c_write_buffer[2] = differential_speed_cmd_.right & 0xFF;
+  this->i2c_write(_i2c_write_buffer);
 
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * this->i2c->read_word_data(differential_speed_cmd_.right);
+  this->i2c->bus_read(0, _i2c_read_buffer);
+  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * (_i2c_read_buffer[0] << 8 | _i2c_read_buffer[1]);
+  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * (_i2c_read_buffer[2] << 8 | _i2c_read_buffer[3]);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
+  this->sign_steps_left = signbit(differential_speed_cmd_.left);
 
   this->i2c_mutex.unlock();
 
@@ -265,17 +266,8 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
-#ifndef SIMULATION
-  this->i2c_mutex.lock();
 
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c_mutex.unlock();
-#endif
+  this->_enabled = request->data;
 
   if (request->data) {
     response->message = "Stepper drivers are enabled";
@@ -300,10 +292,9 @@ void Drive::sim_step() { this->wb_robot->step(timestep); }
 Drive::~Drive() {
 #ifndef SIMULATION
   this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
+  this->i2c->set_address(I2C_ADDR_MOTOR);
+  _i2c_write_buffer[0], _i2c_write_buffer[1], _i2c_write_buffer[2] = 0;
+  this->i2c->bus_write(_i2c_write_buffer);
   this->i2c_mutex.unlock();
 #endif /* SIMULATION */
   RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");

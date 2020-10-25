@@ -70,8 +70,8 @@ mkdir -p ~/ros_ws/src
 cd ~/ros_ws
 vcs import src < ros_ws.repos
 rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "gazebo_ros_pkgs slam_toolbox"
-colcon build --symlink-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" --packages-skip "nav2_system_tests"
 colcon build --symlink-install --packages-select image_transport cv_bridge --cmake-args "-DCMAKE_CXX_STANDARD_LIBRARIES=-lpython3.7m" --cmake-force-configure
+colcon build --symlink-install --packages-skip image_transport cv_bridge --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" --packages-skip "nav2_system_tests"
 source ros_ws/install/setup.bash
 
 

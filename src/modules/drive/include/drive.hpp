@@ -38,8 +38,8 @@ public:
 private:
   struct TinyCMD {
     /* ATTiny speed command to I2C */
-    int8_t left = 0;
-    int8_t right = 0;
+    int16_t left = 0;
+    int16_t right = 0;
   };
 
   struct TinyData {
@@ -71,6 +71,8 @@ private:
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
   std::mutex i2c_mutex;
+  char *_i2c_write_buffer[3];
+  char *_i2c_read_buffer[4];
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;
@@ -81,6 +83,8 @@ private:
   double timestep;
   rclcpp::TimerBase::SharedPtr time_stepper_;
 #endif
+
+  bool _enabled;
 
   // ROS time
   rclcpp::Time time_since_last_sync_;

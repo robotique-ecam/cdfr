@@ -49,10 +49,9 @@ dtoverlay=i2c0,baudrate=400000
 */etc/rc.local*
 ```bash
 #!/bin/bash
-
-iw wlan0 set power_save off
-source /home/ubuntu/ros/install/setup.bash
-HOME=/home/ubuntu /opt/ros/foxy/bin/ros2 launch asterix launch.py > /home/ubuntu/ros2-system-$(date "+%Y.%m.%d-%H.%M.%S").log 2>&1 &
+source /home/pi/ros/install/setup.bash
+HOME=/home/pi /home/pi/ros2_foxy/install/ros2cli/bin/ros2 launch obelix launch.py > /home/pi/ros2-system-$(date "+%Y.%m.%d-%H.%M.%S").log 2>&1 &
+exit 0
 ```
 
 *~/.bashrc*
