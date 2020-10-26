@@ -110,10 +110,10 @@ void onReceive(int n) {
     enabled = 0x80 & buffer[0];
     left_dir = buffer[0] & 0x20;
     right_dir = buffer[0] & 0x10;
-    left_index = (0x0F & buffer[0] << 8) | (buffer[1] & 0xF4);
-    right_index = (0x02 & buffer[1] << 8) | buffer[2];
-    left_prescaler = pgm_read_byte(&(prescaler[left_index]));
-    right_prescaler = pgm_read_byte(&(prescaler[right_index]));
+    left_index = (0x0F & buffer[0] << 8) | (buffer[1] & 0xFC);
+    right_index = (0x03 & buffer[1] << 8) | buffer[2];
+    left_prescaler = prescaler[left_index];
+    right_prescaler = prescaler[right_index];
 
     TCNT0 = TCNT2 = 0;
     left_old_steps = left_steps;
@@ -125,9 +125,9 @@ void onReceive(int n) {
     PORTD ^= (-(left_dir ^ INVERT) ^ PORTD) & (1 << PIN_LEFT_DIR);
 
     TCCR0B = (TCCR0B & 0xF8) | left_prescaler;
-    OCR0A = pgm_read_byte(&(comparator[left_index]));
+    OCR0A = comparator[left_index];
     TCCR2B = (TCCR0B & 0xF8) | right_prescaler;
-    OCR2A = pgm_read_byte(&(comparator[right_index]));
+    OCR2A = comparator[right_index];
   }
 
   /* Enable interrupts */
