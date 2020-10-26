@@ -149,7 +149,7 @@ void Drive::update_velocity() {
   _i2c_write_buffer[0] = _enabled << 7 | signbit(differential_speed_cmd_.left) << 5 | signbit(differential_speed_cmd_.right) << 4 | (differential_speed_cmd_.left >> 6 & 0x0F);
   _i2c_write_buffer[1] = differential_speed_cmd_.left << 2 | (differential_speed_cmd_.right >> 8 & 0x02);
   _i2c_write_buffer[2] = differential_speed_cmd_.right & 0xFF;
-  this->i2c_write(_i2c_write_buffer);
+  this->i2c->bus_write(0, _i2c_write_buffer, 3);
 
   this->i2c->bus_read(0, _i2c_read_buffer);
   attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * (_i2c_read_buffer[0] << 8 | _i2c_read_buffer[1]);
