@@ -293,7 +293,7 @@ Drive::~Drive() {
 #ifndef SIMULATION
   this->i2c_mutex.lock();
   this->i2c->set_address(I2C_ADDR_MOTOR);
-  _i2c_write_buffer[0], _i2c_write_buffer[1], _i2c_write_buffer[2] = 0;
+  _i2c_write_buffer[0] = _i2c_write_buffer[1] = _i2c_write_buffer[2] = 0;
   this->i2c->bus_write(0, _i2c_write_buffer, 3);
   this->i2c_mutex.unlock();
 #endif /* SIMULATION */

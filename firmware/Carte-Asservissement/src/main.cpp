@@ -115,10 +115,10 @@ void onReceive(int n) {
     left_prescaler = pgm_read_byte(&(prescaler[left_index]));
     right_prescaler = pgm_read_byte(&(prescaler[right_index]));
 
-    TCNT0, TCNT2 = 0;
+    TCNT0 = TCNT2 = 0;
     left_old_steps = left_steps;
     left_old_steps = left_steps;
-    left_steps, right_steps = 0;
+    left_steps = right_steps = 0;
 
     PORTB ^= (-(enabled) ^ PORTB) & (1 << PIN_ENA);
     PORTB ^= (-(right_dir ^ INVERT) ^ PORTB) & (1 << PIN_RIGHT_DIR);
@@ -150,7 +150,7 @@ void onRequest() {
 
 void setup() {
   /* Setup IO */
-  PORTB, PORTD = 0;
+  PORTB = PORTD = 0;
   DDRB |= (1 << PIN_RIGHT_DIR) | (1 << PIN_RIGHT_STEP) | (1 << PIN_ENA);
   DDRD |= (1 << PIN_LEFT_DIR) | (1 << PIN_LEFT_STEP);
   PORTB |= (1 << PIN_ENA);

@@ -19,8 +19,8 @@ void I2C::write_byte(uint8_t cmd) { i2c_smbus_write_byte(i2c_fd_, cmd); }
 
 void I2C::write_byte_data(uint8_t cmd, uint8_t val) { i2c_smbus_write_byte_data(i2c_fd_, cmd, val); }
 
-void I2C::bus_read(uint8_t cmd, uint8_t *buff) { i2c_smbus_read_block_data(i2c_fd_, cmd, buff); }
+void I2C::bus_read(uint8_t cmd, uint8_t buff[]) { i2c_smbus_read_block_data(i2c_fd_, cmd, buff); }
 
-void I2C::bus_write(uint8_t cmd, uint8_t *buff, uint8_t length) { i2c_smbus_write_block_data(i2c_fd_, cmd, length, buff); }
+void I2C::bus_write(uint8_t cmd, uint8_t buff[], uint8_t length) { i2c_smbus_write_block_data(i2c_fd_, cmd, length, buff); }
 
 #endif /* SIMULATION */
