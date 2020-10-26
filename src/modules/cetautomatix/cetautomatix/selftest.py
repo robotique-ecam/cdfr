@@ -44,7 +44,7 @@ class Selftest:
         self.__write__(code)
         try:
             bus = SMBus(1)
-            for addr in [0x10, 0x11]:
+            for addr in [0x10]:
                 code += 1
                 self.__write__(code)
                 bus.write_byte_data(addr, 0x80, 0x10)
