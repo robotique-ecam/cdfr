@@ -71,8 +71,8 @@ private:
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
   std::mutex i2c_mutex;
-  char _i2c_write_buffer[3];
-  char _i2c_read_buffer[4];
+  uint8_t _i2c_write_buffer[3];
+  uint8_t _i2c_read_buffer[4];
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;
