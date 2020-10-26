@@ -151,7 +151,7 @@ void Drive::update_velocity() {
   _i2c_write_buffer[2] = differential_speed_cmd_.right & 0xFF;
   this->i2c_write(_i2c_write_buffer);
 
-  this->i2c->bus_read(0, _i2c_read_buffer);
+  this->i2c->read_bus(0, _i2c_read_buffer);
   attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * (_i2c_read_buffer[0] << 8 | _i2c_read_buffer[1]);
   attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * (_i2c_read_buffer[2] << 8 | _i2c_read_buffer[3]);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
@@ -294,7 +294,7 @@ Drive::~Drive() {
   this->i2c_mutex.lock();
   this->i2c->set_address(I2C_ADDR_MOTOR);
   _i2c_write_buffer[0], _i2c_write_buffer[1], _i2c_write_buffer[2] = 0;
-  this->i2c->bus_write(_i2c_write_buffer);
+  this->i2c->write_bus(_i2c_write_buffer);
   this->i2c_mutex.unlock();
 #endif /* SIMULATION */
   RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
