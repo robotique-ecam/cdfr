@@ -120,6 +120,15 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 remappings=remappings,
             ),
 
+            Node(
+                package='nav2_map_server',
+                executable='map_server',
+                name='map_server',
+                output='screen',
+                parameters=[params.name],
+                remappings=remappings
+            ),
+
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([nav2_launch_file_dir, '/navigation_launch.py']),
                 launch_arguments={
