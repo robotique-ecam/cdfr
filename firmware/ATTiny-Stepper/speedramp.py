@@ -31,5 +31,5 @@ for delay in speed_delays:
 
 
 with open('src/speedramp.hpp', 'w') as header:
-    header.write('#include <inttypes.h>\n\nvolatile const uint8_t prescaler[%d] = {\n%s};\n\n' % (resolution, prescalers))
-    header.write('volatile const uint8_t comparator[%d] = {\n%s};\n' % (resolution, comparators))
+    header.write('#include <inttypes.h>\n\nconst uint8_t prescaler[%d] = {\n%s};\n\n' % (resolution, prescalers))
+    header.write('const uint8_t comparator[%d] = {\n%s};\n' % (resolution, comparators))
