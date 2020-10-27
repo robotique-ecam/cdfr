@@ -68,14 +68,14 @@ GREEN_CUPS = {
 
 
 ZONES = {
-    'CHENAL_BLEU_ROUGE_1': (0, 0.9, 0.4, 0.93),
-    'CHENAL_BLEU_VERT_1': (0, 1.47, 0.4, 1.5),
-    'CHENAL_BLEU_ROUGE_2': (1.25, 0, 1.35, 0.3),
-    'CHENAL_BLEU_VERT_2': (1.05, 0, 1.15, 0.3),
-    'CHENAL_JAUNE_ROUGE_1': (2.6, 1.47, 3, 1.5),
-    'CHENAL_JAUNE_VERT_1': (2.6, 0.9, 3, 0.93),
-    'CHENAL_JAUNE_ROUGE_2': (1.85, 0, 1.95, 0.3),
-    'CHENAL_JAUNE_VERT_2': (1.65, 0, 1.75, 0.3),
+    # 'CHENAL_BLEU_ROUGE_1': (0, 0.9, 0.4, 0.93),
+    # 'CHENAL_BLEU_VERT_1': (0, 1.47, 0.4, 1.5),
+    # 'CHENAL_BLEU_ROUGE_2': (1.25, 0, 1.35, 0.3),
+    # 'CHENAL_BLEU_VERT_2': (1.05, 0, 1.15, 0.3),
+    # 'CHENAL_JAUNE_ROUGE_1': (2.6, 1.47, 3, 1.5),
+    # 'CHENAL_JAUNE_VERT_1': (2.6, 0.9, 3, 0.93),
+    # 'CHENAL_JAUNE_ROUGE_2': (1.85, 0, 1.95, 0.3),
+    # 'CHENAL_JAUNE_VERT_2': (1.65, 0, 1.75, 0.3),
     'PORT_BLEU_1': (0, 0.93, 0.4, 1.47),
     'PORT_BLEU_2': (1.75, 0, 1.85, 0.3),
     'PORT_JAUNE_1': (2.6, 0.93, 3, 1.47),
@@ -94,6 +94,17 @@ elements = {
     'MANCHE4': {"X": 2.77, "Y": 0, "Rot": -90},
     'PHARE_BLEU': {"X": 0.225, "Y": 2, "Rot": 90},
     'PHARE_JAUNE': {"X": 2.775, "Y": 2, "Rot": 90},
+
+    'CHENAL_BLEU_VERT_1': {"X": 0.2, "Y": 1.485, "Rot": 90},
+    # 'CHENAL_BLEU_VERT_2': {"X": 1.7, "Y": 0.15, "Rot": 0},
+    'CHENAL_BLEU_ROUGE_1': {"X": 0.2, "Y": 0.915, "Rot": 90},
+    # 'CHENAL_BLEU_ROUGE_2': {"X": 1.9, "Y": 0.15, "Rot": 0},
+
+    'CHENAL_JAUNE_VERT_1': {"X": 1.8, "Y": 0.915, "Rot": 90},
+    # 'CHENAL_JAUNE_VERT_2': {"X": 1.2, "Y": 0.15, "Rot": 180},
+    'CHENAL_JAUNE_ROUGE_1': {"X": 1.8, "Y": 1.485, "Rot": 90},
+    # 'CHENAL_JAUNE_ROUGE_2': {"X": 1.3, "Y": 0.15, "Rot": 180},
+
     # 'ARUCO42': {"X": 1.5, "Y": 0.75},
     'GOB1': {"X": 0.3, "Y": 0.8},
     'GOB2': {"X": 0.3, "Y": 1.6},

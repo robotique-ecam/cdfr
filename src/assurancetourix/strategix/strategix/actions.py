@@ -12,6 +12,17 @@ actions = {
     "ECUEIL_JAUNE": {"ONLY_ROBOT": "obelix", "ONLY_SIDE": "yellow", "GOBS": ['GOB30', 'GOB31', 'GOB32', 'GOB33', 'GOB34']},
     "PHARE_BLEU": {"ONLY_SIDE": "blue"},
     "PHARE_JAUNE": {"ONLY_SIDE": "yellow"},
+
+    "CHENAL_BLEU_VERT_1": {"ONLY_SIDE": "blue"},
+    "CHENAL_BLEU_VERT_2": {"ONLY_SIDE": "blue"},
+    "CHENAL_BLEU_ROUGE_1": {"ONLY_SIDE": "blue"},
+    "CHENAL_BLEU_ROUGE_2": {"ONLY_SIDE": "blue"},
+
+    "CHENAL_JAUNE_VERT_1": {"ONLY_SIDE": "yellow"},
+    "CHENAL_JAUNE_VERT_2": {"ONLY_SIDE": "yellow"},
+    "CHENAL_JAUNE_ROUGE_1": {"ONLY_SIDE": "yellow"},
+    "CHENAL_JAUNE_ROUGE_2": {"ONLY_SIDE": "yellow"},
+
     # Red Cups
     'GOB2': {"COLOR": "RED"},
     'GOB3': {"COLOR": "RED"},
