@@ -20,7 +20,7 @@ class I2CDriver:
         """Create driver with default values."""
         self._mutex = RLock()
         self._bus_id = bus_id
-        self.i2c = SMBus(self._bus_id)
+        self._i2c = SMBus(self._bus_id)
 
     def read_byte(self, addr: int):
         """Read pump driver outputs state."""
