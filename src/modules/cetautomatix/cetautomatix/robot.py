@@ -47,6 +47,8 @@ class Robot(Node):
         self.selftest = Selftest(self)
         # Prechill engines
         self.actuators.setFansEnabled(True)
+        # Stop ros service
+        self._stop_ros_service = self.create_service(Trigger, 'stop', self._stop_robot_callback)
         # strategix client interfaces
         self._get_available_request = GetAvailableActions.Request()
         self._get_available_request.sender = self.robot
@@ -166,6 +168,12 @@ class Robot(Node):
         self._lcd_driver_pub.publish(lcd_msg)
         if hasattr(resp, 'success'):
             resp.success = True
+        return resp
+
+    def _stop_robot_callback(self, req, resp):
+        """Stop robot / ROS."""
+        self.stop_ros(shutdown=False)
+        resp.sucess = True
         return resp
 
     def triggered(self):
