@@ -51,6 +51,13 @@ ros2 service call /pharaon/deploy std_srvs/srv/Trigger
 ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
 ```
 
+##### Publish to LCD screen
+
+```
+ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
+```
+
+
 ### Changelog
 
 #### v0.8.0
