@@ -20,6 +20,7 @@ from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.time import Duration, Time
 from std_srvs.srv import SetBool, Trigger
+from actuators_srvs.srv import Slider
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
@@ -59,6 +60,9 @@ class Robot(Node):
         # Phararon delploy client interfaces
         self._get_trigger_deploy_pharaon_request = Trigger.Request()
         self._get_trigger_deploy_pharaon_client = self.create_client(Trigger, '/pharaon/deploy')
+        # Slider driver
+        self._set_slider_postion_request = Slider.Request()
+        self._set_slider_postion_client = self.create_client(Slider, 'slider_position')
         # Odometry subscriber
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self)
@@ -92,6 +96,11 @@ class Robot(Node):
         except BaseException:
             response = None
         return response
+
+    def set_slider_postion(self, position: int):
+        """Set slider position with position in range 0 to 255."""
+        self._set_slider_postion_request.position = position
+        return self._synchronous_call(self._set_slider_postion_client, self._set_slider_postion_request)
 
     def fetch_available_actions(self):
         """Fetch available actions for BT."""
