@@ -16,7 +16,7 @@
 #define sign(N) ((N < 0) ? (1) : (0))
 
 #ifndef TWI_RX_BUFFER_SIZE
-#define TWI_RX_BUFFER_SIZE (16)
+#define TWI_RX_BUFFER_SIZE (4)
 #endif
 
 uint32_t position_goal = 0;
@@ -44,7 +44,7 @@ void setup() {
 void step() {
   PORTB |= (1 << PIN_STEP);
   // Pulse width depends on the stepper driver, you should test it first.
-  _delay_us(2);
+  _delay_us(10);
   if (PORTB & (1 << PIN_DIR)) {
     current_position++;
   } else {
@@ -99,7 +99,7 @@ ISR(TIMER1_COMPA_vect) {
   TCNT1 = 0;
 }
 
-void on_receive_command(uint8_t n) {
+void onReceive(uint8_t n) {
   // Sanity check
   if ((n > 0) | (n < TWI_RX_BUFFER_SIZE)) {
     position_goal = TinyWireS.receive();
@@ -144,7 +144,7 @@ int main(int argc, char const *argv[]) {
   setup();
 
   TinyWireS.begin(I2C_ADDR);
-  TinyWireS.onReceive(on_receive_command);
+  TinyWireS.onReceive(onReceive);
 
   sei();
 

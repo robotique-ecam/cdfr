@@ -25,12 +25,12 @@ class I2CDriver:
     def read_byte(self, addr: int):
         """Read pump driver outputs state."""
         if self._i2c != self._bus_id:
-            with self.__mutex__:
+            with self._mutex:
                 return self._i2c.read_byte(addr)
         return 0
 
     def write_byte(self, addr: int, value: int):
         """Write pump driver outputs state."""
         if self._i2c != self._bus_id:
-            with self.mutex:
+            with self._mutex:
                 self._i2c.write_byte(addr, value)

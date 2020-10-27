@@ -6,10 +6,12 @@ max_freq = 5e3
 resolution = 64
 prescaller_bitsize = 14
 
-step = round(max_freq / resolution)
+impulsion_time = 10e-6
+
+step = max_freq / resolution
 
 speed_frequencies = [step * i for i in range(resolution)]
-speed_delays = [1/x for x in speed_frequencies if x != 0]
+speed_delays = [(1/x - impulsion_time) for x in speed_frequencies if x != 0]
 
 
 def find_prescaler(delay):
