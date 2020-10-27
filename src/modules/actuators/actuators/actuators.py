@@ -7,9 +7,9 @@
 from time import sleep
 
 from .arbotix.arbotix import ArbotiX
-from .driver.i2c import I2CDriver
-from .driver.pumps import PumpDriver
-from .driver.rpi_servos import RPiServos
+from .drivers.i2c import I2CDriver
+from .drivers.pumps import PumpDriver
+from .drivers.rpi_servos import RPiServos
 
 NO, NC = False, True
 
@@ -27,8 +27,8 @@ class Actuators:
         self.pump_addr = pump_addr
         self._i2c_bus = I2CDriver(i2c_bus)
         self.rpi_servos = RPiServos(pins=[19, 6])
-        self.pump_driver = PumpDriver(self._i2c_bus, addrs=pump_addr)
-        if len(DYNAMIXELS) > 0:
+        self.pump_driver = PumpDriver(self._i2c_bus, addrs=self.pump_addr)
+        if len(self.DYNAMIXELS) > 0:
             self.arbotix = ArbotiX()
             self._setupDynamixels()
 

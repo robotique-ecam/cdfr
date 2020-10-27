@@ -20,7 +20,7 @@ class RPiServos:
     def __init__(self, pins=[]):
         """Create driver with default values."""
         self.PWM_FREQ = 5
-        self._pins = {}
+        self._pwms = {}
         for pin in pins:
             GPIO.setup(pin, GPIO.OUT)
             self._pwms.update({pin: GPIO.PWM(pin, self.PWM_FREQ)})
