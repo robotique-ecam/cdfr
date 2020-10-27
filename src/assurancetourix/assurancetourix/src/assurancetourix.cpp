@@ -37,7 +37,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
     RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
     exit(-1);
   }
-
   arducam::arducam_init_camera(&camera_instance);
   arducam::arducam_set_mode(camera_instance, mode);
   arducam::arducam_reset_control(camera_instance, 0x00980911);
@@ -47,7 +46,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = NULL;
 
-  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>("enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>("/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 #endif // MIPI_CAMERA
 
@@ -59,6 +58,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
     // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
+  savedeee = false;
 
 #ifdef SIMULATION
   RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
@@ -74,7 +74,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
+  //timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
@@ -89,7 +89,7 @@ void Assurancetourix::get_image() {
     cv::Mat *image = new cv::Mat(cv::Size(width, (int)(height * 1.5)), CV_8UC1, buffer->data);
     cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
     arducam::arducam_release_buffer(buffer);
-    cv::flip(*image, *image, -1);
+    //cv::flip(*image, *image, -1);
     _frame = *image;
     delete image;
   }
@@ -292,6 +292,11 @@ void Assurancetourix::detect() {
     // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
+
+  if (!savedeee){
+    cv::imwrite("test.jpg", _anotated);
+    savedeee = true;
+  }
 }
 
 void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &transformation) {
@@ -351,7 +356,7 @@ void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.06, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.09, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
     for (int i = 0; i < int(_detected_ids.size()); i++) {
 
