@@ -9,7 +9,7 @@ assurancetourix:
       mode: 0
       rgain: 1500
     image:
-      contrast: 25.0
+      contrast: 35.0
       show_image: false
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]

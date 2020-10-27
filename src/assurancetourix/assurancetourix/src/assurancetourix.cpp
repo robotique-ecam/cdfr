@@ -74,7 +74,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-  //timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
+  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
@@ -356,7 +356,7 @@ void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.09, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.08, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
 
     for (int i = 0; i < int(_detected_ids.size()); i++) {
 
@@ -403,10 +403,12 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       float colorSideCoeff = 0;
       if (side.compare("yellow") == 0){
-        colorSideCoeff = 0.2;
+        colorSideCoeff = 0.28;
       }
 
-      tmpPoseOut.pose.position.x += 0.15 + colorSideCoeff;
+      //tmpPoseOut.pose.position.x += 0.6 + colorSideCoeff;
+      tmpPoseOut.pose.position.x = 1.34 + 0.6 + colorSideCoeff - (1.34 + 0.6 + colorSideCoeff - tmpPoseOut.pose.position.x)/2;
+      tmpPoseOut.pose.position.y += -0.4;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
