@@ -312,19 +312,19 @@ class Robot(Node):
         if self._current_action is not None:
             offset = (0, 0)
             if 'GOB' in self._current_action:
-                for pump_id, pump_dict in self.actuator.PUMPS.items():
+                for pump_id, pump_dict in self.actuators.PUMPS.items():
                     if pump_dict.get('type') == NC and not pump_dict.get('STATUS'):
                         self.current_pump = pump_id
                         offset = pump_dict.get("pos")
                         self.actuators.setPumpsEnabled(True, [pump_id])
                         break
             elif 'ECUEIL' in self._current_action:
-                for pump_id, pump_dict in self.actuator.PUMPS.items():
+                for pump_id, pump_dict in self.actuators.PUMPS.items():
                     if pump_dict.get('type') == NO and not pump_dict.get('STATUS'):
                         offset = pump_dict.get("pos")
                         self.set_slider_position(0)
             elif 'CHENAL' in self._current_action:
-                for pump_id, pump_dict in self.actuator.PUMPS.items():
+                for pump_id, pump_dict in self.actuators.PUMPS.items():
                     if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
                         arriere = True
                 if arriere is True:
