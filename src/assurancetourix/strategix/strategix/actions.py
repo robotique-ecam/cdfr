@@ -14,14 +14,14 @@ actions = {
     "PHARE_JAUNE": {"ONLY_SIDE": "yellow"},
 
     "CHENAL_BLEU_VERT_1": {"ONLY_SIDE": "blue"},
-    "CHENAL_BLEU_VERT_2": {"ONLY_SIDE": "blue"},
+    # "CHENAL_BLEU_VERT_2": {"ONLY_SIDE": "blue"},
     "CHENAL_BLEU_ROUGE_1": {"ONLY_SIDE": "blue"},
-    "CHENAL_BLEU_ROUGE_2": {"ONLY_SIDE": "blue"},
+    # "CHENAL_BLEU_ROUGE_2": {"ONLY_SIDE": "blue"},
 
     "CHENAL_JAUNE_VERT_1": {"ONLY_SIDE": "yellow"},
-    "CHENAL_JAUNE_VERT_2": {"ONLY_SIDE": "yellow"},
+    # "CHENAL_JAUNE_VERT_2": {"ONLY_SIDE": "yellow"},
     "CHENAL_JAUNE_ROUGE_1": {"ONLY_SIDE": "yellow"},
-    "CHENAL_JAUNE_ROUGE_2": {"ONLY_SIDE": "yellow"},
+    # "CHENAL_JAUNE_ROUGE_2": {"ONLY_SIDE": "yellow"},
 
     # Red Cups
     'GOB2': {"COLOR": "RED"},
