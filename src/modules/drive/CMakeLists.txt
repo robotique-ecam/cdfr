@@ -22,6 +22,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
+find_package(actuators_srvs REQUIRED)
 
 
 ################################################################################
@@ -40,6 +41,7 @@ set(dependencies
   "tf2_msgs"
   "std_srvs"
   "diagnostic_msgs"
+  "actuators_srvs"
 )
 
 set(EXEC_NAME "drive")

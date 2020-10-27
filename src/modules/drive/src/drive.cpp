@@ -2,6 +2,7 @@
 
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
+#define I2C_ADDR_SLIDER 0x12
 
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
@@ -53,6 +54,7 @@ Drive::Drive() : Node("drive_node") {
 
   _enable_drivers = this->create_service<std_srvs::srv::SetBool>(
       "enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  _set_slider_postion = this->create_service<actuators_srvs::srv::Slider>("slider_position", std::bind(&Drive::handle_set_slider_position, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)))
 
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
@@ -284,6 +286,19 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
     response->message = "Stepper drivers are disabled";
     RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
   }
+  response->success = true;
+}
+
+void Drive::handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
+                                       const actuators_srvs::srv::Slider::Response::SharedPtr response) {
+#ifndef SIMULATION
+  this->i2c_mutex.lock();
+
+  this->i2c->set_address(I2C_ADDR_SLIDER);
+  this->i2c->write_byte(request->position);
+
+  this->i2c_mutex.unlock();
+#endif
   response->success = true;
 }
 

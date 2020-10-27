@@ -10,6 +10,7 @@
 #include <webots/PositionSensor.hpp>
 #endif
 #include "std_srvs/srv/set_bool.hpp"
+#include "actuators_srvs/srv/slider.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -98,6 +99,9 @@ private:
   // Steppers disable service
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
 
+  // Sliders service
+  rclcpp::Service<actuators_srvs::srv::Slider>::SharedPtr _set_slider_postion;
+
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
@@ -159,6 +163,8 @@ private:
   int8_t compute_velocity_cmd(double velocity);
   void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
+  void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
+                                  const actuators_srvs::srv::Slider::Response::SharedPtr response);
 
 #ifdef SIMULATION
   void sim_step();
