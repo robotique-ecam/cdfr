@@ -298,7 +298,7 @@ class Robot(Node):
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
         check = self.check_to_empty()
-        if check:
+        if check is not None:
             action_list = check
         if not action_list:
             return None
@@ -331,6 +331,7 @@ class Robot(Node):
                 return ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
             else:
                 return ["CHENAL_JAUNE_VERT_1", "CHENAL_JAUNE_ROUGE_1"]
+        return None
 
     def get_goal_pose(self):
         """Get goal pose for action."""
