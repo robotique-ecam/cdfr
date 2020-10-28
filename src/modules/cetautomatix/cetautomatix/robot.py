@@ -88,6 +88,10 @@ class Robot(Node):
         self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
+        if self.robot == 'obelix':
+            self._trigger_start_asterix_request = Trigger.Request()
+            self._trigger_start_asterix_client = self.create_client(Trigger, '/asterix/start')
+
         # Reached initialized state
         self.get_logger().info('Cetautomatix ROS node has been started')
 
@@ -205,6 +209,13 @@ class Robot(Node):
         """Start robot."""
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
+        if self.robot == 'obelix':
+            i = 0
+            while not self._trigger_start_asterix_client.wait_for_service(timeout_sec=5):
+                if i > 10:
+                    break
+                self._synchronous_call(self._trigger_start_asterix_client, self._trigger_start_asterix_request)
+                i += 1
         self._start_time = self.get_clock().now().nanoseconds * 1e-9
         lcd_msg = Lcd()
         lcd_msg.line = 0
