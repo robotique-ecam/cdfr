@@ -160,7 +160,7 @@ class Robot(Node):
             response = self._synchronous_call(self._get_trigger_deploy_pharaon_client, self._get_trigger_deploy_pharaon_request)
             return response.success
         elif 'GOB' in self._current_action:
-            self.actuators[self.current_pump]['STATUS'] = self._current_action
+            self.actuators.PUMPS.[self.current_pump]['STATUS'] = self._current_action
             servo = self.actuators.DYNAMIXELS[self.current_pump]
             self.actuators.arbotix.setPosition(self.current_pump, servo.get('up'))
             return True
