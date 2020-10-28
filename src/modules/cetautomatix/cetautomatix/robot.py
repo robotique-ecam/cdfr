@@ -182,6 +182,7 @@ class Robot(Node):
                     servo = self.actuators.DYNAMIXELS[pump]
                     self.actuators.arbotix.setPosition(pump, servo.get('down'))
             else:
+                # TODO: Ouvrir herse
                 self.set_slider_position(100)
             self.actuators.setPumpsEnabled(False, pump_list)
             for pump in pump_list:
