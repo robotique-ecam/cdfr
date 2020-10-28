@@ -299,6 +299,7 @@ class Robot(Node):
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
         check = self.check_to_empty()
+        self.get_logger().info(check)
         if check is not None:
             action_list = check
         if not action_list:
@@ -323,6 +324,7 @@ class Robot(Node):
                     empty_behind = False
                 else:
                     empty_front = True
+        self.get_logger().info(f'behind: {empty_behind}, front: {empty_front}')
         if empty_behind or empty_front:
             if self.side.value == 'blue':
                 return ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
@@ -345,9 +347,10 @@ class Robot(Node):
                         break
             elif 'ECUEIL' in self._current_action:
                 for pump_id, pump_dict in self.actuators.PUMPS.items():
-                    if pump_dict.get('type') == NO and not pump_dict.get('STATUS'):
+                    if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
                         offset = pump_dict.get("pos")
-                        self.set_slider_position(0)
+                        break
+                self.set_slider_position(0)
             elif 'CHENAL' in self._current_action:
                 arriere = False
                 for pump_id, pump_dict in self.actuators.PUMPS.items():
