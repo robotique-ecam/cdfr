@@ -184,6 +184,8 @@ class Robot(Node):
             else:
                 self.set_slider_position(100)
             self.actuators.setPumpsEnabled(False, pump_list)
+            for pump in pump_list:
+                self.actuators.PUMPS[pump]["STATUS"] = None
             return True
         else:
             return True
