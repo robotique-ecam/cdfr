@@ -346,6 +346,7 @@ class Robot(Node):
                         offset = pump_dict.get("pos")
                         self.set_slider_position(0)
             elif 'CHENAL' in self._current_action:
+                arriere = False
                 for pump_id, pump_dict in self.actuators.PUMPS.items():
                     if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
                         arriere = True
