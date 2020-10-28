@@ -3,8 +3,10 @@
 
 """Strategix action server and score counter."""
 
+from importlib import import_module
 from threading import Thread
 
+from actuators.actuators import NO
 import rclpy
 from lcd_msgs.msg import Lcd
 from std_msgs.msg import UInt8
@@ -53,7 +55,24 @@ class StrategixActionServer(Node):
                 if actions[action].get("ONLY_SIDE") is None or actions[action].get("ONLY_SIDE") == self.side.value:
                     if actions[action].get("ONLY_ROBOT") is None or actions[action].get("ONLY_ROBOT") == request.sender:
                         available.append(action)
+        actuators = import_module(f'actuators.{request.sender}').actuators
+        arriere, i = 0, 0
+        devant, j = 0, 0
+        for pump_id, pump_dict in actuators.PUMPS.items():
+            if pump_dict.get('type') == NO:
+                i += 1
+                if pump_dict.get('STATUS') is not None:
+                    arriere += 1
+            else:
+                j += 1
+                if pump_dict.get('STATUS') is not None:
+                    devant += 1
         response.available = available
+        if arriere == i or devant == j:
+            if self.side.value == 'blue':
+                response.available = ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
+            else:
+                response.available = ["CHENAL_JAUNE_VERT_1", "CHENAL_JAUNE_ROUGE_1"]
         self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
 
