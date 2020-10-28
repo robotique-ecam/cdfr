@@ -165,7 +165,7 @@ class Robot(Node):
             for pump_id, pump_dict in self.actuators.PUMPS.items():
                 if pump_dict.get("type") == NO:
                     pump_list.append(pump_id)
-                    pump_dict['STATUS'] = actions[self._current_action].get('GOBS')[i]
+                    self.actuators.PUMPS[pump_id]['STATUS'] = actions[self._current_action].get('GOBS')[i]
                     i += 1
             self.actuators.setPumpsEnabled(True, pump_list)
             # TODO: Fermer Herse
@@ -182,8 +182,8 @@ class Robot(Node):
                     servo = self.actuators.DYNAMIXELS[pump]
                     self.actuators.arbotix.setPosition(pump, servo.get('down'))
             else:
-                # TODO: Ouvrir herse
                 self.set_slider_position(100)
+                # TODO: Ouvrir herse
             self.actuators.setPumpsEnabled(False, pump_list)
             for pump in pump_list:
                 self.actuators.PUMPS[pump]["STATUS"] = None
