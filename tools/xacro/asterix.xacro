@@ -4,7 +4,7 @@
 
   <xacro:property name="robot" value="asterix"/>
 
-  <xacro:property name="robotbase_lenght" value="0.2"/>
+  <xacro:property name="robotbase_length" value="0.2"/>
   <xacro:property name="robotbase_width" value="0.26"/>
   <xacro:property name="robotbase_height" value="0.32"/>
 

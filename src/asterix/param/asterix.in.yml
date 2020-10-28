@@ -1,6 +1,6 @@
 !Defaults
 footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
-use_sim_time: True
+use_sim_time: False
 max_steps_frequency: 10000
 speedramp_resolution: 128
 microsteps: 16
@@ -13,6 +13,8 @@ max_vel_x_backwards: 0.4
 max_vel_theta: 1.0
 acc_lim_x: 0.5
 acc_lim_theta: 0.5
+robotbase_length: 0.2
+robotbase_width: 0.26
 ---
 asterix:
   drive_node:
@@ -37,56 +39,13 @@ asterix:
       base_frame: "base_link"
 
 
-  sensors_node:
+  cetautomatix:
     ros__parameters:
       use_sim_time: !Var use_sim_time
+      width: !Var robotbase_width
+      length: !Var robotbase_length
 
-      i2c_bus: 4
-
-      hcsr04_names : [front_left, front_right, back_left, back_right]
-      vl53l1x_names : [front_left, front_right, side_left, side_right, back_left, back_right]
-
-      hcsr04:
-        front_left:
-          addr: 0x20
-          frame_id: 'sensor_front_left'
-
-        front_right:
-          addr: 0x21
-          frame_id: 'sensor_front_right'
-
-        back_left:
-          addr: 0x22
-          frame_id: 'sensor_back_left'
-
-        back_right:
-          addr: 0x23
-          frame_id: 'sensor_back_right'
-
-      vl53l1x:
-        front_left:
-          addr: 0x30
-          frame_id: 'tof_front_left'
-
-        front_right:
-          addr: 0x31
-          frame_id: 'tof_front_right'
-
-        side_left:
-          addr: 0x32
-          frame_id: 'tof_side_left'
-
-        side_right:
-          addr: 0x33
-          frame_id: 'tof_side_right'
-
-        back_left:
-          addr: 0x34
-          frame_id: 'tof_back_left'
-
-        back_right:
-          addr: 0x35
-          frame_id: 'tof_back_right'
+      strategy_mode: NORMAL
 
 
   lcd_driver:
@@ -96,15 +55,10 @@ asterix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Asterix v0.8.1"
+      banner: "Asterix v0.8.3"
 
 
   tree:
-    ros__parameters:
-      use_sim_time: !Var use_sim_time
-
-
-  robot:
     ros__parameters:
       use_sim_time: !Var use_sim_time
 

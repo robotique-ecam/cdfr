@@ -29,7 +29,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("transformix/get_transform");
   getTransformation(assurancetourix_to_map_transformation);
 
-
 #ifdef MIPI_CAMERA
 
   RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
@@ -95,10 +94,10 @@ void Assurancetourix::get_image() {
   }
 }
 
-//service enabling/disabling aruco detection, enabled by default
-//service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
+// service enabling/disabling aruco detection, enabled by default
+// service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
 void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
-                                  const std_srvs::srv::SetBool::Response::SharedPtr response) {
+                                                    const std_srvs::srv::SetBool::Response::SharedPtr response) {
 
   if (request->data) {
     timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this));
@@ -236,6 +235,7 @@ void Assurancetourix::detect() {
   marker.scale.z = 0.05;
   marker.id = 13;
 
+#ifdef EXTRALOG // if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
   auto start_total = std::chrono::high_resolution_clock::now();
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
@@ -252,7 +252,7 @@ void Assurancetourix::detect() {
   auto end_camera = std::chrono::high_resolution_clock::now();
 #endif
 
-  //cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
+  // cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
   _frame.convertTo(raised_contrast, -1, contrast, 0);
 
   raised_contrast.copyTo(_anotated);
@@ -272,7 +272,6 @@ void Assurancetourix::detect() {
 #ifdef EXTRALOG
   auto end_detection = std::chrono::high_resolution_clock::now();
   auto end_total = std::chrono::high_resolution_clock::now();
-
 
   double time_taken_camera = std::chrono::duration_cast<std::chrono::nanoseconds>(end_camera - start_camera).count();
   double time_taken_detection = std::chrono::duration_cast<std::chrono::nanoseconds>(end_detection - start_detection).count();

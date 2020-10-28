@@ -19,8 +19,30 @@
 
       var socket = io(namespace);
 
+      toastr.options = {
+        closeButton: false,
+        debug: false,
+        newestOnTop: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        preventDuplicates: true,
+        onclick: null,
+        showDuration: 300,
+        hideDuration: 0,
+        timeOut: 15000,
+        extendedTimeOut: 5000,
+        showEasing: 'linear',
+        hideEasing: 'linear',
+        showMethod: 'show',
+        hideMethod: 'hide',
+      };
+
       socket.on('connect', function() {
-        toastr.success('Connected to api')
+        toastr.success('Connected to api');
+      });
+
+      socket.on('score', function(msg) {
+        $('#affichageScore').html(msg.score);
       });
 
       socket.on('console_out', function(msg) {
@@ -34,14 +56,14 @@
           toastr.error(msg.msg, msg.name, {
             timeOut: 0,
             extendedTimeout: 0,
-            closeButton: true
-          })
+            closeButton: true,
+          });
         } else if (msg.level == 'WARN') {
           toastr.warning(msg.msg, msg.name, {
             timeOut: 0,
             extendedTimeout: 0,
-            closeButton: true
-          })
+            closeButton: true,
+          });
         }
       });
     });
@@ -53,7 +75,7 @@
   <div class="container-fluid">
     <div class="d-none d-lg-block">
       <h3 class="text-center">Panoramix</h3>
-      <h6 class="text-center">Club Robotique ECAM - v0.8.1</h6>
+      <h6 class="text-center">Club Robotique ECAM - v0.8.3</h6>
     </div>
 
     <hr>
@@ -75,7 +97,7 @@
           <h5 class="card-title text-center">Strategy</h5>
           <div class="card-body">
             <p class="card-text">
-
+              <input id="strategy_slider" type="range" min="1" max="5" value="3">
             </p>
           </div>
         </div>
@@ -84,8 +106,7 @@
         <div class="card">
           <h5 class="card-title text-center" id="titreScore">Score</h5>
           <div class="card-body">
-            <p class="card-text" id="affichageScore">42</p>
-
+            <p class="card-text" id="affichageScore">0</p>
           </div>
         </div>
       </div>

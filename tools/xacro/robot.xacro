@@ -17,11 +17,11 @@
   </joint>
 
   <link name="${tf_prefix}robotbase">
-    <xacro:box_inertia m="4" w="${robotbase_lenght}" h="${robotbase_width}" d="${robotbase_height}"/>
+    <xacro:box_inertia m="4" w="${robotbase_length}" h="${robotbase_width}" d="${robotbase_height}"/>
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${robotbase_lenght} ${robotbase_width} ${robotbase_height}"/>
+        <box size="${robotbase_length} ${robotbase_width} ${robotbase_height}"/>
       </geometry>
       <material name="blue"/>
     </visual>
@@ -29,7 +29,7 @@
     <collision>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${robotbase_lenght+.05} ${robotbase_width+.05} ${robotbase_height+.05}"/>
+        <box size="${robotbase_length+.05} ${robotbase_width+.05} ${robotbase_height+.05}"/>
       </geometry>
     </collision>
 

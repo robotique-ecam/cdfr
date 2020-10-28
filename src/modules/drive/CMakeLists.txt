@@ -20,7 +20,9 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
+find_package(actuators_srvs REQUIRED)
 
 
 ################################################################################
@@ -37,7 +39,9 @@ set(dependencies
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
+  "std_srvs"
   "diagnostic_msgs"
+  "actuators_srvs"
 )
 
 set(EXEC_NAME "drive")
@@ -49,6 +53,7 @@ add_executable(${EXEC_NAME}
   src/i2c.cpp
 )
 
+option(DEBUG "Debug mode" OFF)
 option(SIMULATION "Simulation mode" OFF)
 option(TIMER "Enable Wall Timer for odometry" ON)
 
@@ -62,6 +67,9 @@ if(SIMULATION)
   include_directories($ENV{WEBOTS_HOME}/include/controller/c $ENV{WEBOTS_HOME}/include/controller/cpp)
   target_link_libraries(${EXEC_NAME} ${LIBRARIES})
 else()
+  if (DEBUG)
+    add_definitions(-DDEBUG)
+  endif()
   target_link_libraries(${EXEC_NAME} i2c)
 endif()
 

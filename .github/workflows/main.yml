@@ -75,26 +75,3 @@ jobs:
         with:
           name: simulation-results
           path: ~/animation/*.rbsd
-
-
-  hyperion:
-    needs: simulation
-
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install python3-colorama
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: simulation-results
-
-      - name: Run hyperion
-        run: |
-          cd tools/hyperion
-          python3 hyperion.py

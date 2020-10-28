@@ -2,7 +2,7 @@
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
 ![Webots](https://img.shields.io/badge/webots-2020b-blue)
 ![Status](https://img.shields.io/badge/status-beta-blueviolet)
-![Version](https://img.shields.io/badge/version-v0.8.1-blue)
+![Version](https://img.shields.io/badge/version-v0.8.3-blue)
 
 ### Build
 
@@ -25,9 +25,42 @@ cd path/to/ros
 ```
 
 
+### Few service calls
+
+##### Enable stepper drivers
+
+```
+ros2 service call /obelix/enable_drivers  std_srvs/SetBool "{data: true}"
+```
+
+##### Send action goal
+
+```
+ros2 action send_goal /obelix/navigate_to_pose nav2_msgs/action/NavigateToPose "{'pose': {'pose': {'position': {'x': 1, 'y': 1}}}}"
+```
+
+##### Deploy pharaon
+
+```
+ros2 service call /pharaon/deploy std_srvs/srv/Trigger
+```
+
+##### Disable Aruco detection
+
+```
+ros2 service call /enable_aruco_detection std_srvs/SetBool "{data: false}"
+```
+
+##### Publish to LCD screen
+
+```
+ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
+```
+
+
 ### Changelog
 
-### v0.8.0
+#### v0.8.0
 - Updated linux distro to ubuntu 20.04 LTS
 - Updated ROS2 distro to Foxy
 - Added webots simulation world for Physical based simulation
@@ -39,7 +72,7 @@ cd path/to/ros
 - Simulation mode for assurancetourix, drive and pharaon
 - Fixed many bugs thanks to simulation mode, including race conditions between modules
 
-#### v0.8.1
+#### v0.7.0
 - Full support for asterix, obelix, assurancetourix and pharaon running simultaneously
 - Upstreamed navigation2 stack to master branch
 - Refactored behavior trees with full strategy engine support

@@ -7,4 +7,4 @@
 from actuators.actuators import Actuators
 
 
-actuators = Actuators()
+actuators = Actuators(pump_addr=[0x42])

@@ -48,26 +48,26 @@ fi
 
 if [ $robot = "asterix" ] || [ $robot = "obelix" ]; then
     print_info "Setting up $robot"
-    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix strategix panoramix transformix transformix_msgs pharaon_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix panoramix transformix transformix_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "assurancetourix" ]; then
     print_info "Setting up $robot"
-    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix pharaon_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args " -DMIPI_CAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix lcd_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
-    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation-core" ]; then
     print_info "Setting up simulation environment"
     xacro ros/tools/xacro/asterix.xacro -o ros/src/asterix/robot/asterix.urdf
     xacro ros/tools/xacro/obelix.xacro -o ros/src/obelix/robot/obelix.urdf
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors drive assurancetourix && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip drive assurancetourix && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation-interfaces" ]; then
     print_info "Setting up simulation environment"
     generate_yamls
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip sensors gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
     print_info "Linking webots controllers"
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
     install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix

@@ -25,6 +25,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    autostart = LaunchConfiguration('autostart')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
     params = tempfile.NamedTemporaryFile(mode='w', delete=False)
@@ -58,6 +59,12 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
         ),
 
         DeclareLaunchArgument(
+            'autostart',
+            default_value='true',
+            description='Autostart the nav stack'
+        ),
+
+        DeclareLaunchArgument(
             'map',
             default_value=map_dir,
             description='Full path to map yaml file to load'
@@ -74,13 +81,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             default_value=nav2_bt_xml_file,
             description='Full path to the behavior tree xml file to use'
         ),
-
-        DeclareLaunchArgument(
-            'autostart',
-            default_value='true',
-            description='Automatically startup the nav2 stack'
-        ),
-
 
         GroupAction([
 
@@ -119,18 +119,29 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 parameters=[params.name],
                 remappings=remappings,
             ),
-        ]),
 
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
-            launch_arguments={
-                'map': map,
-                'namespace': namespace,
-                'use_namespace': use_namespace,
-                'use_sim_time': use_sim_time,
-                'default_bt_xml_filename': default_bt_xml_filename,
-                'params_file': params.name}.items(),
-        ),
+            Node(
+                package='nav2_map_server',
+                executable='map_server',
+                name='map_server',
+                output='screen',
+                parameters=[params.name],
+                remappings=remappings
+            ),
+
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([nav2_launch_file_dir, '/navigation_launch.py']),
+                launch_arguments={
+                    'map': map,
+                    'autostart': autostart,
+                    'namespace': namespace,
+                    'use_namespace': use_namespace,
+                    'use_sim_time': use_sim_time,
+                    'use_lifecycle_mgr': 'false',
+                    'default_bt_xml_filename': default_bt_xml_filename,
+                    'params_file': params.name}.items(),
+            ),
+        ]),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([robot_launch_file_dir, '/interfaces.py']),

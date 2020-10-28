@@ -43,6 +43,13 @@ def generate_launch_description():
         ),
 
         Node(
+            package='strategix',
+            executable='strategix',
+            output='screen',
+            arguments=[]
+        ),
+
+        Node(
             package='tf2_ros',
             executable='static_transform_publisher',
             output='screen',

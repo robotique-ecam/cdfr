@@ -7,39 +7,55 @@
 from time import sleep
 
 from .arbotix.arbotix import ArbotiX
-from .pumps.pumps import PumpDriver
+from .drivers.i2c import I2CDriver
+from .drivers.pumps import PumpDriver
+from .drivers.rpi_servos import RPiServos
 
 NO, NC = False, True
-DYNA_UP, DYNA_DOWN = 950, 800
-
-DYNAMIXELS_SPEED = 100
 
 
 class Actuators:
 
     """Actuators base class."""
 
-    def __init__(self, i2c_bus=5, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=None, SERVOS={}):
+    def __init__(self, i2c_bus=5, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=[], SERVOS={}):
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
         self.SERVOS = SERVOS
         self.DYNAMIXELS = DYNAMIXELS
-        self.pump_driver = PumpDriver(addrs=pump_addr, bus_id=i2c_bus)
-        if DYNAMIXELS is not None:
+        self.pump_addr = pump_addr
+        self._i2c_bus = I2CDriver(i2c_bus)
+        self.rpi_servos = RPiServos(pins=[19, 6])
+        self.pump_driver = PumpDriver(self._i2c_bus, addrs=self.pump_addr)
+        if len(self.DYNAMIXELS) > 0:
             self.arbotix = ArbotiX()
             self._setupDynamixels()
 
     def _setupDynamixels(self):
         """Setup dynamixels speed."""
         for dyna in self.DYNAMIXELS:
-            self.arbotix.setSpeed(dyna, DYNAMIXELS_SPEED)
-            self.arbotix.setPosition(dyna, DYNA_DOWN)
+            d = self.DYNAMIXELS[dyna]
+            self.arbotix.setSpeed(dyna, d.get('speed'))
+            self.arbotix.setPosition(dyna, d.get('down'))
+        for s in self.SERVOS:
+            servo = self.SERVOS[s]
+            self.arbotix.setSpeed(servo.get('addr'), servo.get('speed'))
+            self.arbotix.setPosition(servo.get('addr'), servo.get('down'))
+
+    def disableDynamixels(self):
+        """Setup dynamixels speed."""
+        for dyna in self.DYNAMIXELS:
+            self.arbotix.disableTorque(dyna)
+        for s in self.SERVOS:
+            servo = self.SERVOS[s]
+            self.arbotix.disableTorque(servo.get('addr'))
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
-        if flag_servo := self.SERVOS.get('flags') is not None:
-            self.arbotix.setServo(flag_servo['addr'], flag_servo['high'])
+        flag_servo = self.SERVOS.get('flags')
+        if flag_servo is not None:
+            self.arbotix.setPosition(flag_servo['addr'], flag_servo['up'])
 
     def setPumpsEnabled(self, enabled: bool, pumps: list):
         """Set list of pumps as enabled or not."""
@@ -62,6 +78,27 @@ class Actuators:
         if len(relax) > 0:
             sleep(.1)
             self.pump_driver.bytes_clear(relax)
+
+    def grabCups(self, ports: list):
+        """Grab cups at specified indexes."""
+        self.setPumpsEnabled(True, ports)
+        sleep(.5)
+        positions, servos = [], []
+        for servo in ports:
+            if servo in self.DYNAMIXELS:
+                servos.append(servo)
+                positions.append(self.DYNAMIXELS[servo].get('up'))
+        self.setDynamixelsPositions(servos, positions)
+
+    def dropCups(self, ports: list):
+        """Drop cups at specified indexes."""
+        positions, servos = [], []
+        for servo in ports:
+            if servo in self.DYNAMIXELS:
+                servos.append(servo)
+                positions.append(self.DYNAMIXELS[servo].get('down'))
+        self.setDynamixelsPositions(servos, positions)
+        self.setPumpsEnabled(False, ports)
 
     def setDynamixelsPositions(self, addrs: list, positions: list):
         """Set list of pumps as enabled or not."""

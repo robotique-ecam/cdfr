@@ -62,6 +62,7 @@ class SetupTimersAction(py_trees.behaviour.Behaviour):
         if not self.visited:
             self.visited = True
             # Setup Timers
+            self.robot._start_robot_callback(None, None)
             for action, duration in self.actions.items():
                 action.time = self.robot.get_clock().now().nanoseconds * 1e-9 + duration
             return py_trees.common.Status.SUCCESS
@@ -96,6 +97,7 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
             if not self.visited:
                 self.visited = True
                 # Code to end every action
+                self.robot.stop_ros()
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.FAILURE
 
@@ -110,13 +112,13 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
         if GPIO is None:
             return
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     def update(self):
         """Guard condition for goupille."""
-        if GPIO is None:
+        if GPIO is None or self.robot.robot == 'asterix':
             if self.robot.triggered():
                 return py_trees.common.Status.SUCCESS
-        elif GPIO.input(27) or self.robot.triggered():
+        elif not GPIO.input(17) or self.robot.triggered():
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING

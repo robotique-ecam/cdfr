@@ -9,6 +9,8 @@
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
 #endif
+#include "std_srvs/srv/set_bool.hpp"
+#include "actuators_srvs/srv/slider.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
@@ -24,6 +26,7 @@
 
 #define STEPPER_LEFT 1
 #define STEPPER_RIGHT 2
+#define STEPPER_CMD -128
 
 using namespace rclcpp;
 using namespace std::chrono;
@@ -68,6 +71,7 @@ private:
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
+  std::mutex i2c_mutex;
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;
@@ -91,6 +95,12 @@ private:
 
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+
+  // Steppers disable service
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
+
+  // Sliders service
+  rclcpp::Service<actuators_srvs::srv::Slider>::SharedPtr _set_slider_postion;
 
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
@@ -151,6 +161,10 @@ private:
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   int8_t compute_velocity_cmd(double velocity);
+  void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                             const std_srvs::srv::SetBool::Response::SharedPtr response);
+  void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
+                                  const actuators_srvs::srv::Slider::Response::SharedPtr response);
 
 #ifdef SIMULATION
   void sim_step();

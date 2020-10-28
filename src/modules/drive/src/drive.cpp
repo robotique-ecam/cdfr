@@ -2,6 +2,7 @@
 
 #define I2C_ADDR_MOTOR_LEFT 0x10
 #define I2C_ADDR_MOTOR_RIGHT 0x11
+#define I2C_ADDR_SLIDER 0x12
 
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
@@ -13,6 +14,14 @@ Drive::Drive() : Node("drive_node") {
 #ifndef SIMULATION
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
+
+  /* Init speed before starting odom */
+  this->i2c_mutex.lock();
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->read_word_data(0);
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->read_word_data(0);
+  this->i2c_mutex.unlock();
 #else
   /* Init webots supervisor */
   wb_robot = std::make_shared<webots::Robot>();
@@ -42,6 +51,11 @@ Drive::Drive() : Node("drive_node") {
   diagnostics_pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", 1);
 
   cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos, std::bind(&Drive::command_velocity_callback, this, std::placeholders::_1));
+
+  _enable_drivers = this->create_service<std_srvs::srv::SetBool>(
+      "enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  _set_slider_postion = this->create_service<actuators_srvs::srv::Slider>(
+      "slider_position", std::bind(&Drive::handle_set_slider_position, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
@@ -133,16 +147,25 @@ void Drive::update_velocity() {
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
+  this->i2c_mutex.lock();
+
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.left);
+  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * this->i2c->read_word_data(differential_speed_cmd_.left);
   this->sign_steps_left = signbit(differential_speed_cmd_.left);
 
   this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * this->i2c->read_word(differential_speed_cmd_.right);
+  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * this->i2c->read_word_data(differential_speed_cmd_.right);
   this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
+  this->i2c_mutex.unlock();
+
+#ifdef DEBUG
+  std::cout << "---" << std::endl;
+  std::cout << "speed_cmd_.left:" << static_cast<int>(differential_speed_cmd_.left) << " speed_cmd_.right" << static_cast<int>(differential_speed_cmd_.right) << std::endl;
+  std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
+#endif /* DEBUG */
 #else
   time_since_last_sync_ = get_sim_time();
 
@@ -181,6 +204,11 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
+
+#ifdef DEBUG
+  std::cout << "cmd_vel_.left:" << cmd_vel_.left << " cmd_vel_.right:" << cmd_vel_.right << std::endl;
+  std::cout << "speed_.left:" << differential_speed_.left << " speed_.right:" << differential_speed_.right << std::endl;
+#endif /* DEBUG */
 
   instantaneous_move_.linear = (differential_move_.right + differential_move_.left) / 2;
   instantaneous_move_.angular = (differential_move_.right - differential_move_.left) / (_wheel_separation);
@@ -238,6 +266,42 @@ void Drive::update_joint_states() {
 
 void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_); }
 
+void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
+                                  const std_srvs::srv::SetBool::Response::SharedPtr response) {
+#ifndef SIMULATION
+  this->i2c_mutex.lock();
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
+
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
+
+  this->i2c_mutex.unlock();
+#endif
+
+  if (request->data) {
+    response->message = "Stepper drivers are enabled";
+    RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
+  } else {
+    response->message = "Stepper drivers are disabled";
+    RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
+  }
+  response->success = true;
+}
+
+void Drive::handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
+                                       const actuators_srvs::srv::Slider::Response::SharedPtr response) {
+#ifndef SIMULATION
+  this->i2c_mutex.lock();
+
+  this->i2c->set_address(I2C_ADDR_SLIDER);
+  this->i2c->write_byte(request->position);
+
+  this->i2c_mutex.unlock();
+#endif
+}
+
 #ifdef SIMULATION
 rclcpp::Time Drive::get_sim_time() {
   double seconds = 0;
@@ -248,4 +312,14 @@ rclcpp::Time Drive::get_sim_time() {
 void Drive::sim_step() { this->wb_robot->step(timestep); }
 #endif /* SIMULATION */
 
-Drive::~Drive() { RCLCPP_INFO(this->get_logger(), "Drive Node Terminated"); }
+Drive::~Drive() {
+#ifndef SIMULATION
+  this->i2c_mutex.lock();
+  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
+  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
+  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
+  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
+  this->i2c_mutex.unlock();
+#endif /* SIMULATION */
+  RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
+}

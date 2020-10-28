@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>titan</name>
-  <version>0.8.1</version>
+  <version>0.8.3</version>
   <description>Supervision tools and launchfiles for simulation</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
   <license>ECAM Makers :: CDFR 2020</license>

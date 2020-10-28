@@ -21,10 +21,12 @@ public:
   I2C(int i2c_bus);
   void set_address(int addr);
   uint8_t read_byte();
-  uint16_t read_word(uint8_t cmd);
+  uint8_t read_byte_data(uint8_t cmd);
+  uint16_t read_word_data(uint8_t cmd);
   void write_byte(uint8_t cmd);
-  uint8_t bus_read(uint8_t *buff, uint8_t lenght);
-  uint8_t bus_write(uint8_t *buff, uint8_t lenght);
+  void write_byte_data(uint8_t cmd, uint8_t val);
+  uint8_t bus_read(uint8_t *buff, uint8_t length);
+  uint8_t bus_write(uint8_t *buff, uint8_t length);
 
 private:
   int i2c_fd_;
