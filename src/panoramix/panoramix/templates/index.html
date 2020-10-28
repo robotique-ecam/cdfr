@@ -47,8 +47,6 @@
 
       socket.on('console_out', function(msg) {
         $('#console').append(msg.text);
-        if ($('#console').length)
-          $('#console').scrollTop($('#console')[0].scrollHeight - $('#console').height());
       });
 
       socket.on('console_msg', function(msg) {
@@ -116,51 +114,6 @@
           <div class="card-body">
             <p class="card-text">
 
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <hr>
-
-    <h5 class="text-center">System Monitor</h5>
-    <div class="row">
-      <div class="col-sm">
-        <div class="card">
-          <img id="asterix_img" class="card-img-top" src="..." alt="Asterix image">
-          <h5 class="card-title text-center">Asterix</h5>
-          <div class="card-body">
-            <p class="card-text">
-              <ul id=asterix_nodes>
-
-              </ul>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <div class="card">
-          <img id="obelix_img" class="card-img-top" src="..." alt="Obelix image">
-          <h5 class="card-title text-center">Obelix</h5>
-          <div class="card-body">
-            <p class="card-text">
-              <ul id=obelix_nodes>
-
-              </ul>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <div class="card">
-          <img id="assurancetourix_img" class="card-img-top" src="..." alt="Assurancetourix image">
-          <h5 class="card-title text-center">Assurancetourix</h5>
-          <div class="card-body">
-            <p class="card-text">
-              <ul id=assurancetourix_nodes>
-
-              </ul>
             </p>
           </div>
         </div>
