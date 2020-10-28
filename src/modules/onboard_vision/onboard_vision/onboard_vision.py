@@ -31,19 +31,48 @@ class OnBoardService(Node):
     def __init__(self):
         super().__init__('onboard_vision')
         self.srv = self.create_service(Trigger, '/get_eceuil_case', self.get_eceuil_case_callback)
-        print("onboard_vision node has started")
+        self.srv = self.create_service(Trigger, '/get_north_or_south', self.get_north_or_south_callback)
+        self.get_logger().info("onboard_vision node has started")
 
     def get_eceuil_case_callback(self, request, response):
-        self.get_logger().info('Incoming request for ecueil case')
-
-        response.success = True
         response.message = self.get_eceuil_case()
+        if response.message != "0":
+            response.success = True
+        else:
+            response.success = False
         return response
 
-    def get_eceuil_case(self):
-        print('init camera')
+    def get_north_or_south_callback(self, request, response):
+        side = self.get_north_or_south()
+        if side != None:
+            self.get_logger().info(side + " end detected")
+            response.message = side
+            response.success = True
+        else:
+            self.get_logger().info("no side detected")
+            response.message = ""
+            response.success = False
+        return response
+
+    def get_north_or_south(self):
         cap = cv2.VideoCapture(0)
-        print('launching analysis')
+        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+        for _ in range(20):
+            frame = frame = cv2.flip(cap.read()[1], 0).astype(np.uint8)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            res = cv2.aruco.detectMarkers(gray,dictionary)
+            if len(res[0]) > 0:
+                cv2.aruco.drawDetectedMarkers(gray,res[0],res[1])
+                if res[1][0][0] == 17:
+                    result = res[0][0][0][0][0] - res[0][0][0][1][0]
+                    if result < 0:
+                        return "North"
+                    else:
+                        return "South"
+        return None
+
+    def get_eceuil_case(self):
+        cap = cv2.VideoCapture(0)
         for _ in range(20):
             frame = cv2.flip(cap.read()[1], 0).astype(np.uint8)
             im = cv2.blur(frame, (3, 3))
@@ -82,13 +111,12 @@ class OnBoardService(Node):
                 if colors in eceuil_possibility:
                     case = int(eceuil_possibility.index(colors)/2) + 1
                     cap.release()
-                    print(case, end ="\n")
+                    self.get_logger().info(str(case) + " case ecueil")
                     return str(case)
         return "0"
 
 
     def color_mask(self, img, color_lower, color_upper):
-        """Return mask of colors in between upper & lower."""
         raw_mask = cv2.inRange(img, np.array(color_lower), np.array(color_upper))
         return cv2.morphologyEx(raw_mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
 
@@ -144,8 +172,6 @@ class OnBoardService(Node):
             ]]
             return three
         return arr
-
-
 
     def average(self, acc):
         x = y = 0
