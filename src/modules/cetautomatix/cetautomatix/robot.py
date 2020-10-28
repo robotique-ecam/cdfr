@@ -2,6 +2,7 @@
 
 
 import math
+import time
 from importlib import import_module
 from signal import SIGINT
 from subprocess import call
@@ -388,6 +389,7 @@ class Robot(Node):
         msg.pose.pose.orientation.w = q[3]
         self.blackboard.goal = msg
         self.i += 1
+        time.sleep(1)
 
     def stop_ros(self, shutdown=True):
         """Stop ros launch processes."""
