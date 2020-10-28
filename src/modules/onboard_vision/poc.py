@@ -12,7 +12,7 @@ body_colors = {
     ], 'color': (0, 0, 200)},
     'green': {'bounds': [
         ([50, 0, 50], [255, 10, 255]),
-        ([23, 50, 23], [255, 255, 255])
+        ([35, 50, 35], [255, 255, 255])
     ], 'color': (0, 250, 0)},
 }
 
@@ -40,15 +40,51 @@ def min_area_boxes(mask, threshold=300):
             rects.append(np.int0(cv2.boxPoints(cv2.minAreaRect(contour))))
     return rects
 
+def dist2points(p1, p2):
+    return abs(p1[0]-p2[0])+abs(p1[1]-p2[1])
+
 def accepted(rectangle):
     trueRect = []
     for i in rectangle:
-        dist = abs(i[1][0]-i[3][0])+abs(i[1][1]-i[3][1])
-        dist1 = abs(i[0][0]-i[2][0])+abs(i[0][1]-i[2][1])
+        dist = dist2points(i[1], i[3])
+        dist1 = dist2points(i[0], i[2])
         if (((dist <= dist1*(1+accuracy/2)) and (dist >= dist1*(1-accuracy/2))) or \
-        ((dist1 <= dist*(1+accuracy/2)) and (dist1 >= dist*(1-accuracy/2)))) and dist1 < dist:
+        ((dist1 <= dist*(1+accuracy/2)) and (dist1 >= dist*(1-accuracy/2)))): #and dist1 < dist:
             trueRect.append(i)
     return trueRect
+
+def getCoords(point):
+    return point[0], point[1]
+
+def splitGobelet(arr):
+    dist = dist2points(arr[1], arr[3])
+    dist1 = dist2points(arr[0], arr[2])
+    if dist1 < dist:
+        return arr
+    x0, y0 = getCoords(arr[0])
+    x1, y1 = getCoords(arr[1])
+    x2, y2 = getCoords(arr[2])
+    x3, y3 = getCoords(arr[3])
+    if dist < dist1:
+        #two gobelets
+        two = [[
+        [x0,y0],[x1,y1],[(x2+x0)/2, (y2+y0)/2],[(x3+x1)/2, (y3+y1)/2]
+        ],[
+        [(x2+x0)/2, (y2+y0)/2],[(x3+x1)/2, (y3+y1)/2],[x2,y2],[x3,y3]
+        ]]
+        return two
+    elif dist < 2.5 * dist1:
+        three = [[
+        [x0,y0],[x1,y1],[(x2+x0)/3, (y2+y0)/3],[(x3+x1)/3, (y3+y1)/3]
+        ],[
+        [(x2+x0)/3, (y2+y0)/3], [(x3+x1)/3, (y3+y1)/3], [2*(x2+x0)/3, 2*(y2+y0)/3], [2*(x3+x1)/3, 2*(y3+y1)/3]
+        ],[
+        [2*(x2+x0)/3, 2*(y2+y0)/3], [2*(x3+x1)/3, 2*(y3+y1)/3],[x2,y2],[x3,y3]
+        ]]
+        return three
+    return arr
+
+
 
 def average(acc):
     x = y = 0
@@ -108,9 +144,14 @@ while (1):
             rects = min_area_boxes(mask)
             toDraw = accepted(rects)
             if len(toDraw) != 0:
-                for i in toDraw:
-                    resultat[body].append(average(i))
                 cv2.drawContours(im, toDraw, -1, body_colors[body]['color'], 2)
+                for i in toDraw:
+                    split = splitGobelet(i)
+                    if len(split) == 4:
+                        resultat[body].append(average(i))
+                    else:
+                        for j in split:
+                            resultat[body].append(average(j))
 
     if len(resultat['red']) + len(resultat['green']) == 5:
         maybe = []
@@ -124,7 +165,8 @@ while (1):
             case = int(eceuil_possibility.index(colors)/2) + 1
             print(case, end ="\n")
 
-    cv2.imshow("annotated", im)
+    cv2.imshow("colors", cv2.bitwise_and(img, img, mask=global_mask))
+    cv2.imshow("around", im)
     cv2.waitKey(3)
 
 #cv2.imwrite('contours.png', im)
