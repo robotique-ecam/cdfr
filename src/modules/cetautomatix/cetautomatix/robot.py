@@ -375,7 +375,7 @@ class Robot(Node):
         #             offset = (0, 0.1)
         #             elements[self._current_action]["Rot"] = 90
         #             self.drop = NC
-        offset = 0
+        offset = (0, 0)
         (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
         position = self.get_position(self._current_action, self._orientation, theta, offset)
         msg.pose.pose.position.x = position[0]
