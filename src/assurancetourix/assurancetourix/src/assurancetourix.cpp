@@ -4,24 +4,21 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-  auto on_parameter_event_callback =
-    [this](const rcl_interfaces::msg::ParameterEvent::SharedPtr event) -> void
-    {
-
-      for (auto & new_parameter : event->new_parameters) {
-        if (new_parameter.name == "side" && (new_parameter.value.string_value == "blue" || new_parameter.value.string_value == "yellow")){
-          RCLCPP_INFO(this->get_logger(), "new_parameter from node %s, side = %s \n", event->node.c_str(), new_parameter.value.string_value.c_str());
-          side = new_parameter.value.string_value;
-        }
+  auto on_parameter_event_callback = [this](const rcl_interfaces::msg::ParameterEvent::SharedPtr event) -> void {
+    for (auto &new_parameter : event->new_parameters) {
+      if (new_parameter.name == "side" && (new_parameter.value.string_value == "blue" || new_parameter.value.string_value == "yellow")) {
+        RCLCPP_INFO(this->get_logger(), "new_parameter from node %s, side = %s \n", event->node.c_str(), new_parameter.value.string_value.c_str());
+        side = new_parameter.value.string_value;
       }
+    }
 
-      for (auto & changed_parameter : event->changed_parameters) {
-        if (changed_parameter.name == "side" && (changed_parameter.value.string_value == "blue" || changed_parameter.value.string_value == "yellow")){
-          RCLCPP_INFO(this->get_logger(), "changed_parameter from node %s, side = %s \n", event->node.c_str(), changed_parameter.value.string_value.c_str());
-          side = changed_parameter.value.string_value;
-        }
+    for (auto &changed_parameter : event->changed_parameters) {
+      if (changed_parameter.name == "side" && (changed_parameter.value.string_value == "blue" || changed_parameter.value.string_value == "yellow")) {
+        RCLCPP_INFO(this->get_logger(), "changed_parameter from node %s, side = %s \n", event->node.c_str(), changed_parameter.value.string_value.c_str());
+        side = changed_parameter.value.string_value;
       }
-    };
+    }
+  };
 
   parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
   parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
@@ -45,7 +42,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = NULL;
 
-  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>("/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
+      "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 #endif // MIPI_CAMERA
 
@@ -73,7 +71,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); //to remove for PR
+  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); // to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
@@ -88,7 +86,7 @@ void Assurancetourix::get_image() {
     cv::Mat *image = new cv::Mat(cv::Size(width, (int)(height * 1.5)), CV_8UC1, buffer->data);
     cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
     arducam::arducam_release_buffer(buffer);
-    //cv::flip(*image, *image, -1);
+    // cv::flip(*image, *image, -1);
     _frame = *image;
     delete image;
   }
@@ -217,8 +215,8 @@ void Assurancetourix::init_parameters() {
 
 void Assurancetourix::detect() {
 
-#ifdef EXTRALOG //if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
-//will also show a marker at the assurancetourix origin frame position
+#ifdef EXTRALOG // if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
+  // will also show a marker at the assurancetourix origin frame position
   marker.pose.orientation.x = 0.70711;
   marker.pose.orientation.y = 0;
   marker.pose.orientation.z = 0.70711;
@@ -235,8 +233,6 @@ void Assurancetourix::detect() {
   marker.scale.z = 0.05;
   marker.id = 13;
 
-#ifdef EXTRALOG // if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
-  auto start_total = std::chrono::high_resolution_clock::now();
   auto start_camera = std::chrono::high_resolution_clock::now();
   std::ios_base::sync_with_stdio(false);
 #endif
@@ -292,7 +288,7 @@ void Assurancetourix::detect() {
     cv::waitKey(3);
   }
 
-  if (!savedeee){
+  if (!savedeee) {
     cv::imwrite("test.jpg", _anotated);
     savedeee = true;
   }
@@ -401,29 +397,27 @@ void Assurancetourix::_anotate_image(Mat img) {
       tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
       float colorSideCoeff = 0;
-      if (side.compare("yellow") == 0){
+      if (side.compare("yellow") == 0) {
         colorSideCoeff = 0.28;
       }
 
-      //tmpPoseOut.pose.position.x += 0.6 + colorSideCoeff;
-      tmpPoseOut.pose.position.x = 1.34 + 0.6 + colorSideCoeff - (1.34 + 0.6 + colorSideCoeff - tmpPoseOut.pose.position.x)/2;
+      // tmpPoseOut.pose.position.x += 0.6 + colorSideCoeff;
+      tmpPoseOut.pose.position.x = 1.34 + 0.6 + colorSideCoeff - (1.34 + 0.6 + colorSideCoeff - tmpPoseOut.pose.position.x) / 2;
       tmpPoseOut.pose.position.y += -0.4;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
       transformed_marker.pose = tmpPoseOut.pose;
 
-      if ( (side.compare("blue")==0) && (marker.id <= 10) && (6 <= marker.id) ){
+      if ((side.compare("blue") == 0) && (marker.id <= 10) && (6 <= marker.id)) {
         marker_array_ennemies.markers.push_back(transformed_marker);
-      }
-      else if ( (side.compare("yellow")==0) && (marker.id <= 5) && (1 <= marker.id) ){
+      } else if ((side.compare("yellow") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
         marker_array_ennemies.markers.push_back(transformed_marker);
       }
 
-      if ( (side.compare("yellow")==0) && (marker.id <= 10) && (6 <= marker.id) ){
+      if ((side.compare("yellow") == 0) && (marker.id <= 10) && (6 <= marker.id)) {
         marker_array_allies.markers.push_back(transformed_marker);
-      }
-      else if ( (side.compare("blue")==0) && (marker.id <= 5) && (1 <= marker.id) ){
+      } else if ((side.compare("blue") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
         marker_array_allies.markers.push_back(transformed_marker);
       }
 
