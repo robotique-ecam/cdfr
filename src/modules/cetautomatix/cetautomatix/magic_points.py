@@ -84,6 +84,9 @@ ZONES = {
 
 
 elements = {
+    "STUPID_1": {"X": 0.8, "Y": 1.5},
+    "STUPID_2": {"X": 1.3, "Y": 0.4},
+    "STUPID_3": {"X": 0.3, "Y": 0.3},
     'ECUEIL_BLEU': {"X": 0, "Y": 0.4, "Rot": 180},
     'ECUEIL_JAUNE': {"X": 3, "Y": 0.4, "Rot": 0},
     'ECUEIL_1': {"X": 0.85, "Y": 2, "Rot": 90},

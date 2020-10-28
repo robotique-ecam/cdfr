@@ -34,6 +34,8 @@ from tf2_ros.transform_listener import TransformListener
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='cetautomatix')
+        self.i = 0
+        self.stupid_actions = ["STUPID_1", "STUPID_2", "STUPID_3"]
         self._triggered = False
         self._position = None
         self._start_time = None
@@ -344,46 +346,48 @@ class Robot(Node):
         """Get goal pose for action."""
         msg = NavigateToPose_Goal()
         msg.pose.header.frame_id = 'map'
-        if self._current_action is not None:
-            offset = (0, 0)
-            if 'GOB' in self._current_action:
-                for pump_id, pump_dict in self.actuators.PUMPS.items():
-                    if pump_dict.get('type') == NC and not pump_dict.get('STATUS'):
-                        self.current_pump = pump_id
-                        offset = pump_dict.get("pos")
-                        self.actuators.setPumpsEnabled(True, [pump_id])
-                        break
-            elif 'ECUEIL' in self._current_action:
-                for pump_id, pump_dict in self.actuators.PUMPS.items():
-                    if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
-                        offset = pump_dict.get("pos")
-                        break
-                self.set_slider_position(0)
-            elif 'CHENAL' in self._current_action:
-                arriere = False
-                for pump_id, pump_dict in self.actuators.PUMPS.items():
-                    if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
-                        arriere = True
-                if arriere is True:
-                    offset = (0, -0.1)
-                    elements[self._current_action]["Rot"] = -90
-                    self.drop = NO
-                else:
-                    offset = (0, 0.1)
-                    elements[self._current_action]["Rot"] = 90
-                    self.drop = NC
-
-            (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
-            position = self.get_position(self._current_action, self._orientation, theta, offset)
-            msg.pose.pose.position.x = position[0]
-            msg.pose.pose.position.y = position[1]
-            msg.pose.pose.position.z = 0.0
-            q = self.euler_to_quaternion(phi)
-            msg.pose.pose.orientation.x = q[0]
-            msg.pose.pose.orientation.y = q[1]
-            msg.pose.pose.orientation.z = q[2]
-            msg.pose.pose.orientation.w = q[3]
+        # if self._current_action is not None:
+        #     offset = (0, 0)
+        #     if 'GOB' in self._current_action:
+        #         for pump_id, pump_dict in self.actuators.PUMPS.items():
+        #             if pump_dict.get('type') == NC and not pump_dict.get('STATUS'):
+        #                 self.current_pump = pump_id
+        #                 offset = pump_dict.get("pos")
+        #                 self.actuators.setPumpsEnabled(True, [pump_id])
+        #                 break
+        #     elif 'ECUEIL' in self._current_action:
+        #         for pump_id, pump_dict in self.actuators.PUMPS.items():
+        #             if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
+        #                 offset = pump_dict.get("pos")
+        #                 break
+        #         self.set_slider_position(0)
+        #     elif 'CHENAL' in self._current_action:
+        #         arriere = False
+        #         for pump_id, pump_dict in self.actuators.PUMPS.items():
+        #             if pump_dict.get('type') == NO and pump_dict.get('STATUS') is not None:
+        #                 arriere = True
+        #         if arriere is True:
+        #             offset = (0, -0.1)
+        #             elements[self._current_action]["Rot"] = -90
+        #             self.drop = NO
+        #         else:
+        #             offset = (0, 0.1)
+        #             elements[self._current_action]["Rot"] = 90
+        #             self.drop = NC
+        self._current_action = self.stupid_actions[self.i % len(self.stupid_actions)]
+        offset = 0
+        (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
+        position = self.get_position(self._current_action, self._orientation, theta, offset)
+        msg.pose.pose.position.x = position[0]
+        msg.pose.pose.position.y = position[1]
+        msg.pose.pose.position.z = 0.0
+        q = self.euler_to_quaternion(phi)
+        msg.pose.pose.orientation.x = q[0]
+        msg.pose.pose.orientation.y = q[1]
+        msg.pose.pose.orientation.z = q[2]
+        msg.pose.pose.orientation.w = q[3]
         self.blackboard.goal = msg
+        self.i += 1
 
     def stop_ros(self, shutdown=True):
         """Stop ros launch processes."""

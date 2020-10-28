@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 actions = {
+    "STUPID_1": {},
+    "STUPID_2": {},
+    "STUPID_3": {},
     "MANCHE1": {"ONLY_SIDE": "blue"},
     "MANCHE2": {"ONLY_SIDE": "blue"},
     "MANCHE3": {"ONLY_SIDE": "yellow"},
