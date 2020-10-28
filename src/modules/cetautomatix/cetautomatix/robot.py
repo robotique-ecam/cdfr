@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
 
+import math
 from importlib import import_module
 from signal import SIGINT
 from subprocess import call
+from threading import Thread
 
 import numpy as np
 import psutil
-import math
 
 import py_trees
 import rclpy
-from cetautomatix import tf2_geometry_msgs
 from actuators.actuators import NC, NO
+from actuators_srvs.srv import Slider
+from cetautomatix import tf2_geometry_msgs
 from cetautomatix.magic_points import elements
 from cetautomatix.selftest import Selftest
 from cetautomatix.strategy_modes import get_time_coeff
@@ -22,7 +24,6 @@ from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.time import Duration, Time
 from std_srvs.srv import SetBool, Trigger
-from actuators_srvs.srv import Slider
 from strategix.actions import actions
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 from tf2_ros import LookupException
@@ -210,12 +211,8 @@ class Robot(Node):
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
         if self.robot == 'obelix':
-            i = 0
-            while not self._trigger_start_asterix_client.wait_for_service(timeout_sec=5):
-                if i > 10:
-                    break
-                self._synchronous_call(self._trigger_start_asterix_client, self._trigger_start_asterix_request)
-                i += 1
+            Thread(target=self._synchronous_call, args=[self._trigger_start_asterix_client, self._trigger_start_asterix_request]).start()
+            self.get_logger().info('Obelix triggered Asterix')
         self._start_time = self.get_clock().now().nanoseconds * 1e-9
         lcd_msg = Lcd()
         lcd_msg.line = 0
