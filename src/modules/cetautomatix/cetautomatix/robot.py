@@ -158,6 +158,7 @@ class Robot(Node):
             self.actuators[self.current_pump]['STATUS'] = self._current_action
             servo = self.actuators.DYNAMIXELS[self.current_pump]
             self.actuators.arbotix.setPosition(self.current_pump, servo.get('up'))
+            return True
         elif 'ECUEIL' in self._current_action:
             pump_list = []
             i = 0
@@ -169,6 +170,7 @@ class Robot(Node):
             self.actuators.setPumpsEnabled(True, pump_list)
             # TODO: Fermer Herse
             self.set_slider_position(255)
+            return True
         elif 'CHENAL' in self._current_action:
             color = 'GREEN' if 'VERT' in self._current_action else 'RED'
             pump_list = []
@@ -182,6 +184,7 @@ class Robot(Node):
             else:
                 self.set_slider_position(100)
             self.actuators.setPumpsEnabled(False, pump_list)
+            return True
         else:
             return True
 
