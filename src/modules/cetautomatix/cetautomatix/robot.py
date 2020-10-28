@@ -299,7 +299,7 @@ class Robot(Node):
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
         check = self.check_to_empty()
-        self.get_logger().info(check)
+        self.get_logger().info(f'{check}')
         if check is not None:
             action_list = check
         if not action_list:
@@ -323,7 +323,7 @@ class Robot(Node):
                 if pump_dict.get('type') == NO:
                     empty_behind = False
                 else:
-                    empty_front = True
+                    empty_front = False
         self.get_logger().info(f'behind: {empty_behind}, front: {empty_front}')
         if empty_behind or empty_front:
             if self.side.value == 'blue':
