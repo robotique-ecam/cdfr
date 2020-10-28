@@ -1,14 +1,15 @@
 ---
 assurancetourix:
   ros__parameters:
-    topic_for_gradient_layer: "coordonate_position_transform"
+    topic_for_allies_position: /allies_positions_markers
+    topic_for_gradient_layer: /ennemies_positions_markers
     camera:
-      bgain: 5160
+      bgain: 2500
       exposure: 250
       mode: 0
-      rgain: 3110
+      rgain: 1500
     image:
-      contrast: 1.0
+      contrast: 35.0
       show_image: false
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]

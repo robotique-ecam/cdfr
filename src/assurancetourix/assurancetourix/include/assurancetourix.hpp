@@ -79,6 +79,7 @@ private:
   double mat_dist_coeffs[1][5] = {{0.5 * -0.05507153604545092, -0.036754144220704506, 0.004500420597462287, -0.01843020862512126, 0.017075316951618093}};
   double mat_camera_matrix_coeff[3][3] = {{1.2 * 978.2290511854844, 0.0, 1.2 * 722.0173011119409}, {0.0, 1.2 * 982.4076393453565, 1.2 * 653.1296070005849}, {0.0, 0.0, 1.0}};
 
+
   cv::Mat _distCoeffs = Mat(5, 1, CV_64F, mat_dist_coeffs);
   cv::Mat _cameraMatrix = Mat(3, 3, CV_64F, mat_camera_matrix_coeff);
 
@@ -93,17 +94,20 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
   visualization_msgs::msg::Marker transformed_marker;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_;
+
+  rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
 
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
   // Parameters
   int _camera_id, mode, lifetime_sec, lifetime_nano_sec, exposure;
-  bool show_image;
+  bool show_image, savedeee;
   uint rgain, bgain, robot_type, game_element_type;
   double contrast;
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale;
-  std::string base_frame, header_frame_id, topic_for_gradient_layer;
+  std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
 
   rclcpp::Client<transformix_msgs::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;
 };
