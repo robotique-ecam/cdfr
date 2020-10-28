@@ -39,6 +39,7 @@ class Robot(Node):
         self._current_action = None
         self.robot = self.get_namespace().strip('/')
         # parameters interfaces
+        self.side = self.declare_parameter('side', 'blue')
         self.declare_parameter('length')
         self.declare_parameter('width')
         self.declare_parameter('strategy_mode')
@@ -291,6 +292,9 @@ class Robot(Node):
 
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
+        check = self.check_to_empty()
+        if check:
+            action_list = check
         if not action_list:
             return None
         coefficient_list = []
@@ -304,6 +308,24 @@ class Robot(Node):
             coefficient_list.append(coefficient)
         best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
+
+    def check_to_empty(self):
+        arriere, i = 0, 0
+        avant, j = 0, 0
+        for pump_id, pump_dict in self.actuators.PUMPS.items():
+            if pump_dict.get('type') == NO:
+                i += 1
+                if pump_dict.get('STATUS') is not None:
+                    arriere += 1
+            else:
+                j += 1
+                if pump_dict.get('STATUS') is not None:
+                    avant += 1
+        if arriere == i or avant == j:
+            if self.side.value == 'blue':
+                return ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
+            else:
+                return ["CHENAL_JAUNE_VERT_1", "CHENAL_JAUNE_ROUGE_1"]
 
     def get_goal_pose(self):
         """Get goal pose for action."""

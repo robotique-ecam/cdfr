@@ -3,7 +3,6 @@
 
 """Strategix action server and score counter."""
 
-from importlib import import_module
 from threading import Thread
 
 import rclpy
@@ -54,14 +53,7 @@ class StrategixActionServer(Node):
                 if actions[action].get("ONLY_SIDE") is None or actions[action].get("ONLY_SIDE") == self.side.value:
                     if actions[action].get("ONLY_ROBOT") is None or actions[action].get("ONLY_ROBOT") == request.sender:
                         available.append(action)
-        arriere, i = 0, 0
-        devant, j = 0, 0
         response.available = available
-        if arriere == i or devant == j:
-            if self.side.value == 'blue':
-                response.available = ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
-            else:
-                response.available = ["CHENAL_JAUNE_VERT_1", "CHENAL_JAUNE_ROUGE_1"]
         self.get_logger().info(f'AVAILABLE: {response.available}')
         return response
 
