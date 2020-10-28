@@ -19,13 +19,13 @@ cmdline=cmdline.txt
 # Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
 # this file. Please refer to the README file for a description of the various
 # configuration files on the boot partition.
-dtparam=i2c_arm=on,i2c_arm_baudrate=400000
+dtparam=i2c_arm=on,i2c_arm_baudrate=10000
 dtoverlay=i2c6,baudrate=400000
-dtoverlay=i2c5,baudrate=400000
+dtoverlay=i2c5,baudrate=10000
 dtoverlay=i2c4,baudrate=400000
 dtoverlay=i2c3,baudrate=400000
-dtoverlay=i2c1,baudrate=400000
-dtoverlay=i2c0,baudrate=400000
+dtoverlay=i2c1,baudrate=10000
+dtoverlay=i2c0,baudrate=10000
 ```
 
 */etc/systemd/system/rc-local.service*
