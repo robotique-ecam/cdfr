@@ -213,7 +213,8 @@ class Robot(Node):
         self._triggered = True
         self.get_logger().info('Triggered robot starter')
         if self.robot == 'obelix':
-            Thread(target=self._synchronous_call, args=[self._trigger_start_asterix_client, self._trigger_start_asterix_request]).start()
+            # TODO : Fix sync call
+            # Thread(target=self._synchronous_call, args=[self._trigger_start_asterix_client, self._trigger_start_asterix_request]).start()
             self.get_logger().info('Obelix triggered Asterix')
         self._start_time = self.get_clock().now().nanoseconds * 1e-9
         lcd_msg = Lcd()
