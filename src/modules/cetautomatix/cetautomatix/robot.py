@@ -308,6 +308,7 @@ class Robot(Node):
 
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot."""
+        return self.stupid_actions[self.i % len(self.stupid_actions)]
         check = self.check_to_empty()
         self.get_logger().info(f'{check}')
         if check is not None:
@@ -374,7 +375,6 @@ class Robot(Node):
         #             offset = (0, 0.1)
         #             elements[self._current_action]["Rot"] = 90
         #             self.drop = NC
-        self._current_action = self.stupid_actions[self.i % len(self.stupid_actions)]
         offset = 0
         (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
         position = self.get_position(self._current_action, self._orientation, theta, offset)
