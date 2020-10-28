@@ -191,7 +191,7 @@ class Robot(Node):
                 # TODO: Ouvrir herse
             self.actuators.setPumpsEnabled(False, pump_list)
             for pump in pump_list:
-                self.actuators.PUMPS[pump]["STATUS"] = None
+                del self.actuators.PUMPS[pump]["STATUS"]
             return True
         else:
             return True
