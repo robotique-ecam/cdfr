@@ -316,18 +316,14 @@ class Robot(Node):
         return best_action
 
     def check_to_empty(self):
-        arriere, i = 0, 0
-        avant, j = 0, 0
+        empty_behind, empty_front = True, True
         for pump_id, pump_dict in self.actuators.PUMPS.items():
-            if pump_dict.get('type') == NO:
-                i += 1
-                if pump_dict.get('STATUS') is not None:
-                    arriere += 1
-            else:
-                j += 1
-                if pump_dict.get('STATUS') is not None:
-                    avant += 1
-        if arriere == i or avant == j:
+            if pump_dict.get('STATUS') is None:
+                if pump_dict.get('type') == NO:
+                    empty_behind = False
+                else:
+                    empty_front = True
+        if empty_behind or empty_front:
             if self.side.value == 'blue':
                 return ["CHENAL_BLEU_VERT_1", "CHENAL_BLEU_ROUGE_1"]
             else:
