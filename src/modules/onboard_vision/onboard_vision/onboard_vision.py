@@ -1,10 +1,11 @@
-import rclpy
 import cv2
 import numpy as np
+
+import rclpy
 from rclpy.node import Node
 from std_srvs.srv import Trigger
 
-accuracy = 0.4 #pourcent
+accuracy = 0.4  # pourcent
 
 body_colors = {
     'red': {'bounds': [
@@ -17,14 +18,15 @@ body_colors = {
     ], 'color': (0, 250, 0)},
 }
 
-eceuil_possibility =[
-['g','r','g','g','r'],
-['g','r','r','g','r'],
-['g','g','r','g','r'],
-['g','r','g','r','r'],
-['g','g','g','r','r'],
-['g','g','r','r','r']
+eceuil_possibility = [
+    ['g', 'r', 'g', 'g', 'r'],
+    ['g', 'r', 'r', 'g', 'r'],
+    ['g', 'g', 'r', 'g', 'r'],
+    ['g', 'r', 'g', 'r', 'r'],
+    ['g', 'g', 'g', 'r', 'r'],
+    ['g', 'g', 'r', 'r', 'r']
 ]
+
 
 class OnBoardService(Node):
 
@@ -60,9 +62,9 @@ class OnBoardService(Node):
         for _ in range(20):
             frame = frame = cv2.flip(cap.read()[1], 0).astype(np.uint8)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            res = cv2.aruco.detectMarkers(gray,dictionary)
+            res = cv2.aruco.detectMarkers(gray, dictionary)
             if len(res[0]) > 0:
-                cv2.aruco.drawDetectedMarkers(gray,res[0],res[1])
+                cv2.aruco.drawDetectedMarkers(gray, res[0], res[1])
                 if res[1][0][0] == 17:
                     result = res[0][0][0][0][0] - res[0][0][0][1][0]
                     if result < 0:
@@ -109,17 +111,15 @@ class OnBoardService(Node):
                 sorted = self.sortList(maybe)
                 colors = self.color(sorted, resultat)
                 if colors in eceuil_possibility:
-                    case = int(eceuil_possibility.index(colors)/2) + 1
+                    case = int(eceuil_possibility.index(colors) / 2) + 1
                     cap.release()
                     self.get_logger().info(str(case) + " case ecueil")
                     return str(case)
         return "0"
 
-
     def color_mask(self, img, color_lower, color_upper):
         raw_mask = cv2.inRange(img, np.array(color_lower), np.array(color_upper))
         return cv2.morphologyEx(raw_mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-
 
     def min_area_boxes(self, mask, threshold=300):
         rects = []
@@ -130,15 +130,15 @@ class OnBoardService(Node):
         return rects
 
     def dist2points(self, p1, p2):
-        return abs(p1[0]-p2[0])+abs(p1[1]-p2[1])
+        return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
     def accepted(self, rectangle):
         trueRect = []
         for i in rectangle:
             dist = self.dist2points(i[1], i[3])
             dist1 = self.dist2points(i[0], i[2])
-            if (((dist <= dist1*(1+accuracy/2)) and (dist >= dist1*(1-accuracy/2))) or \
-            ((dist1 <= dist*(1+accuracy/2)) and (dist1 >= dist*(1-accuracy/2)))): #and dist1 < dist:
+            if (((dist <= dist1 * (1 + accuracy / 2)) and (dist >= dist1 * (1 - accuracy / 2))) or
+                    ((dist1 <= dist * (1 + accuracy / 2)) and (dist1 >= dist * (1 - accuracy / 2)))):  # and dist1 < dist:
                 trueRect.append(i)
         return trueRect
 
@@ -155,20 +155,20 @@ class OnBoardService(Node):
         x2, y2 = self.getCoords(arr[2])
         x3, y3 = self.getCoords(arr[3])
         if dist < dist1:
-            #two gobelets
+            # two gobelets
             two = [[
-            [x0,y0],[x1,y1],[(x2+x0)/2, (y2+y0)/2],[(x3+x1)/2, (y3+y1)/2]
-            ],[
-            [(x2+x0)/2, (y2+y0)/2],[(x3+x1)/2, (y3+y1)/2],[x2,y2],[x3,y3]
+                [x0, y0], [x1, y1], [(x2 + x0) / 2, (y2 + y0) / 2], [(x3 + x1) / 2, (y3 + y1) / 2]
+            ], [
+                [(x2 + x0) / 2, (y2 + y0) / 2], [(x3 + x1) / 2, (y3 + y1) / 2], [x2, y2], [x3, y3]
             ]]
             return two
         elif dist < 2.5 * dist1:
             three = [[
-            [x0,y0],[x1,y1],[(x2+x0)/3, (y2+y0)/3],[(x3+x1)/3, (y3+y1)/3]
-            ],[
-            [(x2+x0)/3, (y2+y0)/3], [(x3+x1)/3, (y3+y1)/3], [2*(x2+x0)/3, 2*(y2+y0)/3], [2*(x3+x1)/3, 2*(y3+y1)/3]
-            ],[
-            [2*(x2+x0)/3, 2*(y2+y0)/3], [2*(x3+x1)/3, 2*(y3+y1)/3],[x2,y2],[x3,y3]
+                [x0, y0], [x1, y1], [(x2 + x0) / 3, (y2 + y0) / 3], [(x3 + x1) / 3, (y3 + y1) / 3]
+            ], [
+                [(x2 + x0) / 3, (y2 + y0) / 3], [(x3 + x1) / 3, (y3 + y1) / 3], [2 * (x2 + x0) / 3, 2 * (y2 + y0) / 3], [2 * (x3 + x1) / 3, 2 * (y3 + y1) / 3]
+            ], [
+                [2 * (x2 + x0) / 3, 2 * (y2 + y0) / 3], [2 * (x3 + x1) / 3, 2 * (y3 + y1) / 3], [x2, y2], [x3, y3]
             ]]
             return three
         return arr
@@ -178,13 +178,13 @@ class OnBoardService(Node):
         for i in acc:
             x += i[0]
             y += i[1]
-        x = x/4
-        y = y/4
-        return [x,y]
+        x = x / 4
+        y = y / 4
+        return [x, y]
 
     def sortList(self, toSort):
         sorted = []
-        toReturn=[]
+        toReturn = []
         for i in toSort:
             sorted.append(i[0])
         sorted.sort()
@@ -203,6 +203,7 @@ class OnBoardService(Node):
                 colors.append('g')
         colors.reverse()
         return colors
+
 
 def main(args=None):
     rclpy.init(args=args)
