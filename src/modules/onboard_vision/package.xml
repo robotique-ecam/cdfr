@@ -3,19 +3,16 @@
 <package format="3">
   <name>onboard_vision</name>
   <version>0.8.3</version>
-  <description>Onboard vision node</description>
-  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Club Robotique ECAM :: CDFR 2020</license>
+  <description>onboard_vision module</description>
+  <maintainer email="phileas.lambert@ecam.fr">Phileas Lambert</maintainer>
+  <license>ECAM Makers :: CDFR 2020</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>rclcpp</buildtool_depend>
-
-  <depend>libopencv-dev</depend>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>
