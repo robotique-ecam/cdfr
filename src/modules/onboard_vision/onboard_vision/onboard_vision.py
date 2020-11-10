@@ -46,7 +46,7 @@ class OnBoardService(Node):
 
     def get_north_or_south_callback(self, request, response):
         side = self.get_north_or_south()
-        if side != None:
+        if side is not None:
             self.get_logger().info(side + " end detected")
             response.message = side
             response.success = True

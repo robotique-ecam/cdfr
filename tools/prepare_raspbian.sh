@@ -50,10 +50,36 @@ sudo -H pip3 install \
   vcgencmd \
   vl53l1x
 
+sudo systemctl disable dphys-swapfile.service
+sudo systemctl disable keyboard-setup.service
+sudo systemctl disable apt-daily.service
+sudo systemctl disable apt-daily-upgrade.service
+sudo systemctl disable hciuart.service
+sudo systemctl disable raspi-config.service
+sudo systemctl disable avahi-daemon.service
+sudo systemctl disable triggerhappy.service
+
+sudo systemctl mask dphys-swapfile.service
+sudo systemctl mask keyboard-setup.service
+sudo systemctl mask apt-daily.service
+sudo systemctl mask apt-daily-upgrade.service
+sudo systemctl mask hciuart.service
+sudo systemctl mask raspi-config.service
+sudo systemctl mask avahi-daemon.service
+sudo systemctl mask triggerhappy.service
+
 mkdir -p ~/ros2_foxy/src
 cd ~/ros2_foxy
 wget https://raw.githubusercontent.com/ros2/ros2/foxy/ros2.repos
 vcs import src < ros2.repos
+
+
+sudo mkdir -p /opt/ros/foxy/install
+sudo chown -R pi: /opt/ros
+
+
+export CFLAGS="-march=native"
+export CXXFLAGS=${CFLAGS}
 
 
 sudo rosdep init
@@ -62,22 +88,16 @@ rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "co
 
 
 cd ~/ros2_foxy/
-colcon build --symlink-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release"
-source ros2_foxy/install/setup.bash
+colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release"
+source /opt/ros/foxy/install/setup.bash
 
 
 mkdir -p ~/ros_ws/src
 cd ~/ros_ws
 vcs import src < ros_ws.repos
 rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "gazebo_ros_pkgs slam_toolbox"
-colcon build --symlink-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" --packages-skip "nav2_system_tests"
-colcon build --symlink-install --packages-select image_transport cv_bridge --cmake-args "-DCMAKE_CXX_STANDARD_LIBRARIES=-lpython3.7m" --cmake-force-configure
-source ros_ws/install/setup.bash
-
-
- mv /home/pi/ros_ws/install/libg2o/include/g2o /home/pi/ros_ws/install/libg2o/include/g3o
- mkdir /home/pi/ros_ws/install/libg2o/include/g2o/
- mv /home/pi/ros_ws/install/libg2o/include/g3o /home/pi/ros_ws/install/libg2o/include/g2o/g2o
+colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_CXX_STANDARD_LIBRARIES=-lpython3.7m" --packages-skip "nav2_system_tests"
+source /opt/ros/foxy/install/setup.bash
 
 
 cd ~

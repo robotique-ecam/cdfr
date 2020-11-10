@@ -60,6 +60,28 @@ ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
 
 ### Changelog
 
+#### v0.8.4
+- Added localisation node compatible with side selection interfaces with service call for odometry correction
+- Fixed bug in costmap causing robot position to be evaluated outside of it
+- Fixed bugs in NavigateToPose calculation
+- Added actuators drivers with full support for ArbotixM
+- Added templating for YAML files
+- Added non-blocking selftest upon startup
+- Added service call disable for aruco detection
+- Added service call disable for drive steppers
+- Added actuators logic in strategy
+- Fixed ATTiny-85 firmwares for sliders
+- Improved assurancetourix aruco detection with better camera calibration
+- Improved and fixed ATTiny for steppers *WARNING : There is still an unresolved bug which causes I2C bus to freeze randomly*
+- Fixed VL53L1X sensors initialisation board's firmware
+- Refactored Pharaon firmware
+- Refactored Panoramix
+- Refactored cetautomatix
+- Removed sensors node
+- Droped ubuntu 20.04.1 LTS for Raspbian Buster 10
+- Precompiled ros2 binaries now available in releases
+
+
 #### v0.8.0
 - Updated linux distro to ubuntu 20.04 LTS
 - Updated ROS2 distro to Foxy

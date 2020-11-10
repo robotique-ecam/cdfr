@@ -57,9 +57,9 @@ class Localisation(rclpy.node.Node):
             if self.side.value == 'blue':
                 return (0.29, 1.33, 0)
             elif self.side.value == 'yellow':
-                return (0.29, 1.33, 0)
+                return (3 - 0.29, 1.33, np.pi)
         # Make it crash in case of undefined parameters
-        return (0.29, 1.33, 0)
+        return None
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""

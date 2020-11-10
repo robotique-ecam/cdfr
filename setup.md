@@ -1,49 +1,36 @@
-### Setup Ubuntu 20.04.1 LTS on Raspberry Pi 4
+### Setup Raspbian buster (10) aarch64 on Raspberry Pi 4
 
-*/boot/firmware/syscfg.txt*
+*/boot/config.txt*
 ```
-# This file is intended to be modified by the pibootctl utility. User
-# configuration changes should be placed in "usercfg.txt". Please refer to the
-# README file for a description of the various configuration files on the boot
-# partition.
+#uncomment to overclock the arm. 1500 MHz is the default.
+over_voltage=4
+arm_freq=2000
 
-enable_uart=0
-dtparam=audio=off
-dtparam=i2c_arm=on
-dtparam=spi=off
-cmdline=cmdline.txt
-```
+# Boot optimisations
+disable_splash=1
+dtoverlay=sdtweak,overclock_50=100
+dtoverlay=pi3-disable-bt
 
-*/boot/firmware/usercfg.txt*
-```
-# Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
-# this file. Please refer to the README file for a description of the various
-# configuration files on the boot partition.
-dtparam=i2c_arm=on,i2c_arm_baudrate=10000
+# Uncomment some or all of these to enable the optional hardware interfaces
+dtparam=i2c_arm=on,i2c_arm_baudrate=400000
 dtoverlay=i2c6,baudrate=400000
-dtoverlay=i2c5,baudrate=10000
+dtoverlay=i2c5,baudrate=100000
 dtoverlay=i2c4,baudrate=400000
 dtoverlay=i2c3,baudrate=400000
-dtoverlay=i2c1,baudrate=10000
-dtoverlay=i2c0,baudrate=10000
-```
+dtoverlay=i2c1,baudrate=400000
+#dtparam=i2s=on
+#dtparam=spi=on
 
-*/etc/systemd/system/rc-local.service*
-```
-[Unit]
- Description=/etc/rc.local Compatibility
- ConditionPathExists=/etc/rc.local
+# Additional overlays and parameters are documented /boot/overlays/README
 
-[Service]
- Type=forking
- ExecStart=/etc/rc.local start
- TimeoutSec=0
- StandardOutput=tty
- RemainAfterExit=yes
- SysVStartPriority=99
+# Enable audio (loads snd_bcm2835)
+dtparam=audio=off
 
-[Install]
- WantedBy=multi-user.target
+# Enable DRM VC4 V3D driver on top of the dispmanx display stack
+dtoverlay=vc4-fkms-v3d
+max_framebuffers=2
+arm_64bit=1
+enable_uart=1
 ```
 
 */etc/rc.local*
@@ -59,25 +46,4 @@ HOME=/home/ubuntu /opt/ros/foxy/bin/ros2 launch asterix launch.py > /home/ubuntu
 ...
 
 source /home/ubuntu/ros/install/setup.bash
-```
-
-*/usr/bin/vcgencmd*
-```
-#!/bin/bash
-sudo LD_LIBRARY_PATH=/opt/vc/lib /opt/vc/bin/vcgencmd "$@"
-```
-
-And run
-```bash
-sudo chmod +x /etc/rc.local
-sudo systemctl enable rc-local
-
-# Install vcgencmd
-git clone --depth 1 https://github.com/raspberrypi/userland rpi-userland
-cd rpi-userland && ./buildme --aarch64
-sudo rm -rf rpi-userland
-
-# Set SUID byte to run it with owner privileges
-sudo chown root: /usr/bin/vcgencmd
-sudo chmod 4755 /usr/bin/vcgencmd
 ```
