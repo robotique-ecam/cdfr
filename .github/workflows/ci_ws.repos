@@ -1,0 +1,9 @@
+repositories:
+  costmap_converter:
+    type: git
+    url: https://github.com/rst-tu-dortmund/costmap_converter.git
+    version: ros2
+  teb_local_planner:
+    type: git
+    url: https://github.com/robotique-ecam/teb_local_planner.git
+    version: foxy

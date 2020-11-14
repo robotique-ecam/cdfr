@@ -33,14 +33,14 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/ros_ws/
-          key: cache-teb-foxy-tempfix
+          key: cache-teb-foxy
 
       # Keep until foxy
       - name: Build ros_ws from source
         if: steps.cache-ws.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/ros_ws/src
-          vcs import --recursive ~/ros_ws/src < ros_ws.repos
+          vcs import --recursive ~/ros_ws/src < .github/workflows/ci_ws.repos
           source /opt/ros/foxy/setup.bash
           cd ~/ros_ws && WEBOTS_HOME=/usr/local/webots colcon build --symlink-install --cmake-args --no-warn-unused-cli -DCMAKE_CXX_FLAGS=" -Wno-deprecated-declarations" --packages-skip nav2_system_tests
       - name: Build packages
