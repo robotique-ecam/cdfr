@@ -56,23 +56,27 @@ elif [ $robot = "assurancetourix" ]; then
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
+    if [ -z $WEBOTS_HOME ]; then
+      print_failure "WEBOTS_HOME is not set"
+      exit 1
+    fi
     generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    if [ $(uname -s) = "Darwin" ]; then
+      print_info "Checking webots python binding"
+      if [[ ! -d "$WEBOTS_HOME/lib/controller/python39" ]]; then
+        print_info "Installing Python3.9 controllers for Webots"
+        cp -r $WEBOTS_HOME/lib/controller/python38 $WEBOTS_HOME/lib/controller/python39
+        install_name_tool -change /Library/Frameworks/Python.framework/Versions/3.8/Python /usr/local/Cellar/python@3.9/3.9.0_1/Frameworks/Python.framework/Python $WEBOTS_HOME/lib/controller/python39/_controller.so
+        install_name_tool -change /Library/Frameworks/Python.framework/Versions/3.8/Python /usr/local/Cellar/python@3.9/3.9.0_1/Frameworks/Python.framework/Python $WEBOTS_HOME/lib/controller/python39/_vehicule.so
+      fi
+      print_info "Linking webots to ros nodes"
+      ln -s $WEBOTS_HOME /Users/ewen/ros2/share/webots_ros2_desktop/webots
+      install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
+      install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
+      install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/drive/lib/drive/drive
+      install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
+    fi
 
-elif [ $robot = "simulation-core" ]; then
-    print_info "Setting up simulation environment"
-    xacro ros/tools/xacro/asterix.xacro -o ros/src/asterix/robot/asterix.urdf
-    xacro ros/tools/xacro/obelix.xacro -o ros/src/obelix/robot/obelix.urdf
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip drive assurancetourix && print_success "Built packages for $robot" || print_failure "Packages build failed"
-
-elif [ $robot = "simulation-interfaces" ]; then
-    print_info "Setting up simulation environment"
-    generate_yamls
-    colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --cmake-args=" -DSIMULATION=ON" --packages-skip gradient_costmap_layer && print_success "Built packages for $robot" || print_failure "Packages build failed"
-    print_info "Linking webots controllers"
-    install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
-    install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
-    install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/drive/lib/drive/drive
-    install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
 else
     print_failure "No such component"
 

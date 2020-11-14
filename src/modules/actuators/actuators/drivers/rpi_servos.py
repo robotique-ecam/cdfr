@@ -16,10 +16,16 @@ class RPiServos:
     def __init__(self, pins={}):
         """Create driver with default values."""
         self.servos = {}
-        for pin in pins:
-            self.servos.update({pin: Servo(pin)})
+        try:
+            for pin in pins:
+                self.servos.update({pin: Servo(pin)})
+        except NameError:
+            pass
 
     def set_angles(self, pins, values):
         """Set servo angles."""
-        for pin, val in zip(pins, values):
-            self.servos[pin].value = val
+        try:
+            for pin, val in zip(pins, values):
+                self.servos[pin].value = val
+        except NameError:
+            print(f'Servo {pin} set to {val}', flush=True)

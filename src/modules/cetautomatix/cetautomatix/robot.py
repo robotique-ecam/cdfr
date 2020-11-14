@@ -7,6 +7,7 @@ from importlib import import_module
 from signal import SIGINT
 from subprocess import call
 from threading import Thread
+from platform import machine
 
 import numpy as np
 import psutil
@@ -27,7 +28,7 @@ from rclpy.time import Duration, Time
 from std_srvs.srv import SetBool, Trigger
 from strategix.actions import actions
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
-from tf2_ros import LookupException
+from tf2_ros import LookupException, ConnectivityException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
@@ -35,8 +36,10 @@ from tf2_ros.transform_listener import TransformListener
 class Robot(Node):
     def __init__(self):
         super().__init__(node_name='cetautomatix')
+        # Detect simulation mode
+        self.simulation = True if machine() != 'aarch64' else False
         self.i = 0
-        self.stupid_actions = ["STUPID_1", "STUPID_2", "STUPID_3"]
+        self.stupid_actions = ['STUPID_1', 'STUPID_2', 'STUPID_3']
         self._triggered = False
         self._position = None
         self._start_time = None
@@ -86,10 +89,11 @@ class Robot(Node):
         while not self._get_available_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn('Failed to contact strategix services ! Has it been started ?')
         # Enable stepper drivers
-        self._get_enable_drivers_request = SetBool.Request()
-        self._get_enable_drivers_request.data = True
-        self._get_enable_drivers_client = self.create_client(SetBool, 'enable_drivers')
-        self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
+        if not self.simulation:
+            self._get_enable_drivers_request = SetBool.Request()
+            self._get_enable_drivers_request.data = True
+            self._get_enable_drivers_client = self.create_client(SetBool, 'enable_drivers')
+            self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
         # Robot trigger service
         self._trigger_start_robot_server = self.create_service(Trigger, 'start', self._start_robot_callback)
         if self.robot == 'obelix':
@@ -249,6 +253,9 @@ class Robot(Node):
         except LookupException:
             self.get_logger().warn('Failed to lookup_transform from map to odom')
             return
+        except ConnectivityException:
+            self.get_logger().warn("ConnectivityException, 'map' and 'base_link' are not part of the same tree")
+            return
         self._position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
         self._orientation = self.quaternion_to_euler(tf_pose.pose.orientation.x, tf_pose.pose.orientation.y, tf_pose.pose.orientation.z, tf_pose.pose.orientation.w)
 
@@ -288,12 +295,12 @@ class Robot(Node):
 
     def get_orientation(self, element, robot_pos, initial_orientation):
         element = elements[element]
-        element_x, element_y = element.get("X"), element.get("Y")
+        element_x, element_y = element.get('X'), element.get('Y')
         robot_pos_x, robot_pos_y = robot_pos[0], robot_pos[1]
 
         u = (np.cos(initial_orientation[0]), np.sin(initial_orientation[0]))
         u = u / (np.sqrt(u[0]**2 + u[1]**2))
-        if element.get("Rot") is None:
+        if element.get('Rot') is None:
             v = (element_x - robot_pos_x, element_y - robot_pos_y)
             v = v / (np.sqrt(v[0]**2 + v[1]**2))
             theta = np.arccos(
@@ -322,7 +329,7 @@ class Robot(Node):
             coefficient = 0
             element = elements[action]
             distance = np.sqrt(
-                (element["X"] - self._position[0])**2 + (element["Y"] - self._position[1])**2)
+                (element['X'] - self._position[0])**2 + (element['Y'] - self._position[1])**2)
             coefficient += 100 * (1 - distance / 3.6)
             coefficient += get_time_coeff(self.get_clock().now().nanoseconds * 1e-9 - self._start_time, action, self.strategy_mode_param.value)
             coefficient_list.append(coefficient)

@@ -68,37 +68,35 @@ sudo systemctl mask raspi-config.service
 sudo systemctl mask avahi-daemon.service
 sudo systemctl mask triggerhappy.service
 
-mkdir -p ~/ros2_foxy/src
-cd ~/ros2_foxy
-wget https://raw.githubusercontent.com/ros2/ros2/foxy/ros2.repos
-vcs import src < ros2.repos
+if [[ $BUILD = "ON" ]]; then
+  mkdir -p ~/ros2_foxy/src
+  cd ~/ros2_foxy
+  wget https://raw.githubusercontent.com/ros2/ros2/foxy/ros2.repos
+  vcs import src < ros2.repos
 
+  sudo mkdir -p /opt/ros/foxy/install
+  sudo chown -R pi: /opt/ros
 
-sudo mkdir -p /opt/ros/foxy/install
-sudo chown -R pi: /opt/ros
+  export CFLAGS="-march=native"
+  export CXXFLAGS=${CFLAGS}
 
+  sudo rosdep init
+  rosdep update
+  rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps rti-connext-dds-5.3.1 urdfdom_headers"
 
-export CFLAGS="-march=native"
-export CXXFLAGS=${CFLAGS}
+  cd ~/ros2_foxy/
+  colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release"
+  source /opt/ros/foxy/install/setup.bash
 
+  mkdir -p ~/ros_ws/src
+  cd ~/ros_ws
+  vcs import src < ros_ws.repos
+  rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "gazebo_ros_pkgs slam_toolbox"
+  colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_CXX_STANDARD_LIBRARIES=-lpython3.7m" --packages-skip "nav2_system_tests"
+  source /opt/ros/foxy/install/setup.bash
+else
 
-sudo rosdep init
-rosdep update
-rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps rti-connext-dds-5.3.1 urdfdom_headers"
-
-
-cd ~/ros2_foxy/
-colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release"
-source /opt/ros/foxy/install/setup.bash
-
-
-mkdir -p ~/ros_ws/src
-cd ~/ros_ws
-vcs import src < ros_ws.repos
-rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "gazebo_ros_pkgs slam_toolbox"
-colcon build --install-base /opt/ros/foxy/install --merge-install --cmake-args "-DBUILD_TESTING=OFF" "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_CXX_STANDARD_LIBRARIES=-lpython3.7m" --packages-skip "nav2_system_tests"
-source /opt/ros/foxy/install/setup.bash
-
+fi
 
 cd ~
 git clone --recursive git@github.com:3wnbr1/ros.git
