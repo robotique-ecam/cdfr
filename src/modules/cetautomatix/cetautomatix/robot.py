@@ -42,6 +42,7 @@ class Robot(Node):
         self.stupid_actions = ['STUPID_1', 'STUPID_2', 'STUPID_3']
         self._triggered = False
         self._position = None
+        self._orientation = None
         self._start_time = None
         self._current_action = None
         self.robot = self.get_namespace().strip('/')
@@ -406,20 +407,21 @@ class Robot(Node):
         lcd_msg.line = 0
         lcd_msg.text = f'{self.robot.capitalize()} is done!'.ljust(16)
         self._lcd_driver_pub.publish(lcd_msg)
-        # Disable stepper drivers
-        self._get_enable_drivers_request.data = False
-        self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
-        # Stop fans and relax servos
-        self.actuators.disableDynamixels()
-        self.actuators.setFansEnabled(False)
-        # Shutdown ROS
-        for p in psutil.process_iter(['pid', 'name', 'cmdline']):
-            if 'ros2' in p.name() and 'launch' in p.cmdline():
-                self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
-                p.send_signal(SIGINT)
-        # shutdown linux
-        if shutdown:
-            call(['shutdown', '-h', 'now'])
+        if not self.simulation:
+            # Disable stepper drivers
+            self._get_enable_drivers_request.data = False
+            self._synchronous_call(self._get_enable_drivers_client, self._get_enable_drivers_request)
+            # Stop fans and relax servos
+            self.actuators.disableDynamixels()
+            self.actuators.setFansEnabled(False)
+            # Shutdown ROS
+            for p in psutil.process_iter(['pid', 'name', 'cmdline']):
+                if 'ros2' in p.name() and 'launch' in p.cmdline():
+                    self.get_logger().warn(f'Sent SIGINT to ros2 launch {p.pid}')
+                    p.send_signal(SIGINT)
+            # shutdown linux
+            if shutdown:
+                call(['shutdown', '-h', 'now'])
 
     def destroy_node(self):
         """Handle SIGINT/global destructor."""

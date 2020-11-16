@@ -20,11 +20,6 @@ field SFBool     synchronization FALSE                 # Is `Robot.synchronizati
     supervisor IS supervisor
     synchronization IS synchronization
     children [
-      DEF Light PointLight {
-        attenuation 0 0 0.5
-        location 0 0.71 0
-        castShadows TRUE
-      }
       DEF BOTTOM Transform {
         translation -0.000315964 0.148764 -0.000167053
         rotation 0 0.7071067811865476 0.7071067811865476 3.14159

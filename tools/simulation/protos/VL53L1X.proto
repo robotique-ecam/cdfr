@@ -1,0 +1,34 @@
+#VRML_SIM R2020b utf8
+PROTO VL53L1X [
+  field SFVec3f    translation       0 0 0
+  field SFRotation rotation          1 0 0 1.57
+  field SFString   name              "vlx"
+]
+{
+  DistanceSensor {
+    name IS name
+    translation IS translation
+    rotation IS rotation
+    lookupTable   [ 0   0    0     ,
+                    0.02 0.01 0.005,
+                    3000 3000 0.01 ,
+                    3500 0 0       ]
+    type          "laser"
+    numberOfRays  1
+    resolution    -1
+    aperture 0.01
+
+    children [
+      DEF VLX Shape {
+        appearance DEF white PBRAppearance {
+          baseColor 1 1 1
+          roughness 1
+          emissiveColor 0.2 0.2 0.2
+        }
+        geometry Box {
+           size 0.001 0.015 0.02
+        }
+      }
+    ]
+  }
+}
