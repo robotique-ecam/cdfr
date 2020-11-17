@@ -4,9 +4,6 @@
 """Simulated sensors definition for localisation."""
 
 
-from webots_ros2_core.devices.device_manager import DeviceManager
-
-
 class Sensors:
     def __init__(self, node, addrs=[]):
         """Init sensors baseclass."""
