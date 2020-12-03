@@ -26,4 +26,4 @@ assurancetourix:
       robots :
         - PHARAON
         - ASTERIX
-      refresh_frequency: 20
+      refresh_frequency: 5
