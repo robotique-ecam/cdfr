@@ -24,6 +24,7 @@ void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::ms
     std::array<double, 2> tmp_coord{{msg->markers[i].pose.position.x, msg->markers[i].pose.position.y}};
     coord_from_frame.push_back(tmp_coord);
   }
+  need_recalculation_ = true;
 }
 // This method is called at the end of plugin initialization.
 // It contains ROS parameter(s) declaration and initialization

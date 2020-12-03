@@ -71,7 +71,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
-  timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); // to remove for PR
+  //timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); // to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
@@ -124,7 +124,7 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.header.frame_id = "map";
   int id = 0;
 
-  for (auto robot : robots) {
+  /*for (auto robot : robots) {
     double x, y;
 
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
@@ -138,7 +138,13 @@ void Assurancetourix::simulation_marker_callback() {
 
     marker_array.markers.push_back(webots_marker);
     id++;
-  }
+  }*/
+  webots_marker.header.stamp = this->get_clock()->now();
+  webots_marker.pose.position.x = 1.5;
+  webots_marker.pose.position.y = 1;
+  webots_marker.text = "test";
+  webots_marker.id = id;
+  marker_array.markers.push_back(webots_marker);
 
   transformed_marker_pub_ennemies_->publish(marker_array);
 }
