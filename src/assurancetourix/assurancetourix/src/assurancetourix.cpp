@@ -68,6 +68,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   putenv(mypath);
 
   wb_supervisor = std::make_shared<webots::Supervisor>();
+  comeback = false;
 
   timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
@@ -139,8 +140,21 @@ void Assurancetourix::simulation_marker_callback() {
     marker_array.markers.push_back(webots_marker);
     id++;
   }*/
+
   webots_marker.header.stamp = this->get_clock()->now();
-  webots_marker.pose.position.x = 1.5;
+  if (comeback) {
+    comeback_x += 0.0005;
+    if (comeback_x > 2.5){
+      comeback = false;
+    }
+  } else {
+    comeback_x -= 0.0005;
+    if (comeback_x < 0.5){
+      comeback = true;
+    }
+  }
+  webots_marker.pose.position.x = comeback_x;
+
   webots_marker.pose.position.y = 1;
   webots_marker.text = "test";
   webots_marker.id = id;
