@@ -64,6 +64,8 @@ private:
 
 #ifdef SIMULATION
   int refresh_frequency;
+  bool comeback;
+  float comeback_x = 1.5;
   std::vector<std::string> robots;
   std::shared_ptr<webots::Supervisor> wb_supervisor;
   void simulation_marker_callback();

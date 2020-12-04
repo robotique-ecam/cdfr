@@ -115,9 +115,9 @@ global_costmap:
       gradient_layer: #draw radians circle around ennemies
         plugin: "gradient_costmap_layer_plugin/GradientLayer"
         enabled: true
-        gradient_size: 5
-        gradient_factor: 60
-        markers_topic: "coordonate_position_transform"
+        gradient_size: 15
+        gradient_factor: 100
+        markers_topic: /ennemies_positions_markers
       always_send_full_costmap: True
 
 local_costmap: #just enough parameters to disable it
