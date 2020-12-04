@@ -46,6 +46,7 @@ private:
   void _anotate_image(Mat img);
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
+  visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
 
 #ifdef MIPI_CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
@@ -96,6 +97,8 @@ private:
 
   visualization_msgs::msg::Marker transformed_marker;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_;
+
+  visualization_msgs::msg::MarkerArray lastEnnemiesMarkers, ennemiesMarkersOnThisCycle;
 
   rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
   rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
