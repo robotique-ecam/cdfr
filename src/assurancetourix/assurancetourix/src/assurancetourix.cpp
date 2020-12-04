@@ -70,7 +70,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   wb_supervisor = std::make_shared<webots::Supervisor>();
   comeback = false;
 
-  timer_ = this->create_wall_timer(std::chrono::seconds(1 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
+  timer_ = this->create_wall_timer(std::chrono::milliseconds(1000 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
   //timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this)); // to remove for PR
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
@@ -143,12 +143,12 @@ void Assurancetourix::simulation_marker_callback() {
 
   webots_marker.header.stamp = this->get_clock()->now();
   if (comeback) {
-    comeback_x += 0.0005;
+    comeback_x += 0.2;
     if (comeback_x > 2.5){
       comeback = false;
     }
   } else {
-    comeback_x -= 0.0005;
+    comeback_x -= 0.2;
     if (comeback_x < 0.5){
       comeback = true;
     }
@@ -159,10 +159,30 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.text = "test";
   webots_marker.id = id;
   marker_array.markers.push_back(webots_marker);
+  marker_array.markers.push_back(predictEnnemiesPos(webots_marker));
 
   transformed_marker_pub_ennemies_->publish(marker_array);
+  lastEnnemiesMarkers = ennemiesMarkersOnThisCycle;
+  ennemiesMarkersOnThisCycle.markers.clear();
 }
 #endif // SIMULATION
+
+visualization_msgs::msg::Marker Assurancetourix::predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarker){
+  ennemiesMarkersOnThisCycle.markers.push_back(detectedMarker);
+  for(int i = 0; i< int(lastEnnemiesMarkers.markers.size()); i++ ){
+    if (lastEnnemiesMarkers.markers[i].id == detectedMarker.id){
+      visualization_msgs::msg::Marker predictedMarker = detectedMarker;
+      predictedMarker.pose.position.x += detectedMarker.pose.position.x - lastEnnemiesMarkers.markers[i].pose.position.x;
+      predictedMarker.pose.position.y += detectedMarker.pose.position.y - lastEnnemiesMarkers.markers[i].pose.position.y;
+      predictedMarker.id = detectedMarker.id + 10;
+      predictedMarker.header.stamp = this->get_clock()->now();
+      predictedMarker.color.r = 0;
+      predictedMarker.color.g = 255;
+      return predictedMarker;
+    }
+  }
+  return detectedMarker;
+}
 
 void Assurancetourix::init_parameters() {
 
