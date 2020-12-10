@@ -16,6 +16,7 @@ GradientLayer::GradientLayer()
 
 void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::msg::MarkerArray> msg) {
   coord_from_frame.clear();
+  predictedIndexes.clear();
   if (int(msg->markers.size()) == 0) {
     return;
   }
@@ -23,6 +24,11 @@ void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::ms
   for (int i = 0; i < int(msg->markers.size()); i++) {
     std::array<double, 2> tmp_coord{{msg->markers[i].pose.position.x, msg->markers[i].pose.position.y}};
     coord_from_frame.push_back(tmp_coord);
+    if (msg->markers[i].id > 10) {
+      predictedIndexes.push_back(true);
+    } else {
+      predictedIndexes.push_back(false);
+    }
   }
   need_recalculation_ = true;
 }
@@ -104,23 +110,29 @@ void GradientLayer::updateCosts(nav2_costmap_2d::Costmap2D &master_grid, int min
     coord_from_index.push_back(tmp);
   }
 
+  std::vector<bool> predictedIndexesCopy = predictedIndexes;
+  int index =0;
+
   for (std::array<double, 2> cost : coord_from_index) {
     for (int gradient_layer = 0; gradient_layer < LETHAL_OBSTACLE / GRADIENT_FACTOR; gradient_layer++) {
-      int gradient_cost = LETHAL_OBSTACLE - gradient_layer * GRADIENT_FACTOR;
-      int gradient_radius = GRADIENT_SIZE * (gradient_layer + 1);
-      double max_rect_i = cost[0] + gradient_radius;
-      double max_rect_j = cost[1] + gradient_radius;
-      double min_rect_i = cost[0] - gradient_radius;
-      double min_rect_j = cost[1] - gradient_radius;
-      for (double k = min_rect_i; k < max_rect_i; k++) {
-        for (double v = min_rect_j; v < max_rect_j; v++) {
-          unsigned char old_cost = master_array[master_grid.getIndex(k, v)];
-          if ((k - cost[0]) * (k - cost[0]) + (v - cost[1]) * (v - cost[1]) <= gradient_radius * gradient_radius && (old_cost == NO_INFORMATION || old_cost <= gradient_cost)) {
-            master_array[master_grid.getIndex(k, v)] = gradient_cost;
+      if (!(gradient_layer == 0 && predictedIndexesCopy[index])){
+        int gradient_cost = LETHAL_OBSTACLE - gradient_layer * GRADIENT_FACTOR;
+        int gradient_radius = GRADIENT_SIZE * (gradient_layer + 1);
+        double max_rect_i = cost[0] + gradient_radius;
+        double max_rect_j = cost[1] + gradient_radius;
+        double min_rect_i = cost[0] - gradient_radius;
+        double min_rect_j = cost[1] - gradient_radius;
+        for (double k = min_rect_i; k < max_rect_i; k++) {
+          for (double v = min_rect_j; v < max_rect_j; v++) {
+            unsigned char old_cost = master_array[master_grid.getIndex(k, v)];
+            if ((k - cost[0]) * (k - cost[0]) + (v - cost[1]) * (v - cost[1]) <= gradient_radius * gradient_radius && (old_cost == NO_INFORMATION || old_cost <= gradient_cost)) {
+              master_array[master_grid.getIndex(k, v)] = gradient_cost;
+            }
           }
         }
       }
     }
+    index++;
   }
 }
 
