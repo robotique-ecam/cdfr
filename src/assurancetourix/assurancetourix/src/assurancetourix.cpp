@@ -123,7 +123,7 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.scale.y = 0.1;
   webots_marker.scale.z = 0.1;
   webots_marker.header.frame_id = "map";
-  int id = 0;
+  int id = 6;
 
   /*for (auto robot : robots) {
     double x, y;

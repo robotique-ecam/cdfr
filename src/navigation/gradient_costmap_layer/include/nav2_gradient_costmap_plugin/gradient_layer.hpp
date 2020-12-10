@@ -30,6 +30,7 @@ private:
   visualization_msgs::msg::Marker received_marker;
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
   std::vector<std::array<double, 2>> coord_from_frame;
+  std::vector<bool> predictedIndexes;
 
   // Indicates that the entire gradient should be recalculated next time.
   bool need_recalculation_;
