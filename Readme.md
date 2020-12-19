@@ -1,8 +1,8 @@
 ![Simulation](https://github.com/3wnbr1/ros/workflows/Simulation/badge.svg)
 ![ROS2](https://img.shields.io/badge/ros2-foxy-blue)
-![Webots](https://img.shields.io/badge/webots-2020b-blue)
+![Webots](https://img.shields.io/badge/webots-2021a-blue)
 ![Status](https://img.shields.io/badge/status-beta-blueviolet)
-![Version](https://img.shields.io/badge/version-v0.8.3-blue)
+![Version](https://img.shields.io/badge/version-v0.9-blue)
 
 ### Build
 
