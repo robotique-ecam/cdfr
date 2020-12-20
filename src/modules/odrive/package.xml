@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>odrive</name>
+  <version>0.8.3</version>
+  <description>New drive node interfacing with an oDrive board</description>
+  <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
+  <license>ECAM Makers :: CDFR 2020</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

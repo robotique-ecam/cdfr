@@ -79,7 +79,6 @@ elif [ $robot = "simulation" ]; then
       fi
 
       print_info "Linking webots to ros nodes"
-      ln -s $WEBOTS_HOME /Users/ewen/ros2/share/webots_ros2_desktop/webots
       install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/drive/lib/drive/drive
       install_name_tool -change @rpath/lib/controller/libController.dylib $WEBOTS_HOME/lib/controller/libController.dylib install/assurancetourix/lib/assurancetourix/assurancetourix
       install_name_tool -change @rpath/lib/controller/libCppController.dylib $WEBOTS_HOME/lib/controller/libCppController.dylib install/drive/lib/drive/drive
