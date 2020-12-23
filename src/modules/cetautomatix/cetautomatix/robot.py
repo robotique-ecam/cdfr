@@ -295,8 +295,6 @@ class Robot(Node):
         return (element_x - v[0], element_y - v[1])
 
     def get_orientation(self, element, robot_pos, initial_orientation):
-        if robot_pos is None:
-            return (0, 0)
         element = elements[element]
         element_x, element_y = element.get('X'), element.get('Y')
         robot_pos_x, robot_pos_y = robot_pos[0], robot_pos[1]
@@ -387,20 +385,20 @@ class Robot(Node):
         #             offset = (0, 0.1)
         #             elements[self._current_action]["Rot"] = 90
         #             self.drop = NC
-        offset = (0, 0)
-        (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
-        position = self.get_position(self._current_action, self._orientation, theta, offset)
-        msg.pose.pose.position.x = position[0]
-        msg.pose.pose.position.y = position[1]
-        msg.pose.pose.position.z = 0.0
-        q = self.euler_to_quaternion(phi)
-        msg.pose.pose.orientation.x = q[0]
-        msg.pose.pose.orientation.y = q[1]
-        msg.pose.pose.orientation.z = q[2]
-        msg.pose.pose.orientation.w = q[3]
+        if self._position is not None:
+            offset = (0, 0)
+            (theta, phi) = self.get_orientation(self._current_action, self._position, self._orientation)
+            position = self.get_position(self._current_action, self._orientation, theta, offset)
+            msg.pose.pose.position.x = position[0]
+            msg.pose.pose.position.y = position[1]
+            msg.pose.pose.position.z = 0.0
+            q = self.euler_to_quaternion(phi)
+            msg.pose.pose.orientation.x = q[0]
+            msg.pose.pose.orientation.y = q[1]
+            msg.pose.pose.orientation.z = q[2]
+            msg.pose.pose.orientation.w = q[3]
         self.blackboard.goal = msg
         self.i += 1
-        time.sleep(1)
 
     def stop_ros(self, shutdown=True):
         """Stop ros launch processes."""
