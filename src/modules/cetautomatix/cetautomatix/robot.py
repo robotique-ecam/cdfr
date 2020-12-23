@@ -295,6 +295,8 @@ class Robot(Node):
         return (element_x - v[0], element_y - v[1])
 
     def get_orientation(self, element, robot_pos, initial_orientation):
+        if robot_pos is None:
+            return (0, 0)
         element = elements[element]
         element_x, element_y = element.get('X'), element.get('Y')
         robot_pos_x, robot_pos_y = robot_pos[0], robot_pos[1]
