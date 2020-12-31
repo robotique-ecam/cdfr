@@ -44,6 +44,7 @@ from actuators.arbotix import ax12
 class ArbotiXException(Exception):
     pass
 
+
 # @brief This class controls an ArbotiX, USBDynamixel, or similar board through a serial connection.
 
 
@@ -59,7 +60,7 @@ class ArbotiX:
     # increase this.
     ##
     # @param open Whether to open immediately the serial port.
-    def __init__(self, port='/dev/ttyUSB0', baud=115200, timeout=0.1, open_port=True):
+    def __init__(self, port="/dev/ttyUSB0", baud=115200, timeout=0.1, open_port=True):
         self._mutex = RLock()
         self.ser = serial.Serial()
 
@@ -102,43 +103,43 @@ class ArbotiX:
             print(e)
             return None
         # need a positive byte
-        if d == b'':
+        if d == b"":
             return None
 
         # Need int, not byte
         d = d[0]
 
         # now process our byte
-        if mode == 0:           # get our first 0xFF
-            if d == 0xff:
+        if mode == 0:  # get our first 0xFF
+            if d == 0xFF:
                 return self.getPacket(1)
             else:
                 return self.getPacket(0)
-        elif mode == 1:         # get our second 0xFF
-            if d == 0xff:
+        elif mode == 1:  # get our second 0xFF
+            if d == 0xFF:
                 return self.getPacket(2)
             else:
                 return self.getPacket(0)
-        elif mode == 2:         # get id
-            if d != 0xff:
+        elif mode == 2:  # get id
+            if d != 0xFF:
                 return self.getPacket(3, d)
             else:
                 return self.getPacket(0)
-        elif mode == 3:         # get length
+        elif mode == 3:  # get length
             return self.getPacket(4, id, d)
-        elif mode == 4:         # read error
+        elif mode == 4:  # read error
             self.error = d
             if leng == 2:
                 return self.getPacket(6, id, leng, d, [])
             else:
                 return self.getPacket(5, id, leng, d, [])
-        elif mode == 5:         # read params
+        elif mode == 5:  # read params
             params.append(d)
             if len(params) + 2 == leng:
                 return self.getPacket(6, id, leng, error, params)
             else:
                 return self.getPacket(5, id, leng, error, params)
-        elif mode == 6:         # read checksum
+        elif mode == 6:  # read checksum
             checksum = id + leng + error + sum(params) + d
             if checksum % 256 != 255:
                 return None
@@ -215,8 +216,8 @@ class ArbotiX:
         output = []
         for i in values:
             output = output + i
-        length = len(output) + 4                # length of overall packet
-        lbytes = len(values[0]) - 1               # length of bytes to write to a servo
+        length = len(output) + 4  # length of overall packet
+        lbytes = len(values[0]) - 1  # length of bytes to write to a servo
         self._mutex.acquire()
         try:
             self.ser.flushInput()
@@ -225,7 +226,9 @@ class ArbotiX:
         packet = bytes([0xFF, 0xFF, 254, length, ax12.AX_SYNC_WRITE, start, lbytes])
         for i in output:
             packet += bytes([i])
-        checksum = 255 - ((254 + length + ax12.AX_SYNC_WRITE + start + lbytes + sum(output)) % 256)
+        checksum = 255 - (
+            (254 + length + ax12.AX_SYNC_WRITE + start + lbytes + sum(output)) % 256
+        )
         packet += bytes([checksum])
         self.__write__(packet)
         self._mutex.release()
@@ -250,7 +253,13 @@ class ArbotiX:
     ##
     # @return The error level.
     def setBaud(self, index, baud):
-        return self.write(index, ax12.P_BAUD_RATE, [baud, ])
+        return self.write(
+            index,
+            ax12.P_BAUD_RATE,
+            [
+                baud,
+            ],
+        )
 
     # @brief Get the return level of a device.
     ##
@@ -438,11 +447,11 @@ class ArbotiX:
     # Helper definition for analog and digital access.
     LOW = 0
     # Helper definition for analog and digital access.
-    HIGH = 0xff
+    HIGH = 0xFF
     # Helper definition for analog and digital access.
     INPUT = 0
     # Helper definition for analog and digital access.
-    OUTPUT = 0xff
+    OUTPUT = 0xFF
 
     # ArbotiX-specific register table
     # We do Model, Version, ID, Baud, just like the AX-12
@@ -465,7 +474,13 @@ class ArbotiX:
 
     # @brief Force the ArbotiX2 to rescan the Dynamixel busses.
     def rescan(self):
-        self.write(253, self.REG_RESCAN, [1, ])
+        self.write(
+            253,
+            self.REG_RESCAN,
+            [
+                1,
+            ],
+        )
 
     # @brief Get the value of an analog input pin.
     ##
@@ -494,7 +509,7 @@ class ArbotiX:
                 return -1
         except BaseException:
             return -1
-        if x & (2**(index % 8)):
+        if x & (2 ** (index % 8)):
             return 255
         else:
             return 0
@@ -508,7 +523,7 @@ class ArbotiX:
     # @param direction The direction of the port, >0 is output.
     ##
     # @return -1 if error.
-    def setDigital(self, index, value, direction=0xff):
+    def setDigital(self, index, value, direction=0xFF):
         if index > 31:
             return -1
         if value == 0 and direction > 0:
@@ -533,7 +548,7 @@ class ArbotiX:
         if index > 7:
             return -1
         if value != 0 and (value < 500 or value > 2500):
-            print('ArbotiX Error: Servo value out of range:', value)
+            print("ArbotiX Error: Servo value out of range:", value)
         else:
             self.write(253, self.SERVO_BASE + 2 * index, [value % 256, value >> 8])
         return 0

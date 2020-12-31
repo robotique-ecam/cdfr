@@ -26,38 +26,44 @@ from launch_ros.actions import Node
 from titan.utils.replace_string import ReplaceString
 
 
-def generate_rviz_launch_description(namespace='robot'):
+def generate_rviz_launch_description(namespace="robot"):
     # Get the launch directory
-    titan_dir = get_package_share_directory('titan')
+    titan_dir = get_package_share_directory("titan")
 
-    rviz_config_file = os.path.join(titan_dir, 'rviz', 'namespaced_view.rviz')
+    rviz_config_file = os.path.join(titan_dir, "rviz", "namespaced_view.rviz")
 
-    use_namespace = 'true'
+    use_namespace = "true"
 
     namespaced_rviz_config_file = ReplaceString(
         source_file=rviz_config_file,
-        replacements={'<robot_namespace>': ('/', namespace)})
+        replacements={"<robot_namespace>": ("/", namespace)},
+    )
 
     start_namespaced_rviz_cmd = Node(
         condition=IfCondition(use_namespace),
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
         namespace=namespace,
         # TODO: FIX onload MUTEX ERROR
         # arguments=['-d', namespaced_rviz_config_file],
-        output='screen',
-        remappings=[('/tf', 'tf'),
-                    ('/tf_static', 'tf_static'),
-                    ('/goal_pose', 'goal_pose'),
-                    ('/clicked_point', 'clicked_point'),
-                    ('/initialpose', 'initialpose')])
+        output="screen",
+        remappings=[
+            ("/tf", "tf"),
+            ("/tf_static", "tf_static"),
+            ("/goal_pose", "goal_pose"),
+            ("/clicked_point", "clicked_point"),
+            ("/initialpose", "initialpose"),
+        ],
+    )
 
     exit_event_handler_namespaced = RegisterEventHandler(
         condition=IfCondition(use_namespace),
         event_handler=OnProcessExit(
             target_action=start_namespaced_rviz_cmd,
-            on_exit=EmitEvent(event=Shutdown(reason='rviz exited'))))
+            on_exit=EmitEvent(event=Shutdown(reason="rviz exited")),
+        ),
+    )
 
     # Create the launch description and populate
     ld = LaunchDescription()

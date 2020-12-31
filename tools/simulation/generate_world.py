@@ -53,20 +53,32 @@ DEF PHARAON Pharaon {
 }
 """
 
-file = open('worlds/cdr2020.wbt', 'w')
+file = open("worlds/cdr2020.wbt", "w")
 
 file.write(header)
 
 for name, red in RED_CUPS.items():
-    file.write('RedSignal {\n  name \"' + name + '\"\n  translation ' + str(red[0]) + ' ')
+    file.write('RedSignal {\n  name "' + name + '"\n  translation ' + str(red[0]) + " ")
     if int(name[3:]) < 25:
-        file.write(str(z) + ' ' + str(round(2 - red[1], 3)) + '\n}\n')
+        file.write(str(z) + " " + str(round(2 - red[1], 3)) + "\n}\n")
     else:
-        file.write(str(z + reversed_cup) + ' ' + str(round(2 - red[1], 3)) + '\n  rotation 1 0 0 3.1415\n}\n')
+        file.write(
+            str(z + reversed_cup)
+            + " "
+            + str(round(2 - red[1], 3))
+            + "\n  rotation 1 0 0 3.1415\n}\n"
+        )
 for name, green in GREEN_CUPS.items():
-    file.write('GreenSignal {\n  name \"' + name + '\"\n  translation ' + str(green[0]) + ' ')
+    file.write(
+        'GreenSignal {\n  name "' + name + '"\n  translation ' + str(green[0]) + " "
+    )
     if int(name[3:]) < 25:
-        file.write(str(z) + ' ' + str(round(2 - green[1], 3)) + '\n}\n')
+        file.write(str(z) + " " + str(round(2 - green[1], 3)) + "\n}\n")
     else:
-        file.write(str(z + reversed_cup) + ' ' + str(round(2 - green[1], 3)) + '\n  rotation 1 0 0 3.1415\n}\n')
+        file.write(
+            str(z + reversed_cup)
+            + " "
+            + str(round(2 - green[1], 3))
+            + "\n  rotation 1 0 0 3.1415\n}\n"
+        )
 file.close()

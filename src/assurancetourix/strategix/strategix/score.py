@@ -15,17 +15,17 @@ class Score:
         phare_raised = False
         pavillon_raised = False
         for action in actions:
-            if actions[action].get('STATUS') == 'FINISHED':
-                if 'MANCHE' in action:
+            if actions[action].get("STATUS") == "FINISHED":
+                if "MANCHE" in action:
                     num_manche_air += 1
-                if 'GOB' in action:
-                    if actions[action].get("COLOR") == 'RED':
+                if "GOB" in action:
+                    if actions[action].get("COLOR") == "RED":
                         num_red_cups += 1
                     else:
                         num_green_cups += 1
-                if 'PHARE' in action:
+                if "PHARE" in action:
                     phare_raised = True
-                if 'PAVILLON' in action:
+                if "PAVILLON" in action:
                     pavillon_raised = True
         # Bon Port
         # if self.bonPortGros.pos == self.bonPortPetit.pos == 'Good':
@@ -49,7 +49,7 @@ class Score:
     def preempt(self, action, sender):
         actions[action]["STATUS"] = "PREEMPTED"
         actions[action]["EXECUTER"] = sender
-        if 'ECUEIL' in action:
+        if "ECUEIL" in action:
             for gob in actions[action]["GOBS"]:
                 actions[action]["STATUS"] = "PREEMPTED"
                 actions[gob]["EXECUTER"] = sender
@@ -58,7 +58,7 @@ class Score:
     def release(self, action, sender):
         actions[action]["STATUS"] = "RELEASED"
         actions[action]["EXECUTER"] = None
-        if 'ECUEIL' in action:
+        if "ECUEIL" in action:
             for gob in actions[action]["GOBS"]:
                 actions[action]["STATUS"] = "RELEASED"
                 actions[gob]["EXECUTER"] = None
@@ -68,7 +68,7 @@ class Score:
     def finish(self, action, sender):
         actions[action]["STATUS"] = "FINISHED"
         actions[action]["EXECUTER"] = sender
-        if 'ECUEIL' in action:
+        if "ECUEIL" in action:
             for gob in actions[action]["GOBS"]:
                 actions[action]["STATUS"] = "FINISHED"
                 actions[gob]["EXECUTER"] = sender

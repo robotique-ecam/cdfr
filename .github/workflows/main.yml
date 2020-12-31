@@ -60,7 +60,7 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:$WEBOTS_HOME/lib/controller/python38:~/ros_ws/build/python_orocos_kdl
           xvfb-run --auto-servernum webots --mode=fast --no-rendering --stdout --stderr --minimize --batch tools/simulation/worlds/cdr2020.wbt &
           echo "Webots is starting..."
-          sleep 45
+          sleep 30
           ros2 launch titan cloud-interfaces.py &
           ros2 launch titan core.py &
           ros2 run titan game_manager

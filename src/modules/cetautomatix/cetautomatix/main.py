@@ -15,21 +15,21 @@ def main(args=None):
     rclpy.init(args=args)
     robot = Robot()
     root = create_tree(robot)
-    tree = py_trees_ros.trees.BehaviourTree(
-        root=root,
-        unicode_tree_debug=False
-    )
+    tree = py_trees_ros.trees.BehaviourTree(root=root, unicode_tree_debug=False)
     try:
         tree.setup(timeout=15.0)
     except py_trees_ros.exceptions.TimedOutError as e:
         console.logerror(
-            console.red + 'failed to setup the tree, aborting [{}]'.format(str(e)) + console.reset)
+            console.red
+            + "failed to setup the tree, aborting [{}]".format(str(e))
+            + console.reset
+        )
         tree.shutdown()
         rclpy.shutdown()
         sys.exit(1)
     except KeyboardInterrupt:
         # not a warning, nor error, usually a user-initiated shutdown
-        console.logerror('tree setup interrupted')
+        console.logerror("tree setup interrupted")
         tree.shutdown()
         rclpy.shutdown()
         sys.exit(1)
@@ -51,5 +51,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

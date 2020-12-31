@@ -27,8 +27,8 @@ def print_critical(*args, **kwargs):
     print(*args, f'[{Fore.WHITE + Back.RED + "CRITICAL" + Style.RESET_ALL}]', **kwargs)
 
 
-if __name__ == '__main__':
-    print_ok('Hyperion started')
-    print_warn('This is a warning')
-    print_error('This is a failure')
-    print_critical('In case of crash')
+if __name__ == "__main__":
+    print_ok("Hyperion started")
+    print_warn("This is a warning")
+    print_error("This is a failure")
+    print_critical("In case of crash")

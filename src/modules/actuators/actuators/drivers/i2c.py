@@ -9,7 +9,7 @@ from threading import RLock
 try:
     from smbus import SMBus
 except ImportError:
-    print('[!] Actuators are in simulation mode. No python3-smbus was found !')
+    print("[!] Actuators are in simulation mode. No python3-smbus was found !")
     SMBus = int
 
 

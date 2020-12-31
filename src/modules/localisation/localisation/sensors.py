@@ -19,7 +19,9 @@ class Sensors:
                 vlx.start_ranging(2)  # Medium range
                 self._vlx_array.append(vlx)
             except BaseException:
-                print(f'No VL53L1X sensor on I2C bus {self._i2c_bus} at address {addr} !')
+                print(
+                    f"No VL53L1X sensor on I2C bus {self._i2c_bus} at address {addr} !"
+                )
 
     def get_distances(self):
         """Fetch distances from VL53L1Xs."""
