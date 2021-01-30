@@ -24,6 +24,5 @@ assurancetourix:
       header_frame_id: "assurancetourix"
     simulation:
       robots :
-        - PHARAON
         - ASTERIX
       refresh_frequency: 2
