@@ -114,7 +114,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
 #ifdef SIMULATION
 // webots element positioning
 void Assurancetourix::simulation_marker_callback() {
-  visualization_msgs::msg::MarkerArray marker_array;
+  visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
   visualization_msgs::msg::Marker webots_marker;
   webots_marker.type = robot_type;
   webots_marker.color.r = 255;
@@ -123,9 +123,9 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.scale.y = 0.1;
   webots_marker.scale.z = 0.1;
   webots_marker.header.frame_id = "map";
-  int id = 6;
+  int id = 0;
 
-  /*for (auto robot : robots) {
+  for (auto robot : robots) {
     double x, y;
 
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
@@ -137,18 +137,19 @@ void Assurancetourix::simulation_marker_callback() {
     webots_marker.text = robot;
     webots_marker.id = id;
 
-    marker_array.markers.push_back(webots_marker);
+    marker_array_allies.markers.push_back(webots_marker);
     id++;
-  }*/
+  }
+  id = 6;
 
   webots_marker.header.stamp = this->get_clock()->now();
   if (comeback) {
-    comeback_x += 0.2;
+    comeback_x += 0.1;
     if (comeback_x > 2.5){
       comeback = false;
     }
   } else {
-    comeback_x -= 0.2;
+    comeback_x -= 0.1;
     if (comeback_x < 0.5){
       comeback = true;
     }
@@ -158,12 +159,14 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.pose.position.y = 1;
   webots_marker.text = "test";
   webots_marker.id = id;
-  marker_array.markers.push_back(webots_marker);
-  marker_array.markers.push_back(predictEnnemiesPos(webots_marker));
+  marker_array_ennemies.markers.push_back(webots_marker);
+  marker_array_ennemies.markers.push_back(predictEnnemiesPos(webots_marker));
 
-  transformed_marker_pub_ennemies_->publish(marker_array);
+  transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
   lastEnnemiesMarkers = ennemiesMarkersOnThisCycle;
   ennemiesMarkersOnThisCycle.markers.clear();
+
+  transformed_marker_pub_allies_->publish(marker_array_allies);
 }
 #endif // SIMULATION
 
