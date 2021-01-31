@@ -127,6 +127,10 @@ void Assurancetourix::simulation_marker_callback() {
 
   for (auto robot : robots) {
     double x, y;
+    double theta = acos(wb_supervisor->getFromDef(robot)->getOrientation()[0]);
+
+    if (theta < 0) theta = -theta;
+    if (wb_supervisor->getFromDef(robot)->getOrientation()[1] > 0) theta = -theta;
 
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
     y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
@@ -134,6 +138,8 @@ void Assurancetourix::simulation_marker_callback() {
     webots_marker.header.stamp = this->get_clock()->now();
     webots_marker.pose.position.x = x;
     webots_marker.pose.position.y = y;
+    webots_marker.pose.orientation.z = theta;
+
     webots_marker.text = robot;
     webots_marker.id = id;
 
@@ -141,7 +147,7 @@ void Assurancetourix::simulation_marker_callback() {
     id++;
   }
   id = 6;
-
+  webots_marker.pose.orientation.z = 0;
   webots_marker.header.stamp = this->get_clock()->now();
   if (comeback) {
     comeback_x += 0.1;
