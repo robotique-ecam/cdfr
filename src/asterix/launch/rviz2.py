@@ -9,4 +9,4 @@ from titan.rviz2 import generate_rviz_launch_description
 
 def generate_launch_description():
     """Launch asterix rviz2."""
-    return generate_rviz_launch_description(namespace='asterix')
+    return generate_rviz_launch_description(namespace="asterix")

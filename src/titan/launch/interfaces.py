@@ -15,43 +15,61 @@ from launch_ros.actions import Node
 from webots_ros2_core.webots_launcher import WebotsLauncher
 
 
-robots = ['asterix']
+robots = ["asterix"]
 
 
 def generate_launch_description():
-    return launch.LaunchDescription([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([get_package_share_directory(robot), '/launch/interfaces.py']),
-            launch_arguments={
-                'namespace': robot,
-                'params_file': os.path.join(get_package_share_directory(robot), 'param', f'{robot}.yml')
-            }.items(),
-        ) for robot in robots
-    ] + [
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([get_package_share_directory('assurancetourix'), '/launch/launch.py']),
-            launch_arguments={
-                'namespace': 'assurancetourix',
-                'params_file': os.path.join(get_package_share_directory('assurancetourix'), 'param', 'assurancetourix.yml')
-            }.items(),
-        )
-    ] + [
-        GroupAction([
-            Node(
-                package='titan',
-                executable='pharaon',
-                output='screen',
-            ),
-
-            Node(
-                package='strategix',
-                executable='strategix',
-                output='screen',
-            ),
-
-            WebotsLauncher(
-                mode='realtime',
-                world='tools/simulation/worlds/cdr2020.wbt',
-            ),
-        ])
-    ])
+    return launch.LaunchDescription(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [get_package_share_directory(robot), "/launch/interfaces.py"]
+                ),
+                launch_arguments={
+                    "namespace": robot,
+                    "params_file": os.path.join(
+                        get_package_share_directory(robot), "param", f"{robot}.yml"
+                    ),
+                }.items(),
+            )
+            for robot in robots
+        ]
+        + [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [
+                        get_package_share_directory("assurancetourix"),
+                        "/launch/launch.py",
+                    ]
+                ),
+                launch_arguments={
+                    "namespace": "assurancetourix",
+                    "params_file": os.path.join(
+                        get_package_share_directory("assurancetourix"),
+                        "param",
+                        "assurancetourix.yml",
+                    ),
+                }.items(),
+            )
+        ]
+        + [
+            GroupAction(
+                [
+                    Node(
+                        package="titan",
+                        executable="pharaon",
+                        output="screen",
+                    ),
+                    Node(
+                        package="strategix",
+                        executable="strategix",
+                        output="screen",
+                    ),
+                    WebotsLauncher(
+                        mode="realtime",
+                        world="tools/simulation/worlds/cdr2020.wbt",
+                    ),
+                ]
+            )
+        ]
+    )

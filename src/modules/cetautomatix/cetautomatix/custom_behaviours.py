@@ -6,7 +6,7 @@ import py_trees
 try:
     import RPi.GPIO as GPIO
 except ImportError:
-    print('Not running on RPI. Fallback to ros service call !!!', flush=True)
+    print("Not running on RPI. Fallback to ros service call !!!", flush=True)
     GPIO = None
 
 
@@ -19,7 +19,11 @@ class NewAction(py_trees.behaviour.Behaviour):
         if self.robot._current_action is None:
             available = self.robot.fetch_available_actions()
             best_action = self.robot.compute_best_action(available)
-            return py_trees.common.Status.SUCCESS if self.robot.preempt_action(best_action) else py_trees.common.Status.FAILURE
+            return (
+                py_trees.common.Status.SUCCESS
+                if self.robot.preempt_action(best_action)
+                else py_trees.common.Status.FAILURE
+            )
         else:
             return py_trees.common.Status.SUCCESS
 
@@ -30,7 +34,11 @@ class ConfirmAction(py_trees.behaviour.Behaviour):
         self.robot = robot
 
     def update(self):
-        return py_trees.common.Status.SUCCESS if self.robot.confirm_current_action() else py_trees.common.Status.FAILURE
+        return (
+            py_trees.common.Status.SUCCESS
+            if self.robot.confirm_current_action()
+            else py_trees.common.Status.FAILURE
+        )
 
 
 class ReleaseAction(py_trees.behaviour.Behaviour):
@@ -39,7 +47,11 @@ class ReleaseAction(py_trees.behaviour.Behaviour):
         self.robot = robot
 
     def update(self):
-        return py_trees.common.Status.SUCCESS if self.robot.drop_current_action() else py_trees.common.Status.FAILURE
+        return (
+            py_trees.common.Status.SUCCESS
+            if self.robot.drop_current_action()
+            else py_trees.common.Status.FAILURE
+        )
 
 
 class ActuatorAction(py_trees.behaviour.Behaviour):
@@ -48,7 +60,11 @@ class ActuatorAction(py_trees.behaviour.Behaviour):
         self.robot = robot
 
     def update(self):
-        return py_trees.common.Status.SUCCESS if self.robot.start_actuator_action() else py_trees.common.Status.FAILURE
+        return (
+            py_trees.common.Status.SUCCESS
+            if self.robot.start_actuator_action()
+            else py_trees.common.Status.FAILURE
+        )
 
 
 class SetupTimersAction(py_trees.behaviour.Behaviour):
@@ -116,7 +132,7 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
 
     def update(self):
         """Guard condition for goupille."""
-        if GPIO is None or self.robot.robot == 'asterix':
+        if GPIO is None or self.robot.robot == "asterix":
             if self.robot.triggered():
                 return py_trees.common.Status.SUCCESS
         elif not GPIO.input(17) or self.robot.triggered():

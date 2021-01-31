@@ -18,7 +18,9 @@ class Actuators:
 
     """Actuators base class."""
 
-    def __init__(self, i2c_bus=5, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=[], SERVOS={}):
+    def __init__(
+        self, i2c_bus=5, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=[], SERVOS={}
+    ):
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
@@ -36,12 +38,12 @@ class Actuators:
         """Setup dynamixels speed."""
         for dyna in self.DYNAMIXELS:
             d = self.DYNAMIXELS[dyna]
-            self.arbotix.setSpeed(dyna, d.get('speed'))
-            self.arbotix.setPosition(dyna, d.get('down'))
+            self.arbotix.setSpeed(dyna, d.get("speed"))
+            self.arbotix.setPosition(dyna, d.get("down"))
         for s in self.SERVOS:
             servo = self.SERVOS[s]
-            self.arbotix.setSpeed(servo.get('addr'), servo.get('speed'))
-            self.arbotix.setPosition(servo.get('addr'), servo.get('down'))
+            self.arbotix.setSpeed(servo.get("addr"), servo.get("speed"))
+            self.arbotix.setPosition(servo.get("addr"), servo.get("down"))
 
     def disableDynamixels(self):
         """Setup dynamixels speed."""
@@ -49,13 +51,13 @@ class Actuators:
             self.arbotix.disableTorque(dyna)
         for s in self.SERVOS:
             servo = self.SERVOS[s]
-            self.arbotix.disableTorque(servo.get('addr'))
+            self.arbotix.disableTorque(servo.get("addr"))
 
     def raiseTheFlag(self):
         """Raise obelix flags. Servo must be bound with ArbotixM."""
-        flag_servo = self.SERVOS.get('flags')
+        flag_servo = self.SERVOS.get("flags")
         if flag_servo is not None:
-            self.arbotix.setPosition(flag_servo['addr'], flag_servo['up'])
+            self.arbotix.setPosition(flag_servo["addr"], flag_servo["up"])
 
     def setPumpsEnabled(self, enabled: bool, pumps: list):
         """Set list of pumps as enabled or not."""
@@ -63,31 +65,31 @@ class Actuators:
         for p in pumps:
             pump = self.PUMPS.get(p)
             if pump is not None:
-                if enabled and pump.get('type') == NC:
-                    self.pump_driver.bytes_set([pump.get('pump')])
-                elif enabled and pump.get('type') == NO:
-                    self.pump_driver.bytes_set([pump.get('pump'), pump.get('valve')])
-                elif not enabled and pump.get('type') == NC:
-                    self.pump_driver.bytes_clear([pump.get('pump')])
-                    self.pump_driver.bytes_set([pump.get('valve')])
-                    relax.append(pump.get('valve'))
-                    self.pump_driver.bytes_clear([pump.get('valve')])
-                elif not enabled and pump.get('type') == NO:
-                    self.pump_driver.bytes_clear([pump.get('pump'), pump.get('valve')])
+                if enabled and pump.get("type") == NC:
+                    self.pump_driver.bytes_set([pump.get("pump")])
+                elif enabled and pump.get("type") == NO:
+                    self.pump_driver.bytes_set([pump.get("pump"), pump.get("valve")])
+                elif not enabled and pump.get("type") == NC:
+                    self.pump_driver.bytes_clear([pump.get("pump")])
+                    self.pump_driver.bytes_set([pump.get("valve")])
+                    relax.append(pump.get("valve"))
+                    self.pump_driver.bytes_clear([pump.get("valve")])
+                elif not enabled and pump.get("type") == NO:
+                    self.pump_driver.bytes_clear([pump.get("pump"), pump.get("valve")])
         # Relax valves to normal state after 100ms minimum delay
         if len(relax) > 0:
-            sleep(.1)
+            sleep(0.1)
             self.pump_driver.bytes_clear(relax)
 
     def grabCups(self, ports: list):
         """Grab cups at specified indexes."""
         self.setPumpsEnabled(True, ports)
-        sleep(.5)
+        sleep(0.5)
         positions, servos = [], []
         for servo in ports:
             if servo in self.DYNAMIXELS:
                 servos.append(servo)
-                positions.append(self.DYNAMIXELS[servo].get('up'))
+                positions.append(self.DYNAMIXELS[servo].get("up"))
         self.setDynamixelsPositions(servos, positions)
 
     def dropCups(self, ports: list):
@@ -96,7 +98,7 @@ class Actuators:
         for servo in ports:
             if servo in self.DYNAMIXELS:
                 servos.append(servo)
-                positions.append(self.DYNAMIXELS[servo].get('down'))
+                positions.append(self.DYNAMIXELS[servo].get("down"))
         self.setDynamixelsPositions(servos, positions)
         self.setPumpsEnabled(False, ports)
 

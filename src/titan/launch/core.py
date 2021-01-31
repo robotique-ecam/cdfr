@@ -12,16 +12,23 @@ import launch
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
-robots = ['asterix']
+robots = ["asterix"]
 
 
 def generate_launch_description():
-    return launch.LaunchDescription([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([get_package_share_directory(robot), '/launch/nav-core.py']),
-            launch_arguments={
-                'namespace': robot,
-                'params_file': os.path.join(get_package_share_directory(robot), 'param', f'{robot}.yml')
-            }.items(),
-        ) for robot in robots
-    ])
+    return launch.LaunchDescription(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [get_package_share_directory(robot), "/launch/nav-core.py"]
+                ),
+                launch_arguments={
+                    "namespace": robot,
+                    "params_file": os.path.join(
+                        get_package_share_directory(robot), "param", f"{robot}.yml"
+                    ),
+                }.items(),
+            )
+            for robot in robots
+        ]
+    )

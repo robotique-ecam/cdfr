@@ -16,26 +16,26 @@ class Localisation(rclpy.node.Node):
     """Robot localisation node."""
 
     def __init__(self):
-        super().__init__('localisation_node')
-        self.robot = self.get_namespace().strip('/')
-        self.side = self.declare_parameter('side', 'blue')
+        super().__init__("localisation_node")
+        self.robot = self.get_namespace().strip("/")
+        self.side = self.declare_parameter("side", "blue")
         self.add_on_set_parameters_callback(self._on_set_parameters)
         self._x, self._y, self._theta = self.fetchStartPosition()
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
-        self._tf.header.frame_id = 'map'
-        self._tf.child_frame_id = 'odom'
+        self._tf.header.frame_id = "map"
+        self._tf.child_frame_id = "odom"
         self.create_timer(1, self.update_transform)
-        self.get_logger().info(f'Default side is {self.side.value}')
-        self.get_logger().info('Localisation node is ready')
+        self.get_logger().info(f"Default side is {self.side.value}")
+        self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
         """Handle Parameter events especially for side."""
         result = SetParametersResult()
         try:
             for param in params:
-                if param.name == 'side':
-                    self.get_logger().warn(f'Side changed {param.value}')
+                if param.name == "side":
+                    self.get_logger().warn(f"Side changed {param.value}")
                     self.side = param
                 else:
                     setattr(self, param.name, param)
@@ -48,25 +48,33 @@ class Localisation(rclpy.node.Node):
     def fetchStartPosition(self):
         """Fetch start position for side and robot."""
         # TODO : Calibrate the start position using VL53L1X
-        if self.robot == 'asterix':
-            if self.side.value == 'blue':
+        if self.robot == "asterix":
+            if self.side.value == "blue":
                 return (0.29, 1.33, 0)
-            elif self.side.value == 'yellow':
+            elif self.side.value == "yellow":
                 return (0.29, 1.33, 0)
-        elif self.robot == 'obelix':
-            if self.side.value == 'blue':
+        elif self.robot == "obelix":
+            if self.side.value == "blue":
                 return (0.29, 1.33, 0)
-            elif self.side.value == 'yellow':
+            elif self.side.value == "yellow":
                 return (3 - 0.29, 1.33, np.pi)
         # Make it crash in case of undefined parameters
         return None
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
-        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
-        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
-        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2)
-        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.cos(pitch / 2) * np.sin(yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.cos(yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
         return [qx, qy, qz, qw]
 
     def update_transform(self):

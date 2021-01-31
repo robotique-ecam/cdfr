@@ -7,28 +7,28 @@
 from setuptools import setup, find_packages
 
 
-package_name = 'panoramix'
+package_name = "panoramix"
 
 
 setup(
     name=package_name,
-    version='0.8.3',
+    version="0.8.3",
     packages=find_packages(),
     data_files=[
-        ('share/' + package_name, ['package.xml']),
-        ('share/ament_index/resource_index/packages', ['resource/' + package_name])
+        ("share/" + package_name, ["package.xml"]),
+        ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
     zip_safe=True,
-    install_requires=['setuptools'],
-    author='Ewen BRUN',
-    author_email='ewen.brun@ecam.fr',
-    maintainer='Ewen BRUN',
-    maintainer_email='ewen.brun@ecam.fr',
-    description='Panoramix web server.',
-    license='ECAM Makers :: CDFR 2020',
+    install_requires=["setuptools"],
+    author="Ewen BRUN",
+    author_email="ewen.brun@ecam.fr",
+    maintainer="Ewen BRUN",
+    maintainer_email="ewen.brun@ecam.fr",
+    description="Panoramix web server.",
+    license="ECAM Makers :: CDFR 2020",
     entry_points={
-        'console_scripts': [
-            'panoramix = panoramix.app:main',
+        "console_scripts": [
+            "panoramix = panoramix.app:main",
         ],
     },
 )

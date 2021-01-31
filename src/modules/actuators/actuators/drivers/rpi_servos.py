@@ -7,7 +7,7 @@
 try:
     from gpiozero import Servo
 except ImportError:
-    print('[!] RPI Servos are in simulation mode. python3-gpiozero was found !')
+    print("[!] RPI Servos are in simulation mode. python3-gpiozero was found !")
 
 
 class RPiServos:
@@ -28,4 +28,4 @@ class RPiServos:
             for pin, val in zip(pins, values):
                 self.servos[pin].value = val
         except NameError:
-            print(f'Servo {pin} set to {val}', flush=True)
+            print(f"Servo {pin} set to {val}", flush=True)

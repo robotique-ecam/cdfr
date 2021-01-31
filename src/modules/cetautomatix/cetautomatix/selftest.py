@@ -22,13 +22,13 @@ class Selftest:
     def __init__(self, node):
         """Init selftest with node."""
         self.node = node
-        self.lcd_driver = self.node.create_publisher(Lcd, 'lcd', 1)
+        self.lcd_driver = self.node.create_publisher(Lcd, "lcd", 1)
         # Wait for subscribers
         while self.lcd_driver.get_subscription_count() < 1:
             sleep(1)
 
         self.__write__(0)  # Report selftest init
-        if 'aarch64' not in machine():
+        if "aarch64" not in machine():
             return
 
         self.__write__(0x10)  # Started Hardware tests
@@ -36,7 +36,7 @@ class Selftest:
         # Testing for CPU Throttling
         vcgm = Vcgencmd()
         self.__write__(0x11)
-        if int(vcgm.get_throttled().get('raw_data'), 16) != 0:
+        if int(vcgm.get_throttled().get("raw_data"), 16) != 0:
             return
 
         # Testing devices on Drive I2C Bus
@@ -89,7 +89,7 @@ class Selftest:
             servo = self.node.actuators.SERVOS.get(servo)
             code += 1
             self.__write__(code)
-            if self.node.actuators.arbotix.getPosition(servo.get('addr')) == -1:
+            if self.node.actuators.arbotix.getPosition(servo.get("addr")) == -1:
                 return
 
         self.__write__(0xFF)
@@ -98,5 +98,5 @@ class Selftest:
         """Write current testing code to LCD."""
         lcd_msg = Lcd()
         lcd_msg.line = 1
-        lcd_msg.text = f'Selftest: 0x{hex(code)[2:].zfill(2).upper()}'
+        lcd_msg.text = f"Selftest: 0x{hex(code)[2:].zfill(2).upper()}"
         self.lcd_driver.publish(lcd_msg)
