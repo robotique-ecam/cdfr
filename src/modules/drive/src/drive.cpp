@@ -24,6 +24,9 @@ Drive::Drive() : Node("drive_node") {
   this->i2c_mutex.unlock();
 #else
   /* Init webots supervisor */
+  std::string namespace_str(Node::get_namespace()), webots_robot_name("WEBOTS_ROBOT_NAME=");
+  namespace_str.erase(namespace_str.begin());
+  putenv(strdup((webots_robot_name + namespace_str).c_str()));
   wb_robot = std::make_shared<webots::Robot>();
   /* Initialize motors */
   wb_left_motor = wb_robot->getMotor("wheel_left_joint");
