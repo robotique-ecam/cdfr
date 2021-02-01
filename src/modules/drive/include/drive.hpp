@@ -10,6 +10,7 @@
 #include <webots/PositionSensor.hpp>
 #endif
 #include "std_srvs/srv/set_bool.hpp"
+#include "std_srvs/srv/trigger.hpp"
 #include "actuators_srvs/srv/slider.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -102,6 +103,9 @@ private:
   // Sliders service
   rclcpp::Service<actuators_srvs::srv::Slider>::SharedPtr _set_slider_postion;
 
+  // Odometric adjustment
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _adjust_odometry;
+
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
@@ -165,6 +169,8 @@ private:
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
   void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
                                   const actuators_srvs::srv::Slider::Response::SharedPtr response);
+  void adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::Trigger::Request::SharedPtr request,
+                             const std_srvs::srv::Trigger::Response::SharedPtr response);
 
 #ifdef SIMULATION
   void sim_step();
