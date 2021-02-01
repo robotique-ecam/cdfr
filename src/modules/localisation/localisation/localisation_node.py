@@ -9,7 +9,9 @@ import numpy as np
 import rclpy
 from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.msg import SetParametersResult
+from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
+from std_srvs.srv import Trigger
 
 
 class Localisation(rclpy.node.Node):
@@ -23,11 +25,18 @@ class Localisation(rclpy.node.Node):
         self._x, self._y, self._theta = self.fetchStartPosition()
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
-        self._tf.header.frame_id = "map"
-        self._tf.child_frame_id = "odom"
+        self._tf.header.frame_id = 'map'
+        self._tf.child_frame_id = 'odom'
+        self.update_transform()
+        self.subscription_ = self.create_subscription(
+            MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
+        self.subscription_  # prevent unused variable warning
+        self.last_odom_update = self.get_clock().now().to_msg().sec;
         self.create_timer(1, self.update_transform)
-        self.get_logger().info(f"Default side is {self.side.value}")
-        self.get_logger().info("Localisation node is ready")
+        self._get_trigger_adjust_odometry_request = Trigger.Request()
+        self._get_trigger_adjust_odometry_client = self.create_client(Trigger, 'adjust_odometry')
+        self.get_logger().info(f'Default side is {self.side.value}')
+        self.get_logger().info('Localisation node is ready')
 
     def _on_set_parameters(self, params):
         """Handle Parameter events especially for side."""
@@ -88,7 +97,24 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.rotation.z = float(qz)
         self._tf.transform.rotation.w = float(qw)
         self._tf_brodcaster.sendTransform(self._tf)
+        #self.get_logger().info(f'tf: x={self.get_clock().now().to_msg().sec}')
 
+    def _service_call(self, client, request):
+        """Call service synchronously."""
+        client.call_async(request)
+
+    def allies_subscription_callback(self, msg):
+        for allie_marker in msg.markers:
+            if allie_marker.text.lower() == self.robot and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5:
+                self._x = allie_marker.pose.position.x
+                self._y = allie_marker.pose.position.y
+                self._theta = allie_marker.pose.orientation.z
+                self._service_call(
+                    self._get_trigger_adjust_odometry_client,
+                    self._get_trigger_adjust_odometry_request,
+                )
+                self.update_transform()
+                self.last_odom_update = self.get_clock().now().to_msg().sec
 
 def main(args=None):
     """Entrypoint."""
