@@ -60,6 +60,9 @@ Drive::Drive() : Node("drive_node") {
   _set_slider_postion = this->create_service<actuators_srvs::srv::Slider>(
       "slider_position", std::bind(&Drive::handle_set_slider_position, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
+  _adjust_odometry = this->create_service<std_srvs::srv::Trigger>(
+      "adjust_odometry", std::bind(&Drive::adjust_odometry, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
@@ -314,6 +317,15 @@ rclcpp::Time Drive::get_sim_time() {
 
 void Drive::sim_step() { this->wb_robot->step(timestep); }
 #endif /* SIMULATION */
+
+void Drive::adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::Trigger::Request::SharedPtr request,
+                            const std_srvs::srv::Trigger::Response::SharedPtr response) {
+
+  odom_pose_.x = 0;
+  odom_pose_.y = 0;
+  odom_pose_.thetha = 0;
+  response->success = true;
+}
 
 Drive::~Drive() {
 #ifndef SIMULATION
