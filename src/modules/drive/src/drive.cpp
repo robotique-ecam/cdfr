@@ -63,6 +63,9 @@ Drive::Drive() : Node("drive_node") {
   _adjust_odometry = this->create_service<std_srvs::srv::Trigger>(
       "adjust_odometry", std::bind(&Drive::adjust_odometry, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
+  _adjust_odometry_sub = this->create_subscription<geometry_msgs::msg::TransformStamped>(
+      "adjust_odometry", qos, std::bind(&Drive::adjust_odometry_callback, this, std::placeholders::_1));
+
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
@@ -259,6 +262,9 @@ void Drive::update_tf() {
   tf2_msgs::msg::TFMessage odom_tf_msg;
   odom_tf_msg.transforms.push_back(odom_tf);
   tf_pub_->publish(odom_tf_msg);
+
+  _previous_tf.insert(_previous_tf.begin(), odom_tf);
+  if (_previous_tf.size() > 20) _previous_tf.pop_back();
 }
 
 void Drive::update_joint_states() {
@@ -326,6 +332,21 @@ void Drive::adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_head
   odom_pose_.thetha = 0;
   response->success = true;
 }
+
+void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg){
+  rclcpp::Time stamp_msg = tf_stamped_msg->header.stamp;
+  int right_stamp_index = 0;
+  while (right_stamp_index < _previous_tf.size() && stamp_msg < _previous_tf[right_stamp_index].header.stamp){
+    right_stamp_index++;
+    if (right_stamp_index == _previous_tf.size()) {
+      RCLCPP_WARN(this->get_logger(), "Not enough tf stored to readjust odometry");
+      return;
+    }
+  }
+  
+
+}
+
 
 Drive::~Drive() {
 #ifndef SIMULATION

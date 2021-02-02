@@ -117,6 +117,10 @@ private:
   diagnostic_msgs::msg::DiagnosticArray diagnostics_array_;
   diagnostic_msgs::msg::DiagnosticStatus diagnostics_status_;
 
+  /* Odometry re-adjustement */
+  std::vector<geometry_msgs::msg::TransformStamped> _previous_tf;
+  rclcpp::Subscription<geometry_msgs::msg::TransformStamped>::SharedPtr _adjust_odometry_sub;
+
   double _accel;
   double _wheel_separation;
   double _wheel_radius;
@@ -171,6 +175,7 @@ private:
                                   const actuators_srvs::srv::Slider::Response::SharedPtr response);
   void adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::Trigger::Request::SharedPtr request,
                              const std_srvs::srv::Trigger::Response::SharedPtr response);
+  void adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg);
 
 #ifdef SIMULATION
   void sim_step();
