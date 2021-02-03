@@ -114,6 +114,10 @@ private:
   std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
 
   rclcpp::Client<transformix_msgs::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;
+
+#ifdef SIMULATION
+  rclcpp::Time get_sim_time(std::shared_ptr<webots::Robot> wb_robot);
+#endif /* SIMULATION */
 };
 
 #endif /* ONBOARD_VISION_NODE_HPP */
