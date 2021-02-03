@@ -135,10 +135,17 @@ void Assurancetourix::simulation_marker_callback() {
     x = wb_supervisor->getFromDef(robot)->getPosition()[0];
     y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
 
-    webots_marker.header.stamp = this->get_clock()->now();
+    webots_marker.header.stamp = get_sim_time(wb_supervisor);
+    tf2::Quaternion q;
+    q.setRPY(0, 0, theta);
+
+    webots_marker.pose.orientation.x = q.x();
+    webots_marker.pose.orientation.y = q.y();
+    webots_marker.pose.orientation.z = q.z();
+    webots_marker.pose.orientation.w = q.w();
+
     webots_marker.pose.position.x = x;
     webots_marker.pose.position.y = y;
-    webots_marker.pose.orientation.z = theta;
 
     webots_marker.text = robot;
     webots_marker.id = id;
@@ -147,7 +154,10 @@ void Assurancetourix::simulation_marker_callback() {
     id++;
   }
   id = 6;
-  webots_marker.pose.orientation.z = 0;
+  webots_marker.pose.orientation.x = 0.0;
+  webots_marker.pose.orientation.y = 0.0;
+  webots_marker.pose.orientation.z = 0.0;
+  webots_marker.pose.orientation.w = 1.0;
   webots_marker.header.stamp = this->get_clock()->now();
   if (comeback) {
     comeback_x += 0.1;
@@ -476,6 +486,14 @@ void Assurancetourix::_anotate_image(Mat img) {
     transformed_marker_pub_allies_->publish(marker_array_allies);
   }
 }
+
+#ifdef SIMULATION
+rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_robot) {
+  double seconds = 0;
+  double nanosec = modf(wb_robot->getTime(), &seconds) * 1e9;
+  return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
+}
+#endif /* SIMULATION */
 
 Assurancetourix::~Assurancetourix() {
 #ifdef MIPI_CAMERA
