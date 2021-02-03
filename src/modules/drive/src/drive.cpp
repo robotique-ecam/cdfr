@@ -348,6 +348,21 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
     if (stamp_msg - (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp
       > (rclcpp::Time)_previous_tf[right_stamp_index - 1].header.stamp - stamp_msg) right_stamp_index--;
   }
+
+  //stamp_msg = this->get_clock()->now();
+  geometry_msgs::msg::TransformStamped base_link_odom_tf,
+                                       tf_msg = *tf_stamped_msg,
+                                       nearest_tf = _previous_tf[right_stamp_index];
+  //tf_msg.header.stamp = this->get_clock()->now();
+
+  geometry_msgs::msg::PoseStamped base_link_relative_to_old_odom, base_link_relative_to_new_odom;
+  extract_pose_from_transform(_previous_tf[0], base_link_relative_to_old_odom);
+
+  tf2::doTransform<geometry_msgs::msg::PoseStamped>(base_link_relative_to_old_odom, base_link_relative_to_new_odom, nearest_tf);
+
+  //rclcpp::Time base_link_odom_tf_stamp = (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp;
+  set_transform_from_pose(base_link_relative_to_new_odom, base_link_odom_tf, stamp_msg);
+
 void Drive::extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out){
   pose_out.header = transform_in.header;
   pose_out.pose.position.x = transform_in.transform.translation.x;
