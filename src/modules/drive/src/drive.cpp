@@ -336,15 +336,18 @@ void Drive::adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_head
 void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg){
   rclcpp::Time stamp_msg = tf_stamped_msg->header.stamp;
   int right_stamp_index = 0;
-  while (right_stamp_index < _previous_tf.size() && stamp_msg < _previous_tf[right_stamp_index].header.stamp){
+  while (stamp_msg < (rclcpp::Time)_previous_tf.at(right_stamp_index).header.stamp){
     right_stamp_index++;
     if (right_stamp_index == _previous_tf.size()) {
       RCLCPP_WARN(this->get_logger(), "Not enough tf stored to readjust odometry");
       return;
     }
   }
-  
 
+  if (right_stamp_index != 0){
+    if (stamp_msg - (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp
+      > (rclcpp::Time)_previous_tf[right_stamp_index - 1].header.stamp - stamp_msg) right_stamp_index--;
+  }
 }
 
 
