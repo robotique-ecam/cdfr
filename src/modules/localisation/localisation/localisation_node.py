@@ -11,6 +11,7 @@ from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
+from tf2_ros import TransformBroadcaster
 from std_srvs.srv import Trigger
 
 
@@ -24,6 +25,7 @@ class Localisation(rclpy.node.Node):
         self.add_on_set_parameters_callback(self._on_set_parameters)
         self._x, self._y, self._theta = self.fetchStartPosition()
         self._tf_brodcaster = StaticTransformBroadcaster(self)
+        self._tf_brodcaster = TransformBroadcaster(self)
         self._tf = TransformStamped()
         self._tf.header.frame_id = 'map'
         self._tf.child_frame_id = 'odom'
@@ -35,6 +37,8 @@ class Localisation(rclpy.node.Node):
         self.create_timer(1, self.update_transform)
         self._get_trigger_adjust_odometry_request = Trigger.Request()
         self._get_trigger_adjust_odometry_client = self.create_client(Trigger, 'adjust_odometry')
+        self.tf_publisher_ = self.create_publisher(TransformStamped, 'adjust_odometry', 10)
+        self.update_transform()
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Localisation node is ready')
 
@@ -85,6 +89,20 @@ class Localisation(rclpy.node.Node):
             roll / 2
         ) * np.sin(pitch / 2) * np.sin(yaw / 2)
         return [qx, qy, qz, qw]
+
+    def quaternion_to_euler(self, x, y, z, w):
+        """Conversion between quaternions and euler angles."""
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        X = math.atan2(t0, t1)
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        Y = math.asin(t2)
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        Z = math.atan2(t3, t4)
+        return (X, Y, Z)
 
     def update_transform(self):
         """Update and publish transform callback."""
