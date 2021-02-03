@@ -20,6 +20,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(actuators_srvs REQUIRED)
@@ -39,6 +40,7 @@ set(dependencies
   "sensor_msgs"
   "tf2"
   "tf2_msgs"
+  "tf2_geometry_msgs"
   "std_srvs"
   "diagnostic_msgs"
   "actuators_srvs"

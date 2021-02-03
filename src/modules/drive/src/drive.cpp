@@ -135,6 +135,11 @@ void Drive::init_variables() {
 #else
   time_since_last_sync_ = get_sim_time();
 #endif /* SIMULATION */
+  geometry_msgs::msg::TransformStamped init_vector;
+  init_vector.header.stamp = this->get_clock()->now();
+  init_vector.header.frame_id = odom_.header.frame_id;
+  init_vector.child_frame_id = odom_.child_frame_id;
+  for (int i = 0; i<20; i++) _previous_tf.push_back(init_vector);
 }
 
 int8_t Drive::compute_velocity_cmd(double velocity) {
