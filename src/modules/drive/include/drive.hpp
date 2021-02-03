@@ -19,6 +19,7 @@
 #include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
@@ -163,7 +164,7 @@ private:
   void init_variables();
   void update_tf();
   void update_joint_states();
-  void update_odometry();
+  void update_odometry(rclcpp::Time stamp = rclcpp::Time(0));
   void update_velocity();
   void update_diagnostic();
   void read_from_serial();
