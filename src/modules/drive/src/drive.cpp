@@ -348,6 +348,22 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
     if (stamp_msg - (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp
       > (rclcpp::Time)_previous_tf[right_stamp_index - 1].header.stamp - stamp_msg) right_stamp_index--;
   }
+void Drive::extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out){
+  pose_out.header = transform_in.header;
+  pose_out.pose.position.x = transform_in.transform.translation.x;
+  pose_out.pose.position.y = transform_in.transform.translation.y;
+  pose_out.pose.position.z = transform_in.transform.translation.z;
+  pose_out.pose.orientation = transform_in.transform.rotation;
+}
+
+void Drive::set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out, rclcpp::Time &stamp){
+  transform_out.header.stamp = stamp;
+  transform_out.header.frame_id = odom_.header.frame_id;
+  transform_out.child_frame_id = odom_.child_frame_id;
+  transform_out.transform.translation.x = pose_in.pose.position.x;
+  transform_out.transform.translation.y = pose_in.pose.position.y;
+  transform_out.transform.translation.z = pose_in.pose.position.z;
+  transform_out.transform.rotation = pose_in.pose.orientation;
 }
 
 

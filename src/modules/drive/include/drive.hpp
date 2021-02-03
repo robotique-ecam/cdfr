@@ -176,6 +176,8 @@ private:
   void adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::Trigger::Request::SharedPtr request,
                              const std_srvs::srv::Trigger::Response::SharedPtr response);
   void adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg);
+  void extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out);
+  void set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out, rclcpp::Time &stamp);
 
 #ifdef SIMULATION
   void sim_step();
