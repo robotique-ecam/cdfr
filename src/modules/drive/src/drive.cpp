@@ -230,7 +230,7 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   odom_pose_.thetha += instantaneous_move_.angular;
 }
 
-void Drive::update_odometry() {
+void Drive::update_odometry(rclcpp::Time stamp) {
   odom_.pose.pose.position.x = odom_pose_.x;
   odom_.pose.pose.position.y = odom_pose_.y;
   odom_.pose.pose.position.z = 0;
@@ -246,7 +246,8 @@ void Drive::update_odometry() {
   // We should update the twist of the odometry
   odom_.twist.twist.linear.x = instantaneous_speed_.linear;
   odom_.twist.twist.angular.z = instantaneous_speed_.angular;
-  odom_.header.stamp = time_since_last_sync_;
+  if (stamp.nanoseconds() == 0) odom_.header.stamp = time_since_last_sync_;
+  else odom_.header.stamp = stamp;
   odom_pub_->publish(odom_);
 }
 
@@ -362,6 +363,26 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
 
   //rclcpp::Time base_link_odom_tf_stamp = (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp;
   set_transform_from_pose(base_link_relative_to_new_odom, base_link_odom_tf, stamp_msg);
+
+  tf2_msgs::msg::TFMessage odom_tf_msg;
+  odom_tf_msg.transforms.push_back(tf_msg);
+  odom_tf_msg.transforms.push_back(base_link_odom_tf);
+
+  tf2::Quaternion q(
+    base_link_odom_tf.transform.rotation.x,
+    base_link_odom_tf.transform.rotation.y,
+    base_link_odom_tf.transform.rotation.z,
+    base_link_odom_tf.transform.rotation.w
+  );
+  tf2::Matrix3x3 m(q);
+  double roll, pitch, yaw;
+  m.getRPY(roll, pitch, yaw);
+  odom_pose_.thetha = yaw;
+  odom_pose_.x = base_link_odom_tf.transform.translation.x;
+  odom_pose_.y = base_link_odom_tf.transform.translation.y;
+  update_odometry(stamp_msg);
+  tf_pub_->publish(odom_tf_msg);
+}
 
 void Drive::extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out){
   pose_out.header = transform_in.header;
