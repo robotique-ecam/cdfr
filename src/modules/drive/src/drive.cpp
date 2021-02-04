@@ -132,6 +132,15 @@ void Drive::init_variables() {
 #else
   time_since_last_sync_ = get_sim_time();
 #endif /* SIMULATION */
+
+  tf2_ros::Buffer tfBuffer(std::make_shared<rclcpp::Clock>(), tf2::Duration(tf2::BUFFER_CORE_DEFAULT_CACHE_TIME));
+  tf2_ros::TransformListener tfListener(tfBuffer);
+  std::string errorMsg;
+  if(tfBuffer.canTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000)))
+  {
+    _map_to_odom_tf = tfBuffer.lookupTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000));
+  }
+
   geometry_msgs::msg::TransformStamped init_vector;
   init_vector.header.stamp = this->get_clock()->now();
   init_vector.header.frame_id = odom_.header.frame_id;
