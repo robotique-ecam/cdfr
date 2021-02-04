@@ -20,7 +20,10 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
@@ -121,6 +124,7 @@ private:
   diagnostic_msgs::msg::DiagnosticStatus diagnostics_status_;
 
   /* Odometry re-adjustement */
+  geometry_msgs::msg::TransformStamped _map_to_odom_tf;
   std::vector<geometry_msgs::msg::TransformStamped> _previous_tf;
   rclcpp::Subscription<geometry_msgs::msg::TransformStamped>::SharedPtr _adjust_odometry_sub;
 
