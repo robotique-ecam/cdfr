@@ -351,25 +351,30 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
       > (rclcpp::Time)_previous_tf[right_stamp_index - 1].header.stamp - stamp_msg) right_stamp_index--;
   }
 
-  //stamp_msg = this->get_clock()->now();
-  geometry_msgs::msg::TransformStamped base_link_odom_tf,
-                                       tf_msg = *tf_stamped_msg,
+  geometry_msgs::msg::TransformStamped msg_received_relative_to_odom_tf,
                                        nearest_tf = _previous_tf[right_stamp_index];
-  //tf_msg.header.stamp = this->get_clock()->now();
 
-  geometry_msgs::msg::PoseStamped base_link_relative_to_old_odom, base_link_relative_to_new_odom;
-  extract_pose_from_transform(_previous_tf[0], base_link_relative_to_old_odom);
+  geometry_msgs::msg::PoseStamped msg_received_relative_to_map, msg_received_relative_to_odom,
+                                  base_link_relative_to_odom_estim, base_link_relative_to_near,
+                                  base_link_relative_to_odom_corrected;
 
+ /* Getting msg_received_relative_to_odom */
+  extract_pose_from_transform(*tf_stamped_msg, msg_received_relative_to_map);
+  get_pose_in_another_frame(msg_received_relative_to_map, msg_received_relative_to_odom, _map_to_odom_tf);
 
-  //rclcpp::Time base_link_odom_tf_stamp = (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp;
-  set_transform_from_pose(base_link_relative_to_new_odom, base_link_odom_tf, stamp_msg);
+  /* Getting base_link_relative_to_near */
+  extract_pose_from_transform(_previous_tf[0], base_link_relative_to_odom_estim);
+  get_pose_in_another_frame(base_link_relative_to_odom_estim, base_link_relative_to_near, nearest_tf);
 
+  /* Getting base_link_relative_to_odom_corrected */
+  set_transform_from_pose(msg_received_relative_to_odom, msg_received_relative_to_odom_tf);
+  get_pose_in_another_frame(base_link_relative_to_near, base_link_relative_to_odom_corrected, msg_received_relative_to_odom_tf);
 
   tf2::Quaternion q(
-    base_link_odom_tf.transform.rotation.x,
-    base_link_odom_tf.transform.rotation.y,
-    base_link_odom_tf.transform.rotation.z,
-    base_link_odom_tf.transform.rotation.w
+    base_link_relative_to_odom_corrected.pose.orientation.x,
+    base_link_relative_to_odom_corrected.pose.orientation.y,
+    base_link_relative_to_odom_corrected.pose.orientation.z,
+    base_link_relative_to_odom_corrected.pose.orientation.w
   );
   tf2::Matrix3x3 m(q);
   double roll, pitch, yaw;
