@@ -31,6 +31,7 @@ class Localisation(rclpy.node.Node):
             MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
         self.subscription_  # prevent unused variable warning
         self.tf_publisher_ = self.create_publisher(TransformStamped, 'adjust_odometry', 10)
+        self.last_odom_update = 0
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Localisation node is ready')
 
@@ -109,16 +110,20 @@ class Localisation(rclpy.node.Node):
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
+        """Identity the robot marker in assurancetourix marker_array detection
+           publish the transformation for drive to readjust odometry"""
         for allie_marker in msg.markers:
             if allie_marker.text.lower() == self.robot and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5:
                 self._x = allie_marker.pose.position.x
                 self._y = allie_marker.pose.position.y
-                self._theta = allie_marker.pose.orientation.z
-                self._service_call(
-                    self._get_trigger_adjust_odometry_client,
-                    self._get_trigger_adjust_odometry_request,
-                )
-                self.update_transform()
+                q = allie_marker.pose.orientation
+                self._theta = self.quaternion_to_euler(q.x, q.y, q.z, q.w)[2]
+                self._tf.header.stamp = allie_marker.header.stamp
+                self._tf.transform.translation.x = allie_marker.pose.position.x
+                self._tf.transform.translation.y = allie_marker.pose.position.y
+                self._tf.transform.translation.z = float(0)
+                self._tf.transform.rotation = q
+                self.tf_publisher_.publish(self._tf)
                 self.last_odom_update = self.get_clock().now().to_msg().sec
 
 def main(args=None):
