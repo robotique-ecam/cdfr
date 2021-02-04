@@ -12,8 +12,6 @@ from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from tf2_ros import TransformBroadcaster
-from std_srvs.srv import Trigger
-
 
 class Localisation(rclpy.node.Node):
     """Robot localisation node."""
@@ -35,8 +33,6 @@ class Localisation(rclpy.node.Node):
         self.subscription_  # prevent unused variable warning
         self.last_odom_update = self.get_clock().now().to_msg().sec;
         self.create_timer(1, self.update_transform)
-        self._get_trigger_adjust_odometry_request = Trigger.Request()
-        self._get_trigger_adjust_odometry_client = self.create_client(Trigger, 'adjust_odometry')
         self.tf_publisher_ = self.create_publisher(TransformStamped, 'adjust_odometry', 10)
         self.update_transform()
         self.get_logger().info(f'Default side is {self.side.value}')
