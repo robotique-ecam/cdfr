@@ -379,10 +379,8 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
   odom_pose_.thetha = yaw;
-  odom_pose_.x = base_link_odom_tf.transform.translation.x;
-  odom_pose_.y = base_link_odom_tf.transform.translation.y;
-  update_odometry(stamp_msg);
-  tf_pub_->publish(odom_tf_msg);
+  odom_pose_.x = base_link_relative_to_odom_corrected.pose.position.x;
+  odom_pose_.y = base_link_relative_to_odom_corrected.pose.position.y;
 }
 
 void Drive::extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out){
@@ -393,8 +391,7 @@ void Drive::extract_pose_from_transform(geometry_msgs::msg::TransformStamped &tr
   pose_out.pose.orientation = transform_in.transform.rotation;
 }
 
-void Drive::set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out, rclcpp::Time &stamp){
-  transform_out.header.stamp = stamp;
+void Drive::set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out){
   transform_out.header.frame_id = odom_.header.frame_id;
   transform_out.child_frame_id = odom_.child_frame_id;
   transform_out.transform.translation.x = pose_in.pose.position.x;
