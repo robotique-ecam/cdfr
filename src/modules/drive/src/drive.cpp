@@ -360,14 +360,10 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
   geometry_msgs::msg::PoseStamped base_link_relative_to_old_odom, base_link_relative_to_new_odom;
   extract_pose_from_transform(_previous_tf[0], base_link_relative_to_old_odom);
 
-  tf2::doTransform<geometry_msgs::msg::PoseStamped>(base_link_relative_to_old_odom, base_link_relative_to_new_odom, nearest_tf);
 
   //rclcpp::Time base_link_odom_tf_stamp = (rclcpp::Time)_previous_tf[right_stamp_index].header.stamp;
   set_transform_from_pose(base_link_relative_to_new_odom, base_link_odom_tf, stamp_msg);
 
-  tf2_msgs::msg::TFMessage odom_tf_msg;
-  odom_tf_msg.transforms.push_back(tf_msg);
-  odom_tf_msg.transforms.push_back(base_link_odom_tf);
 
   tf2::Quaternion q(
     base_link_odom_tf.transform.rotation.x,
