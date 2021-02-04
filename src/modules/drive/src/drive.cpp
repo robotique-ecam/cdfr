@@ -396,6 +396,23 @@ void Drive::set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, ge
   transform_out.transform.rotation = pose_in.pose.orientation;
 }
 
+void Drive::get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::PoseStamped &pose_out, geometry_msgs::msg::TransformStamped &transform){
+}
+
+tf2::Quaternion Drive::get_tf2_quaternion(geometry_msgs::msg::Quaternion &q){
+  return tf2::Quaternion(q.x,q.y,q.z,q.w);
+}
+
+tf2::Vector3 Drive::get_tf2_vector(geometry_msgs::msg::Point &p){
+  return tf2::Vector3(p.x, p.y, p.z);
+}
+
+tf2::Vector3 Drive::get_tf2_vector(geometry_msgs::msg::Vector3 &p){
+  return tf2::Vector3(p.x, p.y, p.z);
+}
+
+void Drive::set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out){
+}
 
 Drive::~Drive() {
 #ifndef SIMULATION
