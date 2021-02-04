@@ -241,7 +241,7 @@ void Drive::compute_pose_velocity(TinyData steps_returned) {
   odom_pose_.thetha += instantaneous_move_.angular;
 }
 
-void Drive::update_odometry(rclcpp::Time stamp) {
+void Drive::update_odometry() {
   odom_.pose.pose.position.x = odom_pose_.x;
   odom_.pose.pose.position.y = odom_pose_.y;
   odom_.pose.pose.position.z = 0;
@@ -257,8 +257,7 @@ void Drive::update_odometry(rclcpp::Time stamp) {
   // We should update the twist of the odometry
   odom_.twist.twist.linear.x = instantaneous_speed_.linear;
   odom_.twist.twist.angular.z = instantaneous_speed_.angular;
-  if (stamp.nanoseconds() == 0) odom_.header.stamp = time_since_last_sync_;
-  else odom_.header.stamp = stamp;
+  odom_.header.stamp = time_since_last_sync_;
   odom_pub_->publish(odom_);
 }
 

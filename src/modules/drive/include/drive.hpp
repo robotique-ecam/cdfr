@@ -109,9 +109,6 @@ private:
   // Sliders service
   rclcpp::Service<actuators_srvs::srv::Slider>::SharedPtr _set_slider_postion;
 
-  // Odometric adjustment
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _adjust_odometry;
-
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
 #ifdef USE_TIMER
@@ -168,7 +165,7 @@ private:
   void init_variables();
   void update_tf();
   void update_joint_states();
-  void update_odometry(rclcpp::Time stamp = rclcpp::Time(0));
+  void update_odometry();
   void update_velocity();
   void update_diagnostic();
   void read_from_serial();
@@ -180,11 +177,11 @@ private:
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
   void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
                                   const actuators_srvs::srv::Slider::Response::SharedPtr response);
-  void adjust_odometry(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::Trigger::Request::SharedPtr request,
-                             const std_srvs::srv::Trigger::Response::SharedPtr response);
   void adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg);
   void extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out);
-  void set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out, rclcpp::Time &stamp);
+  void set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out);
+  void get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::PoseStamped &pose_out, geometry_msgs::msg::TransformStamped &transform);
+  tf2::Quaternion get_tf2_quaternion(geometry_msgs::msg::Quaternion &q);
 
 #ifdef SIMULATION
   void sim_step();
