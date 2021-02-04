@@ -402,6 +402,19 @@ void Drive::set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, ge
 }
 
 void Drive::get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::PoseStamped &pose_out, geometry_msgs::msg::TransformStamped &transform){
+  pose_out.header = pose_in.header;
+  pose_out.header.frame_id = transform.child_frame_id;
+
+  tf2::Vector3 t_in_new_frame,
+               t_pose_in = get_tf2_vector(pose_in.pose.position),
+               t_transform = get_tf2_vector(transform.transform.translation);
+  tf2::Quaternion q_in_new_frame,
+                  q_pose_in = get_tf2_quaternion(pose_in.pose.orientation),
+                  q_transform = get_tf2_quaternion(transform.transform.rotation);
+
+    t_in_new_frame = t_pose_in - t_transform;
+    q_in_new_frame = q_pose_in * q_transform.inverse();
+  set_pose_from_tf_t_q(t_in_new_frame, q_in_new_frame, pose_out);
 }
 
 tf2::Quaternion Drive::get_tf2_quaternion(geometry_msgs::msg::Quaternion &q){
@@ -417,6 +430,18 @@ tf2::Vector3 Drive::get_tf2_vector(geometry_msgs::msg::Vector3 &p){
 }
 
 void Drive::set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out){
+  pose_out.pose.position.x = dummy_tree_digits_precision(t.x());
+  pose_out.pose.position.y = dummy_tree_digits_precision(t.y());
+  pose_out.pose.position.z = 0;
+  pose_out.pose.orientation.x = q.x();
+  pose_out.pose.orientation.y = q.y();
+  pose_out.pose.orientation.z = q.z();
+  pose_out.pose.orientation.w = q.w();
+}
+
+double Drive::dummy_tree_digits_precision(double a){
+  int dummy = (int)(a*1000);
+  return (double)(dummy)/1000;
 }
 
 Drive::~Drive() {
