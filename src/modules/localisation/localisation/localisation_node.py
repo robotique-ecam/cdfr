@@ -4,6 +4,7 @@
 """Robot localisation node."""
 
 
+import math
 import numpy as np
 
 import rclpy
@@ -29,10 +30,7 @@ class Localisation(rclpy.node.Node):
         self.subscription_ = self.create_subscription(
             MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
         self.subscription_  # prevent unused variable warning
-        self.last_odom_update = self.get_clock().now().to_msg().sec;
-        self.create_timer(1, self.update_transform)
         self.tf_publisher_ = self.create_publisher(TransformStamped, 'adjust_odometry', 10)
-        self.update_transform()
         self.get_logger().info(f'Default side is {self.side.value}')
         self.get_logger().info('Localisation node is ready')
 
@@ -109,11 +107,6 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.rotation.z = float(qz)
         self._tf.transform.rotation.w = float(qw)
         self._tf_brodcaster.sendTransform(self._tf)
-        #self.get_logger().info(f'tf: x={self.get_clock().now().to_msg().sec}')
-
-    def _service_call(self, client, request):
-        """Call service synchronously."""
-        client.call_async(request)
 
     def allies_subscription_callback(self, msg):
         for allie_marker in msg.markers:
