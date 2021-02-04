@@ -11,7 +11,6 @@ from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
-from tf2_ros import TransformBroadcaster
 
 class Localisation(rclpy.node.Node):
     """Robot localisation node."""
@@ -23,7 +22,6 @@ class Localisation(rclpy.node.Node):
         self.add_on_set_parameters_callback(self._on_set_parameters)
         self._x, self._y, self._theta = self.fetchStartPosition()
         self._tf_brodcaster = StaticTransformBroadcaster(self)
-        self._tf_brodcaster = TransformBroadcaster(self)
         self._tf = TransformStamped()
         self._tf.header.frame_id = 'map'
         self._tf.child_frame_id = 'odom'
