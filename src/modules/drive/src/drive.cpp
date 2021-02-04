@@ -412,8 +412,19 @@ void Drive::get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, 
                   q_pose_in = get_tf2_quaternion(pose_in.pose.orientation),
                   q_transform = get_tf2_quaternion(transform.transform.rotation);
 
+  if (pose_in.header.frame_id == transform.header.frame_id){
     t_in_new_frame = t_pose_in - t_transform;
+  } else {
+    t_in_new_frame = t_pose_in + t_transform;
+  }
+
+  if (pose_in.header.frame_id == odom_.child_frame_id){
+    q_in_new_frame = q_transform * q_pose_in.inverse();
+  } else {
     q_in_new_frame = q_pose_in * q_transform.inverse();
+  }
+
+
   set_pose_from_tf_t_q(t_in_new_frame, q_in_new_frame, pose_out);
 }
 
