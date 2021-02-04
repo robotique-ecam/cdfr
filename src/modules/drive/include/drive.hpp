@@ -185,6 +185,7 @@ private:
   tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Point &p);
   tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Vector3 &p);
   void set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out);
+  double dummy_tree_digits_precision(double a);
 
 #ifdef SIMULATION
   void sim_step();
