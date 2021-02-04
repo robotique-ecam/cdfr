@@ -182,6 +182,9 @@ private:
   void set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out);
   void get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::PoseStamped &pose_out, geometry_msgs::msg::TransformStamped &transform);
   tf2::Quaternion get_tf2_quaternion(geometry_msgs::msg::Quaternion &q);
+  tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Point &p);
+  tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Vector3 &p);
+  void set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out);
 
 #ifdef SIMULATION
   void sim_step();
