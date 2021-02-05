@@ -145,7 +145,7 @@ void Drive::init_variables() {
   init_vector.header.stamp = this->get_clock()->now();
   init_vector.header.frame_id = odom_.header.frame_id;
   init_vector.child_frame_id = odom_.child_frame_id;
-  for (int i = 0; i<20; i++) _previous_tf.push_back(init_vector);
+  for (int i = 0; i<30; i++) _previous_tf.push_back(init_vector);
 }
 
 int8_t Drive::compute_velocity_cmd(double velocity) {
@@ -275,7 +275,7 @@ void Drive::update_tf() {
   tf_pub_->publish(odom_tf_msg);
 
   _previous_tf.insert(_previous_tf.begin(), odom_tf);
-  if (_previous_tf.size() > 20) _previous_tf.pop_back();
+  if (_previous_tf.size() > 30) _previous_tf.pop_back();
 }
 
 void Drive::update_joint_states() {
@@ -418,7 +418,7 @@ void Drive::get_pose_in_another_frame(geometry_msgs::msg::PoseStamped &pose_in, 
     t_in_new_frame = t_pose_in + t_transform;
   }
 
-  if (pose_in.header.frame_id == odom_.child_frame_id){
+  if (pose_in.header.frame_id == odom_.child_frame_id || pose_in.header.frame_id == transform.header.frame_id){
     q_in_new_frame = q_transform * q_pose_in.inverse();
   } else {
     q_in_new_frame = q_pose_in * q_transform.inverse();
