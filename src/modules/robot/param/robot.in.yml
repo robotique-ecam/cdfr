@@ -92,14 +92,15 @@ controller_server:
       # Optimisation
       optimization_activate: True
       optimization_verbose: False
-      #weight_shortest_path: 500.0
+      weight_kinematics_forward_drive: 0.0
 
       # Trajectory
       teb_autoresize: True
       exact_arc_length: False
       min_samples: 3
       max_samples: 100
-      max_global_plan_lookahead_dist: 1.0
+      max_global_plan_lookahead_dist: 3.7
+      global_plan_overwrite_orientation: true
       allow_init_with_backwards_motion: true
 
 
@@ -139,19 +140,15 @@ global_costmap:
 local_costmap: #just enough parameters to disable it
   local_costmap:
     ros__parameters:
-      update_frequency: 2.0
-      publish_frequency: 2.0
-      global_frame: odom
+      update_frequency: 0.1
+      publish_frequency: 0.1
+      global_frame: map
       robot_base_frame: base_link
-      use_sim_time: !Var use_sim_time
+      use_sim_time: false
       rolling_window: true
-      width: 3
-      height: 3
-      resolution: 0.02
-      plugins: ["static_layer"]
-      static_layer:
-        plugin: "nav2_costmap_2d::StaticLayer"
-        map_subscribe_transient_local: True
+      width: 6
+      height: 6
+      resolution: 1.0
 
 map_server:
   ros__parameters:
