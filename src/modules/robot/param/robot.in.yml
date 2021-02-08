@@ -112,12 +112,13 @@ controller_server_rclcpp_node:
 global_costmap:
   global_costmap:
     ros__parameters:
+      lethal_cost_threshold: 253
       update_frequency: 5.0
       publish_frequency: 5.0
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: !Var use_sim_time
-      resolution: 0.02
+      resolution: 0.01
       plugins: ["static_layer", "gradient_layer", "inflation_layer"]
       static_layer: #subscribe to map
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -131,8 +132,8 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
-        inflation_radius: 0.2
-        cost_scaling_factor: 5.0
+        inflation_radius: 0.3
+        cost_scaling_factor: 10.0
         inflate_unknown: false
         inflate_around_unknown: false
       always_send_full_costmap: true
