@@ -126,6 +126,13 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         parameters=[params.name],
                         remappings=remappings,
                     ),
+                    Node(
+                        package='teb_obstacles',
+                        executable='teb_obstacles',
+                        output='screen',
+                        parameters=[],
+                        remappings=remappings
+                    ),
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(
                             [nav2_launch_file_dir, "/navigation_launch.py"]
