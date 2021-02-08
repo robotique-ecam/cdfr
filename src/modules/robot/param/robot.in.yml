@@ -137,18 +137,36 @@ global_costmap:
         inflate_around_unknown: false
       always_send_full_costmap: true
 
-local_costmap: #just enough parameters to disable it
+local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 0.1
-      publish_frequency: 0.1
+      lethal_cost_threshold: 253
+      trinary_costmap: false
+      update_frequency: 5.0
+      publish_frequency: 5.0
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: false
-      rolling_window: true
-      width: 6
-      height: 6
+      rolling_window: false
       resolution: 1.0
+      static_map: true
+      plugins: ["static_layer", "gradient_layer", "inflation_layer"]
+      static_layer:
+        plugin: nav2_costmap_2d::StaticLayer
+      gradient_layer: #draw radians circle around ennemies
+        plugin: "gradient_costmap_layer_plugin/GradientLayer"
+        enabled: false
+        gradient_size: 7
+        gradient_factor: 100
+        markers_topic: /ennemies_positions_markers
+      inflation_layer:
+        plugin: nav2_costmap_2d::InflationLayer
+        enabled: false
+        inflation_radius: 0.01
+        cost_scaling_factor: 5.0
+        inflate_unknown: false
+        inflate_around_unknown: false
+      always_send_full_costmap: true
 
 map_server:
   ros__parameters:
