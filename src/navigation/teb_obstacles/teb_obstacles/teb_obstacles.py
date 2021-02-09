@@ -20,8 +20,23 @@ class Teb_obstacles(Node):
             MarkerArray, '/ennemies_positions_markers', self.ennemies_subscription_callback, 10)
         self.allies_subscription_
         self.ennemies_subscription_
+        self.initObstaclesArray()
         self.get_logger().info('teb_dynamic_obstacles node is ready')
 
+    def initObstaclesArray(self):
+        """ObstacleArray index 0: allie, index 1-2: ennemies"""
+        self.obstacles = ObstacleArrayMsg()
+        self.obstacles.header.frame_id = "map"
+        self.obstacles.obstacles.append(ObstacleMsg())
+        self.obstacles.obstacles.append(ObstacleMsg())
+        self.obstacles.obstacles.append(ObstacleMsg())
+        for i in range(3):
+            self.obstacles.obstacles[i].header.frame_id = "map"
+            self.obstacles.obstacles[i].polygon.points = [Point32()]
+            self.obstacles.obstacles[i].polygon.points[0].x = -1.0
+            self.obstacles.obstacles[i].polygon.points[0].y = -1.0
+            self.obstacles.obstacles[i].radius = 0.15
+        self.previous_obstacles = copy.deepcopy(self.obstacles)
     def allies_subscription_callback(self, msg):
     def ennemies_subscription_callback(self, msg):
 
