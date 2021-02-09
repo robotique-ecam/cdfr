@@ -5,6 +5,7 @@
 
 
 import rclpy
+import copy
 
 from rclpy.node import Node
 from costmap_converter_msgs.msg import ObstacleArrayMsg, ObstacleMsg
@@ -40,7 +41,26 @@ class Teb_obstacles(Node):
             self.obstacles.obstacles[i].polygon.points[0].y = -1.0
             self.obstacles.obstacles[i].radius = 0.15
         self.previous_obstacles = copy.deepcopy(self.obstacles)
+
+    def get_diff_time(self, t1, t2):
+        return float(t1.sec - t2.sec + (t1.nanosec - t2.nanosec)*1e-9)
+
     def set_obstacle(self, index, marker):
+        self.previous_obstacles.obstacles[index] = copy.deepcopy(self.obstacles.obstacles[index])
+        self.obstacles.obstacles[index].header = marker.header
+        self.obstacles.obstacles[index].polygon.points[0].x = marker.pose.position.x
+        self.obstacles.obstacles[index].polygon.points[0].y = marker.pose.position.y
+
+        dt = float(self.get_diff_time(marker.header.stamp, self.previous_obstacles.obstacles[index].header.stamp))
+
+        if dt != 0.0:
+            self.obstacles.obstacles[index].velocities.twist.linear.x = (
+                marker.pose.position.x - self.previous_obstacles.obstacles[index].polygon.points[0].x
+            ) / dt
+
+            self.obstacles.obstacles[index].velocities.twist.linear.y = (
+                marker.pose.position.y - self.previous_obstacles.obstacles[index].polygon.points[0].y
+            ) / dt
 
 
     def allies_subscription_callback(self, msg):
