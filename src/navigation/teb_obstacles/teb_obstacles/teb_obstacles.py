@@ -7,7 +7,9 @@
 import rclpy
 
 from rclpy.node import Node
+from costmap_converter_msgs.msg import ObstacleArrayMsg, ObstacleMsg
 from visualization_msgs.msg import MarkerArray
+from geometry_msgs.msg import Point32
 
 class Teb_obstacles(Node):
 
@@ -38,8 +40,29 @@ class Teb_obstacles(Node):
             self.obstacles.obstacles[i].polygon.points[0].y = -1.0
             self.obstacles.obstacles[i].radius = 0.15
         self.previous_obstacles = copy.deepcopy(self.obstacles)
+    def set_obstacle(self, index, marker):
+
+
     def allies_subscription_callback(self, msg):
+
     def ennemies_subscription_callback(self, msg):
+        """Identity the ennemie marker in assurancetourix marker_array detection
+           set the dynamic obstacle for teb_local_planner"""
+        for ennemie_marker in msg.markers:
+            if ennemie_marker.id <= 10:
+                in_dict = False
+                for index in range(1,2):
+                    if self.dictionary_index_id[f"{index}"] == ennemie_marker.id:
+                        self.set_obstacle(index, ennemie_marker)
+                        in_dict = True
+                if not in_dict:
+                    if self.dictionary_index_id["1"] == 0:
+                        self.dictionary_index_id["1"] = ennemie_marker.id
+                    elif self.dictionary_index_id["2"] == 0:
+                        self.dictionary_index_id["2"] = ennemie_marker.id
+                    else:
+                        self.get_logger().info('obstacleArray index limit, is there 3 ennemies, or is it a bad marker detection')
+
 
 def main(args=None):
     """Entrypoint."""
