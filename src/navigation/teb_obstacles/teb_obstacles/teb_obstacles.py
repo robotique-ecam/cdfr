@@ -20,6 +20,7 @@ class Teb_obstacles(Node):
             MarkerArray, '/ennemies_positions_markers', self.ennemies_subscription_callback, 10)
         self.allies_subscription_
         self.ennemies_subscription_
+        self.dictionary_index_id = {"0":0, "1":0, "2":0}
         self.initObstaclesArray()
         self.get_logger().info('teb_dynamic_obstacles node is ready')
 
