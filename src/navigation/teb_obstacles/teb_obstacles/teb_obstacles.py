@@ -44,6 +44,14 @@ class Teb_obstacles(Node):
 
 
     def allies_subscription_callback(self, msg):
+        """Identity the allie marker in assurancetourix marker_array detection
+           set the dynamic obstacle for teb_local_planner"""
+        for allie_marker in msg.markers:
+            if allie_marker.text.lower() == self.allie:
+                if self.dictionary_index_id["0"] == 0:
+                    self.dictionary_index_id["0"] = allie_marker.id
+                    self.obstacles.obstacles[0].id = self.dictionary_index_id["0"]
+                self.set_obstacle(0, allie_marker)
 
     def ennemies_subscription_callback(self, msg):
         """Identity the ennemie marker in assurancetourix marker_array detection
