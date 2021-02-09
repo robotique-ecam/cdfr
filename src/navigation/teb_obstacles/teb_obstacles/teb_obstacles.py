@@ -23,8 +23,14 @@ class Teb_obstacles(Node):
             MarkerArray, '/ennemies_positions_markers', self.ennemies_subscription_callback, 10)
         self.allies_subscription_
         self.ennemies_subscription_
+
+        self.obstacles_publisher_ = self.create_publisher(ObstacleArrayMsg, 'obstacles', 10)
+
         self.dictionary_index_id = {"0":0, "1":0, "2":0}
         self.initObstaclesArray()
+
+        self.create_timer(0.5, self.send_obstacles)
+
         self.get_logger().info('teb_dynamic_obstacles node is ready')
 
     def initObstaclesArray(self):
@@ -91,6 +97,8 @@ class Teb_obstacles(Node):
                     else:
                         self.get_logger().info('obstacleArray index limit, is there 3 ennemies, or is it a bad marker detection')
 
+    def send_obstacles(self):
+        self.obstacles_publisher_.publish(self.obstacles)
 
 def main(args=None):
     """Entrypoint."""

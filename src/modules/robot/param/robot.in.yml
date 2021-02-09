@@ -89,7 +89,7 @@ controller_server:
       costmap_converter_rate: 5
       include_costmap_obstacles: true
       costmap_obstacles_behind_robot_dist: 3.0
-      include_dynamic_obstacles: false
+      include_dynamic_obstacles: true
 
       # Homotopy Class Planner
       enable_homotopy_class_planning: True
