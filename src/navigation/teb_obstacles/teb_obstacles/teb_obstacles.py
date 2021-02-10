@@ -11,12 +11,19 @@ from rclpy.node import Node
 from costmap_converter_msgs.msg import ObstacleArrayMsg, ObstacleMsg
 from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import Point32
+from platform import machine
+from transformix_msgs.srv import TransformixParametersTransformStamped
 
 class Teb_obstacles(Node):
 
     def __init__(self):
         super().__init__("teb_dynamic_obstacles_node")
+        self.simulation = True if machine() != "aarch64" else False
+
         self.allie = "obelix" if self.get_namespace().strip("/") == "asterix" else "asterix"
+
+        self.get_allie_odom_transformation()
+
         self.allies_subscription_ = self.create_subscription(
             MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
         self.ennemies_subscription_ = self.create_subscription(
@@ -33,6 +40,25 @@ class Teb_obstacles(Node):
 
         self.get_logger().info('teb_dynamic_obstacles node is ready')
 
+    def get_allie_odom_transformation(self):
+        if self.simulation:
+            return
+
+        get_tf_client = self.create_client(TransformixParametersTransformStamped, f'/{self.allie}/get_odom_map_tf')
+
+        if not get_tf_client.wait_for_service(timeout_sec=15.0):
+            self.get_logger().info(f'No service /{self.allie}/get_odom_map_tf availible, is there ony one robot?')
+            return
+        get_tf_request = TransformixParametersTransformStamped.Request()
+        future = get_tf_client.call_async(get_tf_request)
+        rclpy.spin_until_future_complete(self, future)
+        try:
+            response = future.result()
+        except Exception as e:
+            self.get_logger().info(
+                'Service call failed %r' % (e,))
+        else:
+            self.odom_map_tf = response.transform_stamped
     def initObstaclesArray(self):
         """ObstacleArray index 0: allie, index 1-2: ennemies"""
         self.obstacles = ObstacleArrayMsg()
