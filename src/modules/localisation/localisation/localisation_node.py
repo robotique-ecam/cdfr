@@ -12,6 +12,7 @@ from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
+from transformix_msgs.srv import TransformixParametersTransformStamped
 
 class Localisation(rclpy.node.Node):
     """Robot localisation node."""
@@ -27,6 +28,8 @@ class Localisation(rclpy.node.Node):
         self._tf.header.frame_id = 'map'
         self._tf.child_frame_id = 'odom'
         self.update_transform()
+        self.get_initial_tf_srv = self.create_service(TransformixParametersTransformStamped,
+            'get_odom_map_tf', self.get_initial_tf_srv_callback)
         self.subscription_ = self.create_subscription(
             MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
         self.subscription_  # prevent unused variable warning
@@ -107,6 +110,7 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.rotation.y = float(qy)
         self._tf.transform.rotation.z = float(qz)
         self._tf.transform.rotation.w = float(qw)
+        self._initial_tf = self._tf
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
@@ -125,6 +129,11 @@ class Localisation(rclpy.node.Node):
                 self._tf.transform.rotation = q
                 self.tf_publisher_.publish(self._tf)
                 self.last_odom_update = self.get_clock().now().to_msg().sec
+
+    def get_initial_tf_srv_callback(self, request, response):
+        self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
+        response.transform_stamped = self._initial_tf
+        return response
 
 def main(args=None):
     """Entrypoint."""
