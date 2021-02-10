@@ -130,8 +130,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         package='teb_obstacles',
                         executable='teb_obstacles',
                         output='screen',
-                        parameters=[],
-                        remappings=remappings
+                        parameters=[]
                     ),
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(

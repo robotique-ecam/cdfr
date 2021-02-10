@@ -79,9 +79,12 @@ class Teb_obstacles(Node):
         self.previous_obstacles = copy.deepcopy(self.obstacles)
 
     def get_diff_time(self, t1, t2):
+        """Returns the nb of seconds between the two Time object"""
         return float(t1.sec - t2.sec + (t1.nanosec - t2.nanosec)*1e-9)
 
     def set_obstacle(self, index, marker):
+        """Set the marker as obstacle in ObstacleArrayMsg at the given index,
+           compute the linear velocities relative to the previous state"""
         self.previous_obstacles.obstacles[index] = copy.deepcopy(self.obstacles.obstacles[index])
         self.obstacles.obstacles[index].header = marker.header
         self.obstacles.obstacles[index].polygon.points[0].x = marker.pose.position.x
