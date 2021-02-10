@@ -9,7 +9,8 @@ import copy
 
 from rclpy.node import Node
 from costmap_converter_msgs.msg import ObstacleArrayMsg, ObstacleMsg
-from visualization_msgs.msg import MarkerArray
+from visualization_msgs.msg import MarkerArray, Marker
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point32
 from platform import machine
 from transformix_msgs.srv import TransformixParametersTransformStamped
@@ -25,7 +26,7 @@ class Teb_obstacles(Node):
         self.get_allie_odom_transformation()
 
         self.allies_subscription_ = self.create_subscription(
-            MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
+            Odometry, f'/{self.allie}/odom', self.allies_subscription_callback, 10)
         self.ennemies_subscription_ = self.create_subscription(
             MarkerArray, '/ennemies_positions_markers', self.ennemies_subscription_callback, 10)
         self.allies_subscription_
@@ -34,6 +35,9 @@ class Teb_obstacles(Node):
         self.obstacles_publisher_ = self.create_publisher(ObstacleArrayMsg, 'obstacles', 10)
 
         self.dictionary_index_id = {"0":0, "1":0, "2":0}
+
+        self.last_time_allie_callback = self.get_clock().now().to_msg()
+
         self.initObstaclesArray()
 
         self.create_timer(0.5, self.send_obstacles)
@@ -96,14 +100,17 @@ class Teb_obstacles(Node):
 
 
     def allies_subscription_callback(self, msg):
-        """Identity the allie marker in assurancetourix marker_array detection
+        """Determine the pose of base_link in map
            set the dynamic obstacle for teb_local_planner"""
-        for allie_marker in msg.markers:
-            if allie_marker.text.lower() == self.allie:
-                if self.dictionary_index_id["0"] == 0:
-                    self.dictionary_index_id["0"] = allie_marker.id
-                    self.obstacles.obstacles[0].id = self.dictionary_index_id["0"]
-                self.set_obstacle(0, allie_marker)
+        if self.get_diff_time(self.get_clock().now().to_msg(), self.last_time_allie_callback) > 0.3:
+            pose = msg.pose.pose
+            x = pose.position.x + self.odom_map_tf.transform.translation.x
+            y = pose.position.y + self.odom_map_tf.transform.translation.y
+            tmp_marker = Marker()
+            tmp_marker.pose.position.x = x
+            tmp_marker.pose.position.y = y
+            self.set_obstacle(0, tmp_marker)
+            self.last_time_allie_callback = self.get_clock().now().to_msg()
 
     def ennemies_subscription_callback(self, msg):
         """Identity the ennemie marker in assurancetourix marker_array detection
