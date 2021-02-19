@@ -10,8 +10,8 @@ import numpy as np
 import math
 import time
 
-x = 0.2
-y = 2 - 1.5
+x = 0.171
+y = 0.171
 
 full_turn = [
     [1.0, 0.0, 0.0, -1.57],
@@ -52,9 +52,11 @@ for i in range(1,51):
     gob = robot.getFromDef(f'GOB{i}')
     gob.remove()
 
+translationtion_field.setSFVec3f([x, 0.17, y])
+
 for i in range(len(full_turn)):
     rotation_field.setSFRotation(full_turn[i])
-    translationtion_field.setSFVec3f([x + i/len(full_turn), 0.17, y])
+    #translationtion_field.setSFVec3f([x + i/len(full_turn), 0.17, y])
     robot.step(1)
     time.sleep(0.1)
     print(round(vlx.getValue(), 4))
