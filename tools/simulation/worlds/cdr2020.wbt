@@ -48,223 +48,223 @@ DEF ASTERIX Asterix {
 DEF PHARAON Pharaon {
   translation 2.78 0.07 -0.11
 }
-RedSignal {
+DEF GOB2 RedSignal {
   translation 0.3 0 0.4
   name "GOB2"
 }
-RedSignal {
+DEF GOB3 RedSignal {
   translation 0.45 0 1.08
   name "GOB3"
 }
-RedSignal {
+DEF GOB5 RedSignal {
   translation 0.67 0 0.1
   name "GOB5"
 }
-RedSignal {
+DEF GOB7 RedSignal {
   translation 1.005 0 1.955
   name "GOB7"
 }
-RedSignal {
+DEF GOB9 RedSignal {
   translation 1.1 0 0.8
   name "GOB9"
 }
-RedSignal {
+DEF GOB11 RedSignal {
   translation 1.335 0 1.65
   name "GOB11"
 }
-RedSignal {
+DEF GOB13 RedSignal {
   translation 1.605 0 1.955
   name "GOB13"
 }
-RedSignal {
+DEF GOB15 RedSignal {
   translation 1.73 0 1.2
   name "GOB15"
 }
-RedSignal {
+DEF GOB17 RedSignal {
   translation 1.935 0 1.65
   name "GOB17"
 }
-RedSignal {
+DEF GOB19 RedSignal {
   translation 2.05 0 0.4
   name "GOB19"
 }
-RedSignal {
+DEF GOB22 RedSignal {
   translation 2.55 0 0.51
   name "GOB22"
 }
-RedSignal {
+DEF GOB23 RedSignal {
   translation 2.7 0 1.2
   name "GOB23"
 }
-RedSignal {
+DEF GOB25 RedSignal {
   translation -0.067 0.132 1.45
   rotation 1 0 0 3.1415
   name "GOB25"
 }
-RedSignal {
+DEF GOB27 RedSignal {
   translation -0.067 0.132 1.6
   rotation 1 0 0 3.1415
   name "GOB27"
 }
-RedSignal {
+DEF GOB29 RedSignal {
   translation -0.067 0.132 1.75
   rotation 1 0 0 3.1415
   name "GOB29"
 }
-RedSignal {
+DEF GOB31 RedSignal {
   translation 3.067 0.132 1.525
   rotation 1 0 0 3.1415
   name "GOB31"
 }
-RedSignal {
+DEF GOB33 RedSignal {
   translation 3.067 0.132 1.675
   rotation 1 0 0 3.1415
   name "GOB33"
 }
-RedSignal {
+DEF GOB36 RedSignal {
   translation 0.775 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB36"
 }
-RedSignal {
+DEF GOB39 RedSignal {
   translation 1 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB39"
 }
-RedSignal {
+DEF GOB41 RedSignal {
   translation 2.075 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB41"
 }
-RedSignal {
+DEF GOB42 RedSignal {
   translation 2.15 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB42"
 }
-RedSignal {
+DEF GOB44 RedSignal {
   translation 2.3 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB44"
 }
-GreenSignal {
+DEF GOB1 GreenSignal {
   translation 0.3 0 1.2
   name "GOB1"
 }
-GreenSignal {
+DEF GOB4 GreenSignal {
   translation 0.45 0 0.51
   name "GOB4"
 }
-GreenSignal {
+DEF GOB6 GreenSignal {
   translation 0.95 0 0.4
   name "GOB6"
 }
-GreenSignal {
+DEF GOB8 GreenSignal {
   translation 1.065 0 1.65
   name "GOB8"
 }
-GreenSignal {
+DEF GOB10 GreenSignal {
   translation 1.27 0 1.2
   name "GOB10"
 }
-GreenSignal {
+DEF GOB12 GreenSignal {
   translation 1.395 0 1.955
   name "GOB12"
 }
-GreenSignal {
+DEF GOB14 GreenSignal {
   translation 1.665 0 1.65
   name "GOB14"
 }
-GreenSignal {
+DEF GOB16 GreenSignal {
   translation 1.9 0 0.8
   name "GOB16"
 }
-GreenSignal {
+DEF GOB18 GreenSignal {
   translation 1.995 0 1.955
   name "GOB18"
 }
-GreenSignal {
+DEF GOB20 GreenSignal {
   translation 2.33 0 0.1
   name "GOB20"
 }
-GreenSignal {
+DEF GOB21 GreenSignal {
   translation 2.55 0 1.08
   name "GOB21"
 }
-GreenSignal {
+DEF GOB24 GreenSignal {
   translation 2.7 0 0.4
   name "GOB24"
 }
-GreenSignal {
+DEF GOB26 GreenSignal {
   translation -0.067 0.132 1.525
   rotation 1 0 0 3.1415
   name "GOB26"
 }
-GreenSignal {
+DEF GOB28 GreenSignal {
   translation -0.067 0.132 1.675
   rotation 1 0 0 3.1415
   name "GOB28"
 }
-GreenSignal {
+DEF GOB30 GreenSignal {
   translation 3.067 0.132 1.45
   rotation 1 0 0 3.1415
   name "GOB30"
 }
-GreenSignal {
+DEF GOB32 GreenSignal {
   translation 3.067 0.132 1.6
   rotation 1 0 0 3.1415
   name "GOB32"
 }
-GreenSignal {
+DEF GOB34 GreenSignal {
   translation 3.067 0.132 1.75
   rotation 1 0 0 3.1415
   name "GOB34"
 }
-GreenSignal {
+DEF GOB35 GreenSignal {
   translation 0.7 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB35"
 }
-GreenSignal {
+DEF GOB37 GreenSignal {
   translation 0.85 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB37"
 }
-GreenSignal {
+DEF GOB38 GreenSignal {
   translation 0.925 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB38"
 }
-GreenSignal {
+DEF GOB40 GreenSignal {
   translation 2 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB40"
 }
-GreenSignal {
+DEF GOB43 GreenSignal {
   translation 2.225 0.132 -0.067
   rotation 1 0 0 3.1415
   name "GOB43"
 }
-GreenSignal {
+DEF GOB45 GreenSignal {
   translation 1.73 0 0.35
   name "GOB45"
 }
-GreenSignal {
+DEF GOB46 GreenSignal {
   translation 1.6 0 0.14
   name "GOB46"
 }
-GreenSignal {
+DEF GOB47 GreenSignal {
   translation 1.22 0 0.33
   name "GOB47"
 }
-RedSignal {
+DEF GOB48 RedSignal {
   translation 1.12 0 0.13
   name "GOB48"
 }
-RedSignal {
+DEF GOB49 RedSignal {
   translation 1.45 0 0.4
   name "GOB49"
 }
-RedSignal {
+DEF GOB50 RedSignal {
   translation 1.91 0 0.16
   name "GOB50"
 }

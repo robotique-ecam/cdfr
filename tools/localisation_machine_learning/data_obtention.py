@@ -48,6 +48,10 @@ asterix = robot.getFromDef('ASTERIX')
 translationtion_field = asterix.getField('translation')
 rotation_field = asterix.getField('rotation')
 
+for i in range(1,51):
+    gob = robot.getFromDef(f'GOB{i}')
+    gob.remove()
+
 for i in range(len(full_turn)):
     rotation_field.setSFRotation(full_turn[i])
     translationtion_field.setSFVec3f([x + i/len(full_turn), 0.17, y])
