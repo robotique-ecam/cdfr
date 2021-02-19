@@ -11,7 +11,7 @@ PROTO Asterix [
   field SFString   controller      "<extern>"            # Is `Robot.controller`.
   field MFString   controllerArgs  []                    # Is `Robot.controllerArgs`.
   field SFString   customData      ""                    # Is `Robot.customData`.
-  field SFBool     supervisor      FALSE                 # Is `Robot.supervisor`.
+  field SFBool     supervisor      TRUE                  # Is `Robot.supervisor`.
   field SFBool     synchronization FALSE                 # Is `Robot.synchronization`.
   field MFNode     arucoTag        [ Aruco { } ]         # Is `Robot.arucoTag`.
 ]
@@ -141,7 +141,7 @@ PROTO Asterix [
       VL53L1X {
         name "vlx_0x30"
         translation 0.08 -0.13 -0.14
-        rotation 0 0 1 1.5708
+        rotation 0 0 1 -1.5708
       }
       VL53L1X {
         name "vlx_0x31"
@@ -156,7 +156,7 @@ PROTO Asterix [
       VL53L1X {
         name "vlx_0x33"
         translation 0.08 0.13 -0.14
-        rotation 0 0 1 -1.5708
+        rotation 0 0 1 1.5708
       }
       VL53L1X {
         name "vlx_0x34"

@@ -1,6 +1,5 @@
 """
-Do not forget to hit supervisor: TRUE in asterix description in webots
-Need export PYTHONPATH=${WEBOTS_HOME}/lib/controller/python38 in order to work
+Need export PYTHONPATH=${WEBOTS_HOME}/lib/controller/python38
 """
 
 from controller import Supervisor
