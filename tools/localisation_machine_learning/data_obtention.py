@@ -42,11 +42,21 @@ full_turn = [
 
 environ["WEBOTS_ROBOT_NAME"] = "asterix"
 robot = Supervisor()
-vlx = robot.getDevice('vlx_0x30')
-vlx.enable(1)
+
+vlx_array = []
+for i in range(6):
+    vlx = robot.getDevice(f'vlx_0x3{i}')
+    vlx.enable(1)
+    vlx_array.append(vlx)
+
 asterix = robot.getFromDef('ASTERIX')
 translationtion_field = asterix.getField('translation')
 rotation_field = asterix.getField('rotation')
+
+def get_vlx_values():
+    values = []
+    for i in vlx_array:
+        values.append(round(i.getValue(), 1))
 
 for i in range(1,51):
     gob = robot.getFromDef(f'GOB{i}')
