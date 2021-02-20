@@ -64,29 +64,14 @@ for i in range(1,51):
 
 translationtion_field.setSFVec3f([x, 0.17, y])
 
-test1 = []
-test2 = []
+for j in range(14):
+    for k in range(9):
+        for i in range(len(full_turn)):
+            rotation_field.setSFRotation(full_turn[i])
+            translationtion_field.setSFVec3f([x + (j/10), 0.17, y + (k/10)])
+            robot.step(1)
+            time.sleep(0.0005)
+            get_vlx_values()
 
-for i in range(len(full_turn)):
-    rotation_field.setSFRotation(full_turn[i])
-    #translationtion_field.setSFVec3f([x + i/len(full_turn), 0.17, y])
-    robot.step(1)
-    time.sleep(0.0005)
-    vlx_value = round(vlx.getValue(), 1)
-    test1.append(vlx_value)
-    print(vlx_value)
-
-for i in range(len(full_turn)):
-    rotation_field.setSFRotation(full_turn[i])
-    #translationtion_field.setSFVec3f([x + i/len(full_turn), 0.17, y])
-    robot.step(1)
-    time.sleep(0.0005)
-    vlx_value = round(vlx.getValue(), 1)
-    test2.append(vlx_value)
-    print(vlx_value)
-
-avg_error = 0
-for i in range(len(test1)):
-    avg_error += abs(test1[i] - test2[i])
-avg_error = avg_error/len(test1)
-print(avg_error)
+position = asterix.getPosition()
+orientation = asterix.getOrientation()
