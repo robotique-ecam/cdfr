@@ -15,6 +15,10 @@ import csv
 folder_for_CSV = "/data"
 
 
+obstacle_1 = [0.9, 1.85]
+obstacle_2 = [1.5, 1.7]
+obstacle_3 = [2.1, 1.85]
+
 fullPath = os.getcwd() + folder_for_CSV
 
 if not os.path.isdir("." + folder_for_CSV):
@@ -71,6 +75,14 @@ def get_vlx_values():
     values = []
     for i in vlx_array:
         values.append(round(i.getValue(), 1))
+def hitting_obstacle(t_x, t_y):
+    if t_x > (obstacle_1[0] - 0.2) and t_x < (obstacle_1[0] + 0.2) and t_y > obstacle_1[1] - 0.2:
+        return True
+    if t_x > (obstacle_2[0] - 0.2) and t_x < (obstacle_2[0] + 0.2) and t_y > obstacle_2[1] - 0.2:
+        return True
+    if t_x > (obstacle_3[0] - 0.2) and t_x < (obstacle_3[0] + 0.2) and t_y > obstacle_3[1] - 0.2:
+        return True
+    return False
 def acquire_data():
     translationtion_field.setSFVec3f([x, 0.17, y])
 
