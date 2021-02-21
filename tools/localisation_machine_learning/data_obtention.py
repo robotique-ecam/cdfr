@@ -9,6 +9,16 @@ from os import environ
 import numpy as np
 import math
 import time
+import os
+import csv
+
+folder_for_CSV = "/data"
+
+
+fullPath = os.getcwd() + folder_for_CSV
+
+if not os.path.isdir("." + folder_for_CSV):
+    os.mkdir(fullPath)
 
 x = 0.171
 y = 0.171
@@ -57,21 +67,3 @@ def get_vlx_values():
     values = []
     for i in vlx_array:
         values.append(round(i.getValue(), 1))
-
-for i in range(1,51):
-    gob = robot.getFromDef(f'GOB{i}')
-    gob.remove()
-
-translationtion_field.setSFVec3f([x, 0.17, y])
-
-for j in range(14):
-    for k in range(9):
-        for i in range(len(full_turn)):
-            rotation_field.setSFRotation(full_turn[i])
-            translationtion_field.setSFVec3f([x + (j/10), 0.17, y + (k/10)])
-            robot.step(1)
-            time.sleep(0.0005)
-            get_vlx_values()
-
-position = asterix.getPosition()
-orientation = asterix.getOrientation()
