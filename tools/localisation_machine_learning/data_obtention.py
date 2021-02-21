@@ -11,6 +11,7 @@ import math
 import time
 import os
 import csv
+import joblib
 
 folder_for_CSV = "/data"
 
@@ -126,3 +127,31 @@ def acquire_data():
                             values = get_vlx_values()
                             position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
                             writer.writerow(np.concatenate([position, [angular_orientation[orien*int(len(full_turn)/4) + i]], values]))
+
+def test_regression():
+    regr = joblib.load('first_test_6_sector1.sav')
+    difftot = 0
+    nb = 0
+    max = 0
+    nbmax = -1
+
+    for j in range(13):
+        for k in range(8):
+            for i in range(int(len(full_turn)/4)):
+                tr_x = x + (j/10)
+                tr_y = y + (k/10)
+                rotation_field.setSFRotation(full_turn[i])
+                translationtion_field.setSFVec3f([tr_x, 0.17, tr_y])
+                robot.step(1)
+                time.sleep(0.0005)
+                values = get_vlx_values()
+                predicted_position = regr.predict([values])
+                position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
+                difftot += abs(predicted_position-position[0])
+                nb += 1
+                if abs(predicted_position-position[0])>max:
+                    nbmax += 1
+                    max = abs(predicted_position-position[0])
+    print(difftot/nb)
+    print(max)
+    print(nbmax)
