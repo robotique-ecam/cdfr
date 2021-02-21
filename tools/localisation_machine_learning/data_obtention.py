@@ -50,6 +50,10 @@ full_turn = [
     [0.983, 0.129, 0.129, -1.59]
 ]
 
+angular_orientation = []
+for i in range(24):
+    angular_orientation.append(math.pi * i/12)
+
 environ["WEBOTS_ROBOT_NAME"] = "asterix"
 robot = Supervisor()
 
@@ -67,3 +71,38 @@ def get_vlx_values():
     values = []
     for i in vlx_array:
         values.append(round(i.getValue(), 1))
+def acquire_data():
+    translationtion_field.setSFVec3f([x, 0.17, y])
+
+    for orien in range(0,4):
+        for sector in range(1,5):
+            with open(f'data/sector{sector}_orient{orien}.csv', 'w') as f:
+                writer = csv.writer(f, delimiter=',')
+                for j in range(13):
+                    for k in range(8):
+                        for i in range(int(len(full_turn)/4)):
+                            if sector == 1:
+                                tr_x = x + (j/10)
+                                tr_y = y + (k/10)
+                            if sector == 2:
+                                tr_x = x + (j/10)
+                                tr_y = 2.0 - y - (k/10)
+                                if hitting_obstacle(tr_x, tr_y):
+                                    tr_x = x
+                                    tr_y = 2.0 - y
+                            if sector == 3:
+                                tr_x = 3.0 - x - (j/10)
+                                tr_y = 2.0 - y - (k/10)
+                                if hitting_obstacle(tr_x, tr_y):
+                                    tr_x = 3.0 - x
+                                    tr_y = 2.0 - y
+                            if sector == 4:
+                                tr_x = 3.0 - x - (j/10)
+                                tr_y = y + (k/10)
+                            rotation_field.setSFRotation(full_turn[orien*int(len(full_turn)/4) + i])
+                            translationtion_field.setSFVec3f([tr_x, 0.17, tr_y])
+                            robot.step(1)
+                            time.sleep(0.0005)
+                            values = get_vlx_values()
+                            position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
+                            writer.writerow(np.concatenate([position, [angular_orientation[orien*int(len(full_turn)/4) + i]], values]))
