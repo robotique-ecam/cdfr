@@ -75,6 +75,8 @@ def get_vlx_values():
     values = []
     for i in vlx_array:
         values.append(round(i.getValue(), 1))
+    return values
+
 def hitting_obstacle(t_x, t_y):
     if t_x > (obstacle_1[0] - 0.2) and t_x < (obstacle_1[0] + 0.2) and t_y > obstacle_1[1] - 0.2:
         return True
@@ -83,6 +85,12 @@ def hitting_obstacle(t_x, t_y):
     if t_x > (obstacle_3[0] - 0.2) and t_x < (obstacle_3[0] + 0.2) and t_y > obstacle_3[1] - 0.2:
         return True
     return False
+
+def remove_gobelets():
+    for i in range(1,51):
+        gob = robot.getFromDef(f'GOB{i}')
+        gob.remove()
+
 def acquire_data():
     translationtion_field.setSFVec3f([x, 0.17, y])
 
