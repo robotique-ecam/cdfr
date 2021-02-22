@@ -220,6 +220,49 @@ def test_regression():
                 if abs(predicted_position-position[0])>max:
                     nbmax += 1
                     max = abs(predicted_position-position[0])
+                    print(position)
     print(difftot/nb)
     print(max)
     print(nbmax)
+
+def test_regression_rework():
+    regr = joblib.load('test.sav')
+    difftot = 0
+    nb = 0
+    max = 0
+    nbmax = -1
+
+    for k in range(y_sample):
+        for j in range(x_sample):
+            for i in range(len(full_turn)):
+                angle = False
+                tr_x = x + j*((1.5-x)/x_sample)
+                tr_y = y + k*((1.0-y)/y_sample)
+                if tr_x < 0.3 and tr_y < 0.3:
+                    angle = True
+                if check_for_sample(1, tr_x, tr_y) and not angle:
+                    rotation_field.setSFRotation(full_turn[i])
+                    translationtion_field.setSFVec3f([tr_x, 0.17, tr_y])
+                    robot.step(1)
+                    time.sleep(0.0005)
+                    values = get_vlx_values()
+                    predicted_position = regr.predict([values])
+                    position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
+                    difftot += abs(predicted_position-position[0])
+                    nb += 1
+                    if abs(predicted_position-position[0])>max:
+                        nbmax += 1
+                        max = abs(predicted_position-position[0])
+                        print(position)
+    print(difftot/nb)
+    print(max)
+    print(nbmax)
+
+
+def print_actual_vlx_states():
+    print([asterix.getPosition()[0], 2 - asterix.getPosition()[2]])
+    print(math.acos(asterix.getOrientation()[0]))
+    robot.step(1)
+    print(get_vlx_values())
+
+test_regression_rework()
