@@ -28,6 +28,9 @@ if not os.path.isdir("." + folder_for_CSV):
 x = 0.171
 y = 0.171
 
+x_sample = 30
+y_sample = 20
+
 full_turn = [
     [1.0, 0.0, 0.0, -1.57],
     [0.982902, -0.130198, -0.130198, -1.58804],
@@ -128,8 +131,73 @@ def acquire_data():
                             position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
                             writer.writerow(np.concatenate([position, [angular_orientation[orien*int(len(full_turn)/4) + i]], values]))
 
+def right_first_diag(x,y):
+    if x > 1.5 * y:
+        return True
+    return False
+
+def right_second_diag(x,y):
+    if x > 1.5 * (2- y):
+        return True
+    return False
+
+def check_for_sample(sector, x, y):
+    if sector in [1,6]:
+        return right_first_diag(x,y)
+    if sector in [2,5]:
+        return not right_first_diag(x,y)
+    if sector in [3,8]:
+        return not right_second_diag(x,y)
+    if sector in [4,7]:
+        return right_second_diag(x,y)
+
+
+def acquire_data_rework():
+    translationtion_field.setSFVec3f([x, 0.17, y])
+
+    for sector in range(1,9):
+        with open(f'data/sector{sector}.csv', 'w') as f:
+            writer = csv.writer(f, delimiter=',')
+            for k in range(y_sample):
+                for j in range(x_sample):
+                    hit = False
+                    angle = False
+                    if sector in [1,2]:
+                        tr_x = x + j*((1.5-x)/x_sample)
+                        tr_y = y + k*((1.0-y)/y_sample)
+                        if tr_x < 0.3 and tr_y < 0.3:
+                            angle = True
+                    if sector in [3,4]:
+                        tr_x = x + j*((1.5-x)/x_sample)
+                        tr_y = 2.0 - y - k*((1.0-y)/y_sample)
+                        if hitting_obstacle(tr_x, tr_y):
+                            hit = True
+                        if tr_x < 0.3 and tr_y > 1.7:
+                            angle = True
+                    if sector in [5,6]:
+                        tr_x = 3.0 - x - j*((1.5-x)/x_sample)
+                        tr_y = 2.0 - y - k*((1.0-y)/y_sample)
+                        if hitting_obstacle(tr_x, tr_y):
+                            hit = True
+                        if tr_x > 1.7 and tr_y > 1.7:
+                            angle = True
+                    if sector in [7,8]:
+                        tr_x = 3.0 - x - j*((1.5-x)/x_sample)
+                        tr_y = y + k*((1.0-y)/y_sample)
+                        if tr_x > 1.7 and tr_y < 0.3:
+                            angle = True
+                    if check_for_sample(sector, tr_x, tr_y) and not hit and not angle:
+                        translationtion_field.setSFVec3f([tr_x, 0.17, tr_y])
+                        for i in range(len(full_turn)):
+                            rotation_field.setSFRotation(full_turn[i])
+                            robot.step(1)
+                            time.sleep(0.0005)
+                            values = get_vlx_values()
+                            position = [asterix.getPosition()[0], 2 - asterix.getPosition()[2]]
+                            writer.writerow(np.concatenate([position, [angular_orientation[i]], values]))
+
 def test_regression():
-    regr = joblib.load('first_test_6_sector1.sav')
+    regr = joblib.load('test.sav')
     difftot = 0
     nb = 0
     max = 0
