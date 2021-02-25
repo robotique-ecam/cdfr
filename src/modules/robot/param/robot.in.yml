@@ -91,6 +91,7 @@ controller_server:
       costmap_obstacles_behind_robot_dist: 3.0
       include_dynamic_obstacles: true
 
+
       # Homotopy Class Planner
       enable_homotopy_class_planning: True
       enable_multithreading: True

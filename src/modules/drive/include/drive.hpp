@@ -10,6 +10,7 @@
 #include <webots/PositionSensor.hpp>
 #endif
 #include "std_srvs/srv/set_bool.hpp"
+#include "std_srvs/srv/trigger.hpp"
 #include "actuators_srvs/srv/slider.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
