@@ -13,6 +13,7 @@ from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 
+
 class Localisation(rclpy.node.Node):
     """Robot localisation node."""
 
@@ -24,16 +25,22 @@ class Localisation(rclpy.node.Node):
         self._x, self._y, self._theta = self.fetchStartPosition()
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
-        self._tf.header.frame_id = 'map'
-        self._tf.child_frame_id = 'odom'
+        self._tf.header.frame_id = "map"
+        self._tf.child_frame_id = "odom"
         self.update_transform()
         self.subscription_ = self.create_subscription(
-            MarkerArray, '/allies_positions_markers', self.allies_subscription_callback, 10)
+            MarkerArray,
+            "/allies_positions_markers",
+            self.allies_subscription_callback,
+            10,
+        )
         self.subscription_  # prevent unused variable warning
-        self.tf_publisher_ = self.create_publisher(TransformStamped, 'adjust_odometry', 10)
+        self.tf_publisher_ = self.create_publisher(
+            TransformStamped, "adjust_odometry", 10
+        )
         self.last_odom_update = 0
-        self.get_logger().info(f'Default side is {self.side.value}')
-        self.get_logger().info('Localisation node is ready')
+        self.get_logger().info(f"Default side is {self.side.value}")
+        self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
         """Handle Parameter events especially for side."""
@@ -111,9 +118,12 @@ class Localisation(rclpy.node.Node):
 
     def allies_subscription_callback(self, msg):
         """Identity the robot marker in assurancetourix marker_array detection
-           publish the transformation for drive to readjust odometry"""
+        publish the transformation for drive to readjust odometry"""
         for allie_marker in msg.markers:
-            if allie_marker.text.lower() == self.robot and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5:
+            if (
+                allie_marker.text.lower() == self.robot
+                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5
+            ):
                 self._x = allie_marker.pose.position.x
                 self._y = allie_marker.pose.position.y
                 q = allie_marker.pose.orientation
@@ -125,6 +135,7 @@ class Localisation(rclpy.node.Node):
                 self._tf.transform.rotation = q
                 self.tf_publisher_.publish(self._tf)
                 self.last_odom_update = self.get_clock().now().to_msg().sec
+
 
 def main(args=None):
     """Entrypoint."""
