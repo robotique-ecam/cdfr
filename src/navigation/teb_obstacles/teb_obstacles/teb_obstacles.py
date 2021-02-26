@@ -43,7 +43,7 @@ class Teb_obstacles(Node):
             ObstacleArrayMsg, "obstacles", 10
         )
 
-        self.dictionary_index_id = {"0":0, "1":0, "2":0}
+        self.enemies_markers_ids = [0, 0]
 
         self.last_time_ally_callback = self.get_clock().now().to_msg()
 
@@ -139,25 +139,27 @@ class Teb_obstacles(Node):
             tmp_marker.pose.position.x = x
             tmp_marker.pose.position.y = y
             self.set_obstacle(0, tmp_marker)
-            self.last_time_allie_callback = self.get_clock().now().to_msg()
+            self.last_time_ally_callback = self.get_clock().now().to_msg()
 
-    def ennemies_subscription_callback(self, msg):
-        """Identity the ennemie marker in assurancetourix marker_array detection
-           set the dynamic obstacle for teb_local_planner"""
-        for ennemie_marker in msg.markers:
-            if ennemie_marker.id <= 10:
-                in_dict = False
-                for index in range(1,2):
-                    if self.dictionary_index_id[f"{index}"] == ennemie_marker.id:
-                        self.set_obstacle(index, ennemie_marker)
-                        in_dict = True
-                if not in_dict:
-                    if self.dictionary_index_id["1"] == 0:
-                        self.dictionary_index_id["1"] = ennemie_marker.id
-                    elif self.dictionary_index_id["2"] == 0:
-                        self.dictionary_index_id["2"] = ennemie_marker.id
+    def enemies_subscription_callback(self, msg):
+        """Identify the enemy marker in assurancetourix marker_array detection
+        set the dynamic obstacle for teb_local_planner"""
+        for enemy_marker in msg.markers:
+            if enemy_marker.id <= 10: # >10 are predicted markers
+                marker_stored = False
+                for index in range(2):
+                    if self.enemies_markers_ids[index] == enemy_marker.id:
+                        self.set_obstacle(index+1, enemy_marker)
+                        marker_stored = True
+                if not marker_stored:
+                    if self.enemies_markers_ids[0] == 0:
+                        self.enemies_markers_ids[0] = enemy_marker.id
+                    elif self.enemies_markers_ids[1] == 0:
+                        self.enemies_markers_ids[1] = enemy_marker.id
                     else:
-                        self.get_logger().info('obstacleArray index limit, is there 3 ennemies, or is it a bad marker detection')
+                        self.get_logger().info(
+                            "obstacleArray index limit, are there 3 enemies, or is it a bad marker detection"
+                        )
 
     def send_obstacles(self):
         self.obstacles_publisher_.publish(self.obstacles)
