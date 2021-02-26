@@ -127,10 +127,10 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         remappings=remappings,
                     ),
                     Node(
-                        package='teb_obstacles',
-                        executable='teb_obstacles',
-                        output='screen',
-                        parameters=[]
+                        package="teb_obstacles",
+                        executable="teb_obstacles",
+                        output="screen",
+                        parameters=[],
                     ),
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(

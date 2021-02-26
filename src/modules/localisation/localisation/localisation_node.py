@@ -29,8 +29,11 @@ class Localisation(rclpy.node.Node):
         self._tf.header.frame_id = "map"
         self._tf.child_frame_id = "odom"
         self.update_transform()
-        self.get_initial_tf_srv = self.create_service(TransformixParametersTransformStamped,
-            'get_odom_map_tf', self.get_initial_tf_srv_callback)
+        self.get_initial_tf_srv = self.create_service(
+            TransformixParametersTransformStamped,
+            "get_odom_map_tf",
+            self.get_initial_tf_srv_callback,
+        )
         self.subscription_ = self.create_subscription(
             MarkerArray,
             "/allies_positions_markers",
@@ -144,6 +147,7 @@ class Localisation(rclpy.node.Node):
         self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
         response.transform_stamped = self._initial_tf
         return response
+
 
 def main(args=None):
     """Entrypoint."""
