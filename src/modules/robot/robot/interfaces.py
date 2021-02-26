@@ -40,7 +40,7 @@ def generate_launch_description():
                     Node(
                         package="drive",
                         executable="drive",
-                        output={"both": "log"},
+                        output="screen",
                         parameters=[params],
                         remappings=remappings,
                     ),
