@@ -145,11 +145,11 @@ class Teb_obstacles(Node):
         """Identify the enemy marker in assurancetourix marker_array detection
         set the dynamic obstacle for teb_local_planner"""
         for enemy_marker in msg.markers:
-            if enemy_marker.id <= 10: # >10 are predicted markers
+            if enemy_marker.id <= 10:  # >10 are predicted markers
                 marker_stored = False
                 for index in range(2):
                     if self.enemies_markers_ids[index] == enemy_marker.id:
-                        self.set_obstacle(index+1, enemy_marker)
+                        self.set_obstacle(index + 1, enemy_marker)
                         marker_stored = True
                 if not marker_stored:
                     if self.enemies_markers_ids[0] == 0:
