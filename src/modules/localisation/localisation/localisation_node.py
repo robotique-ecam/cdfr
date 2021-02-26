@@ -40,7 +40,6 @@ class Localisation(rclpy.node.Node):
             self.allies_subscription_callback,
             10,
         )
-        self.subscription_  # prevent unused variable warning
         self.tf_publisher_ = self.create_publisher(
             TransformStamped, "adjust_odometry", 10
         )

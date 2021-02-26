@@ -36,8 +36,6 @@ class Teb_obstacles(Node):
             self.enemies_subscription_callback,
             10,
         )
-        self.allies_subscription_
-        self.enemies_subscription_
 
         self.obstacles_publisher_ = self.create_publisher(
             ObstacleArrayMsg, "obstacles", 10
