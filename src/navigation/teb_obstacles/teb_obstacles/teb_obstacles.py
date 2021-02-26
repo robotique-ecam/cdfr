@@ -15,43 +15,56 @@ from geometry_msgs.msg import Point32
 from platform import machine
 from transformix_msgs.srv import TransformixParametersTransformStamped
 
-class Teb_obstacles(Node):
 
+class Teb_obstacles(Node):
     def __init__(self):
         super().__init__("teb_dynamic_obstacles_node")
         self.simulation = True if machine() != "aarch64" else False
 
-        self.allie = "obelix" if self.get_namespace().strip("/") == "asterix" else "asterix"
+        self.ally = (
+            "obelix" if self.get_namespace().strip("/") == "asterix" else "asterix"
+        )
 
-        self.get_allie_odom_transformation()
+        self.get_ally_odom_transformation()
 
         self.allies_subscription_ = self.create_subscription(
-            Odometry, f'/{self.allie}/odom', self.allies_subscription_callback, 10)
-        self.ennemies_subscription_ = self.create_subscription(
-            MarkerArray, '/ennemies_positions_markers', self.ennemies_subscription_callback, 10)
+            Odometry, f"/{self.ally}/odom", self.allies_subscription_callback, 10
+        )
+        self.enemies_subscription_ = self.create_subscription(
+            MarkerArray,
+            "/enemies_positions_markers",
+            self.enemies_subscription_callback,
+            10,
+        )
         self.allies_subscription_
-        self.ennemies_subscription_
+        self.enemies_subscription_
 
-        self.obstacles_publisher_ = self.create_publisher(ObstacleArrayMsg, 'obstacles', 10)
+        self.obstacles_publisher_ = self.create_publisher(
+            ObstacleArrayMsg, "obstacles", 10
+        )
 
         self.dictionary_index_id = {"0":0, "1":0, "2":0}
 
-        self.last_time_allie_callback = self.get_clock().now().to_msg()
+        self.last_time_ally_callback = self.get_clock().now().to_msg()
 
         self.initObstaclesArray()
 
         self.create_timer(0.5, self.send_obstacles)
 
-        self.get_logger().info('teb_dynamic_obstacles node is ready')
+        self.get_logger().info("teb_dynamic_obstacles node is ready")
 
-    def get_allie_odom_transformation(self):
+    def get_ally_odom_transformation(self):
         if self.simulation:
             return
 
-        get_tf_client = self.create_client(TransformixParametersTransformStamped, f'/{self.allie}/get_odom_map_tf')
+        get_tf_client = self.create_client(
+            TransformixParametersTransformStamped, f"/{self.ally}/get_odom_map_tf"
+        )
 
         if not get_tf_client.wait_for_service(timeout_sec=15.0):
-            self.get_logger().info(f'No service /{self.allie}/get_odom_map_tf availible, is there ony one robot?')
+            self.get_logger().info(
+                f"No service /{self.ally}/get_odom_map_tf availible, is there ony one robot?"
+            )
             return
         get_tf_request = TransformixParametersTransformStamped.Request()
         future = get_tf_client.call_async(get_tf_request)
@@ -59,12 +72,12 @@ class Teb_obstacles(Node):
         try:
             response = future.result()
         except Exception as e:
-            self.get_logger().info(
-                'Service call failed %r' % (e,))
+            self.get_logger().info("Service call failed %r" % (e,))
         else:
             self.odom_map_tf = response.transform_stamped
+
     def initObstaclesArray(self):
-        """ObstacleArray index 0: allie, index 1-2: ennemies"""
+        """ObstacleArray index 0: ally, index 1-2: enemies"""
         self.obstacles = ObstacleArrayMsg()
         self.obstacles.header.frame_id = "map"
         self.obstacles.obstacles.append(ObstacleMsg())
@@ -80,32 +93,45 @@ class Teb_obstacles(Node):
 
     def get_diff_time(self, t1, t2):
         """Returns the nb of seconds between the two Time object"""
-        return float(t1.sec - t2.sec + (t1.nanosec - t2.nanosec)*1e-9)
+        return t1.sec - t2.sec + (t1.nanosec - t2.nanosec) * 1e-9
 
     def set_obstacle(self, index, marker):
         """Set the marker as obstacle in ObstacleArrayMsg at the given index,
-           compute the linear velocities relative to the previous state"""
-        self.previous_obstacles.obstacles[index] = copy.deepcopy(self.obstacles.obstacles[index])
+        compute the linear velocities relative to the previous state"""
+        self.previous_obstacles.obstacles[index] = copy.deepcopy(
+            self.obstacles.obstacles[index]
+        )
         self.obstacles.obstacles[index].header = marker.header
         self.obstacles.obstacles[index].polygon.points[0].x = marker.pose.position.x
         self.obstacles.obstacles[index].polygon.points[0].y = marker.pose.position.y
 
-        dt = float(self.get_diff_time(marker.header.stamp, self.previous_obstacles.obstacles[index].header.stamp))
+        dt = float(
+            self.get_diff_time(
+                marker.header.stamp,
+                self.previous_obstacles.obstacles[index].header.stamp,
+            )
+        )
 
         if dt != 0.0:
             self.obstacles.obstacles[index].velocities.twist.linear.x = (
-                marker.pose.position.x - self.previous_obstacles.obstacles[index].polygon.points[0].x
+                marker.pose.position.x
+                - self.previous_obstacles.obstacles[index].polygon.points[0].x
             ) / dt
 
             self.obstacles.obstacles[index].velocities.twist.linear.y = (
-                marker.pose.position.y - self.previous_obstacles.obstacles[index].polygon.points[0].y
+                marker.pose.position.y
+                - self.previous_obstacles.obstacles[index].polygon.points[0].y
             ) / dt
-
 
     def allies_subscription_callback(self, msg):
         """Determine the pose of base_link in map
-           set the dynamic obstacle for teb_local_planner"""
-        if self.get_diff_time(self.get_clock().now().to_msg(), self.last_time_allie_callback) > 0.3:
+        set the dynamic obstacle for teb_local_planner"""
+        if (
+            self.get_diff_time(
+                self.get_clock().now().to_msg(), self.last_time_ally_callback
+            )
+            > 0.3
+        ):
             pose = msg.pose.pose
             x = pose.position.x + self.odom_map_tf.transform.translation.x
             y = pose.position.y + self.odom_map_tf.transform.translation.y
@@ -135,6 +161,7 @@ class Teb_obstacles(Node):
 
     def send_obstacles(self):
         self.obstacles_publisher_.publish(self.obstacles)
+
 
 def main(args=None):
     """Entrypoint."""
