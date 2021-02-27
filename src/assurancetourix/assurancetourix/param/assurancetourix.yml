@@ -3,6 +3,7 @@ assurancetourix:
   ros__parameters:
     topic_for_allies_position: /allies_positions_markers
     topic_for_gradient_layer: /ennemies_positions_markers
+    topic_for_cups_position: /cups_positions_markers
     camera:
       bgain: 2500
       exposure: 250

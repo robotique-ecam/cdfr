@@ -50,6 +50,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
+  cups_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(cups_positions_topic, qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -113,7 +114,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
 #ifdef SIMULATION
 // webots element positioning
 void Assurancetourix::simulation_marker_callback() {
-  visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
+  visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies, cups_positions;
   visualization_msgs::msg::Marker webots_marker;
   webots_marker.type = robot_type;
   webots_marker.color.r = 255;
@@ -152,7 +153,6 @@ void Assurancetourix::simulation_marker_callback() {
     marker_array_allies.markers.push_back(webots_marker);
     id++;
   }
-  id = 6;
   webots_marker.pose.orientation.x = 0.0;
   webots_marker.pose.orientation.y = 0.0;
   webots_marker.pose.orientation.z = 0.0;
@@ -239,6 +239,7 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.header_frame_id");
   this->declare_parameter("topic_for_gradient_layer");
   this->declare_parameter("topic_for_allies_position");
+  this->declare_parameter("topic_for_cups_position");
   this->declare_parameter("side");
 
   this->get_parameter_or<double>("image.contrast", contrast, 1.2);
@@ -254,6 +255,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
   this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
   this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
+  this->get_parameter_or<std::string>("topic_for_cups_position", cups_positions_topic, "/default_topic_for_cups_positions");
   this->get_parameter_or<std::string>("side", side, "blue");
 
   // initialisation of markers
