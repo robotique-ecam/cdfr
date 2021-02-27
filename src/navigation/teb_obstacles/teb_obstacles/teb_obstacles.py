@@ -32,7 +32,7 @@ class Teb_obstacles(Node):
         )
         self.enemies_subscription_ = self.create_subscription(
             MarkerArray,
-            "/enemies_positions_markers",
+            "/ennemies_positions_markers",
             self.enemies_subscription_callback,
             10,
         )
@@ -86,7 +86,7 @@ class Teb_obstacles(Node):
             self.obstacles.obstacles[i].polygon.points = [Point32()]
             self.obstacles.obstacles[i].polygon.points[0].x = -1.0
             self.obstacles.obstacles[i].polygon.points[0].y = -1.0
-            self.obstacles.obstacles[i].radius = 0.15
+            self.obstacles.obstacles[i].radius = 0.30
         self.previous_obstacles = copy.deepcopy(self.obstacles)
 
     def get_diff_time(self, t1, t2):
@@ -112,14 +112,22 @@ class Teb_obstacles(Node):
 
         if dt != 0.0:
             self.obstacles.obstacles[index].velocities.twist.linear.x = (
-                marker.pose.position.x
-                - self.previous_obstacles.obstacles[index].polygon.points[0].x
-            ) / dt
+                (
+                    marker.pose.position.x
+                    - self.previous_obstacles.obstacles[index].polygon.points[0].x
+                )
+                * 1.5
+                / dt
+            )
 
             self.obstacles.obstacles[index].velocities.twist.linear.y = (
-                marker.pose.position.y
-                - self.previous_obstacles.obstacles[index].polygon.points[0].y
-            ) / dt
+                (
+                    marker.pose.position.y
+                    - self.previous_obstacles.obstacles[index].polygon.points[0].y
+                )
+                * 1.5
+                / dt
+            )
 
     def allies_subscription_callback(self, msg):
         """Determine the pose of base_link in map
