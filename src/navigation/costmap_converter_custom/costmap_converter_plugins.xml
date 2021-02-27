@@ -1,0 +1,10 @@
+<library path="costmap_converter_custom_core">
+
+  <class name="costmap_converter/Custom" type="costmap_converter::CostmapToPolygonsDBSMCCH" base_class_type="costmap_converter::BaseCostmapToPolygons">
+  <description>
+      This class converts costmap2d obstacles into a vector of convex polygons.
+      Clustering is performed with DBScan. Convex polygons are detected using the Monotone Chain Convex Hull algorithm.
+  </description>
+  </class>
+
+</library>
