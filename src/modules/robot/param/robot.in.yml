@@ -91,7 +91,6 @@ controller_server:
       costmap_obstacles_behind_robot_dist: 3.0
       include_dynamic_obstacles: true
 
-
       # Homotopy Class Planner
       enable_homotopy_class_planning: True
       enable_multithreading: True
@@ -130,16 +129,22 @@ global_costmap:
       robot_base_frame: base_link
       use_sim_time: !Var use_sim_time
       resolution: 0.01
-      plugins: ["static_layer", "gradient_layer", "inflation_layer"]
+      plugins: ["static_layer", "enemie_gradient_layer", "cups_gradient_layer", "inflation_layer"]
       static_layer: #subscribe to map
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
-      gradient_layer: #draw radians circle around ennemies
+      enemie_gradient_layer: #draw radians circle around enemies
         plugin: "gradient_costmap_layer_plugin/GradientLayer"
         enabled: true
         gradient_size: 7
         gradient_factor: 100
         markers_topic: /ennemies_positions_markers
+      cups_gradient_layer:
+        plugin: gradient_costmap_layer_plugin/GradientLayer
+        enabled: true
+        gradient_size: 3
+        gradient_factor: 150
+        markers_topic: /cups_positions_markers
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: true
@@ -162,15 +167,15 @@ local_costmap:
       rolling_window: false
       resolution: 1.0
       static_map: true
-      plugins: ["static_layer", "gradient_layer", "inflation_layer"]
+      plugins: ["static_layer", "cup_gradient_layer", "inflation_layer"]
       static_layer:
         plugin: nav2_costmap_2d::StaticLayer
-      gradient_layer: #draw radians circle around ennemies
-        plugin: "gradient_costmap_layer_plugin/GradientLayer"
+      cup_gradient_layer: #draw radians circle around cups
+        plugin: gradient_costmap_layer_plugin/GradientLayer
         enabled: false
-        gradient_size: 7
-        gradient_factor: 100
-        markers_topic: /ennemies_positions_markers
+        gradient_size: 3
+        gradient_factor: 150
+        markers_topic: /cups_positions_markers
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         enabled: false

@@ -24,7 +24,7 @@ void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::ms
   for (int i = 0; i < int(msg->markers.size()); i++) {
     std::array<double, 2> tmp_coord{{msg->markers[i].pose.position.x, msg->markers[i].pose.position.y}};
     coord_from_frame.push_back(tmp_coord);
-    if (msg->markers[i].id > 10) {
+    if (msg->markers[i].id > 10 && msg->markers[i].id < 100) {
       predictedIndexes.push_back(true);
     } else {
       predictedIndexes.push_back(false);
