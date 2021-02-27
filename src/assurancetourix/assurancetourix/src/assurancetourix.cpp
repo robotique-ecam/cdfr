@@ -173,15 +173,34 @@ void Assurancetourix::simulation_marker_callback() {
 
   webots_marker.pose.position.y = 1;
   webots_marker.text = "test";
-  webots_marker.id = id;
+  webots_marker.id = 6;
   marker_array_ennemies.markers.push_back(webots_marker);
   marker_array_ennemies.markers.push_back(predictEnnemiesPos(webots_marker));
+
+  std::string gob = "GOB";
+  webots_marker.color.g = 255;
+  webots_marker.color.b = 255;
+  webots_marker.scale.x = 0.05;
+  webots_marker.scale.y = 0.05;
+  webots_marker.scale.z = 0.05;
+  for (int i = 1; i<51; i++){
+    double x, y;
+    std::string gobName = gob+std::to_string(i);
+    x = wb_supervisor->getFromDef(gobName.c_str())->getPosition()[0];
+    y = 2 - wb_supervisor->getFromDef(gobName.c_str())->getPosition()[2];
+    webots_marker.pose.position.x = x;
+    webots_marker.pose.position.y = y;
+    webots_marker.text = gobName;
+    webots_marker.id = i + 100;
+    cups_positions.markers.push_back(webots_marker);
+  }
 
   transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
   lastEnnemiesMarkers = ennemiesMarkersOnThisCycle;
   ennemiesMarkersOnThisCycle.markers.clear();
 
   transformed_marker_pub_allies_->publish(marker_array_allies);
+  cups_pub_->publish(cups_positions);
 }
 #endif // SIMULATION
 
