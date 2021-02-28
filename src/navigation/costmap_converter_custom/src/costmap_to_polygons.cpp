@@ -1,41 +1,3 @@
-/*********************************************************************
- *
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2016,
- *  TU Dortmund - Institute of Control Theory and Systems Engineering.
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the institute nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *
- * Author: Christoph Rösmann, Otniel Rinaldo
- *********************************************************************/
-
 #include <costmap_converter/costmap_to_polygons.h>
 #include <costmap_converter/misc.h>
 #include <pluginlib/class_list_macros.hpp>
@@ -134,43 +96,55 @@ void CostmapToPolygonsDBSMCCH::initialize(rclcpp::Node::SharedPtr nh)
     parameter_.min_keypoint_separation_ = 0.1;
     nh->get_parameter_or<double>("convex_hull_min_pt_separation", parameter_.min_keypoint_separation_, parameter_.min_keypoint_separation_);
 
-    parameter_buffered_ = parameter_;
 
-    // setup dynamic reconfigure
-//    dynamic_recfg_ = new dynamic_reconfigure::Server<CostmapToPolygonsDBSMCCHConfig>(nh);
-//    dynamic_reconfigure::Server<CostmapToPolygonsDBSMCCHConfig>::CallbackType cb = boost::bind(&CostmapToPolygonsDBSMCCH::reconfigureCB, this, _1, _2);
-//    dynamic_recfg_->setCallback(cb);
 }
 
 
 void CostmapToPolygonsDBSMCCH::compute()
 {
-    std::vector< std::vector<KeyPoint> > clusters;
-    dbScan(clusters);
-
     // Create new polygon container
     PolygonContainerPtr polygons(new std::vector<geometry_msgs::msg::Polygon>());
 
+    geometry_msgs::msg::Point32 p;
+    geometry_msgs::msg::Polygon poly;
+    p.x = 0.0;
+    p.y = 0.0;
+    p.z = 0.0;
+    poly.points.push_back(p);
+    p.x = 3.0;
+    poly.points.push_back(p);
+    p.y = 2.0;
+    poly.points.push_back(p);
+    p.x = 0.0;
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
 
-    // add convex hulls to polygon container
-    for (std::size_t i = 1; i <clusters.size(); ++i) // skip first cluster, since it is just noise
-    {
-      polygons->push_back( geometry_msgs::msg::Polygon() );
-      convexHull2(clusters[i], polygons->back() );
-    }
+    p.x = 0.9;
+    p.y = 0.0;
+    poly.points.push_back(p);
+    p.y = 0.18;
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
 
-    // add our non-cluster points to the polygon container (as single points)
-    if (!clusters.empty())
-    {
-      for (std::size_t i=0; i < clusters.front().size(); ++i)
-      {
-        polygons->push_back( geometry_msgs::msg::Polygon() );
-        convertPointToPolygon(clusters.front()[i], polygons->back());
-      }
-    }
+    p.x = 1.53;
+    p.y = 0.0;
+    poly.points.push_back(p);
+    p.y = 0.3;
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
+
+    p.x = 2.1;
+    p.y = 0.0;
+    poly.points.push_back(p);
+    p.y = 0.18;
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
 
     // replace shared polygon container
-    updatePolygonContainer(polygons);
 }
 
 void CostmapToPolygonsDBSMCCH::setCostmap2D(nav2_costmap_2d::Costmap2D *costmap)
@@ -289,6 +263,8 @@ void CostmapToPolygonsDBSMCCH::dbScan(std::vector< std::vector<KeyPoint> >& clus
 
 void CostmapToPolygonsDBSMCCH::regionQuery(int curr_index, std::vector<int>& neighbors)
 {
+    RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "region query");
+
     neighbors.clear();
 
     double dist_sqr_threshold = parameter_.max_distance_ * parameter_.max_distance_;
@@ -327,6 +303,7 @@ bool isXCoordinateSmaller(const CostmapToPolygonsDBSMCCH::KeyPoint& p1, const Co
 void CostmapToPolygonsDBSMCCH::convexHull(std::vector<KeyPoint>& cluster, geometry_msgs::msg::Polygon& polygon)
 {
     //Monotone Chain ConvexHull Algorithm source from http://www.algorithmist.com/index.php/Monotone_Chain_Convex_Hull
+    RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "convex hull");
 
     int k = 0;
     int n = cluster.size();
@@ -370,6 +347,8 @@ void CostmapToPolygonsDBSMCCH::convexHull(std::vector<KeyPoint>& cluster, geomet
 
 void CostmapToPolygonsDBSMCCH::convexHull2(std::vector<KeyPoint>& cluster, geometry_msgs::msg::Polygon& polygon)
 {
+    RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "convex hull 2");
+
     std::vector<KeyPoint>& P = cluster;
     std::vector<geometry_msgs::msg::Point32>& points = polygon.points;
 
@@ -468,6 +447,7 @@ void CostmapToPolygonsDBSMCCH::convexHull2(std::vector<KeyPoint>& cluster, geome
 
 void CostmapToPolygonsDBSMCCH::simplifyPolygon(geometry_msgs::msg::Polygon& polygon)
 {
+  /*
   size_t triangleThreshold = 3;
   // check if first and last point are the same. If yes, a triangle has 4 points
   if (polygon.points.size() > 1
@@ -481,6 +461,7 @@ void CostmapToPolygonsDBSMCCH::simplifyPolygon(geometry_msgs::msg::Polygon& poly
   // TODO Reason about better start conditions for splitting lines, e.g., by
   // https://en.wikipedia.org/wiki/Rotating_calipers
   polygon.points = douglasPeucker(polygon.points.begin(), polygon.points.end(), parameter_.min_keypoint_separation_);;
+  */
 }
 
 void CostmapToPolygonsDBSMCCH::updatePolygonContainer(PolygonContainerPtr polygons)
@@ -507,5 +488,3 @@ PolygonContainerConstPtr CostmapToPolygonsDBSMCCH::getPolygons()
 //}
 
 }//end namespace costmap_converter
-
-
