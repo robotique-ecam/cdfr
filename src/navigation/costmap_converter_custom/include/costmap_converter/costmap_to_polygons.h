@@ -21,30 +21,30 @@
 
 namespace costmap_converter
 {
-  
+
 /**
  * @class CostmapToPolygonsDBSMCCH
  * @brief This class converts the costmap_2d into a set of convex polygons (and points)
- * 
+ *
  * The conversion is performed in two stages:
  * 1. Clusters in the costmap are collected using the DBSCAN Algorithm (https://en.wikipedia.org/wiki/DBSCAN)
  *    Reference: Ester, Martin; Kriegel, Hans-Peter; Sander, Jörg; Xu, Xiaowei,
- *               A density-based algorithm for discovering clusters in large spatial databases with noise. 
- *               Proceedings of the Second International Conference on Knowledge Discovery and Data Mining. AAAI Press. 1996. pp. 226–231. ISBN 1-57735-004-9. 
- *    
+ *               A density-based algorithm for discovering clusters in large spatial databases with noise.
+ *               Proceedings of the Second International Conference on Knowledge Discovery and Data Mining. AAAI Press. 1996. pp. 226–231. ISBN 1-57735-004-9.
+ *
  * 2. In the subsequent stage, clusters are converted into convex polgons using the monotone chain algorithm aka Andrew's algorithm:
  *    C++ implementation example: http://www.algorithmist.com/index.php/Monotone_Chain_Convex_Hull ( GNU Free Documentation License 1.2 )
  *    Reference:  A. M. Andrew, "Another Efficient Algorithm for Convex Hulls in Two Dimensions", Info. Proc. Letters 9, 216-219 (1979).
- *  
+ *
  * All single points that do not define a cluster (noise) are also treated as polygon (represented as a single vertex)
  */
 class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
 {
   public:
-    
+
     /**
      * @struct KeyPoint
-     * @brief Defines a keypoint in metric coordinates of the map 
+     * @brief Defines a keypoint in metric coordinates of the map
      */
     struct KeyPoint
     {
@@ -54,7 +54,7 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
       KeyPoint(double x_, double y_) : x(x_), y(y_) {}
       double x; //!< x coordinate [m]
       double y; //!< y coordinate [m]
-      
+
       //! Convert keypoint to geometry_msgs::msg::Point message type
       void toPointMsg(geometry_msgs::msg::Point& point) const {point.x=x; point.y=y; point.z=0;}
       //! Convert keypoint to geometry_msgs::msg::Point32 message type
@@ -72,46 +72,46 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
       double max_distance_; //!< Parameter for DB_Scan, maximum distance to neighbors [m]
       int min_pts_; //!< Parameter for DB_Scan: minimum number of points that define a cluster
       int max_pts_; //!< Parameter for DB_Scan: maximum number of points that define a cluster (to avoid large L- and U-shapes)
-      
+
       // convex hull parameters
       double min_keypoint_separation_; //!< Clear keypoints of the convex polygon that are close to each other [distance in meters] (0: keep all)
     };
-    
+
     /**
      * @brief Constructor
      */
     CostmapToPolygonsDBSMCCH();
-    
+
     /**
      * @brief Destructor
      */
     virtual ~CostmapToPolygonsDBSMCCH();
-    
+
     /**
      * @brief Initialize the plugin
      * @param nh Nodehandle that defines the namespace for parameters
      */
     virtual void initialize(rclcpp::Node::SharedPtr nh) override;
-    
+
     /**
      * @brief This method performs the actual work (conversion of the costmap to polygons)
      */
     virtual void compute();
-        
+
     /**
      * @brief Pass a pointer to the costap to the plugin.
      * @sa updateCostmap2D
      * @param costmap Pointer to the costmap2d source
      */
     virtual void setCostmap2D(nav2_costmap_2d::Costmap2D* costmap);
-    
+
     /**
      * @brief Get updated data from the previously set Costmap2D
      * @sa setCostmap2D
      */
     virtual void updateCostmap2D();
-    
-    
+
+
     /**
      * @brief Convert a generi point type to a geometry_msgs::msg::Polygon
      * @param point generic 2D point type
@@ -126,7 +126,7 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
       polygon.points.front().y = point.y;
       polygon.points.front().z = 0;
     }
-    
+
     /**
      * @brief Get a shared instance of the current polygon container
      * @remarks If compute() or startWorker() has not been called before, this method returns an empty instance!
@@ -134,26 +134,25 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
      */
     PolygonContainerConstPtr getPolygons();
 
-    
-    
+
   protected:
-    
+
     /**
-     * @brief DBSCAN algorithm for clustering 
-     * 
+     * @brief DBSCAN algorithm for clustering
+     *
      * Clusters in the costmap are collected using the DBSCAN Algorithm (https://en.wikipedia.org/wiki/DBSCAN)
      *    Reference: Ester, Martin; Kriegel, Hans-Peter; Sander, Jörg; Xu, Xiaowei,
-     *               A density-based algorithm for discovering clusters in large spatial databases with noise. 
-     *               Proceedings of the Second International Conference on Knowledge Discovery and Data Mining. AAAI Press. 1996. pp. 226–231. ISBN 1-57735-004-9. 
-     * 
+     *               A density-based algorithm for discovering clusters in large spatial databases with noise.
+     *               Proceedings of the Second International Conference on Knowledge Discovery and Data Mining. AAAI Press. 1996. pp. 226–231. ISBN 1-57735-004-9.
+     *
      * @param[out] clusters clusters will added to this output-argument (a sequence of keypoints for each cluster)
-     *                      the first cluster (clusters[0]) will contain all noise points (that does not fulfil the min_pts condition 
+     *                      the first cluster (clusters[0]) will contain all noise points (that does not fulfil the min_pts condition
      */
     void dbScan(std::vector< std::vector<KeyPoint> >& clusters);
-    
+
     /**
-     * @brief Helper function for dbScan to search for neighboring points 
-     * 
+     * @brief Helper function for dbScan to search for neighboring points
+     *
      * @param curr_index index to the current item in \c occupied_cells
      * @param[out] neighbor_indices list of neighbors (indices of \c occupied cells)
      */
@@ -172,10 +171,10 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
       if (nidx >= 0)
         neighbor_lookup_[nidx].push_back(idx);
     }
-    
+
     /**
      * @brief Compute the convex hull for a single cluster (monotone chain algorithm)
-     * 
+     *
      * Clusters are converted into convex polgons using the monotone chain algorithm aka Andrew's algorithm:
      *    C++ implementation example: http://www.algorithmist.com/index.php/Monotone_Chain_Convex_Hull ( GNU Free Documentation License 1.2 )
      *    Reference:  A. M. Andrew, "Another Efficient Algorithm for Convex Hulls in Two Dimensions", Info. Proc. Letters 9, 216-219 (1979).
@@ -184,33 +183,33 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
      * @remarks The last point is the same as the first one
      * @param cluster list of keypoints that should be converted into a polygon
      * @param[out] polygon the resulting convex polygon
-     */  
+     */
     void convexHull(std::vector<KeyPoint>& cluster, geometry_msgs::msg::Polygon& polygon);
-    
+
     /**
      * @brief Compute the convex hull for a single cluster
-     * 
+     *
      * Clusters are converted into convex polgons using an algorithm provided here:
      *  https://bitbucket.org/vostreltsov/concave-hull/overview
      * The convex hull algorithm is part of the concave hull algorithm.
      * The license is WTFPL 2.0 and permits any usage.
-     * 
+     *
      * @remarks The last point is the same as the first one
      * @param cluster list of keypoints that should be converted into a polygon
      * @param[out] polygon the resulting convex polygon
      * @todo Evaluate and figure out whether convexHull() or convexHull2() is better suited (performance, quality, ...)
-     */  
+     */
     void convexHull2(std::vector<KeyPoint>& cluster, geometry_msgs::msg::Polygon& polygon);
 
     /**
      * @brief Simplify a polygon by removing points.
-     * 
+     *
      * We apply the Douglas-Peucker Algorithm to simplify the edges of the polygon.
      * Internally, the parameter min_keypoint_separation is used for deciding whether
      * a point is considered close to an edge and to be merged into the line.
      */
     void simplifyPolygon(geometry_msgs::msg::Polygon& polygon);
-    
+
    /**
     * @brief 2D Cross product of two vectors defined by two points and a common origin
     * @param O Origin
@@ -219,23 +218,23 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
     * @tparam P1 2D Point type with x and y member fields
     * @tparam P2 2D Point type with x and y member fields
     * @tparam P3 2D Point type with x and y member fields
-    */    
+    */
     template <typename P1, typename P2, typename P3>
     long double cross(const P1& O, const P2& A, const P3& B)
-    { 
+    {
         return (long double)(A.x - O.x) * (long double)(B.y - O.y) - (long double)(A.y - O.y) * (long double)(B.x - O.x);
     }
-    
-      
+
+
    /**
     * @brief Thread-safe update of the internal polygon container (that is shared using getPolygons() from outside this class)
     * @param polygons Updated polygon container
     */
-   void updatePolygonContainer(PolygonContainerPtr polygons);   
-          
-   
+   void updatePolygonContainer(PolygonContainerPtr polygons);
+
+
    std::vector<KeyPoint> occupied_cells_; //!< List of occupied cells in the current map (updated by updateCostmap2D())
-   
+
     std::vector<std::vector<int> > neighbor_lookup_; //! array of cells for neighbor lookup
     int neighbor_size_x_; //! size of the neighbour lookup in x (number of cells)
     int neighbor_size_y_; //! size of the neighbour lookup in y (number of cells)
@@ -270,30 +269,30 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
     Parameters parameter_;          //< active parameters throughout computation
     Parameters parameter_buffered_; //< the buffered parameters that are offered to dynamic reconfigure
     std::mutex parameter_mutex_;  //!< Mutex that keeps track about the ownership of the shared polygon instance
-   
+
   private:
-       
+
     /**
      * @brief Callback for the dynamic_reconfigure node.
-     * 
+     *
      * This callback allows to modify parameters dynamically at runtime without restarting the node
      * @param config Reference to the dynamic reconfigure config
      * @param level Dynamic reconfigure level
      */
     //void reconfigureCB(CostmapToPolygonsDBSMCCHConfig& config, uint32_t level);
-    
-    
+
+
     PolygonContainerPtr polygons_; //!< Current shared container of polygons
     std::mutex mutex_; //!< Mutex that keeps track about the ownership of the shared polygon instance
-    
-    //dynamic_reconfigure::Server<CostmapToPolygonsDBSMCCHConfig>* dynamic_recfg_; //!< Dynamic reconfigure server to allow config modifications at runtime
-   
-    nav2_costmap_2d::Costmap2D *costmap_; //!< Pointer to the costmap2d
-   
-}; 
 
-  
+    //dynamic_reconfigure::Server<CostmapToPolygonsDBSMCCHConfig>* dynamic_recfg_; //!< Dynamic reconfigure server to allow config modifications at runtime
+
+    nav2_costmap_2d::Costmap2D *costmap_; //!< Pointer to the costmap2d
+
     void setPolygon(std::vector<std::vector<float>> array);
+
+};
+
 
 } //end namespace teb_local_planner
 
