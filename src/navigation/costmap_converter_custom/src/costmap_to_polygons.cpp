@@ -96,12 +96,25 @@ void CostmapToPolygonsDBSMCCH::initialize(rclcpp::Node::SharedPtr nh)
     parameter_.min_keypoint_separation_ = 0.1;
     nh->get_parameter_or<double>("convex_hull_min_pt_separation", parameter_.min_keypoint_separation_, parameter_.min_keypoint_separation_);
 
+    std::string static_map_polygons_string;
+    nh->declare_parameter("static_map_lines", rclcpp::ParameterValue("NULL"));
+    nh->get_parameter("static_map_lines", static_map_polygons_string);
+
+    if (static_map_polygons_string.compare("NULL") != 0) {
+      std::string error_return;
+      parameter_buffered_ = parameter_;
+      std::vector<std::vector<float>> array;
+      array = nav2_costmap_2d::parseVVF(static_map_polygons_string, error_return);
+    } else {
+      RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "No static map in yaml static_map_lines");
+    }
 
 }
 
 
 void CostmapToPolygonsDBSMCCH::compute()
 {
+  /*
     // Create new polygon container
     PolygonContainerPtr polygons(new std::vector<geometry_msgs::msg::Polygon>());
 
@@ -145,6 +158,7 @@ void CostmapToPolygonsDBSMCCH::compute()
     poly.points.clear();
 
     // replace shared polygon container
+    updatePolygonContainer(polygons);*/
 }
 
 void CostmapToPolygonsDBSMCCH::setCostmap2D(nav2_costmap_2d::Costmap2D *costmap)
