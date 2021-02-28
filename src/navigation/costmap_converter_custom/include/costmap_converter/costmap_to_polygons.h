@@ -293,6 +293,8 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
 }; 
 
   
+    void setPolygon(std::vector<std::vector<float>> array);
+
 } //end namespace teb_local_planner
 
 #endif /* COSTMAP_TO_POLYGONS_H_ */

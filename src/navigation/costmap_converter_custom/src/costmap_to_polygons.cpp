@@ -105,12 +105,34 @@ void CostmapToPolygonsDBSMCCH::initialize(rclcpp::Node::SharedPtr nh)
       parameter_buffered_ = parameter_;
       std::vector<std::vector<float>> array;
       array = nav2_costmap_2d::parseVVF(static_map_polygons_string, error_return);
+      setPolygon(array);
     } else {
       RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "No static map in yaml static_map_lines");
     }
 
 }
 
+void CostmapToPolygonsDBSMCCH::setPolygon(std::vector<std::vector<float>> array){
+  PolygonContainerPtr polygons(new std::vector<geometry_msgs::msg::Polygon>());
+  geometry_msgs::msg::Point32 p;
+  p.z = 0.0;
+  geometry_msgs::msg::Polygon poly;
+  for (std::vector<float> coords_x1_y1_x2_y2 : array){
+    if (coords_x1_y1_x2_y2.size() != 4){
+      RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "Invalid static map in yaml static_map_lines, one size != 4");
+      return;
+    }
+    p.x = coords_x1_y1_x2_y2[0];
+    p.y = coords_x1_y1_x2_y2[1];
+    poly.points.push_back(p);
+    p.x = coords_x1_y1_x2_y2[2];
+    p.y = coords_x1_y1_x2_y2[3];
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
+  }
+  updatePolygonContainer(polygons);
+}
 
 void CostmapToPolygonsDBSMCCH::compute()
 {
