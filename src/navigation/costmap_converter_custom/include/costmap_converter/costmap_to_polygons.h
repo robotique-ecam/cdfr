@@ -67,6 +67,8 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
 
     void setPolygon(std::vector<std::vector<float>> array);
 
+    bool insideTheBoard(std::vector<float> arr);
+
 };
 
 
