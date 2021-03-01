@@ -69,8 +69,8 @@ controller_server:
       movement_time_allowance: 10.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.01
-      yaw_goal_tolerance: 0.01
+      xy_goal_tolerance: 0.02
+      yaw_goal_tolerance: 0.05
       stateful: True
     DynamicFollowPath:
       plugin: "teb_local_planner::TebLocalPlannerROS"
@@ -78,8 +78,8 @@ controller_server:
       footprint_model.type: polygon
 
       # Goal tolerance
-      xy_goal_tolerance: 0.01
-      yaw_goal_tolerance: 0.01
+      xy_goal_tolerance: 0.02
+      yaw_goal_tolerance: 0.05
 
       # Obstacles
       min_obstacle_dist: 0.03
@@ -96,11 +96,13 @@ controller_server:
       enable_homotopy_class_planning: True
       enable_multithreading: True
       delete_detours_backwards: True
+      max_number_classes: 1
 
       # Optimisation
       optimization_activate: True
       optimization_verbose: False
       weight_kinematics_forward_drive: 0.0
+      weight_obstacle: 100.0
 
       # Trajectory
       teb_autoresize: True
@@ -110,6 +112,7 @@ controller_server:
       max_global_plan_lookahead_dist: 3.7
       global_plan_overwrite_orientation: true
       allow_init_with_backwards_motion: true
+      feasibility_check_no_poses: 0
 
       # Miscellaneous
       map_frame: "map"
@@ -120,9 +123,9 @@ costmap_converter:
     # Decomposition of the map into 10 cm thickness lines
     static_map_lines: "[[-0.05, -0.05, 3.05, -0.05],[3.05, -0.05, 3.05, 2.05],
     [3.05, 2.05, -0.05, 2.05],[-0.05, 2.05, -0.05, -0.05],
-    [0.88, 0.04, 0.9, 0.04],[0.88, 0.13, 0.9, 0.13],
-    [1.48, 0.05, 1.5, 0.05],[1.48, 0.15, 1.5, 0.15],[1.48, 0.25, 1.5, 0.25],
-    [2.08, 0.04, 2.1, 0.04],[2.08, 0.13, 2.1, 0.13]]"
+    [0.88, 0.00, 0.90, 0.15],
+    [1.48, 0.00, 1.50, 0.3],
+    [2.08, 0.00, 2.1, 0.15]]"
 
 controller_server_rclcpp_node:
   ros__parameters:
