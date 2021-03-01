@@ -137,13 +137,7 @@ void Drive::init_variables() {
   tf2_ros::TransformListener tfListener(tfBuffer);
   std::string errorMsg;
   try {
-    if(tfBuffer.canTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000)))
-    {
-      _map_to_odom_tf = tfBuffer.lookupTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000));
-    } else {
-      RCLCPP_ERROR(this->get_logger(), "Timed out while waiting for transform from", odom_.header.frame_id.c_str(), " to map");
-      throw tf2::TransformException("Timed out waiting for transform");
-    }
+    _map_to_odom_tf = tfBuffer.lookupTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000));
   } catch (tf2::TransformException const & ex) {
     RCLCPP_ERROR(this->get_logger(), "Exception thrown:", ex.what());
     return exit(EXIT_FAILURE);
