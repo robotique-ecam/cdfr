@@ -22,20 +22,10 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
 {
   public:
 
-    /**
-     * @brief Constructor
-     */
     CostmapToPolygonsDBSMCCH();
 
-    /**
-     * @brief Destructor
-     */
     virtual ~CostmapToPolygonsDBSMCCH();
 
-    /**
-     * @brief Initialize the plugin
-     * @param nh Nodehandle that defines the namespace for parameters
-     */
     virtual void initialize(rclcpp::Node::SharedPtr nh) override;
 
     virtual void setCostmap2D(nav2_costmap_2d::Costmap2D* costmap){};
@@ -43,27 +33,18 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
     virtual void updateCostmap2D(){};
 
     virtual void compute(){};
-    /**
-     * @brief Get a shared instance of the current polygon container
-     * @remarks If compute() or startWorker() has not been called before, this method returns an empty instance!
-     * @return Shared instance of the current polygon container
-     */
+
     PolygonContainerConstPtr getPolygons();
 
 
   protected:
 
-   /**
-    * @brief Thread-safe update of the internal polygon container (that is shared using getPolygons() from outside this class)
-    * @param polygons Updated polygon container
-    */
    void updatePolygonContainer(PolygonContainerPtr polygons);
+
 
   private:
 
-
-    PolygonContainerPtr polygons_; //!< Current shared container of polygons
-    std::mutex mutex_; //!< Mutex that keeps track about the ownership of the shared polygon instance
+    PolygonContainerPtr polygons_;
 
     void setPolygon(std::vector<std::vector<float>> array);
 
