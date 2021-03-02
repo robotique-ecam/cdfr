@@ -42,65 +42,15 @@ void CostmapToPolygonsDBSMCCH::setPolygon(std::vector<std::vector<float>> array)
       RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "Invalid static map in yaml static_map_lines, one size != 4");
       return;
     }
-    RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "%f %f %f %f", coords_x1_y1_x2_y2[0], coords_x1_y1_x2_y2[1], coords_x1_y1_x2_y2[2], coords_x1_y1_x2_y2[3]);
-
-    if (insideTheBoard(coords_x1_y1_x2_y2)){
-      float min_x, min_y, max_x, max_y;
-      if (coords_x1_y1_x2_y2[0] < coords_x1_y1_x2_y2[2]){
-        min_x = coords_x1_y1_x2_y2[0];
-        max_x = coords_x1_y1_x2_y2[2];
-      }
-      else
-      {
-        min_x = coords_x1_y1_x2_y2[2];
-        max_x = coords_x1_y1_x2_y2[0];
-      }
-      if (coords_x1_y1_x2_y2[1] < coords_x1_y1_x2_y2[3]){
-        min_y = coords_x1_y1_x2_y2[1];
-        max_y = coords_x1_y1_x2_y2[3];
-      }
-      else
-      {
-        min_y = coords_x1_y1_x2_y2[3];
-        max_y = coords_x1_y1_x2_y2[1];
-      }
-      if ((max_y - min_y) < (max_x - min_x)){
-        for (int j = 0; j < (max_x - min_x)*100; j++){
-          p.x = min_x + float(j)/100;
-          p.y = min_y;
-          poly.points.push_back(p);
-          p.x = max_x + float(j)/100;
-          p.y = min_y;
-          poly.points.push_back(p);
-          polygons->push_back(poly);
-          poly.points.clear();
-        }
-      }
-      else
-      {
-        for (int j = 0; j < (max_y - min_y)*100; j++){
-          p.x = min_x;
-          p.y = min_y + float(j)/100;
-          poly.points.push_back(p);
-          p.x = max_x;
-          p.y = min_y + float(j)/100;
-          poly.points.push_back(p);
-          polygons->push_back(poly);
-          poly.points.clear();
-        }
-      }
-    }
-    else
-    {
-      p.x = coords_x1_y1_x2_y2[0];
-      p.y = coords_x1_y1_x2_y2[1];
-      poly.points.push_back(p);
-      p.x = coords_x1_y1_x2_y2[2];
-      p.y = coords_x1_y1_x2_y2[3];
-      poly.points.push_back(p);
-      polygons->push_back(poly);
-      poly.points.clear();
-    }
+    
+    p.x = coords_x1_y1_x2_y2[0];
+    p.y = coords_x1_y1_x2_y2[1];
+    poly.points.push_back(p);
+    p.x = coords_x1_y1_x2_y2[2];
+    p.y = coords_x1_y1_x2_y2[3];
+    poly.points.push_back(p);
+    polygons->push_back(poly);
+    poly.points.clear();
   }
   updatePolygonContainer(polygons);
 }
