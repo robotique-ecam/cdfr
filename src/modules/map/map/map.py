@@ -53,24 +53,24 @@ def creamap():
 
     draw.line(
         (
-            (cm_pix(90, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(90, reso), cm_pix(186 + reso, reso)),
+            (cm_pix(90 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(90 + reso, reso), cm_pix(185 + reso, reso)),
         ),
         noir,
         1,
     )
     draw.line(
         (
-            (cm_pix(210, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(210, reso), cm_pix(186 + reso, reso)),
+            (cm_pix(210 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(210 + reso, reso), cm_pix(185 + reso, reso)),
         ),
         noir,
         1,
     )
     draw.line(
         (
-            (cm_pix(150, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(150, reso), cm_pix(170 + reso, reso)),
+            (cm_pix(150 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(150 + reso, reso), cm_pix(170 + reso, reso)),
         ),
         noir,
         1,
