@@ -18,13 +18,13 @@
 namespace costmap_converter
 {
 
-class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
+class CostmapToLines : public BaseCostmapToPolygons
 {
   public:
 
-    CostmapToPolygonsDBSMCCH();
+    CostmapToLines();
 
-    virtual ~CostmapToPolygonsDBSMCCH();
+    virtual ~CostmapToLines();
 
     virtual void initialize(rclcpp::Node::SharedPtr nh) override;
 

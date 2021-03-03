@@ -2,16 +2,16 @@
 #include <costmap_converter/misc.h>
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToPolygonsDBSMCCH, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToLines, costmap_converter::BaseCostmapToPolygons)
 
 namespace costmap_converter
 {
 
-CostmapToPolygonsDBSMCCH::CostmapToPolygonsDBSMCCH() : BaseCostmapToPolygons() {}
+CostmapToLines::CostmapToLines() : BaseCostmapToPolygons() {}
 
-CostmapToPolygonsDBSMCCH::~CostmapToPolygonsDBSMCCH() {}
+CostmapToLines::~CostmapToLines() {}
 
-void CostmapToPolygonsDBSMCCH::initialize(rclcpp::Node::SharedPtr nh)
+void CostmapToLines::initialize(rclcpp::Node::SharedPtr nh)
 {
   BaseCostmapToPolygons::initialize(nh);
 
@@ -31,7 +31,7 @@ void CostmapToPolygonsDBSMCCH::initialize(rclcpp::Node::SharedPtr nh)
   }
 }
 
-void CostmapToPolygonsDBSMCCH::setPolygon(std::vector<std::vector<float>> array)
+void CostmapToLines::setPolygon(std::vector<std::vector<float>> array)
 {
   PolygonContainerPtr polygons(new std::vector<geometry_msgs::msg::Polygon>());
   geometry_msgs::msg::Point32 p;
@@ -42,7 +42,7 @@ void CostmapToPolygonsDBSMCCH::setPolygon(std::vector<std::vector<float>> array)
       RCLCPP_WARN(rclcpp::get_logger("costmap_converter_custom"), "Invalid static map in yaml static_map_lines, one size != 4");
       return;
     }
-    
+
     p.x = coords_x1_y1_x2_y2[0];
     p.y = coords_x1_y1_x2_y2[1];
     poly.points.push_back(p);
@@ -55,19 +55,19 @@ void CostmapToPolygonsDBSMCCH::setPolygon(std::vector<std::vector<float>> array)
   updatePolygonContainer(polygons);
 }
 
-bool CostmapToPolygonsDBSMCCH::insideTheBoard(std::vector<float> arr){
+bool CostmapToLines::insideTheBoard(std::vector<float> arr){
   bool pt1 = arr[0]<3.0 && arr[0]>0.0 && arr[1]<2.0 && arr[1]>0.0,
        pt2 = arr[2]<3.0 && arr[2]>0.0 && arr[3]<2.0 && arr[3]>0.0;
   return pt1 || pt2;
 }
 
-void CostmapToPolygonsDBSMCCH::updatePolygonContainer(PolygonContainerPtr polygons)
+void CostmapToLines::updatePolygonContainer(PolygonContainerPtr polygons)
 {
   polygons_ = polygons;
 }
 
 
-PolygonContainerConstPtr CostmapToPolygonsDBSMCCH::getPolygons()
+PolygonContainerConstPtr CostmapToLines::getPolygons()
 {
   return polygons_;
 }
