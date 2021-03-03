@@ -5,6 +5,7 @@
 
 
 import sys
+import os
 from os import path
 
 from PIL import Image, ImageDraw
@@ -52,24 +53,24 @@ def creamap():
 
     draw.line(
         (
-            (cm_pix(90, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(90, reso), cm_pix(185, reso)),
+            (cm_pix(90 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(90 + reso, reso), cm_pix(185 + reso, reso)),
         ),
         noir,
         1,
     )
     draw.line(
         (
-            (cm_pix(210, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(210, reso), cm_pix(185, reso)),
+            (cm_pix(210 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(210 + reso, reso), cm_pix(185 + reso, reso)),
         ),
         noir,
         1,
     )
     draw.line(
         (
-            (cm_pix(150, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(150, reso), cm_pix(170, reso)),
+            (cm_pix(150 + reso, reso), cm_pix(largeur_cm, reso)),
+            (cm_pix(150 + reso, reso), cm_pix(170 + reso, reso)),
         ),
         noir,
         1,
@@ -98,7 +99,7 @@ def creamapbleu():
     # draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
     #                                     cm_pix(largeur_cm, reso))), noir, 1)
     mapbleu = add_background(mapbleu)
-    mapbleu.save(path.join(sys.argv[1], "map", "mapbleu.pgm"))
+    mapbleu.save(path.join(os.getcwd(), "mapbleu.pgm"))
 
 
 def creamapjaune():
@@ -107,7 +108,7 @@ def creamapjaune():
     # draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
     #                                    cm_pix(largeur_cm, reso))), noir, 1)
     mapjaune = add_background(mapjaune)
-    mapjaune.save(path.join(sys.argv[1], "map", "mapjaune.pgm"))
+    mapjaune.save(path.join(os.getcwd(), "mapjaune.pgm"))
 
 
 if __name__ == "__main__":

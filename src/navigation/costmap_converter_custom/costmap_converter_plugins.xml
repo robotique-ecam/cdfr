@@ -1,0 +1,9 @@
+<library path="costmap_converter_custom_core">
+
+  <class name="costmap_converter/Custom" type="costmap_converter::CostmapToLines" base_class_type="costmap_converter::BaseCostmapToPolygons">
+  <description>
+      This class converts a given set of lines into obstacles for teb_local_planner
+  </description>
+  </class>
+
+</library>
