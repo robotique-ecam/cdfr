@@ -76,6 +76,16 @@ controller_server:
       acc_lim_x: !Var acc_lim_x
       acc_lim_theta: !Var acc_lim_theta
 
+    CustomController:
+      footprint_model.vertices: '[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128],
+        [0.095, -0.128]]'
+      min_turning_radius: 0.0
+      max_vel_x: 0.2
+      max_vel_x_backwards: 0.2
+      max_vel_theta: 3.1
+      acc_lim_x: 0.5
+      acc_lim_theta: 2.5
+
 
 local_costmap:
   local_costmap:

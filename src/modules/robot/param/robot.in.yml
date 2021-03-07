@@ -62,7 +62,7 @@ controller_server:
     min_theta_velocity_threshold: 0.001
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "goal_checker"
-    controller_plugins: ["DynamicFollowPath"]
+    controller_plugins: ["DynamicFollowPath", "CustomController"]
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.02
@@ -115,6 +115,36 @@ controller_server:
 
       # Miscellaneous
       map_frame: "map"
+    CustomController:
+      plugin: teb_local_planner::TebLocalPlannerROS
+      footprint_model.type: polygon
+      xy_goal_tolerance: 0.005
+      yaw_goal_tolerance: 0.01
+      min_obstacle_dist: 0.005
+      inflation_dist: 0.45
+      costmap_converter_plugin: costmap_converter/Custom
+      costmap_converter_spin_thread: true
+      costmap_converter_rate: 10
+      include_costmap_obstacles: true
+      costmap_obstacles_behind_robot_dist: 3.8
+      include_dynamic_obstacles: true
+      enable_homotopy_class_planning: true
+      selection_obst_cost_scale: 255.0
+      enable_multithreading: true
+      delete_detours_backwards: false
+      optimization_activate: true
+      optimization_verbose: false
+      weight_kinematics_forward_drive: 0.0
+      teb_autoresize: true
+      exact_arc_length: false
+      min_samples: 3
+      max_samples: 100
+      max_global_plan_lookahead_dist: 3.7
+      global_plan_overwrite_orientation: true
+      allow_init_with_backwards_motion: true
+      weight_obstacle: 100.0
+      weight_prefer_rotdir: 0.0
+      map_frame: map
 
 costmap_converter:
   ros__parameters:
