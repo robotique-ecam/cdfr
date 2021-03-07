@@ -4,11 +4,44 @@
 
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
-    <PipelineSequence name="NavigateWithReplanning">
-      <RateController hz="2.0">
-        <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
-      </RateController>
-      <FollowPath path="{path}"  controller_id="DynamicFollowPath"/>
-    </PipelineSequence>
+    <SequenceStar name="NavigateWithReplanning">
+      <PipelineSequence>
+        <RateController hz="2.0">
+          <ComputePathToPose goal="{goal}" path="{globalPath}" planner_id="GridBased"/>
+        </RateController>
+
+        <SplitGoal goal="{goal}" nominal_teb_need="{nominalTebNeed}" nominal_teb_goal="{nominalTebGoal}"
+          get_in_teb_need="{getInTebNeed}" get_in_teb_goal="{getInTebGoal}" global_path="{globalPath}"/>
+      </PipelineSequence>
+      <Fallback>
+        <Inverter>
+          <BooleanCondition boolean="{nominalTebNeed}"/>
+        </Inverter>
+
+        <PipelineSequence>
+          <RateController hz="2.0">
+            <ComputePathToPose goal="{nominalTebGoal}" path="{pathNominal}" planner_id="GridBased"/>
+          </RateController>
+          <FollowPath path="{pathNominal}" controller_id="DynamicFollowPath"/>
+        </PipelineSequence>
+      </Fallback>
+
+      <Fallback>
+        <Inverter>
+          <BooleanCondition boolean="{getInTebNeed}"/>
+        </Inverter>
+        <Inverter>
+          <RateController hz="2.0">
+            <ComputePathToPose goal="{getInTebGoal}" path="{pathGetIn}" planner_id="GridBased"/>
+          </RateController>
+        </Inverter>
+        <FollowPath path="{pathGetIn}" controller_id="CustomController"/>
+      </Fallback>
+      <!--
+      <SequenceStar name="Test">
+        <FollowPath path="{pathtest}" controller_id="CustomController"/>
+      </SequenceStar>
+      -->
+    </SequenceStar>
   </BehaviorTree>
 </root>
