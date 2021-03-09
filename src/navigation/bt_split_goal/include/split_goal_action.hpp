@@ -47,6 +47,8 @@ private:
   void setOutputPort();
   bool nearWalls(geometry_msgs::msg::PoseStamped & pose);
   void setAutoQuaternions();
+  void setAutoPositions();
+  int intoSpecificZone(geometry_msgs::msg::PoseStamped & pose);
 
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;
@@ -54,6 +56,37 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_;
   rclcpp::Node::SharedPtr node_;
   double transform_tolerance_;
+
+  double distance_from_walls = 0.25;
+  double distance_ = 0.15;
+
+  double specific_area_coords[10][4] = {
+    {0.9, 0.0, 1.5, 0.3 + distance_},
+    {1.5, 0.0, 2.1, 0.3 + distance_},
+    {0.0, 0.885 - distance_, 0.4 + distance_, 0.885},
+    {0.0, 0.885, 0.4 + distance_, 0.885 + distance_},
+    {0.0, 1.485 - distance_, 0.4 + distance_, 1.485},
+    {0.0, 1.485, 0.4 + distance_, 1.485 + distance_},
+    {2.6 - distance_, 0.885 - distance_, 3.0, 0.885},
+    {2.6 - distance_, 0.885, 3.0, 0.885 + distance_},
+    {2.6 - distance_, 1.485 - distance_, 3.0, 1.485},
+    {2.6 - distance_, 1.485, 3.0, 1.485 + distance_}
+  };
+  double exit_area_coords[10] = {
+    0.3 + distance_,
+    0.3 + distance_,
+    0.885 - distance_,
+    0.885 + distance_,
+    1.485 - distance_,
+    1.485 + distance_,
+    0.885 - distance_,
+    0.885 + distance_,
+    1.485 - distance_,
+    1.485 + distance_
+  };
+
+  int get_out_area, get_in_area;
+
 };
 
 }  // namespace nav2_behavior_tree

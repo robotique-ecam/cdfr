@@ -32,9 +32,8 @@ inline BT::NodeStatus SplitGoal::tick()
   else mode_ = AUTOMATIC;
   goal_.pose.position.z = 0.0;
 
-  get_out_goal_ = goal_;
-  get_in_goal_ = goal_;
   nominal_goal_ = goal_;
+  get_in_goal_ = goal_;
   get_out_need_ = false;
   get_in_need_ = false;
   nominal_need_ = false;
@@ -59,12 +58,20 @@ inline BT::NodeStatus SplitGoal::tick()
     return BT::NodeStatus::FAILURE;
   }
 
+  nominal_need_ = true;
+  get_out_goal_ = current_pose_;
 
-  }
+  get_out_area = intoSpecificZone(current_pose_);
+  if (nearWalls(current_pose_) || get_out_area != 10) get_out_need_ = true;
 
-  }
+  get_in_area = intoSpecificZone(goal_);
+  if (nearWalls(goal_) || get_in_area != 10) get_in_need_ = true;
 
+  setAutoQuaternions();
 
+  setAutoPositions();
+
+  setOutputPort();
 
   return BT::NodeStatus::SUCCESS;
 }
@@ -82,6 +89,14 @@ void SplitGoal::setOutputPort(){
 bool SplitGoal::nearWalls(geometry_msgs::msg::PoseStamped & pose){
   return pose.pose.position.x < distance_from_walls || pose.pose.position.x > 3.0 - distance_from_walls
     || pose.pose.position.y < distance_from_walls || pose.pose.position.y > 2.0 - distance_from_walls;
+}
+
+int SplitGoal::intoSpecificZone(geometry_msgs::msg::PoseStamped & pose){
+  for(int i = 0; i < 10; i++){
+    if (pose.pose.position.x > specific_area_coords[i][0] && pose.pose.position.x < specific_area_coords[i][2]
+      && pose.pose.position.y > specific_area_coords[i][1] && pose.pose.position.y < specific_area_coords[i][3]) return i;
+  }
+  return 10;
 }
 
 void SplitGoal::setAutoQuaternions(){
@@ -107,6 +122,16 @@ void SplitGoal::setAutoQuaternions(){
   // check orientation ?
   nominal_goal_. pose.orientation = goal_.pose.orientation;
 }
+
+void SplitGoal::setAutoPositions(){
+  if (get_out_need_){
+    get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
+  }
+  if (get_in_need_){
+    nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+  }
+}
+
 }  // namespace nav2_behavior_tree
 
 #include "behaviortree_cpp_v3/bt_factory.h"
