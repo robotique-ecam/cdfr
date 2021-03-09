@@ -6,7 +6,7 @@
 -->
 <root>
   <TreeNodesModel>
-    <Action ID="SplitGoal">
+    <Action ID="BooleanCondition">
       <input_port name="boolean">SUCCESS if true, else FAILURE</input_port>
     </Action>
   </TreeNodesModel>

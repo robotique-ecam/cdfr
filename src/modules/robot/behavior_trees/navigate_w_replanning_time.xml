@@ -40,12 +40,12 @@
         <Inverter>
           <BooleanCondition boolean="{getInTebNeed}"/>
         </Inverter>
-        <Inverter>
+        <PipelineSequence>
           <RateController hz="2.0">
             <ComputePathToPose goal="{getInTebGoal}" path="{pathGetIn}" planner_id="GridBased"/>
           </RateController>
-        </Inverter>
-        <FollowPath path="{pathGetIn}" controller_id="CustomController"/>
+          <FollowPath path="{pathGetIn}" controller_id="CustomController"/>
+        </PipelineSequence>
       </Fallback>
     </SequenceStar>
   </BehaviorTree>
