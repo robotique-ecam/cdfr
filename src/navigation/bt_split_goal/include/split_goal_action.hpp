@@ -6,6 +6,8 @@
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/path.hpp"
+#include "tf2_ros/buffer.h"
+#include "nav2_util/robot_utils.hpp"
 
 #include "behaviortree_cpp_v3/action_node.h"
 
@@ -44,9 +46,12 @@ private:
   BT::NodeStatus tick() override;
   void setOutputPort();
 
-  geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_;
+  geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;
   int mode_;
+  std::shared_ptr<tf2_ros::Buffer> tf_;
+  rclcpp::Node::SharedPtr node_;
+  double transform_tolerance_;
 };
 
 }  // namespace nav2_behavior_tree

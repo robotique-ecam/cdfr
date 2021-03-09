@@ -17,6 +17,9 @@ SplitGoal::SplitGoal(
 : BT::ActionNodeBase(name, conf)
 {
   getInput("goal", goal_);
+  node_ = config().blackboard->get<rclcpp::Node::SharedPtr>("node");
+  tf_ = config().blackboard->get<std::shared_ptr<tf2_ros::Buffer>>("tf_buffer");
+  node_->get_parameter("transform_tolerance", transform_tolerance_);
 }
 
 inline BT::NodeStatus SplitGoal::tick()
@@ -48,7 +51,12 @@ inline BT::NodeStatus SplitGoal::tick()
     return BT::NodeStatus::SUCCESS;
   }
 
-  return BT::NodeStatus::FAILURE;
+  if (!nav2_util::getCurrentPose(
+      current_pose_, *tf_, "map", "base_link",
+      transform_tolerance_))
+  {
+    RCLCPP_WARN(node_->get_logger(), "Current robot pose is not available.");
+    return BT::NodeStatus::FAILURE;
   }
 
 
