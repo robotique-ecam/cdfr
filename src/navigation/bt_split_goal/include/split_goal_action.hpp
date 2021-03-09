@@ -45,6 +45,8 @@ private:
   void halt() override {}
   BT::NodeStatus tick() override;
   void setOutputPort();
+  bool nearWalls(geometry_msgs::msg::PoseStamped & pose);
+  void setAutoQuaternions();
 
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;
