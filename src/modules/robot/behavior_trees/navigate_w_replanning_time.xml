@@ -5,10 +5,6 @@
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
     <SequenceStar name="NavigateWithReplanning">
-      <PipelineSequence>
-        <RateController hz="2.0">
-          <ComputePathToPose goal="{goal}" path="{globalPath}" planner_id="GridBased"/>
-        </RateController>
 
         <SplitGoal goal="{goal}" nominal_teb_need="{nominalTebNeed}" nominal_teb_goal="{nominalTebGoal}"
           get_in_teb_need="{getInTebNeed}" get_in_teb_goal="{getInTebGoal}" global_path="{globalPath}"/>

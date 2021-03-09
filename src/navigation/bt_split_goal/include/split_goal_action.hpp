@@ -28,7 +28,6 @@ public:
   {
     return {
       BT::InputPort<geometry_msgs::msg::PoseStamped>("goal", "Destination to plan to"),
-      BT::InputPort<nav_msgs::msg::Path>("global_path", "Global path"),
 
       BT::OutputPort<bool>("get_out_teb_need", "Is get_out of specific area teb controller needed"),
       BT::OutputPort<bool>("nominal_teb_need", "Is nominal teb controller needed"),
@@ -45,7 +44,6 @@ private:
   BT::NodeStatus tick() override;
   void setOutputPort();
 
-  nav_msgs::msg::Path path_;
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_;
   bool get_out_need_, get_in_need_, nominal_need_;
   int mode_;

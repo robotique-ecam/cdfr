@@ -8,7 +8,6 @@
   <TreeNodesModel>
     <Action ID="SplitGoal">
       <input_port name="goal">Destination to plan to</input_port>
-      <input_port name="global_path">Global path</input_port>
       <output_port name="get_out_teb_need">Is get_out of specific area teb controller needed</output_port>
       <output_port name="nominal_teb_need">Is nominal teb controller needed</output_port>
       <output_port name="get_in_teb_need">Is get_in of specific area teb controller needed</output_port>

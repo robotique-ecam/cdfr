@@ -17,19 +17,12 @@ SplitGoal::SplitGoal(
 : BT::ActionNodeBase(name, conf)
 {
   getInput("goal", goal_);
-  getInput("global_path", path_);
 }
 
 inline BT::NodeStatus SplitGoal::tick()
 {
   setStatus(BT::NodeStatus::RUNNING);
   getInput("goal", goal_);
-  getInput("global_path", path_);
-
-  RCLCPP_WARN(
-    config().blackboard->get<rclcpp::Node::SharedPtr>("node")->get_logger(),
-    "Initial orientation z: %f, w: %f", path_.poses.size(), path_.poses[0].pose.orientation.w
-  );
 
   if (goal_.pose.position.z == NOMINAL_FORCED) mode_ = NOMINAL_FORCED;
   else if (goal_.pose.position.z == SLOW_FORCED) mode_ = SLOW_FORCED;
@@ -56,46 +49,16 @@ inline BT::NodeStatus SplitGoal::tick()
   }
 
   return BT::NodeStatus::FAILURE;
-/*
-  nav_msgs::msg::Path input_path;
-
-  getInput("input_path", input_path);
-
-  if (input_path.poses.empty()) {
-    setOutput("output_path", input_path);
-    return BT::NodeStatus::SUCCESS;
   }
 
-  geometry_msgs::msg::PoseStamped final_pose = input_path.poses.back();
 
-  double distance_to_goal = nav2_util::geometry_utils::euclidean_distance(
-    input_path.poses.back(), final_pose);
-
-  while (distance_to_goal < distance_ && input_path.poses.size() > 2) {
-    input_path.poses.pop_back();
-    distance_to_goal = nav2_util::geometry_utils::euclidean_distance(
-      input_path.poses.back(), final_pose);
   }
 
-  double dx = final_pose.pose.position.x - input_path.poses.back().pose.position.x;
-  double dy = final_pose.pose.position.y - input_path.poses.back().pose.position.y;
-
-  double final_angle = atan2(dy, dx);
-
-  if (std::isnan(final_angle) || std::isinf(final_angle)) {
-    RCLCPP_WARN(
-      config().blackboard->get<rclcpp::Node::SharedPtr>("node")->get_logger(),
-      "Final angle is not valid while truncating path. Setting to 0.0");
-    final_angle = 0.0;
   }
 
-  input_path.poses.back().pose.orientation = nav2_util::geometry_utils::orientationAroundZAxis(
-    final_angle);
 
-  setOutput("output_path", input_path);
 
   return BT::NodeStatus::SUCCESS;
-  */
 }
 
 void SplitGoal::setOutputPort(){
