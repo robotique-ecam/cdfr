@@ -49,6 +49,7 @@ private:
   void setAutoQuaternions();
   void setAutoPositions();
   int intoSpecificZone(geometry_msgs::msg::PoseStamped & pose);
+  void setPositionNearWall(geometry_msgs::msg::PoseStamped & pose);
 
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;

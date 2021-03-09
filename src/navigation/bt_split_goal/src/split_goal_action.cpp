@@ -105,14 +105,24 @@ void SplitGoal::setAutoQuaternions(){
   if (get_out_need_){
     geometry_msgs::msg::Quaternion q_out = current_pose_.pose.orientation;
     RCLCPP_WARN(node_->get_logger(), "q_out z: %f, w: %f", q_out.z, q_out.w);
-    if ( (abs(q_out.z - 0.7071068)<0.35 &&  abs(q_out.w - 0.7071068)<0.35)
-        || (abs(q_out.z + 0.7071068)<0.35 &&  abs(q_out.w + 0.7071068)<0.35) ){
+    if ( (abs(q_out.z - 0.7071068)<0.22 &&  abs(q_out.w - 0.7071068)<0.22)
+        || (abs(q_out.z + 0.7071068)<0.22 &&  abs(q_out.w + 0.7071068)<0.22) ){
       q.z = q.w = 0.7071068;
     }
-    else if ( (abs(q_out.z + 0.7071068)<0.35 &&  abs(q_out.w - 0.7071068)<0.35)
-        || (abs(q_out.z - 0.7071068)<0.35 &&  abs(q_out.w + 0.7071068)<0.35) ){
+    else if ( (abs(q_out.z + 0.7071068)<0.22 &&  abs(q_out.w - 0.7071068)<0.22)
+        || (abs(q_out.z - 0.7071068)<0.22 &&  abs(q_out.w + 0.7071068)<0.22) ){
       q.z = -0.7071068;
       q.w = 0.7071068;
+    }
+    else if ( (abs(q_out.z)<0.22 &&  abs(q_out.w - 1.0)<0.22)
+        || (abs(q_out.z)<0.22 &&  abs(q_out.w + 1.0)<0.22) ){
+      q.z = 0.0;
+      q.w = 1.0;
+    }
+    else if ( (abs(q_out.z - 1.0)<0.22 &&  abs(q_out.w)<0.22)
+        || (abs(q_out.z + 1.0)<0.22 &&  abs(q_out.w)<0.22) ){
+      q.z = 1.0;
+      q.w = 0.0;
     }
     else q = q_out;
     get_out_goal_.pose.orientation = q;
@@ -125,11 +135,24 @@ void SplitGoal::setAutoQuaternions(){
 
 void SplitGoal::setAutoPositions(){
   if (get_out_need_){
-    get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
+    if (get_out_area != 10) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
+    else {
+      setPositionNearWall(get_out_goal_);
+    }
   }
   if (get_in_need_){
-    nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+    if (get_in_area != 10) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+    else {
+      setPositionNearWall(nominal_goal_);
+    }
   }
+}
+
+void SplitGoal::setPositionNearWall(geometry_msgs::msg::PoseStamped & pose){
+  if (pose.pose.position.x < distance_from_walls) pose.pose.position.x = distance_from_walls;
+  else if (pose.pose.position.x > 3.0 - distance_from_walls) pose.pose.position.x = 3.0 - distance_from_walls;
+  else if (pose.pose.position.y < distance_from_walls) pose.pose.position.y = distance_from_walls;
+  else pose.pose.position.y = 2.0 - distance_from_walls;
 }
 
 }  // namespace nav2_behavior_tree
