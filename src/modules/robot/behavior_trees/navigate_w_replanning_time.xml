@@ -5,10 +5,24 @@
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
     <SequenceStar name="NavigateWithReplanning">
+      <SplitGoal goal="{goal}"
+        get_out_teb_need="{getOutTebNeed}" get_out_teb_goal="{getOutTebGoal}"
+        nominal_teb_need="{nominalTebNeed}" nominal_teb_goal="{nominalTebGoal}"
+        get_in_teb_need="{getInTebNeed}" get_in_teb_goal="{getInTebGoal}"/>
 
-        <SplitGoal goal="{goal}" nominal_teb_need="{nominalTebNeed}" nominal_teb_goal="{nominalTebGoal}"
-          get_in_teb_need="{getInTebNeed}" get_in_teb_goal="{getInTebGoal}" global_path="{globalPath}"/>
-      </PipelineSequence>
+      <Fallback>
+        <Inverter>
+          <BooleanCondition boolean="{getOutTebNeed}"/>
+        </Inverter>
+
+        <PipelineSequence>
+          <RateController hz="2.0">
+            <ComputePathToPose goal="{getOutTebGoal}" path="{pathGetOut}" planner_id="GridBased"/>
+          </RateController>
+          <FollowPath path="{pathGetOut}" controller_id="CustomController"/>
+        </PipelineSequence>
+      </Fallback>
+
       <Fallback>
         <Inverter>
           <BooleanCondition boolean="{nominalTebNeed}"/>
@@ -33,11 +47,6 @@
         </Inverter>
         <FollowPath path="{pathGetIn}" controller_id="CustomController"/>
       </Fallback>
-      <!--
-      <SequenceStar name="Test">
-        <FollowPath path="{pathtest}" controller_id="CustomController"/>
-      </SequenceStar>
-      -->
     </SequenceStar>
   </BehaviorTree>
 </root>
