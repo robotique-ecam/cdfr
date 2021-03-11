@@ -6,6 +6,7 @@ specific_area_coords: "[[0.9, 0.0, 1.5, 0.45],
 [0.0, 1.485, 0.55, 1.635],[2.45, 0.735, 3.0, 0.885],
 [2.45, 0.885, 3.0, 1.035],[2.45, 1.335, 3.0, 1.485],
 [2.45, 1.485, 3.0, 1.635]]"
+exit_area_coords: "[[0.45, 0.45, 0.735, 1.035, 1.335, 1.635, 0.735, 1.035, 1.335, 1.635]]"
 distance_from_walls: 0.25
 ---
 amcl:
@@ -72,7 +73,7 @@ controller_server:
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "custom_goal_checker"
     controller_plugins: ["DynamicFollowPath", "CustomController"]
-    
+
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.02
@@ -274,3 +275,11 @@ planner_server_rclcpp_node:
 robot_state_publisher:
   ros__parameters:
     use_sim_time: !Var use_sim_time
+
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: false
+    bt_split_goal:
+      distance_from_walls: !Var distance_from_walls
+      specific_area_coords: !Var specific_area_coords
+      exit_area_coords: !Var exit_area_coords
