@@ -1,5 +1,12 @@
 !Defaults
 use_sim_time: False
+specific_area_coords: "[[0.9, 0.0, 1.5, 0.45],
+[1.5, 0.0, 2.1, 0.45],[0.0, 0.735, 0.55, 0.885],
+[0.0, 0.885, 0.55, 1.035],[0.0, 1.335, 0.55, 1.485],
+[0.0, 1.485, 0.55, 1.635],[2.45, 0.735, 3.0, 0.885],
+[2.45, 0.885, 3.0, 1.035],[2.45, 1.335, 3.0, 1.485],
+[2.45, 1.485, 3.0, 1.635]]"
+distance_from_walls: 0.25
 ---
 amcl:
   ros__parameters:
@@ -65,10 +72,12 @@ controller_server:
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "custom_goal_checker"
     controller_plugins: ["DynamicFollowPath", "CustomController"]
+    
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.02
       movement_time_allowance: 10.0
+
     custom_goal_checker:
       plugin: "nav2_controller::CustomGoalChecker"
       xy_goal_tolerance_nominal: 0.02
@@ -76,6 +85,9 @@ controller_server:
       xy_goal_tolerance_accurate: 0.01
       yaw_goal_tolerance_accurate: 0.01
       stateful: true
+      specific_area_coords: !Var specific_area_coords
+      distance_from_walls: !Var distance_from_walls
+
     DynamicFollowPath:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       # Robot footprint
