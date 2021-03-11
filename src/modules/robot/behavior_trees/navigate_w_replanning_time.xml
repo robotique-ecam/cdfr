@@ -19,7 +19,7 @@
           <RateController hz="2.0">
             <ComputePathToPose goal="{getOutTebGoal}" path="{pathGetOut}" planner_id="GridBased"/>
           </RateController>
-          <FollowPath path="{pathGetOut}" controller_id="CustomController"/>
+          <FollowPath path="{pathGetOut}" controller_id="AccurateController"/>
         </PipelineSequence>
       </Fallback>
 
@@ -32,7 +32,7 @@
           <RateController hz="2.0">
             <ComputePathToPose goal="{nominalTebGoal}" path="{pathNominal}" planner_id="GridBased"/>
           </RateController>
-          <FollowPath path="{pathNominal}" controller_id="DynamicFollowPath"/>
+          <FollowPath path="{pathNominal}" controller_id="NominalController"/>
         </PipelineSequence>
       </Fallback>
 
@@ -44,7 +44,7 @@
           <RateController hz="2.0">
             <ComputePathToPose goal="{getInTebGoal}" path="{pathGetIn}" planner_id="GridBased"/>
           </RateController>
-          <FollowPath path="{pathGetIn}" controller_id="CustomController"/>
+          <FollowPath path="{pathGetIn}" controller_id="AccurateController"/>
         </PipelineSequence>
       </Fallback>
     </SequenceStar>
