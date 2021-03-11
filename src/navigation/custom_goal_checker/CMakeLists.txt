@@ -28,6 +28,7 @@ find_package(angles REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
 
 set(dependencies
   angles
@@ -36,6 +37,7 @@ set(dependencies
   nav2_util
   nav2_core
   pluginlib
+  nav2_costmap_2d
 )
 
 nav2_package()

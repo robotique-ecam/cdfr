@@ -43,12 +43,32 @@ void CustomGoalChecker::initialize(
   nav2_util::declare_parameter_if_not_declared(
     nh,
     plugin_name + ".stateful", rclcpp::ParameterValue(true));
+  nav2_util::declare_parameter_if_not_declared(
+    nh,
+    plugin_name + ".specific_area_coords", rclcpp::ParameterValue("NULL"));
+  nav2_util::declare_parameter_if_not_declared(
+    nh,
+    plugin_name + ".distance_from_walls", rclcpp::ParameterValue(0.15));
 
   nh->get_parameter(plugin_name + ".xy_goal_tolerance_nominal", xy_goal_tolerance_nominal_);
   nh->get_parameter(plugin_name + ".yaw_goal_tolerance_nominal", yaw_goal_tolerance_nominal_);
   nh->get_parameter(plugin_name + ".xy_goal_tolerance_accurate", xy_goal_tolerance_accurate_);
   nh->get_parameter(plugin_name + ".yaw_goal_tolerance_accurate", yaw_goal_tolerance_accurate_);
   nh->get_parameter(plugin_name + ".stateful", stateful_);
+  nh->get_parameter(plugin_name + ".distance_from_walls", distance_from_walls_);
+
+  std::string specific_area_coords_string;
+  nh->get_parameter(plugin_name + ".specific_area_coords", specific_area_coords_string);
+
+  if (specific_area_coords_string.compare("NULL") != 0) {
+    std::string error_return;
+    specific_area_coords = nav2_costmap_2d::parseVVF(specific_area_coords_string, error_return);
+  }
+  else
+  {
+    specific_area_coords = {{0.0, 0.0, 0.0, 0.0}};
+    RCLCPP_WARN(rclcpp::get_logger("custom_goal_checker"), "No specific_area_coords in yaml, considering no specific area");
+  }
 
   xy_goal_tolerance_sq_nominal_ = xy_goal_tolerance_nominal_ * yaw_goal_tolerance_nominal_;
   xy_goal_tolerance_sq_accurate_ = xy_goal_tolerance_accurate_ * yaw_goal_tolerance_accurate_;
@@ -94,12 +114,12 @@ bool CustomGoalChecker::isGoalReached(
 }
 
 bool CustomGoalChecker::nearWalls(const geometry_msgs::msg::Pose & pose){
-  return pose.position.x < distance_from_walls || pose.position.x > 3.0 - distance_from_walls
-    || pose.position.y < distance_from_walls || pose.position.y > 2.0 - distance_from_walls;
+  return pose.position.x < distance_from_walls_ || pose.position.x > 3.0 - distance_from_walls_
+    || pose.position.y < distance_from_walls_ || pose.position.y > 2.0 - distance_from_walls_;
 }
 
 bool CustomGoalChecker::intoSpecificZone(const geometry_msgs::msg::Pose & pose){
-  for(int i = 0; i < 10; i++){
+  for(int i = 0; i < (int)specific_area_coords.size(); i++){
     if (pose.position.x > specific_area_coords[i][0] && pose.position.x < specific_area_coords[i][2]
       && pose.position.y > specific_area_coords[i][1] && pose.position.y < specific_area_coords[i][3]) return true;
   }

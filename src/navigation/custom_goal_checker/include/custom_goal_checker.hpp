@@ -7,6 +7,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "nav2_core/goal_checker.hpp"
+#include <nav2_costmap_2d/array_parser.hpp>
 
 namespace nav2_controller
 {
@@ -32,20 +33,8 @@ protected:
   bool stateful_, check_xy_;
   double xy_goal_tolerance_sq_nominal_, xy_goal_tolerance_sq_accurate_;
 
-  const double distance_from_walls = 0.25;
-  const double distance_ = 0.15;
-  double specific_area_coords[10][4] = {
-    {0.9, 0.0, 1.5, 0.3 + distance_},
-    {1.5, 0.0, 2.1, 0.3 + distance_},
-    {0.0, 0.885 - distance_, 0.4 + distance_, 0.885},
-    {0.0, 0.885, 0.4 + distance_, 0.885 + distance_},
-    {0.0, 1.485 - distance_, 0.4 + distance_, 1.485},
-    {0.0, 1.485, 0.4 + distance_, 1.485 + distance_},
-    {2.6 - distance_, 0.885 - distance_, 3.0, 0.885},
-    {2.6 - distance_, 0.885, 3.0, 0.885 + distance_},
-    {2.6 - distance_, 1.485 - distance_, 3.0, 1.485},
-    {2.6 - distance_, 1.485, 3.0, 1.485 + distance_}
-  };
+  double distance_from_walls_;
+  std::vector<std::vector<float>> specific_area_coords;
 };
 
 }  // namespace nav2_controller
