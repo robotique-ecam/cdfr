@@ -8,6 +8,7 @@
 #include "nav_msgs/msg/path.hpp"
 #include "tf2_ros/buffer.h"
 #include "nav2_util/robot_utils.hpp"
+#include <nav2_costmap_2d/array_parser.hpp>
 
 #include "behaviortree_cpp_v3/action_node.h"
 
@@ -58,33 +59,9 @@ private:
   rclcpp::Node::SharedPtr node_;
   double transform_tolerance_;
 
-  double distance_from_walls = 0.25;
-  double distance_ = 0.15;
-
-  double specific_area_coords[10][4] = {
-    {0.9, 0.0, 1.5, 0.3 + distance_},
-    {1.5, 0.0, 2.1, 0.3 + distance_},
-    {0.0, 0.885 - distance_, 0.4 + distance_, 0.885},
-    {0.0, 0.885, 0.4 + distance_, 0.885 + distance_},
-    {0.0, 1.485 - distance_, 0.4 + distance_, 1.485},
-    {0.0, 1.485, 0.4 + distance_, 1.485 + distance_},
-    {2.6 - distance_, 0.885 - distance_, 3.0, 0.885},
-    {2.6 - distance_, 0.885, 3.0, 0.885 + distance_},
-    {2.6 - distance_, 1.485 - distance_, 3.0, 1.485},
-    {2.6 - distance_, 1.485, 3.0, 1.485 + distance_}
-  };
-  double exit_area_coords[10] = {
-    0.3 + distance_,
-    0.3 + distance_,
-    0.885 - distance_,
-    0.885 + distance_,
-    1.485 - distance_,
-    1.485 + distance_,
-    0.885 - distance_,
-    0.885 + distance_,
-    1.485 - distance_,
-    1.485 + distance_
-  };
+  double distance_from_walls_;
+  std::vector<std::vector<float>> specific_area_coords;
+  std::vector<float> exit_area_coords;
 
   int get_out_area, get_in_area;
 

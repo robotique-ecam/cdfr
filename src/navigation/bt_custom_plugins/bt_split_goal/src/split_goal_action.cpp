@@ -4,6 +4,7 @@
 
 #include "nav_msgs/msg/path.hpp"
 #include "nav2_util/geometry_utils.hpp"
+#include "nav2_util/node_utils.hpp"
 #include "behaviortree_cpp_v3/decorator_node.h"
 
 #include <split_goal_action.hpp>
@@ -20,6 +21,43 @@ SplitGoal::SplitGoal(
   node_ = config().blackboard->get<rclcpp::Node::SharedPtr>("node");
   tf_ = config().blackboard->get<std::shared_ptr<tf2_ros::Buffer>>("tf_buffer");
   node_->get_parameter("transform_tolerance", transform_tolerance_);
+
+  nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.distance_from_walls", rclcpp::ParameterValue(0.15));
+  nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.specific_area_coords", rclcpp::ParameterValue("NULL"));
+  nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.exit_area_coords", rclcpp::ParameterValue("NULL"));
+
+  node_->get_parameter("bt_split_goal.distance_from_walls", distance_from_walls_);
+
+  std::string specific_area_coords_string;
+  node_->get_parameter("bt_split_goal.specific_area_coords", specific_area_coords_string);
+
+  if (specific_area_coords_string.compare("NULL") != 0) {
+    std::string error_return;
+    specific_area_coords = nav2_costmap_2d::parseVVF(specific_area_coords_string, error_return);
+  }
+  else
+  {
+    specific_area_coords = {{0.0, 0.0, 0.0, 0.0}};
+    RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "No specific_area_coords in yaml, considering no specific area");
+  }
+
+  std::string exit_area_coords_string;
+  std::vector<std::vector<float>> exit_area_vect;
+  node_->get_parameter("bt_split_goal.exit_area_coords", exit_area_coords_string);
+
+  if (exit_area_coords_string.compare("NULL") != 0) {
+    std::string error_return;
+    exit_area_vect = nav2_costmap_2d::parseVVF(exit_area_coords_string, error_return);
+  }
+  else
+  {
+    exit_area_vect = {{0.0}};
+    RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "No exit_area_coords in yaml, considering no exit area");
+  }
+  exit_area_coords = exit_area_vect[0];
 }
 
 inline BT::NodeStatus SplitGoal::tick()
@@ -87,12 +125,12 @@ void SplitGoal::setOutputPort(){
 }
 
 bool SplitGoal::nearWalls(geometry_msgs::msg::PoseStamped & pose){
-  return pose.pose.position.x < distance_from_walls || pose.pose.position.x > 3.0 - distance_from_walls
-    || pose.pose.position.y < distance_from_walls || pose.pose.position.y > 2.0 - distance_from_walls;
+  return pose.pose.position.x < distance_from_walls_ || pose.pose.position.x > 3.0 - distance_from_walls_
+    || pose.pose.position.y < distance_from_walls_ || pose.pose.position.y > 2.0 - distance_from_walls_;
 }
 
 int SplitGoal::intoSpecificZone(geometry_msgs::msg::PoseStamped & pose){
-  for(int i = 0; i < 10; i++){
+  for(int i = 0; i < (int)specific_area_coords.size(); i++){
     if (pose.pose.position.x > specific_area_coords[i][0] && pose.pose.position.x < specific_area_coords[i][2]
       && pose.pose.position.y > specific_area_coords[i][1] && pose.pose.position.y < specific_area_coords[i][3]) return i;
   }
@@ -104,7 +142,6 @@ void SplitGoal::setAutoQuaternions(){
 
   if (get_out_need_){
     geometry_msgs::msg::Quaternion q_out = current_pose_.pose.orientation;
-    RCLCPP_WARN(node_->get_logger(), "q_out z: %f, w: %f", q_out.z, q_out.w);
     if ( (abs(q_out.z - 0.7071068)<0.22 &&  abs(q_out.w - 0.7071068)<0.22)
         || (abs(q_out.z + 0.7071068)<0.22 &&  abs(q_out.w + 0.7071068)<0.22) ){
       q.z = q.w = 0.7071068;
@@ -149,10 +186,10 @@ void SplitGoal::setAutoPositions(){
 }
 
 void SplitGoal::setPositionNearWall(geometry_msgs::msg::PoseStamped & pose){
-  if (pose.pose.position.x < distance_from_walls) pose.pose.position.x = distance_from_walls;
-  else if (pose.pose.position.x > 3.0 - distance_from_walls) pose.pose.position.x = 3.0 - distance_from_walls;
-  else if (pose.pose.position.y < distance_from_walls) pose.pose.position.y = distance_from_walls;
-  else pose.pose.position.y = 2.0 - distance_from_walls;
+  if (pose.pose.position.x < distance_from_walls_) pose.pose.position.x = distance_from_walls_;
+  else if (pose.pose.position.x > 3.0 - distance_from_walls_) pose.pose.position.x = 3.0 - distance_from_walls_;
+  else if (pose.pose.position.y < distance_from_walls_) pose.pose.position.y = distance_from_walls_;
+  else pose.pose.position.y = 2.0 - distance_from_walls_;
 }
 
 }  // namespace nav2_behavior_tree
