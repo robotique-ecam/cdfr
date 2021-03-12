@@ -1,12 +1,6 @@
 #ifndef BOOLEAN_CONDITION_ACTION_HPP_
 #define BOOLEAN_CONDITION_ACTION_HPP_
 
-#include <memory>
-#include <string>
-
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "nav_msgs/msg/path.hpp"
-
 #include "behaviortree_cpp_v3/action_node.h"
 
 namespace nav2_behavior_tree
