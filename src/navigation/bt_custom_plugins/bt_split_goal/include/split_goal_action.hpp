@@ -64,6 +64,9 @@ private:
 
   int get_out_area, get_in_area;
 
+  const float sqrt2by2 = 0.7071068,
+              quaternionDiff = 0.22;
+
 };
 
 }  // namespace nav2_behavior_tree

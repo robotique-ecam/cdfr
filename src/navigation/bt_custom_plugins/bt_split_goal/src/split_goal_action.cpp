@@ -91,10 +91,10 @@ inline BT::NodeStatus SplitGoal::tick()
   get_out_goal_ = current_pose_;
 
   get_out_area = intoSpecificZone(current_pose_);
-  if (nearWalls(current_pose_) || get_out_area != 10) get_out_need_ = true;
+  if (nearWalls(current_pose_) || get_out_area != (int)specific_area_coords.size()) get_out_need_ = true;
 
   get_in_area = intoSpecificZone(goal_);
-  if (nearWalls(goal_) || get_in_area != 10) get_in_need_ = true;
+  if (nearWalls(goal_) || get_in_area != (int)specific_area_coords.size()) get_in_need_ = true;
 
   setAutoQuaternions();
 
@@ -125,7 +125,7 @@ int SplitGoal::intoSpecificZone(geometry_msgs::msg::PoseStamped & pose){
     if (pose.pose.position.x > specific_area_coords[i][0] && pose.pose.position.x < specific_area_coords[i][2]
       && pose.pose.position.y > specific_area_coords[i][1] && pose.pose.position.y < specific_area_coords[i][3]) return i;
   }
-  return 10;
+  return (int)specific_area_coords.size();
 }
 
 void SplitGoal::setAutoQuaternions(){
@@ -133,22 +133,22 @@ void SplitGoal::setAutoQuaternions(){
 
   if (get_out_need_){
     geometry_msgs::msg::Quaternion q_out = current_pose_.pose.orientation;
-    if ( (abs(q_out.z - 0.7071068)<0.22 &&  abs(q_out.w - 0.7071068)<0.22)
-        || (abs(q_out.z + 0.7071068)<0.22 &&  abs(q_out.w + 0.7071068)<0.22) ){
-      q.z = q.w = 0.7071068;
+    if ( (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
+        || (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
+      q.z = q.w = sqrt2by2;
     }
-    else if ( (abs(q_out.z + 0.7071068)<0.22 &&  abs(q_out.w - 0.7071068)<0.22)
-        || (abs(q_out.z - 0.7071068)<0.22 &&  abs(q_out.w + 0.7071068)<0.22) ){
-      q.z = -0.7071068;
-      q.w = 0.7071068;
+    else if ( (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
+        || (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
+      q.z = -sqrt2by2;
+      q.w = sqrt2by2;
     }
-    else if ( (abs(q_out.z)<0.22 &&  abs(q_out.w - 1.0)<0.22)
-        || (abs(q_out.z)<0.22 &&  abs(q_out.w + 1.0)<0.22) ){
+    else if ( (abs(q_out.z)<quaternionDiff &&  abs(q_out.w - 1.0)<quaternionDiff)
+        || (abs(q_out.z)<quaternionDiff &&  abs(q_out.w + 1.0)<quaternionDiff) ){
       q.z = 0.0;
       q.w = 1.0;
     }
-    else if ( (abs(q_out.z - 1.0)<0.22 &&  abs(q_out.w)<0.22)
-        || (abs(q_out.z + 1.0)<0.22 &&  abs(q_out.w)<0.22) ){
+    else if ( (abs(q_out.z - 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff)
+        || (abs(q_out.z + 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff) ){
       q.z = 1.0;
       q.w = 0.0;
     }
@@ -156,20 +156,18 @@ void SplitGoal::setAutoQuaternions(){
     get_out_goal_.pose.orientation = q;
   }
 
-  //if get_in_need
-  // check orientation ?
   nominal_goal_. pose.orientation = goal_.pose.orientation;
 }
 
 void SplitGoal::setAutoPositions(){
   if (get_out_need_){
-    if (get_out_area != 10) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
+    if (get_out_area != (int)specific_area_coords.size()) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
     else {
       setPositionNearWall(get_out_goal_);
     }
   }
   if (get_in_need_){
-    if (get_in_area != 10) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+    if (get_in_area != (int)specific_area_coords.size()) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
     else {
       setPositionNearWall(nominal_goal_);
     }
