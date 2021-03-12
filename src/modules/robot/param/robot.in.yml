@@ -1,5 +1,13 @@
 !Defaults
 use_sim_time: False
+specific_area_coords: "[[0.9, 0.0, 1.5, 0.45],
+[1.5, 0.0, 2.1, 0.45],[0.0, 0.735, 0.55, 0.885],
+[0.0, 0.885, 0.55, 1.035],[0.0, 1.335, 0.55, 1.485],
+[0.0, 1.485, 0.55, 1.635],[2.45, 0.735, 3.0, 0.885],
+[2.45, 0.885, 3.0, 1.035],[2.45, 1.335, 3.0, 1.485],
+[2.45, 1.485, 3.0, 1.635]]"
+exit_area_coords: "[[0.45, 0.45, 0.735, 1.035, 1.335, 1.635, 0.735, 1.035, 1.335, 1.635]]"
+distance_from_walls: 0.25
 ---
 amcl:
   ros__parameters:
@@ -41,6 +49,8 @@ bt_navigator:
     - nav2_transform_available_condition_bt_node
     - nav2_time_expired_condition_bt_node
     - nav2_distance_traveled_condition_bt_node
+    - bt_split_goal
+    - bt_boolean_condition
 
 
 bt_navigator_rclcpp_node:
@@ -61,18 +71,25 @@ controller_server:
     min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
     progress_checker_plugin: "progress_checker"
-    goal_checker_plugin: "goal_checker"
-    controller_plugins: ["DynamicFollowPath"]
+    goal_checker_plugin: "custom_goal_checker"
+    controller_plugins: ["NominalController", "AccurateController"]
+
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.02
       movement_time_allowance: 10.0
-    goal_checker:
-      plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.02
-      yaw_goal_tolerance: 0.05
-      stateful: True
-    DynamicFollowPath:
+
+    custom_goal_checker:
+      plugin: "nav2_controller::CustomGoalChecker"
+      xy_goal_tolerance_nominal: 0.02
+      yaw_goal_tolerance_nominal: 0.05
+      xy_goal_tolerance_accurate: 0.01
+      yaw_goal_tolerance_accurate: 0.01
+      stateful: true
+      specific_area_coords: !Var specific_area_coords
+      distance_from_walls: !Var distance_from_walls
+
+    NominalController:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       # Robot footprint
       footprint_model.type: polygon
@@ -115,6 +132,50 @@ controller_server:
 
       # Miscellaneous
       map_frame: "map"
+
+    AccurateController:
+      plugin: teb_local_planner::TebLocalPlannerROS
+      # Robot footprint
+      footprint_model.type: polygon
+
+      # Goal tolerance
+      xy_goal_tolerance: 0.01
+      yaw_goal_tolerance: 0.01
+
+      # Obstacles
+      min_obstacle_dist: 0.005
+      inflation_dist: 0.45
+      costmap_converter_plugin: costmap_converter/Custom
+      costmap_converter_spin_thread: true
+      costmap_converter_rate: 5
+      include_costmap_obstacles: true
+      costmap_obstacles_behind_robot_dist: 3.8
+      include_dynamic_obstacles: true
+
+      # Homotopy Class Planner
+      enable_homotopy_class_planning: true
+      enable_multithreading: true
+      delete_detours_backwards: false
+      selection_obst_cost_scale: 255.0
+
+      # Optimisation
+      optimization_activate: true
+      optimization_verbose: false
+      weight_kinematics_forward_drive: 0.0
+      weight_obstacle: 100.0
+      weight_prefer_rotdir: 0.0
+
+      # Trajectory
+      teb_autoresize: true
+      exact_arc_length: false
+      min_samples: 3
+      max_samples: 100
+      max_global_plan_lookahead_dist: 3.7
+      global_plan_overwrite_orientation: true
+      allow_init_with_backwards_motion: true
+
+      # Miscellaneous
+      map_frame: map
 
 costmap_converter:
   ros__parameters:
@@ -214,3 +275,11 @@ planner_server_rclcpp_node:
 robot_state_publisher:
   ros__parameters:
     use_sim_time: !Var use_sim_time
+
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: false
+    bt_split_goal:
+      distance_from_walls: !Var distance_from_walls
+      specific_area_coords: !Var specific_area_coords
+      exit_area_coords: !Var exit_area_coords
