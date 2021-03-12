@@ -1,14 +1,13 @@
 #ifndef SPLIT_GOAL_ACTION_HPP_
 #define SPLIT_GOAL_ACTION_HPP_
 
-#include <memory>
-#include <string>
-
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include "nav_msgs/msg/path.hpp"
 #include "tf2_ros/buffer.h"
+
 #include "nav2_util/robot_utils.hpp"
-#include <nav2_costmap_2d/array_parser.hpp>
+#include "nav2_util/geometry_utils.hpp"
+#include "nav2_util/node_utils.hpp"
+#include "nav2_costmap_2d/array_parser.hpp"
 
 #include "behaviortree_cpp_v3/action_node.h"
 
