@@ -14,6 +14,7 @@ PROTO Asterix [
   field SFBool     supervisor      TRUE                  # Is `Robot.supervisor`.
   field SFBool     synchronization FALSE                 # Is `Robot.synchronization`.
   field MFNode     arucoTag        [ Aruco { } ]         # Is `Robot.arucoTag`.
+  field MFNode     vlx             [ VlxManager { } ] # Is `Robot.vlx`.
 ]
 {
   Robot {
@@ -138,35 +139,9 @@ PROTO Asterix [
         translation 0 0 0.17
         children IS arucoTag
       }
-      VL53L1X {
-        name "vlx_0x30"
-        translation 0.08 -0.13 -0.14
-        rotation 0 0 1 -1.5708
-      }
-      VL53L1X {
-        name "vlx_0x31"
-        translation 0.1 -0.11 -0.14
-        rotation 0 0 1 0
-      }
-      VL53L1X {
-        name "vlx_0x32"
-        translation 0.1 0.11 -0.14
-        rotation 0 0 1 0
-      }
-      VL53L1X {
-        name "vlx_0x33"
-        translation 0.08 0.13 -0.14
-        rotation 0 0 1 1.5708
-      }
-      VL53L1X {
-        name "vlx_0x34"
-        translation -0.1 0.11 -0.14
-        rotation 0 0 1 -3.14159
-      }
-      VL53L1X {
-        name "vlx_0x35"
-        translation -0.1 -0.11 -0.14
-        rotation 0 0 1 -3.14159
+      Transform {
+        translation 0 0 0.0
+        children IS vlx
       }
     ]
     name "robotbase"

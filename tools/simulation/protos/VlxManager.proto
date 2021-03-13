@@ -1,0 +1,56 @@
+#VRML_SIM R2020b utf8
+PROTO VlxManager [
+  field SFVec3f    vlx0_tr           0.08 -0.1305 -0.14
+  field SFRotation vlx0_rot          0 0 1 -1.5708
+  field SFVec3f    vlx1_tr           0.1005 -0.11 -0.14
+  field SFRotation vlx1_rot          0 0 1 0
+  field SFVec3f    vlx2_tr           0.1005 0.11 -0.14
+  field SFRotation vlx2_rot          0 0 1 0
+  field SFVec3f    vlx3_tr           0.08 0.1305 -0.14
+  field SFRotation vlx3_rot          0 0 1 1.5708
+  field SFVec3f    vlx4_tr           -0.1005 0.11 -0.14
+  field SFRotation vlx4_rot          0 0 1 -3.14159
+  field SFVec3f    vlx5_tr           -0.1005 -0.11 -0.14
+  field SFRotation vlx5_rot          0 0 1 -3.14159
+  field SFString   name            "vlx_manager"             # Is `Solid.name`.
+]
+{
+  Robot {
+    name IS name
+    controller "<extern>"
+    supervisor TRUE
+    synchronization FALSE
+    children [
+      VL53L1X {
+        name "vlx_0x30"
+        translation IS vlx0_tr
+        rotation IS vlx0_rot
+      }
+      VL53L1X {
+        name "vlx_0x31"
+        translation IS vlx1_tr
+        rotation IS vlx1_rot
+      }
+      VL53L1X {
+        name "vlx_0x32"
+        translation IS vlx2_tr
+        rotation IS vlx2_rot
+      }
+      VL53L1X {
+        name "vlx_0x33"
+        translation IS vlx3_tr
+        rotation IS vlx3_rot
+      }
+      VL53L1X {
+        name "vlx_0x34"
+        translation IS vlx4_tr
+        rotation IS vlx4_rot
+      }
+      VL53L1X {
+        name "vlx_0x35"
+        translation IS vlx5_tr
+        rotation IS vlx5_rot
+      }
+    ]
+  }
+}
