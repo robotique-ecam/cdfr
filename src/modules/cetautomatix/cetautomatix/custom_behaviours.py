@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import py_trees
 
 try:
@@ -16,16 +15,15 @@ class NewAction(py_trees.behaviour.Behaviour):
         self.robot = robot
 
     def update(self):
-        if self.robot._current_action is None:
-            available = self.robot.fetch_available_actions()
-            best_action = self.robot.compute_best_action(available)
-            return (
-                py_trees.common.Status.SUCCESS
-                if self.robot.preempt_action(best_action)
-                else py_trees.common.Status.FAILURE
-            )
-        else:
-            return py_trees.common.Status.SUCCESS
+        if self.robot.action_queue.empty():
+            available_actions = self.robot.fetch_available_actions()
+            best_action = self.robot.compute_best_action(available_actions)
+            self.robot.action_queue.put(best_action)
+        return (
+            py_trees.common.Status.SUCCESS
+            if self.robot.preempt_action(self.robot.action_queue.get())
+            else py_trees.common.Status.FAILURE
+        )
 
 
 class ConfirmAction(py_trees.behaviour.Behaviour):
@@ -105,7 +103,7 @@ class EndOfGameAction(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
         super().__init__(name=name)
         self.robot = robot
-        self.time = 1e5
+        self.time = 100000
         self.visited = False
 
     def update(self):
