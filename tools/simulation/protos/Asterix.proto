@@ -14,7 +14,7 @@ PROTO Asterix [
   field SFBool     supervisor      TRUE                  # Is `Robot.supervisor`.
   field SFBool     synchronization FALSE                 # Is `Robot.synchronization`.
   field MFNode     arucoTag        [ Aruco { } ]         # Is `Robot.arucoTag`.
-  field MFNode     vlx             [ VlxManager { } ] # Is `Robot.vlx`.
+  field MFNode     vlx             [ VlxManager { name "asterix_vlx_manager" } ]    # Is `Robot.vlx`.
 ]
 {
   Robot {
