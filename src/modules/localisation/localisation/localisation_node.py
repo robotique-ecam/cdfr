@@ -6,14 +6,17 @@
 
 import math
 import numpy as np
+import copy
 
 import rclpy
-from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from transformix_msgs.srv import TransformixParametersTransformStamped
 from localisation.sensors_sim import Sensors
+from nav_msgs.msg import Odometry
+from tf2_kdl import *
 
 
 class Localisation(rclpy.node.Node):
@@ -45,6 +48,12 @@ class Localisation(rclpy.node.Node):
             MarkerArray,
             "/allies_positions_markers",
             self.allies_subscription_callback,
+            10,
+        )
+        self.subscription_ = self.create_subscription(
+            Odometry,
+            "odom",
+            self.odom_callback,
             10,
         )
         self.tf_publisher_ = self.create_publisher(
@@ -141,10 +150,7 @@ class Localisation(rclpy.node.Node):
                 allie_marker.text.lower() == self.robot
                 and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5
             ):
-                self._x = allie_marker.pose.position.x
-                self._y = allie_marker.pose.position.y
                 q = allie_marker.pose.orientation
-                self._theta = self.quaternion_to_euler(q.x, q.y, q.z, q.w)[2]
                 self._tf.header.stamp = allie_marker.header.stamp
                 self._tf.transform.translation.x = allie_marker.pose.position.x
                 self._tf.transform.translation.y = allie_marker.pose.position.y
@@ -157,6 +163,19 @@ class Localisation(rclpy.node.Node):
         self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
         response.transform_stamped = self._initial_tf
         return response
+
+    def odom_callback(self, msg):
+        """Odom callback, compute the new pose of the robot relative to map"""
+        robot_tf = TransformStamped()
+        robot_tf.transform.translation.x = msg.pose.pose.position.x
+        robot_tf.transform.translation.y = msg.pose.pose.position.y
+        robot_tf.transform.rotation = msg.pose.pose.orientation
+        robot_frame = transform_to_kdl(robot_tf)
+        new_robot_pose_kdl = do_transform_frame(robot_frame, self._initial_tf)
+        self.robot_pose.pose.position.x = new_robot_pose_kdl.p.x()
+        self.robot_pose.pose.position.y = new_robot_pose_kdl.p.y()
+        q = new_robot_pose_kdl.M.GetQuaternion()
+        self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
 
 def main(args=None):
