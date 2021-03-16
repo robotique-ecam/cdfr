@@ -15,6 +15,7 @@ from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from transformix_msgs.srv import TransformixParametersTransformStamped
 from localisation.sensors_sim import Sensors
+from localisation.utils import euler_to_quaternion
 from nav_msgs.msg import Odometry
 from tf2_kdl import *
 
@@ -33,7 +34,7 @@ class Localisation(rclpy.node.Node):
             self.robot_pose.pose.position.y,
             theta,
         ) = self.fetchStartPosition()
-        self.robot_pose.pose.orientation = self.euler_to_quaternion(theta)
+        self.robot_pose.pose.orientation = euler_to_quaternion(theta)
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
         self._tf.header.frame_id = "map"
@@ -79,7 +80,7 @@ class Localisation(rclpy.node.Node):
                 self.robot_pose.pose.position.y,
                 theta,
             ) = self.fetchStartPosition()
-            self.robot_pose.pose.orientation = self.euler_to_quaternion(theta)
+            self.robot_pose.pose.orientation = euler_to_quaternion(theta)
             self.update_transform()
             result.successful = True
         except BaseException as e:
@@ -101,36 +102,6 @@ class Localisation(rclpy.node.Node):
                 return (3 - 0.29, 1.33, np.pi)
         # Make it crash in case of undefined parameters
         return None
-
-    def euler_to_quaternion(self, yaw, pitch=0, roll=0):
-        """Conversion between euler angles and quaternions."""
-        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
-            roll / 2
-        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
-        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(
-            roll / 2
-        ) * np.cos(pitch / 2) * np.sin(yaw / 2)
-        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(
-            roll / 2
-        ) * np.sin(pitch / 2) * np.cos(yaw / 2)
-        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
-            roll / 2
-        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
-        return Quaternion(x=qx, y=qy, z=qz, w=qw)
-
-    def quaternion_to_euler(self, x, y, z, w):
-        """Conversion between quaternions and euler angles."""
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        X = math.atan2(t0, t1)
-        t2 = +2.0 * (w * y - z * x)
-        t2 = +1.0 if t2 > +1.0 else t2
-        t2 = -1.0 if t2 < -1.0 else t2
-        Y = math.asin(t2)
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        Z = math.atan2(t3, t4)
-        return (X, Y, Z)
 
     def update_transform(self):
         """Update and publish transform odom --> map."""
