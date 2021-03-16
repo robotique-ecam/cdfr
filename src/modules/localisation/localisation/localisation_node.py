@@ -24,7 +24,13 @@ class Localisation(rclpy.node.Node):
         self.robot = self.get_namespace().strip("/")
         self.side = self.declare_parameter("side", "blue")
         self.add_on_set_parameters_callback(self._on_set_parameters)
-        self._x, self._y, self._theta = self.fetchStartPosition()
+        self.robot_pose = PoseStamped()
+        (
+            self.robot_pose.pose.position.x,
+            self.robot_pose.pose.position.y,
+            theta,
+        ) = self.fetchStartPosition()
+        self.robot_pose.pose.orientation = self.euler_to_quaternion(theta)
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
         self._tf.header.frame_id = "map"
@@ -59,7 +65,13 @@ class Localisation(rclpy.node.Node):
                     self.side = param
                 else:
                     setattr(self, param.name, param)
-            self._x, self._y, self._theta = self.fetchStartPosition()
+            (
+                self.robot_pose.pose.position.x,
+                self.robot_pose.pose.position.y,
+                theta,
+            ) = self.fetchStartPosition()
+            self.robot_pose.pose.orientation = self.euler_to_quaternion(theta)
+            self.update_transform()
             result.successful = True
         except BaseException as e:
             result.reason = e
@@ -95,7 +107,7 @@ class Localisation(rclpy.node.Node):
         qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
             roll / 2
         ) * np.sin(pitch / 2) * np.sin(yaw / 2)
-        return [qx, qy, qz, qw]
+        return Quaternion(x=qx, y=qy, z=qz, w=qw)
 
     def quaternion_to_euler(self, x, y, z, w):
         """Conversion between quaternions and euler angles."""
@@ -112,21 +124,18 @@ class Localisation(rclpy.node.Node):
         return (X, Y, Z)
 
     def update_transform(self):
-        """Update and publish transform callback."""
+        """Update and publish transform odom --> map."""
         self._tf.header.stamp = self.get_clock().now().to_msg()
-        self._tf.transform.translation.x = float(self._x)
-        self._tf.transform.translation.y = float(self._y)
-        qx, qy, qz, qw = self.euler_to_quaternion(self._theta)
-        self._tf.transform.rotation.x = float(qx)
-        self._tf.transform.rotation.y = float(qy)
-        self._tf.transform.rotation.z = float(qz)
-        self._tf.transform.rotation.w = float(qw)
-        self._initial_tf = self._tf
+        self._tf.transform.translation.x = self.robot_pose.pose.position.x
+        self._tf.transform.translation.y = self.robot_pose.pose.position.y
+        self._tf.transform.rotation = self.robot_pose.pose.orientation
+        self._initial_tf = copy.deepcopy(self._tf)
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
         """Identity the robot marker in assurancetourix marker_array detection
-        publish the transformation for drive to readjust odometry"""
+        publish the transformation for drive to readjust odometry
+        compute base_link --> odom"""
         for allie_marker in msg.markers:
             if (
                 allie_marker.text.lower() == self.robot

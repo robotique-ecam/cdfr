@@ -7,6 +7,7 @@ from os import environ
 
 from webots_ros2_core.webots_node import WebotsNode
 
+
 class Sensors:
     def __init__(self, node, addrs=[]):
         """Init sensors baseclass."""
@@ -35,6 +36,7 @@ class Sensors:
         """Destructor."""
         for vlx in self._vlx_array:
             vlx.disable()
+
 
 class VlxSupervisor(WebotsNode):
     """Vlx manager node."""
