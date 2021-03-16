@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
 
-
-from importlib import import_module
-from platform import machine
-from rclpy.node import Node
-from lcd_msgs.msg import Lcd
-from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
-from strategix.actions import actions
 import Queue
 import rclpy
 import py_trees
+import psutil
+import math
+import numpy as np
+from signal import SIGINT
+from subprocess import call
+from importlib import import_module
+from platform import machine
+from rclpy.node import Node
+from rclpy.time import Duration, Time
+from tf2_ros import LookupException, ConnectivityException
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+from nav_msgs.msg import Odometry
+from lcd_msgs.msg import Lcd
+from std_srvs.srv import SetBool, Trigger
+from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
+from strategix.actions import actions
+from cetautomatix.selftest import Selftest
+from cetautomatix import tf2_geometry_msgs
 
 
 class Robot(Node):
@@ -20,17 +32,37 @@ class Robot(Node):
         self.name = self.get_namespace().strip("/")
         # Bind actuators
         self.actuators = import_module(f"actuators.{self.name}").actuators
+        # Do selftest
+        self.selftest = Selftest(self)
+        # Prechill engines
+        self.actuators.setFansEnabled(True)
         # Create empty action queue
         self.action_queue = Queue.Queue()
         self.current_action = None
+        # Stop ROS service
+        self.stop_ros_service = self.create_service(
+            Trigger, "stop", self.stop_robot_callback
+        )
         # Strategix client to get available actions
         self.get_available_actions_request = GetAvailableActions.Request()
         self.get_available_actions_request.sender = self.name
-        self.get_available_actions_client = self.create_client(GetAvailableActions, "/strategix/available")
+        self.get_available_actions_client = self.create_client(
+            GetAvailableActions, "/strategix/available"
+        )
         # Strategix client to change the status of an action
         self.change_action_status_request = ChangeActionStatus.Request()
         self.change_action_status_request.sender = self.name
-        self.change_action_status_client = self.create_client(ChangeActionStatus, "/strategix/action")
+        self.change_action_status_client = self.create_client(
+            ChangeActionStatus, "/strategix/action"
+        )
+        # Odometry subscriber
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+        self.odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
+        self.odom_callback(self.odom_pose_stamped)
+        self.odom_sub = self.create_subscription(
+            Odometry, "odom", self.odom_callback, 1
+        )
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name="NavigateToPose")
         self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
@@ -38,7 +70,32 @@ class Robot(Node):
         self.lcd_driver_pub = self.create_publisher(Lcd, "/obelix/lcd", 1)
         # Wait for Strategix as this can block the whole Behaviour Tree
         while not self.get_available_client.wait_for_service(timeout_sec=5):
-            self.get_logger().warn("Failed to contact strategix services ! Has it been started ?")
+            self.get_logger().warn(
+                "Failed to contact strategix services ! Has it been started ?"
+            )
+        # Enable stepper drivers
+        if not self.simulation:
+            self.get_enable_drivers_request = SetBool.Request()
+            self.get_enable_drivers_request.data = True
+            self.get_enable_drivers_client = self.create_client(
+                SetBool, "enable_drivers"
+            )
+            self.synchronous_call(
+                self.get_enable_drivers_client, self.get_enable_drivers_request
+            )
+        # Robot trigger service
+        self.trigger_start_robot_server = self.create_service(
+            Trigger, "start", self.start_robot_callback
+        )
+        if self.name == "obelix":
+            self.trigger_start_asterix_request = Trigger.Request()
+            self.trigger_start_asterix_client = self.create_client(
+                Trigger, "/asterix/start"
+            )
+        # Reached initialized state
+        self.get_logger().info("Cetautomatix ROS node has been started")
+
+    """~~~~~~~~~~~~~~ BASE FUNCTIONS ~~~~~~~~~~~~~~"""
 
     def synchronous_call(self, client, request):
         """Call service synchronously."""
@@ -52,7 +109,9 @@ class Robot(Node):
 
     def fetch_available_actions(self):
         """Fetch available actions from Strategix."""
-        response = self.synchronous_call(self.get_available_actions_client, self.get_available_actions_request)
+        response = self.synchronous_call(
+            self.get_available_actions_client, self.get_available_actions_request
+        )
         return response.available if response is not None else []
 
     def preempt_action(self, action):
@@ -61,7 +120,9 @@ class Robot(Node):
             return False
         self.change_action_status_request.action = str(action)
         self.change_action_status_request.request = "PREEMPT"
-        response = self.synchronous_call(self.change_action_status_client, self.change_action_status_request)
+        response = self.synchronous_call(
+            self.change_action_status_client, self.change_action_status_request
+        )
         if response is None:
             return False
         self.current_action = action if response.success else None
@@ -75,7 +136,9 @@ class Robot(Node):
             return False
         self.change_action_status_request.action = self.current_action
         self.change_action_status_request.request = "DROP"
-        response = self.synchronous_call(self.change_action_status_client, self.change_action_status_request)
+        response = self.synchronous_call(
+            self.change_action_status_client, self.change_action_status_request
+        )
         if response is None:
             return False
         self.current_action = None
@@ -87,22 +150,142 @@ class Robot(Node):
             return False
         self.change_action_status_request.action = self.current_action
         self.change_action_status_request.request = "CONFIRM"
-        response = self.synchronous_call(self.change_action_status_client, self.change_action_status_request)
+        response = self.synchronous_call(
+            self.change_action_status_client, self.change_action_status_request
+        )
         if response is None:
             return False
         self.current_action = None
         return response.success
 
     def start_actuator_action(self):
+        """Start the actuator action after the robot has reached its destination."""
         self.get_logger().info(f"START ACTUATOR {self.current_action}")
         return actions.get(self.current_action).start_actuator(self)
 
+    def start_robot_callback(self, req, resp):
+        """Start robot."""
+        self.triggered = True
+        self.get_logger().info("Triggered robot starter")
+        if self.robot == "obelix":
+            # TODO : Fix sync call
+            # Thread(target=self.synchronous_call, args=[self.trigger_start_asterix_client, self.trigger_start_asterix_request]).start()
+            self.get_logger().info("Obelix triggered Asterix")
+        self.start_time = self.get_clock().now().nanoseconds * 1e-9
+        lcd_msg = Lcd()
+        lcd_msg.line = 0
+        lcd_msg.text = f"{self.name.capitalize()} running".ljust(16)
+        self.lcd_driver_pub.publish(lcd_msg)
+        lcd_msg.line = 1
+        lcd_msg.text = "Score: 0".ljust(16)
+        self.lcd_driver_pub.publish(lcd_msg)
+        if hasattr(resp, "success"):
+            resp.success = True
+        return resp
+
+    def odom_callback(self, msg):
+        try:
+            # Get latest transform
+            tf = self.tf_buffer.lookup_transform(
+                "map", "base_link", Time(), timeout=Duration(seconds=1.0)
+            )
+            self.odom_pose_stamped.header = msg.header
+            self.odom_pose_stamped.pose = msg.pose.pose
+            tf_pose = tf2_geometry_msgs.do_transform_pose(self.odom_pose_stamped, tf)
+        except LookupException:
+            self.get_logger().warn("Failed to lookup_transform from map to odom")
+            return
+        except ConnectivityException:
+            self.get_logger().warn(
+                "ConnectivityException, 'map' and 'base_link' are not part of the same tree"
+            )
+            return
+        self.position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
+        self.orientation = self.quaternion_to_euler(
+            tf_pose.pose.orientation.x,
+            tf_pose.pose.orientation.y,
+            tf_pose.pose.orientation.z,
+            tf_pose.pose.orientation.w,
+        )
+
+    def stop_robot_callback(self, req, resp):
+        """Stop robot / ROS."""
+        self.stop_ros(shutdown=False)
+        resp.sucess = True
+        return resp
+
+    def stop_ros(self, shutdown=True):
+        """Stop ros launch processes."""
+        # Publish "Robot is done"
+        lcd_msg = Lcd()
+        lcd_msg.line = 0
+        lcd_msg.text = f"{self.name.capitalize()} is done!".ljust(16)
+        self.lcd_driver_pub.publish(lcd_msg)
+        if not self.simulation:
+            # Disable stepper drivers
+            self.get_enable_drivers_request.data = False
+            self.synchronous_call(
+                self.get_enable_drivers_client, self.get_enable_drivers_request
+            )
+            # Stop fans and relax servos
+            self.actuators.disableDynamixels()
+            self.actuators.setFansEnabled(False)
+            # Shutdown ROS
+            for p in psutil.process_iter(["pid", "name", "cmdline"]):
+                if "ros2" in p.name() and "launch" in p.cmdline():
+                    self.get_logger().warn(f"Sent SIGINT to ros2 launch {p.pid}")
+                    p.send_signal(SIGINT)
+            # Shutdown Linux
+            if shutdown:
+                call(["shutdown", "-h", "now"])
+
+    def euler_to_quaternion(self, yaw, pitch=0, roll=0):
+        """Conversion between euler angles and quaternions."""
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.cos(pitch / 2) * np.sin(yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.cos(yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        return (qx, qy, qz, qw)
+
+    def quaternion_to_euler(self, x, y, z, w):
+        """Conversion between quaternions and euler angles."""
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        X = math.atan2(t0, t1)
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        Y = math.asin(t2)
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        Z = math.atan2(t3, t4)
+        return (X, Y, Z)
+
+    def destroy_node(self):
+        """Handle SIGINT/global destructor."""
+        self.actuators.disableDynamixels()
+        self.actuators.setFansEnabled(False)
+        super().destroy_node()
+
+    """~~~~~~~~~~~~~~ CUSTOM FUNCTIONS ~~~~~~~~~~~~~~"""
+
     def trigger_pavillons(self):
+        """Function to trigger the Pavillon after 95 seconds."""
         self.get_logger().info("Triggered pavillons")
         self.actuators.raiseTheFlag()
         self.change_action_status_request.action = "PAVILLON"
         self.change_action_status_request.request = "CONFIRM"
-        response = self.synchronous_call(self.change_action_status_client, self.change_action_status_request)
+        response = self.synchronous_call(
+            self.change_action_status_client, self.change_action_status_request
+        )
         if response is None:
             return False
         return response.success

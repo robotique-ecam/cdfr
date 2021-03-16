@@ -7,7 +7,10 @@ class MancheAir(Action):
         self.step = 0
 
     def get_initial_position(self, robot):
-        offset = -0.1 if self.tags['ONLY_SIDE'] == 'blue' else 0.1
+        if self.step == 0:
+            offset = -0.1 if self.tags["ONLY_SIDE"] == "blue" else 0.1
+        else:
+            offset = 0.1 if self.tags["ONLY_SIDE"] == "blue" else -0.1
         position = (self.position[0] + offset, robot.width_param / 2 + 0.05)
         return position
 

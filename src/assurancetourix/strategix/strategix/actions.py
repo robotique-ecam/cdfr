@@ -4,9 +4,11 @@ from actions import Action, Gobelet, MancheAir, Phare
 actions = {
     "PHARE_BLEU": Phare(position=(0.225, 2), tags={"ONLY_SIDE": "blue"}),
     "PHARE_JAUNE": Phare(position=(2.775, 2), tags={"ONLY_SIDE": "yellow"}),
-    "GOB25": Gobelet(position=(0, 1), color='RED', tags={'IN_ECUEIL': True, "ONLY_SIDE": "blue"}),
+    "GOB25": Gobelet(
+        position=(0, 1), color="RED", tags={"IN_ECUEIL": True, "ONLY_SIDE": "blue"}
+    ),
     "MANCHE1": MancheAir(position=(2, 0), tags={"ONLY_SIDE": "blue"}),
-    "PAVILLON": Action(position=(100, 100), tags={"STATUS": "PREEMPT"})
+    "PAVILLON": Action(position=(100, 100), tags={"STATUS": "PREEMPT"}),
 }
 
 gob25 = actions.get("GOB25")
