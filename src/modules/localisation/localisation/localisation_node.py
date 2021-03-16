@@ -7,14 +7,14 @@
 import math
 import numpy as np
 import copy
-
 import rclpy
+
 from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from transformix_msgs.srv import TransformixParametersTransformStamped
-from localisation.sensors_sim import Sensors
+from localisation.vlx_readjustement import VlxReadjustement
 from localisation.utils import euler_to_quaternion
 from nav_msgs.msg import Odometry
 from tf2_kdl import *
@@ -62,7 +62,7 @@ class Localisation(rclpy.node.Node):
         )
         self.last_odom_update = 0
         self.get_logger().info(f"Default side is {self.side.value}")
-        self.sensors = Sensors(self, [30, 31, 32, 33, 34, 35])
+        self.vlx = VlxReadjustement(self)
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
@@ -146,6 +146,7 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.pose.position.x = new_robot_pose_kdl.p.x()
         self.robot_pose.pose.position.y = new_robot_pose_kdl.p.y()
         q = new_robot_pose_kdl.M.GetQuaternion()
+        self.robot_pose.header.stamp = msg.header.stamp
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
 
