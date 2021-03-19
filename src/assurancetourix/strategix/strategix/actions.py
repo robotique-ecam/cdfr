@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-from actions import Action, Gobelet, MancheAir, Phare
+from strategix.action_objects import Action, Phare
 
 actions = {
     "PHARE_BLEU": Phare(position=(0.225, 2), tags={"ONLY_SIDE": "blue"}),
     "PHARE_JAUNE": Phare(position=(2.775, 2), tags={"ONLY_SIDE": "yellow"}),
-    "GOB25": Gobelet(
-        position=(0, 1), color="RED", tags={"IN_ECUEIL": True, "ONLY_SIDE": "blue"}
-    ),
-    "MANCHE1": MancheAir(position=(2, 0), tags={"ONLY_SIDE": "blue"}),
+    # "GOB25": Gobelet(
+    #     position=(0, 1), color="RED", tags={"IN_ECUEIL": True, "ONLY_SIDE": "blue"}
+    # ),
+    # "MANCHE1": MancheAir(position=(2, 0), tags={"ONLY_SIDE": "blue"}),
     "PAVILLON": Action(position=(100, 100), tags={"STATUS": "PREEMPT"}),
 }
 
-gob25 = actions.get("GOB25")
-print(gob25.position, gob25.color, gob25.tags)
+if __name__ == "__main__":
+    phare = actions.get("PHARE_BLEU")
+    print(phare.position, phare.tags)
+
 # actions = {
-#     "STUPID_1": {},
-#     "STUPID_2": {},
-#     "STUPID_3": {},
 #     "MANCHE1": {"ONLY_SIDE": "blue"},
 #     "MANCHE2": {"ONLY_SIDE": "blue"},
 #     "MANCHE3": {"ONLY_SIDE": "yellow"},
