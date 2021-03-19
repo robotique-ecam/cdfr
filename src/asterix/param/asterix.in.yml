@@ -8,11 +8,12 @@ steps_per_turn: 200
 wheels_separation: 0.244
 wheels_radius: 0.0405
 min_turning_radius: 0.0
-max_vel_x: 0.4
-max_vel_x_backwards: 0.4
-max_vel_theta: 1.0
+max_vel_x_nominal: 2.0
+max_vel_x_accurate: 0.15
+max_vel_theta: 3.1
+max_vel_theta_accurate: 0.5
 acc_lim_x: 0.5
-acc_lim_theta: 0.5
+acc_lim_theta: 2.5
 robotbase_length: 0.2
 robotbase_width: 0.26
 ---
@@ -65,14 +66,25 @@ asterix:
 
 controller_server:
   ros__parameters:
-    DynamicFollowPath:
+    NominalController:
       footprint_model.vertices: !Var footprint
 
       # Robot
       min_turning_radius: !Var min_turning_radius
-      max_vel_x: !Var max_vel_x
-      max_vel_x_backwards: !Var max_vel_x_backwards
+      max_vel_x: !Var max_vel_x_nominal
+      max_vel_x_backwards: !Var max_vel_x_nominal
       max_vel_theta: !Var max_vel_theta
+      acc_lim_x: !Var acc_lim_x
+      acc_lim_theta: !Var acc_lim_theta
+
+    AccurateController:
+      footprint_model.vertices: !Var footprint
+
+      # Robot
+      min_turning_radius: !Var min_turning_radius
+      max_vel_x: !Var max_vel_x_accurate
+      max_vel_x_backwards: !Var max_vel_x_accurate
+      max_vel_theta: !Var max_vel_theta_accurate
       acc_lim_x: !Var acc_lim_x
       acc_lim_theta: !Var acc_lim_theta
 
