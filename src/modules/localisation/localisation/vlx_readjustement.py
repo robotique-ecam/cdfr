@@ -41,14 +41,22 @@ class VlxReadjustement:
             self.parent.get_logger().info("bottom_blue")
         elif in_rectangle(top_blue, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue")
-            x, y, theta = self.get_pose_from_vlx(
-                values[31],
-                values[32],
-                values[33],
-                vlx_0x31_pos,
-                vlx_0x32_pos,
-                vlx_0x33_pos,
-            )
+            pose_considered = self.parent.robot_pose.pose
+            angle = quaternion_to_euler(pose_considered.orientation)[2]
+            if angle > np.pi/4 and angle < 3*np.pi/4:
+                d1, d2, d3 = values[31], values[32], values[33]
+                d1_p, d2_p, d3_p = vlx_0x31_pos, vlx_0x32_pos, vlx_0x33_pos
+            elif angle < -np.pi/4 and angle > -3*np.pi/4:
+                d1, d2, d3 = values[34], values[35], values[30]
+                d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x30_pos
+            elif angle > -np.pi/4 and angle < np.pi/4:
+                d1, d2, d3 = values[34], values[35], values[33]
+                d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x33_pos
+            else:
+                d1, d2, d3 = values[31], values[32], values[30]
+                d1_p, d2_p, d3_p = vlx_0x31_pos, vlx_0x32_pos, vlx_0x30_pos
+
+            x, y, theta = self.get_pose_from_vlx(d1, d2, d3, d1_p, d2_p, d3_p)
             self.parent.get_logger().info(
                 f"x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
             )
