@@ -6,7 +6,7 @@
 import numpy as np
 
 from localisation.sensors_sim import Sensors
-from localisation.utils import in_rectangle
+from localisation.utils import in_rectangle, quaternion_to_euler
 
 bottom_blue = [0.0, 0.0, 0.9, 1.0]
 top_blue = [0.0, 1.0, 1.5, 2.0]
@@ -61,6 +61,9 @@ class VlxReadjustement:
 
     def get_pose_from_vlx(self, d1, d2, d3, d1_pos, d2_pos, d3_pos):
         theta = np.arctan((d2 - d1) / (2 * np.abs(d1_pos[1])))
-        x = (d3 + d3_pos[1]) * np.cos(theta) + d3_pos[0] * np.sin(theta)
-        y = ((d1 + d2) / 2 + d1_pos[0]) * np.cos(theta)
+        if d3_pos == vlx_0x30_pos:
+            x = (d3 + np.abs(d3_pos[1])) * np.cos(theta) - d3_pos[0] * np.sin(theta)
+        else:
+            x = (d3 + np.abs(d3_pos[1])) * np.cos(theta) + d3_pos[0] * np.sin(theta)
+        y = ((d1 + d2) / 2 + np.abs(d1_pos[0])) * np.cos(theta)
         return (x, y, theta)
