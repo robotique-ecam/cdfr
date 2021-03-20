@@ -75,3 +75,13 @@ class VlxReadjustement:
             x = (d3 + np.abs(d3_pos[1])) * np.cos(theta) + d3_pos[0] * np.sin(theta)
         y = ((d1 + d2) / 2 + np.abs(d1_pos[0])) * np.cos(theta)
         return (x, y, theta)
+
+    def get_vlx_from_pose(self, robot_pose, d1_pos, d2_pos, d3_pos):
+        theta = np.pi - quaternion_to_euler(robot_pose.pose.orientation)[2]
+        self.parent.get_logger().info(
+            f"y:{2000 - robot_pose.pose.position.y*1000}, theta:{theta}, tan:{np.tan(theta)}"
+        )
+        d1 = ( 2000 - robot_pose.pose.position.y*1000 ) / np.cos(theta) - d1_pos[1] * np.tan(theta) - d1_pos[0]
+        d2 = ( 2000 - robot_pose.pose.position.y*1000 ) / np.cos(theta) - d2_pos[1] * np.tan(theta) - d2_pos[0]
+        d3 = robot_pose.pose.position.x*1000 / np.cos(theta) + d3_pos[0] * np.tan(theta) - d3_pos[1]
+        return (d1, d2, d3)
