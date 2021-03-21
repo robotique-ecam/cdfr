@@ -4,6 +4,7 @@
 """Vlx readjustement for localisation"""
 
 import numpy as np
+import copy
 
 from localisation.sensors_sim import Sensors
 from localisation.utils import in_rectangle, quaternion_to_euler
@@ -37,36 +38,36 @@ class VlxReadjustement:
             self.parent.get_logger().info("bottom_blue")
         elif in_rectangle(top_blue, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue")
-            pose_considered = self.parent.robot_pose.pose
-            x, y = (
+            pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
+            x_wall, y_wall = (
                 pose_considered.position.x * 1000,
                 2000 - pose_considered.position.y * 1000,
             )
             angle = quaternion_to_euler(pose_considered.orientation)[2]
             if angle > np.pi / 4 and angle < 3 * np.pi / 4:
                 d1, d2, d3 = values[31], values[32], values[33]
-                robot_pose_wall_relative = [x, y]
+                robot_pose_wall_relative = [x_wall, y_wall]
                 rectif_angle = np.pi / 2 - angle
                 x_est = lambda x, y: x / 1000
                 y_est = lambda x, y: (2000 - y) / 1000
                 theta_est = lambda t: t + np.pi / 2
             elif angle < -np.pi / 4 and angle > -3 * np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[30]
-                robot_pose_wall_relative = [x, y]
+                robot_pose_wall_relative = [x_wall, y_wall]
                 rectif_angle = -np.pi / 2 - angle
                 x_est = lambda x, y: x / 1000
                 y_est = lambda x, y: (2000 - y) / 1000
                 theta_est = lambda t: t - np.pi / 2
             elif angle > -np.pi / 4 and angle < np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[33]
-                robot_pose_wall_relative = [y, x]
+                robot_pose_wall_relative = [y_wall, x_wall]
                 rectif_angle = 0 - angle
                 x_est = lambda x, y: y / 1000
                 y_est = lambda x, y: (2000 - x) / 1000
                 theta_est = lambda t: t
             else:
                 d1, d2, d3 = values[31], values[32], values[30]
-                robot_pose_wall_relative = [y, x]
+                robot_pose_wall_relative = [y_wall, x_wall]
                 rectif_angle = np.pi - angle
                 x_est = lambda x, y: y / 1000
                 y_est = lambda x, y: (2000 - x) / 1000
