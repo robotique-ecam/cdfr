@@ -14,13 +14,8 @@ top_blue = [0.0, 1.0, 1.5, 2.0]
 bottom_yellow = [2.1, 0.0, 3.0, 1.0]
 top_yellow = [1.5, 1.0, 3.0, 2.0]
 
-vlx_0x30_pos = [80.0, -130.5]
-vlx_0x31_pos = [100.5, -110.0]
-vlx_0x32_pos = [100.5, 110.0]
-vlx_0x33_pos = [80.0, 130.5]
-vlx_0x34_pos = [-100.5, 110.0]
-vlx_0x35_pos = [-100.5, -110.0]
-
+vlx_lat_x, vlx_lat_y = 80.0, 130.5
+vlx_face_x, vlx_face_y = 100.5, 110.0
 
 class VlxReadjustement:
     def __init__(self, parent_node):
