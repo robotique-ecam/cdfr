@@ -17,6 +17,7 @@ top_yellow = [1.5, 1.0, 3.0, 2.0]
 vlx_lat_x, vlx_lat_y = 80.0, 130.5
 vlx_face_x, vlx_face_y = 100.5, 110.0
 
+
 class VlxReadjustement:
     def __init__(self, parent_node):
         self.parent = parent_node
@@ -37,19 +38,22 @@ class VlxReadjustement:
         elif in_rectangle(top_blue, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue")
             pose_considered = self.parent.robot_pose.pose
-            x, y = pose_considered.position.x*1000, 2000 - pose_considered.position.y*1000
+            x, y = (
+                pose_considered.position.x * 1000,
+                2000 - pose_considered.position.y * 1000,
+            )
             angle = quaternion_to_euler(pose_considered.orientation)[2]
-            if angle > np.pi/4 and angle < 3*np.pi/4:
+            if angle > np.pi / 4 and angle < 3 * np.pi / 4:
                 d1, d2, d3 = values[31], values[32], values[33]
                 d1_p, d2_p, d3_p = vlx_0x31_pos, vlx_0x32_pos, vlx_0x33_pos
                 robot_pose_wall_relative = [x, y]
-                rectif_angle = np.pi/2 - angle
-            elif angle < -np.pi/4 and angle > -3*np.pi/4:
+                rectif_angle = np.pi / 2 - angle
+            elif angle < -np.pi / 4 and angle > -3 * np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[30]
                 d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x30_pos
                 robot_pose_wall_relative = [x, y]
-                rectif_angle = -np.pi/2 - angle
-            elif angle > -np.pi/4 and angle < np.pi/4:
+                rectif_angle = -np.pi / 2 - angle
+            elif angle > -np.pi / 4 and angle < np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[33]
                 d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x33_pos
                 robot_pose_wall_relative = [y, x]
@@ -65,7 +69,9 @@ class VlxReadjustement:
                 f"x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
             )
 
-            d1_est, d2_est, d3_est = self.get_vlx_from_pose(robot_pose_wall_relative, d1_p, d2_p, d3_p, rectif_angle)
+            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
+                robot_pose_wall_relative, d1_p, d2_p, d3_p, rectif_angle
+            )
             self.parent.get_logger().info(
                 f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
             )
@@ -88,14 +94,32 @@ class VlxReadjustement:
             x = (d3 + vlx_lat_y) * np.cos(theta) - vlx_lat_x * np.sin(theta)
         else:
             x = (d3 + vlx_lat_y) * np.cos(theta) + vlx_lat_x * np.sin(theta)
-        y = ((d1 + d2) / 2 + vlx_face_x ) * np.cos(theta)
+        y = ((d1 + d2) / 2 + vlx_face_x) * np.cos(theta)
         return (x, y, theta)
 
-    def get_vlx_from_pose(self, robot_pose_wall_relative, d1_pos, d2_pos, d3_pos, theta):
-        d1 = ( robot_pose_wall_relative[1] ) / np.cos(theta) + vlx_face_y * np.tan(theta) - vlx_face_x
-        d2 = ( robot_pose_wall_relative[1] ) / np.cos(theta) - vlx_face_y * np.tan(theta) - vlx_face_x
+    def get_vlx_from_pose(
+        self, robot_pose_wall_relative, d1_pos, d2_pos, d3_pos, theta
+    ):
+        d1 = (
+            (robot_pose_wall_relative[1]) / np.cos(theta)
+            + vlx_face_y * np.tan(theta)
+            - vlx_face_x
+        )
+        d2 = (
+            (robot_pose_wall_relative[1]) / np.cos(theta)
+            - vlx_face_y * np.tan(theta)
+            - vlx_face_x
+        )
         if d3_pos == vlx_0x33_pos:
-            d3 = robot_pose_wall_relative[0] / np.cos(theta) + vlx_lat_x * np.tan(theta) - vlx_lat_y
-        else :
-            d3 = robot_pose_wall_relative[0] / np.cos(theta) - vlx_lat_x * np.tan(theta) - vlx_lat_y
+            d3 = (
+                robot_pose_wall_relative[0] / np.cos(theta)
+                + vlx_lat_x * np.tan(theta)
+                - vlx_lat_y
+            )
+        else:
+            d3 = (
+                robot_pose_wall_relative[0] / np.cos(theta)
+                - vlx_lat_x * np.tan(theta)
+                - vlx_lat_y
+            )
         return (d1, d2, d3)
