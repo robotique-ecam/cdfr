@@ -51,6 +51,7 @@ class VlxReadjustement:
                 x_est = lambda x, y: x / 1000
                 y_est = lambda x, y: (2000 - y) / 1000
                 theta_est = lambda t: t + np.pi / 2
+                case = 1
             elif angle < -np.pi / 4 and angle > -3 * np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[30]
                 robot_pose_wall_relative = [x_wall, y_wall]
@@ -58,6 +59,7 @@ class VlxReadjustement:
                 x_est = lambda x, y: x / 1000
                 y_est = lambda x, y: (2000 - y) / 1000
                 theta_est = lambda t: t - np.pi / 2
+                case = 2
             elif angle > -np.pi / 4 and angle < np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[33]
                 robot_pose_wall_relative = [y_wall, x_wall]
@@ -65,6 +67,7 @@ class VlxReadjustement:
                 x_est = lambda x, y: y / 1000
                 y_est = lambda x, y: (2000 - x) / 1000
                 theta_est = lambda t: t
+                case = 3
             else:
                 d1, d2, d3 = values[31], values[32], values[30]
                 robot_pose_wall_relative = [y_wall, x_wall]
@@ -72,6 +75,7 @@ class VlxReadjustement:
                 x_est = lambda x, y: y / 1000
                 y_est = lambda x, y: (2000 - x) / 1000
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
+                case = 4
 
             x, y, theta = self.get_pose_from_vlx(
                 d1, d2, d3, True if d3 == values[30] else False
@@ -96,6 +100,17 @@ class VlxReadjustement:
                 y:{round(new_y-pose_considered.position.y, 4)}, \
                 theta:{round(new_theta-angle, 4)}"
             )
+            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
+                d1_est,
+                d2_est,
+                d3_est,
+                rectif_angle,
+                robot_pose_wall_relative,
+                case,
+            )
+            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
+            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
+            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
 
         elif in_rectangle(bottom_yellow, self.parent.robot_pose):
             self.parent.get_logger().info("bottom_yellow")
