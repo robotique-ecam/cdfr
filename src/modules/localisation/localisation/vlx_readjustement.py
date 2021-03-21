@@ -63,12 +63,12 @@ class VlxReadjustement:
             self.parent.get_logger().info("None")
 
     def get_pose_from_vlx(self, d1, d2, d3, d1_pos, d2_pos, d3_pos):
-        theta = np.arctan((d2 - d1) / (2 * np.abs(d1_pos[1])))
+        theta = np.arctan((d2 - d1) / (2 * vlx_face_y))
         if d3_pos == vlx_0x30_pos:
-            x = (d3 + np.abs(d3_pos[1])) * np.cos(theta) - d3_pos[0] * np.sin(theta)
+            x = (d3 + vlx_lat_y) * np.cos(theta) - vlx_lat_x * np.sin(theta)
         else:
-            x = (d3 + np.abs(d3_pos[1])) * np.cos(theta) + d3_pos[0] * np.sin(theta)
-        y = ((d1 + d2) / 2 + np.abs(d1_pos[0])) * np.cos(theta)
+            x = (d3 + vlx_lat_y) * np.cos(theta) + vlx_lat_x * np.sin(theta)
+        y = ((d1 + d2) / 2 + vlx_face_x ) * np.cos(theta)
         return (x, y, theta)
 
     def get_vlx_from_pose(self, robot_pose, d1_pos, d2_pos, d3_pos):
