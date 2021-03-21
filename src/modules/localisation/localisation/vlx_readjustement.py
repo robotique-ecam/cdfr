@@ -76,6 +76,7 @@ class VlxReadjustement:
             x, y, theta = self.get_pose_from_vlx(
                 d1, d2, d3, True if d3 == values[30] else False
             )
+            new_x, new_y, new_theta = x_est(x, y), y_est(x, y), theta_est(theta)
             self.parent.get_logger().info(
                 f"algo x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
             )
@@ -91,9 +92,9 @@ class VlxReadjustement:
                 f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
             )
             self.parent.get_logger().info(
-                f"error computed pose - true pose x:{round(x_est(x, y)-pose_considered.position.x, 4)}, \
-                y:{round(y_est(x, y)-pose_considered.position.y, 4)}, \
-                theta:{round(theta_est(theta)-angle, 4)}"
+                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
+                y:{round(new_y-pose_considered.position.y, 4)}, \
+                theta:{round(new_theta-angle, 4)}"
             )
 
         elif in_rectangle(bottom_yellow, self.parent.robot_pose):
