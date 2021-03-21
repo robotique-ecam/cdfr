@@ -37,24 +37,44 @@ class VlxReadjustement:
         elif in_rectangle(top_blue, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue")
             pose_considered = self.parent.robot_pose.pose
+            x, y = pose_considered.position.x*1000, 2000 - pose_considered.position.y*1000
             angle = quaternion_to_euler(pose_considered.orientation)[2]
             if angle > np.pi/4 and angle < 3*np.pi/4:
                 d1, d2, d3 = values[31], values[32], values[33]
                 d1_p, d2_p, d3_p = vlx_0x31_pos, vlx_0x32_pos, vlx_0x33_pos
+                robot_pose_wall_relative = [x, y]
+                rectif_angle = np.pi/2 - angle
             elif angle < -np.pi/4 and angle > -3*np.pi/4:
                 d1, d2, d3 = values[34], values[35], values[30]
                 d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x30_pos
+                robot_pose_wall_relative = [x, y]
+                rectif_angle = -np.pi/2 - angle
             elif angle > -np.pi/4 and angle < np.pi/4:
                 d1, d2, d3 = values[34], values[35], values[33]
                 d1_p, d2_p, d3_p = vlx_0x34_pos, vlx_0x35_pos, vlx_0x33_pos
+                robot_pose_wall_relative = [y, x]
+                rectif_angle = 0 - angle
             else:
                 d1, d2, d3 = values[31], values[32], values[30]
                 d1_p, d2_p, d3_p = vlx_0x31_pos, vlx_0x32_pos, vlx_0x30_pos
+                robot_pose_wall_relative = [y, x]
+                rectif_angle = np.pi - angle
 
             x, y, theta = self.get_pose_from_vlx(d1, d2, d3, d1_p, d2_p, d3_p)
             self.parent.get_logger().info(
                 f"x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
             )
+
+            d1_est, d2_est, d3_est = self.get_vlx_from_pose(robot_pose_wall_relative, d1_p, d2_p, d3_p, rectif_angle)
+            self.parent.get_logger().info(
+                f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
+            )
+            """
+            self.parent.get_logger().info(
+                f"true vlx d1:{d1}, d2:{d2}, d3:{d3}"
+            )
+            """
+
         elif in_rectangle(bottom_yellow, self.parent.robot_pose):
             self.parent.get_logger().info("bottom_yellow")
         elif in_rectangle(top_yellow, self.parent.robot_pose):
