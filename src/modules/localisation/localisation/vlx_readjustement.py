@@ -71,12 +71,11 @@ class VlxReadjustement:
         y = ((d1 + d2) / 2 + vlx_face_x ) * np.cos(theta)
         return (x, y, theta)
 
-    def get_vlx_from_pose(self, robot_pose, d1_pos, d2_pos, d3_pos):
-        theta = np.pi - quaternion_to_euler(robot_pose.pose.orientation)[2]
-        self.parent.get_logger().info(
-            f"y:{2000 - robot_pose.pose.position.y*1000}, theta:{theta}, tan:{np.tan(theta)}"
-        )
-        d1 = ( 2000 - robot_pose.pose.position.y*1000 ) / np.cos(theta) - d1_pos[1] * np.tan(theta) - d1_pos[0]
-        d2 = ( 2000 - robot_pose.pose.position.y*1000 ) / np.cos(theta) - d2_pos[1] * np.tan(theta) - d2_pos[0]
-        d3 = robot_pose.pose.position.x*1000 / np.cos(theta) + d3_pos[0] * np.tan(theta) - d3_pos[1]
+    def get_vlx_from_pose(self, robot_pose_wall_relative, d1_pos, d2_pos, d3_pos, theta):
+        d1 = ( robot_pose_wall_relative[1] ) / np.cos(theta) + vlx_face_y * np.tan(theta) - vlx_face_x
+        d2 = ( robot_pose_wall_relative[1] ) / np.cos(theta) - vlx_face_y * np.tan(theta) - vlx_face_x
+        if d3_pos == vlx_0x33_pos:
+            d3 = robot_pose_wall_relative[0] / np.cos(theta) + vlx_lat_x * np.tan(theta) - vlx_lat_y
+        else :
+            d3 = robot_pose_wall_relative[0] / np.cos(theta) - vlx_lat_x * np.tan(theta) - vlx_lat_y
         return (d1, d2, d3)
