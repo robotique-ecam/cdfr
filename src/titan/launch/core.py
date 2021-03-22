@@ -11,7 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 import launch
 from launch.actions import IncludeLaunchDescription, RegisterEventHandler, EmitEvent
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.event import Shutdown
+from launch.events import Shutdown
 from launch.event_handlers import OnProcessExit
 
 
