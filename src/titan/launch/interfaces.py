@@ -9,9 +9,16 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 import launch
-from launch.actions import GroupAction, IncludeLaunchDescription
+from launch.actions import (
+    GroupAction,
+    IncludeLaunchDescription,
+    RegisterEventHandler,
+    EmitEvent,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.event import Shutdown
+from launch.event_handlers import OnProcessExit
 from webots_ros2_core.webots_launcher import WebotsLauncher
 
 
@@ -70,6 +77,15 @@ def generate_launch_description():
                         world="tools/simulation/worlds/cdr2020.wbt",
                     ),
                 ]
+            )
+        ]
+        + [
+            RegisterEventHandler(
+                event_handler=OnProcessExit(
+                    on_exit=[
+                        EmitEvent(event=Shutdown()),
+                    ]
+                )
             )
         ]
     )
