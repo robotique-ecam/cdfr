@@ -10,18 +10,16 @@ from subprocess import call
 from importlib import import_module
 from platform import machine
 from rclpy.node import Node
-from rclpy.time import Duration, Time
-from tf2_ros import LookupException, ConnectivityException
-from tf2_ros.buffer import Buffer
-from tf2_ros.transform_listener import TransformListener
+from geometry_msgs.msg import TransformStamped
+from tf2_kdl import transform_to_kdl, do_transform_frame
 from nav_msgs.msg import Odometry
 from lcd_msgs.msg import Lcd
 from std_srvs.srv import SetBool, Trigger
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
+from transformix_msgs.srv import TransformixParametersTransformStamped
 from strategix.actions import actions
 from cetautomatix.selftest import Selftest
-from cetautomatix import tf2_geometry_msgs
 
 
 class Robot(Node):
@@ -62,11 +60,14 @@ class Robot(Node):
         self.change_action_status_client = self.create_client(
             ChangeActionStatus, "/strategix/action"
         )
+        # Get initial transformation
+        self.initial_tf_client = self.create_client(
+            TransformixParametersTransformStamped, "get_odom_map_tf"
+        )
+        self.initial_tf = self.synchronous_call(
+            self.initial_tf_client, TransformixParametersTransformStamped.Request()
+        ).transform_stamped
         # Odometry subscriber
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
-        self.odom_pose_stamped = tf2_geometry_msgs.PoseStamped()
-        self.odom_callback(self.odom_pose_stamped)
         self.odom_sub = self.create_subscription(
             Odometry, "odom", self.odom_callback, 1
         )
@@ -196,29 +197,16 @@ class Robot(Node):
         return resp
 
     def odom_callback(self, msg):
-        try:
-            # Get latest transform
-            tf = self.tf_buffer.lookup_transform(
-                "map", "base_link", Time(), timeout=Duration(seconds=1.0)
-            )
-            self.odom_pose_stamped.header = msg.header
-            self.odom_pose_stamped.pose = msg.pose.pose
-            tf_pose = tf2_geometry_msgs.do_transform_pose(self.odom_pose_stamped, tf)
-        except LookupException:
-            self.get_logger().warn("Failed to lookup_transform from map to odom")
-            return
-        except ConnectivityException:
-            self.get_logger().warn(
-                "ConnectivityException, 'map' and 'base_link' are not part of the same tree"
-            )
-            return
-        self.position = (tf_pose.pose.position.x, tf_pose.pose.position.y)
-        self.orientation = self.quaternion_to_euler(
-            tf_pose.pose.orientation.x,
-            tf_pose.pose.orientation.y,
-            tf_pose.pose.orientation.z,
-            tf_pose.pose.orientation.w,
-        )
+        """Odom callback, compute the new pose of the robot relative to map"""
+        robot_tf = TransformStamped()
+        robot_tf.transform.translation.x = msg.pose.pose.position.x
+        robot_tf.transform.translation.y = msg.pose.pose.position.y
+        robot_tf.transform.rotation = msg.pose.pose.orientation
+        robot_frame = transform_to_kdl(robot_tf)
+        new_robot_pose_kdl = do_transform_frame(robot_frame, self.initial_tf)
+        q = new_robot_pose_kdl.M.GetQuaternion()
+        self.position = (new_robot_pose_kdl.p.x(), new_robot_pose_kdl.p.y())
+        self.orientation = self.quaternion_to_euler(q[0], q[1], q[2], q[3])[2]
 
     def stop_robot_callback(self, req, resp):
         """Stop robot / ROS."""
