@@ -7,7 +7,7 @@ import numpy as np
 import copy
 
 from localisation.sensors_sim import Sensors
-from localisation.utils import in_rectangle, quaternion_to_euler
+from localisation.utils import in_rectangle, quaternion_to_euler, is_simulation
 
 bottom_blue = [0.0, 0.0, 0.9, 1.0]
 top_blue = [0.0, 1.0, 1.5, 2.0]
@@ -23,7 +23,11 @@ class VlxReadjustement:
     def __init__(self, parent_node):
         self.parent = parent_node
         self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
-        self.parent.create_timer(1, self.testVlx)
+        if (is_simulation()):
+            self.y_sim_offset = 0.021
+        else:
+            self.y_sim_offset = 0.0
+        #self.parent.create_timer(1, self.testVlx)
         self.vlx_readjustement = False
 
     def testVlx(self):
@@ -34,16 +38,17 @@ class VlxReadjustement:
             f"{values[30]}, {values[31]}, {values[32]}, {values[33]}, {values[34]}, {values[35]}, {self.parent.robot_pose.pose.position.x}"
         )
         """
+        pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
+        angle = quaternion_to_euler(pose_considered.orientation)[2]
+
         if in_rectangle(bottom_blue, self.parent.robot_pose):
             self.parent.get_logger().info("bottom_blue")
         elif in_rectangle(top_blue, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue")
-            pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
             x_wall, y_wall = (
                 pose_considered.position.x * 1000,
                 2000 - pose_considered.position.y * 1000,
             )
-            angle = quaternion_to_euler(pose_considered.orientation)[2]
             if angle > np.pi / 4 and angle < 3 * np.pi / 4:
                 d1, d2, d3 = values[31], values[32], values[33]
                 robot_pose_wall_relative = [x_wall, y_wall]
