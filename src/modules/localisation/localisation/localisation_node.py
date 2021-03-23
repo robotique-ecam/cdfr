@@ -149,6 +149,8 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.header.stamp = msg.header.stamp
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
+        self.vlx.testVlx()
+
 
 def main(args=None):
     """Entrypoint."""

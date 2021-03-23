@@ -7,6 +7,7 @@ import numpy as np
 import math
 
 from geometry_msgs.msg import Quaternion
+from platform import machine
 
 
 def euler_to_quaternion(yaw, pitch=0, roll=0):
@@ -61,3 +62,6 @@ def in_rectangle(rect, pose):
     x = pose.pose.position.x
     y = pose.pose.position.y
     return rect[0] < x and rect[1] < y and rect[2] > x and rect[3] > y
+
+def is_simulation():
+    return True if machine() != "aarch64" else False
