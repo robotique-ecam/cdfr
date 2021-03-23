@@ -159,7 +159,7 @@ class VlxReadjustement:
         return (d1, d2, d3)
 
     def est_proj_wall(
-        self, d1_est, d2_est, d3_est, rectif_angle, robot_pose_wall_relative, case
+        self, d1_est, d2_est, d3_est, rectif_angle, robot_pose_wall_relative, case, inv_angle=False, inv_lat = False
     ):
         if case in [1, 2]:
             considered_angle = rectif_angle
@@ -172,6 +172,10 @@ class VlxReadjustement:
             considered_vlx_lat_x = -vlx_lat_x
         else:
             considered_vlx_lat_x = vlx_lat_x
+        if inv_angle:
+            considered_angle = -considered_angle
+        if inv_lat:
+            considered_vlx_lat_x = -considered_vlx_lat_x
 
         d1_est_proj_wall = (
             robot_pose_wall_relative[0]
