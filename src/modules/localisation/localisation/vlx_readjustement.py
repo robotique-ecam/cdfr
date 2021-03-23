@@ -35,7 +35,49 @@ class VlxReadjustement:
         self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
         self.vlx_readjustement = False
 
-    def testVlx(self):
+    def compute_data(self):
+        pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
+        data = self.fetch_data(pose_considered)
+        if data == None:
+            self.parent.get_logger().info("data_None")
+        else:
+            self.parent.get_logger().info("we can (hopefully) compute !")
+            x, y, theta = self.get_pose_from_vlx(
+                data["d"][0], data["d"][1], data["d"][2], data["vlx_0x30"]
+            )
+            new_x, new_y, new_theta = (
+                data["pose_est"][0](x, y),
+                data["pose_est"][1](x, y),
+                data["pose_est"][2](theta),
+            )
+            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
+                [data["wall_relative"][0], data["wall_relative"][1]],
+                data["wall_relative"][2],
+                data["vlx_0x30"],
+            )
+            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
+                d1_est,
+                d2_est,
+                d3_est,
+                data["wall_relative"][2],
+                [data["wall_relative"][0], data["wall_relative"][1]],
+                data["case"],
+                data["inv_angle"],
+                data["inv_lat"],
+            )
+
+            d = data["d"]
+            self.parent.get_logger().info(
+                f"error computed vlx - true vlx d1:{d1_est - d[0]}, d2:{d2_est- d[1]}, d3:{d3_est -d[2]}"
+            )
+            self.parent.get_logger().info(
+                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
+                y:{round(new_y-pose_considered.position.y, 4)}, \
+                theta:{round(new_theta-quaternion_to_euler(pose_considered.orientation)[2], 4)}"
+            )
+            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
+            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
+            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
 
     def fetch_data(self, pose_considered):
 
@@ -83,6 +125,7 @@ class VlxReadjustement:
 
             inv_angle_condition = True
             inv_lat_condition = True if case in [1, 2] else False
+
 
         elif in_rectangle(top_blue_area, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue_area")
