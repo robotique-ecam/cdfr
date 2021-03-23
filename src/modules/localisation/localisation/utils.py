@@ -63,5 +63,6 @@ def in_rectangle(rect, pose):
     y = pose.pose.position.y
     return rect[0] < x and rect[1] < y and rect[2] > x and rect[3] > y
 
+
 def is_simulation():
     return True if machine() != "aarch64" else False

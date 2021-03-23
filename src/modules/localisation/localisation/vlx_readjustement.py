@@ -23,11 +23,11 @@ class VlxReadjustement:
     def __init__(self, parent_node):
         self.parent = parent_node
         self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
-        if (is_simulation()):
-            self.y_sim_offset = 0.021
+        if is_simulation():
+            self.sim_offset = 0.0215
         else:
-            self.y_sim_offset = 0.0
-        #self.parent.create_timer(1, self.testVlx)
+            self.sim_offset = 0.0
+        # self.parent.create_timer(1, self.testVlx)
         self.vlx_readjustement = False
 
     def testVlx(self):
@@ -45,22 +45,22 @@ class VlxReadjustement:
             self.parent.get_logger().info("bottom_blue")
             x_wall, y_wall = (
                 pose_considered.position.x * 1000,
-                (pose_considered.position.y - self.y_sim_offset) * 1000,
+                (pose_considered.position.y - self.sim_offset) * 1000,
             )
             if angle > np.pi / 4 and angle < 3 * np.pi / 4:
                 d1, d2, d3 = values[34], values[35], values[33]
                 robot_pose_wall_relative = [x_wall, y_wall]
                 rectif_angle = np.pi / 2 - angle
                 x_est = lambda x, y: x / 1000
-                y_est = lambda x, y: y / 1000 - self.y_sim_offset
+                y_est = lambda x, y: y / 1000 - self.sim_offset
                 theta_est = lambda t: t + np.pi / 2
                 case = 1
             elif angle < -np.pi / 4 and angle > -3 * np.pi / 4:
                 d1, d2, d3 = values[31], values[32], values[30]
                 robot_pose_wall_relative = [x_wall, y_wall]
-                rectif_angle = - np.pi / 2 - angle
+                rectif_angle = -np.pi / 2 - angle
                 x_est = lambda x, y: x / 1000
-                y_est = lambda x, y: y / 1000 - self.y_sim_offset
+                y_est = lambda x, y: y / 1000 - self.sim_offset
                 theta_est = lambda t: t - np.pi / 2
                 case = 2
             elif angle > -np.pi / 4 and angle < np.pi / 4:
@@ -68,7 +68,7 @@ class VlxReadjustement:
                 robot_pose_wall_relative = [y_wall, x_wall]
                 rectif_angle = 0 - angle
                 x_est = lambda x, y: y / 1000
-                y_est = lambda x, y: x / 1000 - self.y_sim_offset
+                y_est = lambda x, y: x / 1000 - self.sim_offset
                 theta_est = lambda t: t
                 case = 3
             else:
@@ -76,7 +76,7 @@ class VlxReadjustement:
                 robot_pose_wall_relative = [y_wall, x_wall]
                 rectif_angle = np.pi - angle
                 x_est = lambda x, y: y / 1000
-                y_est = lambda x, y: x / 1000 - self.y_sim_offset
+                y_est = lambda x, y: x / 1000 - self.sim_offset
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
                 case = 4
 
@@ -113,7 +113,7 @@ class VlxReadjustement:
                 robot_pose_wall_relative,
                 case,
                 True,
-                True if case in [1,2] else False,
+                True if case in [1, 2] else False,
             )
 
             self.parent.get_logger().info(f"test d1:{d1_proj_est}")
