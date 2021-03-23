@@ -37,8 +37,9 @@ class VlxReadjustement:
 
     def testVlx(self):
 
+    def fetch_data(self, pose_considered):
+
         values = self.sensors.get_distances()
-        pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
         angle = quaternion_to_euler(pose_considered.orientation)[2]
 
         if in_rectangle(bottom_blue_area, self.parent.robot_pose):
@@ -80,30 +81,8 @@ class VlxReadjustement:
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
                 case = 4
 
-
-            x, y, theta = self.get_pose_from_vlx(
-                d1, d2, d3, True if d3 == values[30] else False
-            )
-            new_x, new_y, new_theta = x_est(x, y), y_est(x, y), theta_est(theta)
-            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
-                robot_pose_wall_relative,
-                rectif_angle,
-                True if d3 == values[30] else False,
-            )
-            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
-                d1_est,
-                d2_est,
-                d3_est,
-                rectif_angle,
-                robot_pose_wall_relative,
-                case,
-                True,
-                True if case in [1, 2] else False,
-            )
-
-            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
-            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
-            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
+            inv_angle_condition = True
+            inv_lat_condition = True if case in [1, 2] else False
 
         elif in_rectangle(top_blue_area, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue_area")
@@ -144,40 +123,8 @@ class VlxReadjustement:
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
                 case = 4
 
-            x, y, theta = self.get_pose_from_vlx(
-                d1, d2, d3, True if d3 == values[30] else False
-            )
-            new_x, new_y, new_theta = x_est(x, y), y_est(x, y), theta_est(theta)
-            self.parent.get_logger().info(
-                f"algo x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
-            )
-            self.parent.get_logger().info(
-                f"computed x:{x_est(x, y)}, y:{y_est(x, y)}, theta:{theta_est(theta)}"
-            )
-            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
-                robot_pose_wall_relative,
-                rectif_angle,
-                True if d3 == values[30] else False,
-            )
-            self.parent.get_logger().info(
-                f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
-            )
-            self.parent.get_logger().info(
-                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
-                y:{round(new_y-pose_considered.position.y, 4)}, \
-                theta:{round(new_theta-angle, 4)}"
-            )
-            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
-                d1_est,
-                d2_est,
-                d3_est,
-                rectif_angle,
-                robot_pose_wall_relative,
-                case,
-            )
-            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
-            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
-            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
+            inv_angle_condition = False
+            inv_lat_condition = False
 
         elif in_rectangle(bottom_yellow_area, self.parent.robot_pose):
             self.parent.get_logger().info("bottom_yellow_area")
@@ -218,46 +165,8 @@ class VlxReadjustement:
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
                 case = 4
 
-            x, y, theta = self.get_pose_from_vlx(
-                d1, d2, d3, True if d3 == values[30] else False
-            )
-            new_x, new_y, new_theta = x_est(x, y), y_est(x, y), theta_est(theta)
-            """
-            self.parent.get_logger().info(
-                f"algo x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
-            )
-            self.parent.get_logger().info(
-                f"computed x:{x_est(x, y)}, y:{y_est(x, y)}, theta:{theta_est(theta)}"
-            )
-            """
-            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
-                robot_pose_wall_relative,
-                rectif_angle,
-                True if d3 == values[30] else False,
-            )
-            self.parent.get_logger().info(
-                f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
-            )
-            self.parent.get_logger().info(
-                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
-                y:{round(new_y-pose_considered.position.y, 4)}, \
-                theta:{round(new_theta-angle, 4)}"
-            )
-            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
-                d1_est,
-                d2_est,
-                d3_est,
-                rectif_angle,
-                robot_pose_wall_relative,
-                case,
-                False,
-                True,
-            )
-
-            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
-            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
-            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
-
+            inv_angle_condition = False
+            inv_lat_condition = True
 
         elif in_rectangle(top_yellow_area, self.parent.robot_pose):
             self.parent.get_logger().info("top_yellow_area")
@@ -298,48 +207,26 @@ class VlxReadjustement:
                 theta_est = lambda t: (t - np.pi) if t > 0 else (t + np.pi)
                 case = 4
 
-            x, y, theta = self.get_pose_from_vlx(
-                d1, d2, d3, True if d3 == values[30] else False
-            )
-            new_x, new_y, new_theta = x_est(x, y), y_est(x, y), theta_est(theta)
-            """
-            self.parent.get_logger().info(
-                f"algo x:{x/1000}, y:{y/1000}, theta:{np.degrees(theta)}"
-            )
-            self.parent.get_logger().info(
-                f"computed x:{x_est(x, y)}, y:{y_est(x, y)}, theta:{theta_est(theta)}"
-            )
-            """
-            d1_est, d2_est, d3_est = self.get_vlx_from_pose(
-                robot_pose_wall_relative,
-                rectif_angle,
-                True if d3 == values[30] else False,
-            )
-            self.parent.get_logger().info(
-                f"error computed vlx - true vlx d1:{d1_est - d1}, d2:{d2_est- d2}, d3:{d3_est -d3}"
-            )
-            self.parent.get_logger().info(
-                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
-                y:{round(new_y-pose_considered.position.y, 4)}, \
-                theta:{round(new_theta-angle, 4)}"
-            )
-            d1_proj_est, d2_proj_est, d3_proj_est = self.est_proj_wall(
-                d1_est,
-                d2_est,
-                d3_est,
-                rectif_angle,
-                robot_pose_wall_relative,
-                case,
-                True,
-                True if case in [3, 4] else False,
-            )
-
-            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
-            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
-            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
+            inv_angle_condition = True
+            inv_lat_condition = True if case in [3, 4] else False
 
         else:
             self.parent.get_logger().info("None")
+            return None
+
+        return {
+            "d": [d1, d2, d3],
+            "wall_relative": [
+                robot_pose_wall_relative[0],
+                robot_pose_wall_relative[1],
+                rectif_angle,
+            ],
+            "pose_est": [x_est, y_est, theta_est],
+            "case": case,
+            "vlx_0x30": True if d3 == values[30] else False,
+            "inv_angle": inv_angle_condition,
+            "inv_lat": inv_lat_condition,
+        }
 
     def get_pose_from_vlx(self, d1, d2, d3, vlx_0x30):
         theta = np.arctan((d2 - d1) / (2 * self.vlx_face_y))
