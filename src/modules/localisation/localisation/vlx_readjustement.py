@@ -37,11 +37,15 @@ class VlxReadjustement:
         self.pose_array = [self.parent.robot_pose]
         self.vlx_readjustement = False
 
-    def compute_data(self):
-        pose_considered = copy.deepcopy(self.parent.robot_pose.pose)
     def store_robot_pose(self, pose):
         self.pose_array.insert(0, copy.deepcopy(pose))
         if len(self.pose_array) > 15:
+            self.pose_array.pop()
+
+    def try_to_readjust_with_vlx(self):
+        actual_stamp = (
+            self.get_clock().now()
+            if not is_simulation()
             else self.sensors.get_time_stamp()
         )
         vlx_values = self.sensors.get_distances()

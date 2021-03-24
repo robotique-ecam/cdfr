@@ -116,15 +116,15 @@ class Localisation(rclpy.node.Node):
         """Identity the robot marker in assurancetourix marker_array detection
         publish the transformation for drive to readjust odometry
         compute base_link --> odom"""
-        for allie_marker in msg.markers:
+        for ally_marker in msg.markers:
             if (
-                allie_marker.text.lower() == self.robot
-                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 5
+                ally_marker.text.lower() == self.robot
+                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.75
             ):
-                q = allie_marker.pose.orientation
-                self._tf.header.stamp = allie_marker.header.stamp
-                self._tf.transform.translation.x = allie_marker.pose.position.x
-                self._tf.transform.translation.y = allie_marker.pose.position.y
+                q = ally_marker.pose.orientation
+                self._tf.header.stamp = ally_marker.header.stamp
+                self._tf.transform.translation.x = ally_marker.pose.position.x
+                self._tf.transform.translation.y = ally_marker.pose.position.y
                 self._tf.transform.translation.z = float(0)
                 self._tf.transform.rotation = q
                 self.tf_publisher_.publish(self._tf)
@@ -147,9 +147,10 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.pose.position.y = new_robot_pose_kdl.p.y()
         q = new_robot_pose_kdl.M.GetQuaternion()
         self.robot_pose.header.stamp = msg.header.stamp
+        self.robot_pose.header.frame_id = "map"
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
-        self.vlx.compute_data()
+        self.vlx.store_robot_pose(self.robot_pose)
 
 
 def main(args=None):
