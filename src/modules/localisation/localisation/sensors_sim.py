@@ -5,6 +5,7 @@
 
 from os import environ
 
+from builtin_interfaces.msg._time import Time
 from webots_ros2_core.webots_node import WebotsNode
 
 
@@ -31,6 +32,11 @@ class Sensors:
             self.node.robot.step(1)
             distances.update({addr: round(vlx.getValue(), 4)})
         return distances
+
+    def get_time_stamp(self):
+        self.node.robot.step(0)
+        t = self.node.robot.getTime()
+        return Time(sec=int(t), nanosec=int((t % int(t)) * 1e9))
 
     def __del__(self):
         """Destructor."""
