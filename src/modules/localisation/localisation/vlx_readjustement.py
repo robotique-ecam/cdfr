@@ -115,7 +115,26 @@ class VlxReadjustement:
             self.parent.get_logger().info(f"test d2:{d2_proj_est}")
             self.parent.get_logger().info(f"test d3:{d3_proj_est}")
 
-    def fetch_data(self, pose_considered):
+            if (
+                d1_est > 0
+                and d2_est > 0
+                and d3_est > 0
+                and abs(new_x - pose_considered.position.x) < 0.05
+                and abs(new_y - pose_considered.position.y) < 0.05
+                and abs(new_theta - quaternion_to_euler(pose_considered.orientation)[2])
+                < 0.1
+            ):
+                self.parent.get_logger().warn(f"able to correct")
+                tf = TransformStamped()
+                tf.header.frame_id = "map"
+                tf.child_frame_id = "odom"
+                tf.transform.translation.x = new_x
+                tf.transform.translation.y = new_y
+                tf.transform.rotation = euler_to_quaternion(new_theta)
+                return tf
+            else:
+                return None
+
     def fetch_data(self, pose_considered, values):
 
         angle = quaternion_to_euler(pose_considered.orientation)[2]
