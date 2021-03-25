@@ -5,6 +5,7 @@
 
 import numpy as np
 import copy
+import time
 import threading
 
 from localisation.sensors_sim import Sensors
@@ -26,7 +27,7 @@ class VlxReadjustement:
             self.sim_offset = 0.0215
         else:
             self.sim_offset = 0.0
-        #self.parent.create_timer(0.7, self.try_to_readjust_with_vlx)
+        # self.parent.create_timer(0.7, self.try_to_readjust_with_vlx)
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
@@ -49,7 +50,11 @@ class VlxReadjustement:
     def start_continuous_sampling_thread(self, sleep_time, continuous_samp):
         if self.thread_continuous_sampling == None:
             self.thread_continuous_sampling = threading.Thread(
-                target=self.continuous_vlx_sampling, args=(sleep_time, continuous_samp,)
+                target=self.continuous_vlx_sampling,
+                args=(
+                    sleep_time,
+                    continuous_samp,
+                ),
             )
             self.thread_continuous_sampling.start()
         else:
@@ -65,7 +70,9 @@ class VlxReadjustement:
 
     def continuous_vlx_sampling(self, sleep_time_before_sampling, continuous_samp):
         self.continuous_sampling = continuous_samp
-        self.parent.get_logger().warn(f"self.continuous_sampling:{self.continuous_sampling}")
+        self.parent.get_logger().warn(
+            f"self.continuous_sampling:{self.continuous_sampling}"
+        )
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
             actual_stamp = (
@@ -213,7 +220,6 @@ class VlxReadjustement:
 
             inv_angle_condition = True
             inv_lat_condition = True if case in [1, 2] else False
-
 
         elif in_rectangle(top_blue_area, self.parent.robot_pose):
             self.parent.get_logger().info("top_blue_area")

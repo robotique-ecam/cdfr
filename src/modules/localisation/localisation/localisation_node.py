@@ -6,6 +6,7 @@
 
 import math
 import numpy as np
+import time
 import copy
 import rclpy
 
@@ -15,7 +16,7 @@ from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from transformix_msgs.srv import TransformixParametersTransformStamped
 from localisation.vlx_readjustement import VlxReadjustement
-from localisation.utils import euler_to_quaternion
+from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import *
 
@@ -121,14 +122,38 @@ class Localisation(rclpy.node.Node):
                 ally_marker.text.lower() == self.robot
                 and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.75
             ):
-                q = ally_marker.pose.orientation
-                self._tf.header.stamp = ally_marker.header.stamp
-                self._tf.transform.translation.x = ally_marker.pose.position.x
-                self._tf.transform.translation.y = ally_marker.pose.position.y
-                self._tf.transform.translation.z = float(0)
-                self._tf.transform.rotation = q
-                self.tf_publisher_.publish(self._tf)
-                self.last_odom_update = self.get_clock().now().to_msg().sec
+                if (
+                    is_simulation()
+                ):  # simulate marker delais (image analysis from assurancetourix)
+                    time.sleep(0.15)
+                if False:  # is_in_specific_area(ally_marker):
+                    continuous_sampling = 2
+                    tempo = 0.0
+                else:
+                    continuous_sampling = 1
+                    tempo = 0.65
+                if self.vlx.continuous_sampling == 0:
+                    self.get_logger().info(f"initial continuous_sampling == 0")
+                    self.create_and_send_tf(
+                        ally_marker.pose.position.x,
+                        ally_marker.pose.position.y,
+                        ally_marker.pose.orientation,
+                        ally_marker.header.stamp,
+                    )
+                    self.vlx.start_continuous_sampling_thread(
+                        tempo, continuous_sampling
+                    )
+                elif self.vlx.continuous_sampling == 1:
+                    self.vlx.try_to_readjust_with_vlx(
+                        ally_marker.pose.position.x,
+                        ally_marker.pose.position.y,
+                        ally_marker.pose.orientation,
+                        ally_marker.header.stamp,
+                    )
+                    self.vlx.start_continuous_sampling_thread(
+                        tempo, continuous_sampling
+                    )
+
     def create_and_send_tf(self, x, y, q, stamp):
         self._tf.header.stamp = stamp
         self._tf.transform.translation.x = x
