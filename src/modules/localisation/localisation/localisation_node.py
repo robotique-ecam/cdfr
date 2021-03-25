@@ -129,6 +129,14 @@ class Localisation(rclpy.node.Node):
                 self._tf.transform.rotation = q
                 self.tf_publisher_.publish(self._tf)
                 self.last_odom_update = self.get_clock().now().to_msg().sec
+    def create_and_send_tf(self, x, y, q, stamp):
+        self._tf.header.stamp = stamp
+        self._tf.transform.translation.x = x
+        self._tf.transform.translation.y = y
+        self._tf.transform.translation.z = float(0)
+        self._tf.transform.rotation = q
+        self.last_odom_update = self.get_clock().now().to_msg().sec
+        self.tf_publisher_.publish(self._tf)
 
     def get_initial_tf_srv_callback(self, request, response):
         self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
@@ -149,8 +157,6 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.header.stamp = msg.header.stamp
         self.robot_pose.header.frame_id = "map"
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-
-        self.vlx.store_robot_pose(self.robot_pose)
 
 
 def main(args=None):

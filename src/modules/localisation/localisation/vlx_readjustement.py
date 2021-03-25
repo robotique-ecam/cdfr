@@ -8,7 +8,6 @@ import copy
 
 from localisation.sensors_sim import Sensors
 from localisation.utils import *
-from geometry_msgs.msg import TransformStamped
 
 bottom_blue_area = [0.0, 0.0, 0.9, 1.0]
 top_blue_area = [0.0, 1.0, 1.5, 2.0]
@@ -25,7 +24,7 @@ class VlxReadjustement:
             self.sim_offset = 0.0215
         else:
             self.sim_offset = 0.0
-        self.parent.create_timer(0.7, self.try_to_readjust_with_vlx)
+        #self.parent.create_timer(0.7, self.try_to_readjust_with_vlx)
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
@@ -34,39 +33,13 @@ class VlxReadjustement:
         self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
         self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
         self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
-        self.pose_array = [self.parent.robot_pose]
-        self.vlx_readjustement = False
 
-    def store_robot_pose(self, pose):
-        self.pose_array.insert(0, copy.deepcopy(pose))
-        if len(self.pose_array) > 15:
-            self.pose_array.pop()
-
-    def try_to_readjust_with_vlx(self):
-        actual_stamp = (
-            self.get_clock().now()
-            if not is_simulation()
-            else self.sensors.get_time_stamp()
-        )
-        vlx_values = self.sensors.get_distances()
-
-        for i in range(len(self.pose_array)):
             if (
                 abs(
                     float(
-                        self.pose_array[i].header.stamp.sec
-                        + self.pose_array[i].header.stamp.nanosec * 1e-9
                     )
-                    - float(actual_stamp.sec + actual_stamp.nanosec * 1e-9)
                 )
-                < 0.1
             ):
-                tf = self.compute_data(self.pose_array[i].pose, vlx_values)
-                if tf == None:
-                    return
-                else:
-                    tf.header.stamp = actual_stamp
-                    self.parent.get_logger().info("publish")
                 break
 
     def compute_data(self, pose_considered, vlx_values):
@@ -125,13 +98,7 @@ class VlxReadjustement:
                 < 0.1
             ):
                 self.parent.get_logger().warn(f"able to correct")
-                tf = TransformStamped()
-                tf.header.frame_id = "map"
-                tf.child_frame_id = "odom"
-                tf.transform.translation.x = new_x
-                tf.transform.translation.y = new_y
-                tf.transform.rotation = euler_to_quaternion(new_theta)
-                return tf
+                return new_x, new_y, euler_to_quaternion(new_theta)
             else:
                 return None
 
