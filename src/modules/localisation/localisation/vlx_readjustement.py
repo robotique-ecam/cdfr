@@ -78,13 +78,35 @@ class VlxReadjustement:
             if len(self.values_stamped_array) > 10:
                 self.values_stamped_array.pop()
 
+    def try_to_readjust_with_vlx(self, x, y, q, stamp):
+        send_tf = True
+        for i in range(len(self.values_stamped_array)):
             if (
                 abs(
                     float(
+                        self.values_stamped_array[i].stamp.sec
+                        + self.values_stamped_array[i].stamp.nanosec * 1e-9
                     )
+                    - float(stamp.sec + stamp.nanosec * 1e-9)
                 )
+                < 0.06
             ):
+                new_stamp = self.values_stamped_array[i].stamp
+
+                pose = Pose()
+                pose.position.x = x
+                pose.position.y = y
+                pose.orientation = q
+                news = self.compute_data(pose, self.values_stamped_array[i].values)
+                if news != None:
+                    send_tf = False
+                    self.parent.get_logger().info("publish affined position")
+                    self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
+        if send_tf:
+            self.parent.create_and_send_tf(x, y, q, stamp)
+        if self.continuous_sampling == 1:
+            self.stop_continuous_sampling_thread()
 
     def compute_data(self, pose_considered, vlx_values):
 
