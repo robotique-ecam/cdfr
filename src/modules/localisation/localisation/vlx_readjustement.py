@@ -5,9 +5,11 @@
 
 import numpy as np
 import copy
+import threading
 
 from localisation.sensors_sim import Sensors
 from localisation.utils import *
+from geometry_msgs.msg import Pose
 
 bottom_blue_area = [0.0, 0.0, 0.9, 1.0]
 top_blue_area = [0.0, 1.0, 1.5, 2.0]
@@ -33,6 +35,16 @@ class VlxReadjustement:
         self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
         self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
         self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
+        self.values_stamped_array = [
+            VlxStamped(
+                self.sensors.get_distances(),
+                self.get_clock().now()
+                if not is_simulation()
+                else self.sensors.get_time_stamp(),
+            )
+        ]
+        self.thread_continuous_sampling = None
+        self.continuous_sampling = 0
 
             if (
                 abs(
@@ -370,3 +382,9 @@ class VlxReadjustement:
             - considered_vlx_lat_x * np.cos(considered_angle)
         )
         return (d1_est_proj_wall, d2_est_proj_wall, d3_est_proj_wall)
+
+
+class VlxStamped:
+    def __init__(self, values, stamp):
+        self.values = copy.deepcopy(values)
+        self.stamp = stamp
