@@ -46,6 +46,38 @@ class VlxReadjustement:
         self.thread_continuous_sampling = None
         self.continuous_sampling = 0
 
+    def start_continuous_sampling_thread(self, sleep_time, continuous_samp):
+        if self.thread_continuous_sampling == None:
+            self.thread_continuous_sampling = threading.Thread(
+                target=self.continuous_vlx_sampling, args=(sleep_time, continuous_samp,)
+            )
+            self.thread_continuous_sampling.start()
+        else:
+            self.parent.get_logger().info("vlx_thread thread is already running !")
+
+    def stop_continuous_sampling_thread(self):
+        if self.thread_continuous_sampling != None:
+            self.continuous_sampling = 0
+            self.thread_continuous_sampling.join()
+            self.thread_continuous_sampling = None
+        else:
+            self.parent.get_logger().info("vlx_thread thread isn't running !")
+
+    def continuous_vlx_sampling(self, sleep_time_before_sampling, continuous_samp):
+        self.continuous_sampling = continuous_samp
+        self.parent.get_logger().warn(f"self.continuous_sampling:{self.continuous_sampling}")
+        time.sleep(sleep_time_before_sampling)
+        while self.continuous_sampling != 0:
+            actual_stamp = (
+                self.get_clock().now()
+                if not is_simulation()
+                else self.sensors.get_time_stamp()
+            )
+            vlx_values = self.sensors.get_distances()
+            self.values_stamped_array.insert(0, VlxStamped(vlx_values, actual_stamp))
+            if len(self.values_stamped_array) > 10:
+                self.values_stamped_array.pop()
+
             if (
                 abs(
                     float(
