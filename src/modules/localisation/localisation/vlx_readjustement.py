@@ -84,6 +84,7 @@ class VlxReadjustement:
             self.values_stamped_array.insert(0, VlxStamped(vlx_values, actual_stamp))
             if len(self.values_stamped_array) > 10:
                 self.values_stamped_array.pop()
+            time.sleep(0.02)
 
     def try_to_readjust_with_vlx(self, x, y, q, stamp):
         send_tf = True
@@ -99,6 +100,7 @@ class VlxReadjustement:
                 < 0.06
             ):
                 new_stamp = self.values_stamped_array[i].stamp
+                self.stop_continuous_sampling_thread()
 
                 pose = Pose()
                 pose.position.x = x

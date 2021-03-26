@@ -192,5 +192,7 @@ def main(args=None):
         rclpy.spin(localisation)
     except KeyboardInterrupt:
         pass
+    localisation.vlx.stop_continuous_sampling_thread()
+    localisation.vlx.sensors.node.destroy_node()
     localisation.destroy_node()
     rclpy.shutdown()
