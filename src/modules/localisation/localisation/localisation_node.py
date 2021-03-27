@@ -61,6 +61,9 @@ class Localisation(rclpy.node.Node):
         self.tf_publisher_ = self.create_publisher(
             TransformStamped, "adjust_odometry", 10
         )
+        self.odom_map_relative_publisher_ = self.create_publisher(
+            PoseStamped, "odom_map_relative", 10
+        )
         self.last_odom_update = 0
         self.get_logger().info(f"Default side is {self.side.value}")
         self.vlx = VlxReadjustement(self)
@@ -175,6 +178,7 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.header.stamp = msg.header.stamp
         self.robot_pose.header.frame_id = "map"
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+        self.odom_map_relative_publisher_.publish(self.robot_pose)
         if self.is_near_walls(self.robot_pose.pose.position):
             if self.vlx.continuous_sampling == 2:
                 self.vlx.near_wall_routine(self.robot_pose)
