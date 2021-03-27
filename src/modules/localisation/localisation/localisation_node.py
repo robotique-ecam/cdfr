@@ -126,12 +126,6 @@ class Localisation(rclpy.node.Node):
                     is_simulation()
                 ):  # simulate marker delais (image analysis from assurancetourix)
                     time.sleep(0.15)
-                if False:  # is_in_specific_area(ally_marker):
-                    continuous_sampling = 2
-                    tempo = 0.0
-                else:
-                    continuous_sampling = 1
-                    tempo = 0.65
                 if self.vlx.continuous_sampling == 0:
                     self.get_logger().info(f"initial continuous_sampling == 0")
                     self.create_and_send_tf(
@@ -140,19 +134,18 @@ class Localisation(rclpy.node.Node):
                         ally_marker.pose.orientation,
                         ally_marker.header.stamp,
                     )
-                    self.vlx.start_continuous_sampling_thread(
-                        tempo, continuous_sampling
-                    )
-                elif self.vlx.continuous_sampling == 1:
+                else:
                     self.vlx.try_to_readjust_with_vlx(
                         ally_marker.pose.position.x,
                         ally_marker.pose.position.y,
                         ally_marker.pose.orientation,
                         ally_marker.header.stamp,
                     )
-                    self.vlx.start_continuous_sampling_thread(
-                        tempo, continuous_sampling
-                    )
+                if self.vlx.continuous_sampling in [0, 1]:
+                    self.vlx.start_continuous_sampling_thread(0.65, 1)
+
+    def is_near_walls(self, pt):
+        return pt.x < 0.25 or pt.y < 0.25 or pt.x > 2.75 or pt.y > 1.75
 
     def create_and_send_tf(self, x, y, q, stamp):
         self._tf.header.stamp = stamp
@@ -182,6 +175,13 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.header.stamp = msg.header.stamp
         self.robot_pose.header.frame_id = "map"
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+        if self.is_near_walls(self.robot_pose.pose.position):
+            if self.vlx.continuous_sampling == 2:
+                self.vlx.near_wall_routine(self.robot_pose)
+            else:
+                self.vlx.start_near_wall_routine(self.robot_pose)
+        elif self.vlx.continuous_sampling == 2:
+            self.vlx.stop_near_wall_routine()
 
 
 def main(args=None):
