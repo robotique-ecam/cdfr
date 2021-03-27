@@ -49,6 +49,36 @@ class VlxReadjustement:
         self.thread_continuous_sampling = None
         self.continuous_sampling = 0
         self.near_walls_last_check_stamp = None
+
+    def near_wall_routine(self, pose_stamped):
+        actual_stamp = (
+            self.get_clock().now()
+            if not is_simulation()
+            else self.sensors.get_time_stamp()
+        )
+        if (
+            abs(
+                float(
+                    pose_stamped.header.stamp.sec
+                    + pose_stamped.header.stamp.nanosec * 1e-9
+                )
+                - float(self.near_walls_last_check_stamp.sec + self.near_walls_last_check_stamp.nanosec * 1e-9)
+            )
+            < 0.5
+        ):
+            self.parent.get_logger().warn("near_wall_routine")
+            self.try_to_readjust_with_vlx(
+                pose_stamped.pose.position.x,
+                pose_stamped.pose.position.y,
+                pose_stamped.pose.orientation,
+                pose_stamped.header.stamp,
+            )
+            self.near_walls_last_check_stamp = (
+                self.get_clock().now()
+                if not is_simulation()
+                else self.sensors.get_time_stamp()
+            )
+
     def start_near_wall_routine(self, pose_stamped):
         if self.near_walls_last_check_stamp == None:
             self.near_walls_last_check_stamp = Time(sec=0, nanosec=0)
@@ -128,13 +158,18 @@ class VlxReadjustement:
                 news = self.compute_data(pose, self.values_stamped_array[i].values)
                 if news != None:
                     send_tf = False
-                    self.parent.get_logger().info("publish affined position")
+                    self.parent.get_logger().warn("publish affined position")
                     self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
         if send_tf:
             self.parent.create_and_send_tf(x, y, q, stamp)
         if self.continuous_sampling == 1:
             self.stop_continuous_sampling_thread()
+        if self.near_walls_last_check_stamp != None:
+            self.start_continuous_sampling_thread(0.0, 2)
+        later = datetime.now()
+        delay = (later - now).total_seconds()
+        self.parent.get_logger().info(f"delais: {delay}")
 
     def compute_data(self, pose_considered, vlx_values):
 
