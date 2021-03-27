@@ -11,6 +11,9 @@ import threading
 from localisation.sensors_sim import Sensors
 from localisation.utils import *
 from geometry_msgs.msg import Pose
+from builtin_interfaces.msg._time import Time
+
+from datetime import datetime
 
 bottom_blue_area = [0.0, 0.0, 0.9, 1.0]
 top_blue_area = [0.0, 1.0, 1.5, 2.0]
@@ -27,7 +30,6 @@ class VlxReadjustement:
             self.sim_offset = 0.0215
         else:
             self.sim_offset = 0.0
-        # self.parent.create_timer(0.7, self.try_to_readjust_with_vlx)
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
@@ -46,6 +48,23 @@ class VlxReadjustement:
         ]
         self.thread_continuous_sampling = None
         self.continuous_sampling = 0
+        self.near_walls_last_check_stamp = None
+    def start_near_wall_routine(self, pose_stamped):
+        if self.near_walls_last_check_stamp == None:
+            self.near_walls_last_check_stamp = Time(sec=0, nanosec=0)
+            if self.thread_continuous_sampling != None:
+                self.stop_continuous_sampling_thread()
+            self.start_continuous_sampling_thread(0.0, 2)
+            self.near_wall_routine(pose_stamped)
+        else:
+            self.parent.get_logger().info("near wall routine already running")
+
+    def stop_near_wall_routine(self):
+        if self.near_walls_last_check_stamp != None:
+            self.near_walls_last_check_stamp = None
+            self.stop_continuous_sampling_thread()
+        else:
+            self.parent.get_logger().info("near wall routine already stopped")
 
     def start_continuous_sampling_thread(self, sleep_time, continuous_samp):
         if self.thread_continuous_sampling == None:
