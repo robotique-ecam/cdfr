@@ -62,7 +62,10 @@ class VlxReadjustement:
                     pose_stamped.header.stamp.sec
                     + pose_stamped.header.stamp.nanosec * 1e-9
                 )
-                - float(self.near_walls_last_check_stamp.sec + self.near_walls_last_check_stamp.nanosec * 1e-9)
+                - float(
+                    self.near_walls_last_check_stamp.sec
+                    + self.near_walls_last_check_stamp.nanosec * 1e-9
+                )
             )
             < 0.5
         ):
@@ -111,6 +114,9 @@ class VlxReadjustement:
 
     def stop_continuous_sampling_thread(self):
         if self.thread_continuous_sampling != None:
+            self.parent.get_logger().info(
+                f"stopping continuous sampling:{self.continuous_sampling}"
+            )
             self.continuous_sampling = 0
             self.thread_continuous_sampling.join()
             self.thread_continuous_sampling = None
@@ -119,8 +125,8 @@ class VlxReadjustement:
 
     def continuous_vlx_sampling(self, sleep_time_before_sampling, continuous_samp):
         self.continuous_sampling = continuous_samp
-        self.parent.get_logger().warn(
-            f"self.continuous_sampling:{self.continuous_sampling}"
+        self.parent.get_logger().info(
+            f"starting continuous sampling:{self.continuous_sampling}"
         )
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
@@ -136,6 +142,7 @@ class VlxReadjustement:
             time.sleep(0.02)
 
     def try_to_readjust_with_vlx(self, x, y, q, stamp):
+        now = datetime.now()
         send_tf = True
         for i in range(len(self.values_stamped_array)):
             if (

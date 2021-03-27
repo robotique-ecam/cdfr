@@ -19,6 +19,7 @@ from localisation.vlx_readjustement import VlxReadjustement
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import *
+from datetime import datetime
 
 
 class Localisation(rclpy.node.Node):
@@ -157,6 +158,7 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.translation.z = float(0)
         self._tf.transform.rotation = q
         self.last_odom_update = self.get_clock().now().to_msg().sec
+        self.get_logger().info(f"publishing tf")
         self.tf_publisher_.publish(self._tf)
 
     def get_initial_tf_srv_callback(self, request, response):
