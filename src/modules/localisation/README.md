@@ -78,13 +78,13 @@ As all geometrical problem it's way easier to understand what's happening with a
 
 Now, time to deep dive into calculations:
 
-+ $f(d1,d2,d3)=(x,y,\theta)$
-	+ $\theta$:
++ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}f(d1,d2,d3)=(x,y,\theta))
+	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\theta):
 Considering the triangle surrounded in purple and basic trigonometric formula:
-$$\tan(\theta)=\frac{d2-d1}{2e}$$
-$$\Rightarrow\boxed{\theta=\arctan{\frac{d2-d1}{2e}}}\ (3)$$
+![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\tan(\theta)=\frac{d2-d1}{2e})
+![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\Rightarrow\boxed{\theta=\arctan{\frac{d2-d1}{2e}}}\ (3))
 
-	+ $x$ and $y$:
+	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}x) and ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}y):
 Now that we now $\theta$, it's fairly simple to get x and y by projecting vlx distances using $\theta$.
 
 <p align="center">
@@ -92,8 +92,8 @@ Now that we now $\theta$, it's fairly simple to get x and y by projecting vlx di
 </p>
 <br/>
 
-$$\boxed{y= ( \ \frac{d2-d1}{2} + d \ ).\cos{\theta}} \ (1)$$
-$$\boxed{x=(d3+r).\cos{\theta}+L.\sin{\theta}}\ (2)$$
+![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\boxed{y=%20(%20\%20\frac{d2-d1}{2}%20%2B%20d%20\%20).\cos{\theta}}%20\%20(1))
+![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\boxed{x=(d3%2Br).\cos{\theta}%2BL.\sin{\theta}}\%20(2))
 
 + $f(x,y,\theta)=(d1,d2,d3)$
 	+ $d1$
