@@ -112,28 +112,30 @@ Now that we now ![formula](https://render.githubusercontent.com/render/math?math
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\frac{x}{\cos{\theta}}-L.\tan{\theta}=d3%2Br)\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d3=\frac{x}{\cos{\theta}}-L.\tan{\theta}-r})
 
-+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta,d1,d2,d3)=(d1\_proj,d2\_proj,d3\_proj))\
++ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta,d1,d2,d3)=(d1\_proj,d2\_proj,d3\_proj))
+
 <p align="center">
 <img src="./schematic_pictures/vlx_proj.png" title="">
 </p>
 <br/>
+
 All theses are just simple projection knowing ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x,y,\theta) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3)). It constitutes an extra tool to validate the pose estimation. Indeed, if a projection is negative, it's because the vlx doesn't measure the distance to the desired wall, so the resulting pose will obviously be incorrect.
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_\proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_\proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3\_\proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
 
 ### Formulas summary
 \
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{x=(d3%2Br).\cos{\theta}%2BL.\sin{\theta}}\%20)\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{y=%20(%20\%20\frac{d2-d1}{2}%20%2B%20d%20\%20).\cos{\theta}})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{\theta=\arctan{\frac{d2-d1}{2e}}}%20(3)%20)\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{\theta=\arctan{\frac{d2-d1}{2e}}})\
 \
 \
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta}-d})
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d2=\frac{y}{\cos{\theta}}%2Be\tan{\theta}-d})
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d3=\frac{x}{\cos{\theta}}-L.\tan{\theta}-r})
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta}-d})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2=\frac{y}{\cos{\theta}}%2Be\tan{\theta}-d})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3=\frac{x}{\cos{\theta}}-L.\tan{\theta}-r})\
 \
 \
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_\proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_\proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3\_\proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
