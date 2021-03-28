@@ -78,30 +78,30 @@ As all geometrical problem it's way easier to understand what's happening with a
 
 Now, time to deep dive into calculations:
 
-+ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}f(d1,d2,d3)=(x,y,\theta))
-	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\theta):
-Considering the triangle surrounded in purple and basic trigonometric formula:
-![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\tan(\theta)=\frac{d2-d1}{2e})
-![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\Rightarrow\boxed{\theta=\arctan{\frac{d2-d1}{2e}}}\ (3))
++ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(d1,d2,d3)=(x,y,\theta))
+	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta):\
+Considering the triangle surrounded in purple and basic trigonometric formula:\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\tan(\theta)=\frac{d2-d1}{2e})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{\theta=\arctan{\frac{d2-d1}{2e}}}\(3))
 
-	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}x) and ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}y):
-Now that we now $\theta$, it's fairly simple to get x and y by projecting vlx distances using $\theta$.
+	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y):\
+Now that we now ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta), it's fairly simple to get x and y by projecting vlx distances using it.
 
 <p align="center">
 <img src="./schematic_pictures/vlx_x_y_determination.png" title="">
 </p>
 <br/>
 
-![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\boxed{y=%20(%20\%20\frac{d2-d1}{2}%20%2B%20d%20\%20).\cos{\theta}}%20\%20(1))
+![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\boxed{y=%20(%20\%20\frac{d2-d1}{2}%20%2B%20d%20\%20).\cos{\theta}}%20\%20(1))\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{blue}\boxed{x=(d3%2Br).\cos{\theta}%2BL.\sin{\theta}}\%20(2))
 
-+ $f(x,y,\theta)=(d1,d2,d3)$
-	+ $d1$
-$$(3)\Rightarrow\tan{\theta}=\frac{d2-d1}{2e}$$
-$$\Rightarrow d2=2e\tan{\theta}+d1\ (4)$$
-$$(1)\Rightarrow y=(\frac{d1+(d1+2e\tan{\theta})}{2}+d).\cos{\theta}$$
-$$\Rightarrow y=(d1+2e\tan{\theta}).\cos{\theta}$$
-$$\Rightarrow \boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta} -d}$$
++ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3))
+	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}d1)\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(3)\Rightarrow\tan{\theta}=\frac{d2-d1}{2e})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\d2=2e\tan{\theta}%2Bd1\(4))\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(1)\Rightarrow\y=(\frac{d1%2B(d1%2B2e\tan{\theta})}{2}%2Bd).\cos{\theta})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\y=(d1%2B2e\tan{\theta}).\cos{\theta})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta}-d})\
 
 	+ $d2$
 $$(4)\Rightarrow d2=2e\tan{\theta}+\frac{y}{\cos{\theta}}-e\tan{\theta} -d$$
