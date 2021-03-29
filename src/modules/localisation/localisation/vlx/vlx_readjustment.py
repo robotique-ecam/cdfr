@@ -8,10 +8,14 @@ import copy
 import time
 import threading
 
-from localisation.sensors_sim import Sensors
 from localisation.utils import *
 from geometry_msgs.msg import Pose
 from builtin_interfaces.msg._time import Time
+
+if is_simulation():
+    from .sensors_sim import Sensors
+else:
+    from .sensors import Sensors
 
 from datetime import datetime
 
@@ -27,11 +31,12 @@ class VlxReadjustment:
 
     def __init__(self, parent_node):
         self.parent = parent_node
-        self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
         if is_simulation():
             self.sim_offset = 0.0215
+            self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
         else:
             self.sim_offset = 0.0
+            self.sensors = Sensors(addrs=[30, 31, 32, 33, 34, 35])
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)

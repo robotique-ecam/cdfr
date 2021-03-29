@@ -14,8 +14,7 @@ from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
-from transformix_msgs.srv import TransformixParametersTransformStamped
-from localisation.vlx_readjustment import VlxReadjustment
+from .vlx.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import *

@@ -13,7 +13,7 @@ package_name = "localisation"
 
 setup(
     name=package_name,
-    version="0.8.3",
+    version="0.8.4",
     packages=find_packages(),
     data_files=[
         (path.join("share", package_name), ["package.xml"]),
@@ -23,11 +23,11 @@ setup(
     install_requires=["setuptools"],
     author="Ewen BRUN",
     author_email="ewen.brun@ecam.fr",
-    maintainer="Ewen BRUN",
-    maintainer_email="ewen.brun@ecam.fr",
-    keywords=["ROS2", "", "CDFR"],
-    description="Code node cetautomatix.",
-    license="ECAM Makers :: CDFR 2020",
+    maintainer="Philéas LAMBERT",
+    maintainer_email="phileas.lambert@ecam.fr",
+    keywords=["ROS2", "localisation", "CDFR"],
+    description="Code node localisation.",
+    license="ECAM Makers :: CDFR 2021",
     entry_points={
         "console_scripts": [
             "localisation = localisation.localisation_node:main",
