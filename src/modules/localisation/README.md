@@ -72,7 +72,7 @@ This paragraph is about to explain you how we can compute the pose (position/ori
 As all geometrical problem it's way easier to understand what's happening with a schematic of the situation:
 
 <p align="center">
-<img src="./schematic_pictures/vlx_math_schematic.png" title="">
+<img src="./schematic_pictures/vlx_math_schematic.png" title="" width="40%">
 </p>
 <br/>
 
@@ -88,7 +88,7 @@ Considering the triangle surrounded in purple and basic trigonometric formula:\
 Now that we now ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta), it's fairly simple to get x and y by projecting vlx distances using it.
 
 <p align="center">
-<img src="./schematic_pictures/vlx_x_y_determination.png" title="">
+<img src="./schematic_pictures/vlx_x_y_determination.png" title="" width="40%">
 </p>
 <br/>
 
@@ -98,14 +98,14 @@ Now that we now ![formula](https://render.githubusercontent.com/render/math?math
 + ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3))
 	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}d1)\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(3)\Rightarrow\tan{\theta}=\frac{d2-d1}{2e})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\d2=2e\tan{\theta}%2Bd1%20(4)%20)\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(1)\Rightarrow\y=(\frac{d1%2B(d1%2B2e\tan{\theta})}{2}%2Bd).\cos{\theta})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\y=(d1%2B2e\tan{\theta}).\cos{\theta})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta}-d})
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\d2=2e.\tan{\theta}%2Bd1%20(4)%20)\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(1)\Rightarrow\y=(\frac{d1%2B(d1%2B2e.\tan{\theta})}{2}%2Bd).\cos{\theta})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\y=(d1%2B2e.\tan{\theta}).\cos{\theta})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d1=\frac{y}{\cos{\theta}}-e.\tan{\theta}-d})
 
 	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}d2)\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(4)\Rightarrow\d2=2e\tan{\theta}%2B\frac{y}{\cos{\theta}}-e\tan{\theta}-d)\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d2=\frac{y}{\cos{\theta}}%2Be\tan{\theta}-d})
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(4)\Rightarrow\d2=2e.\tan{\theta}%2B\frac{y}{\cos{\theta}}-e.\tan{\theta}-d)\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\Rightarrow\boxed{d2=\frac{y}{\cos{\theta}}%2Be.\tan{\theta}-d})
 
 	+ ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}d3)\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}(2)\Rightarrow\x-L.\sin{\theta}=(d3%2Br).\cos{\theta})\
@@ -115,11 +115,12 @@ Now that we now ![formula](https://render.githubusercontent.com/render/math?math
 + ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta,d1,d2,d3)=(d1\_proj,d2\_proj,d3\_proj))
 
 <p align="center">
-<img src="./schematic_pictures/vlx_proj.png" title="">
+<img src="./schematic_pictures/vlx_proj.png" title="" width="40%">
 </p>
 <br/>
 
-All theses are just simple projection knowing ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x,y,\theta) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3)). It constitutes an extra tool to validate the pose estimation. Indeed, if a projection is negative, it's because the vlx doesn't measure the distance to the desired wall, so the resulting pose will obviously be incorrect.
+All theses are just simple projection knowing ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x,y,\theta) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3)). It constitutes an extra tool to validate the pose estimation. Indeed, if a projection is negative, it's because the vlx doesn't measure the distance to the desired wall, so the resulting pose will obviously be incorrect.\
+
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_\proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_\proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3\_\proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
@@ -131,11 +132,39 @@ All theses are just simple projection knowing ![formula](https://render.githubus
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{\theta=\arctan{\frac{d2-d1}{2e}}})\
 \
 \
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1=\frac{y}{\cos{\theta}}-e\tan{\theta}-d})\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2=\frac{y}{\cos{\theta}}%2Be\tan{\theta}-d})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1=\frac{y}{\cos{\theta}}-e.\tan{\theta}-d})\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2=\frac{y}{\cos{\theta}}%2Be.\tan{\theta}-d})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3=\frac{x}{\cos{\theta}}-L.\tan{\theta}-r})\
 \
 \
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_\proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_\proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d3\_\proj=y-(d3%2Br).\sin{\theta}-L.\cos{\theta}})
+
+## In practice
+
+Now that we've establish the theory, time to find all the cases. The table below summarize the different cases implemented in the algorithm, it also considers some tweaks in the algorithm (such as invert angle in some cases due to some symmetries etc.).  
+
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) the distance between the robot and its sideways wall.\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y) the distance between the robot and its facing wall.\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta) the orientation of the robot relative to the wall as described in the first schematic.\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi) the orientation of the robot relative to the map.\
+\
+| Position | Orientation | d1  | d2 | d3 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta) | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y) |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Top blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{\pi}{4},\frac{3\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\frac{\pi}{2}-\phi) | robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\frac{\pi}{4},-\frac{3\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\frac{\pi}{2}-\phi) | robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{-\pi}{4},\frac{\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\phi) | robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\pi,-\frac{3\pi}{4}]\cup[\frac{3\pi}{4},\pi])| vlx_0x31 | vlx_0x32 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\pi-\phi) | robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Bottom blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{\pi}{4},\frac{3\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\frac{\pi}{2}-\phi) | robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\frac{\pi}{4},-\frac{3\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\frac{\pi}{2}-\phi) | robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{-\pi}{4},\frac{\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\phi) | robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\pi,-\frac{3\pi}{4}]\cup[\frac{3\pi}{4},\pi])| vlx_0x31 | vlx_0x32 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\pi-\phi) | robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Top yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{\pi}{4},\frac{3\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\frac{\pi}{2}-\phi) | 3000 - robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\frac{\pi}{4},-\frac{3\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\frac{\pi}{2}-\phi) | 3000 - robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{-\pi}{4},\frac{\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\phi) | 3000 - robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Top yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\pi,-\frac{3\pi}{4}]\cup[\frac{3\pi}{4},\pi])| vlx_0x34 | vlx_0x35 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\pi-\phi) | 3000 - robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |
+| Bottom yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{\pi}{4},\frac{3\pi}{4}])| vlx_0x34 | vlx_0x35 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\frac{\pi}{2}-\phi) | 3000 - robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\frac{\pi}{4},-\frac{3\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\frac{\pi}{2}-\phi) | 3000 - robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{-\pi}{4},\frac{\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x30 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}-\phi) | 3000 - robot_pose_x . 1000 | robot_pose_y . 1000 |
+| Bottom yellow | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[-\pi,-\frac{3\pi}{4}]\cup[\frac{3\pi}{4},\pi])| vlx_0x34 | vlx_0x35 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\pi-\phi) | 3000 - robot_pose_x . 1000 | robot_pose_y . 1000 |
