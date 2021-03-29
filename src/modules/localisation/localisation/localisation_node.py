@@ -42,11 +42,6 @@ class Localisation(rclpy.node.Node):
         self._tf.header.frame_id = "map"
         self._tf.child_frame_id = "odom"
         self.update_transform()
-        self.get_initial_tf_srv = self.create_service(
-            TransformixParametersTransformStamped,
-            "get_odom_map_tf",
-            self.get_initial_tf_srv_callback,
-        )
         self.subscription_ = self.create_subscription(
             MarkerArray,
             "/allies_positions_markers",
@@ -160,11 +155,6 @@ class Localisation(rclpy.node.Node):
         self.last_odom_update = self.get_clock().now().to_msg().sec
         self.get_logger().info(f"publishing tf")
         self.tf_publisher_.publish(self._tf)
-
-    def get_initial_tf_srv_callback(self, request, response):
-        self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
-        response.transform_stamped = self._initial_tf
-        return response
 
     def odom_callback(self, msg):
         """Odom callback, compute the new pose of the robot relative to map"""
