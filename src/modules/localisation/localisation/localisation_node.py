@@ -17,7 +17,7 @@ from tf2_ros import StaticTransformBroadcaster
 from .vlx.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
-from tf2_kdl import *
+from tf2_kdl import transform_to_kdl, do_transform_frame
 from datetime import datetime
 
 
@@ -25,6 +25,7 @@ class Localisation(rclpy.node.Node):
     """Robot localisation node."""
 
     def __init__(self):
+        """ Init Localisation node """
         super().__init__("localisation_node")
         self.robot = self.get_namespace().strip("/")
         self.side = self.declare_parameter("side", "blue")
@@ -65,7 +66,7 @@ class Localisation(rclpy.node.Node):
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
-        """Handle Parameter events especially for side."""
+        """ Handle Parameter events especially for side """
         result = SetParametersResult()
         try:
             for param in params:
@@ -87,8 +88,7 @@ class Localisation(rclpy.node.Node):
         return result
 
     def fetchStartPosition(self):
-        """Fetch start position for side and robot."""
-        # TODO : Calibrate the start position using VL53L1X
+        """ Fetch start position for side and robot """
         if self.robot == "asterix":
             if self.side.value == "blue":
                 return (0.29, 1.33, 0)
@@ -99,11 +99,10 @@ class Localisation(rclpy.node.Node):
                 return (0.29, 1.33, 0)
             elif self.side.value == "yellow":
                 return (3 - 0.29, 1.33, np.pi)
-        # Make it crash in case of undefined parameters
         return None
 
     def update_transform(self):
-        """Update and publish transform odom --> map."""
+        """ Update and publish transform odom --> map """
         self._tf.header.stamp = self.get_clock().now().to_msg()
         self._tf.transform.translation.x = self.robot_pose.pose.position.x
         self._tf.transform.translation.y = self.robot_pose.pose.position.y
@@ -112,9 +111,9 @@ class Localisation(rclpy.node.Node):
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
-        """Identity the robot marker in assurancetourix marker_array detection
-        publish the transformation for drive to readjust odometry
-        compute base_link --> odom"""
+        """Identity the robot marker in assurancetourix marker_array detection,
+        send the marker to vlx_readjustment in order to try to refine the position
+        at stamp given by the marker"""
         for ally_marker in msg.markers:
             if (
                 ally_marker.text.lower() == self.robot
@@ -143,9 +142,11 @@ class Localisation(rclpy.node.Node):
                     self.vlx.start_continuous_sampling_thread(0.65, 1)
 
     def is_near_walls(self, pt):
-        return pt.x < 0.25 or pt.y < 0.25 or pt.x > 2.75 or pt.y > 1.75
+        """ Return true if the robot if less than 30cm from the wall """
+        return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
 
     def create_and_send_tf(self, x, y, q, stamp):
+        """ create and send tf to drive for it to re-adjust odometry """
         self._tf.header.stamp = stamp
         self._tf.transform.translation.x = x
         self._tf.transform.translation.y = y
@@ -156,7 +157,9 @@ class Localisation(rclpy.node.Node):
         self.tf_publisher_.publish(self._tf)
 
     def odom_callback(self, msg):
-        """Odom callback, compute the new pose of the robot relative to map"""
+        """Odom callback, compute the new pose of the robot relative to map,
+        send this new pose on odom_map_relative topic and start vlx routine
+        if this pose is near walls"""
         robot_tf = TransformStamped()
         robot_tf.transform.translation.x = msg.pose.pose.position.x
         robot_tf.transform.translation.y = msg.pose.pose.position.y
