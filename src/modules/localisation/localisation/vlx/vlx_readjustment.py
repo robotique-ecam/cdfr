@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-"""Vlx readjustment for localisation"""
+"""Vlx readjustment for localisation package"""
 
 import numpy as np
 import copy
@@ -30,6 +30,7 @@ class VlxReadjustment:
     """ Vlx readjustment class, contains routine and algorithm relative to vlx"""
 
     def __init__(self, parent_node):
+        """ Init VlxReadjustment """
         self.parent = parent_node
         if is_simulation():
             self.sim_offset = 0.0215
@@ -58,6 +59,8 @@ class VlxReadjustment:
         self.near_walls_last_check_stamp = None
 
     def near_wall_routine(self, pose_stamped):
+        """Near wall routine: launch try_to_readjust_with_vlx every 0.5 seconds
+        considering the pose_stamped given in argument"""
         actual_stamp = (
             self.get_clock().now()
             if not is_simulation()
@@ -90,6 +93,8 @@ class VlxReadjustment:
             )
 
     def start_near_wall_routine(self, pose_stamped):
+        """Start the near wall routine by starting the thread_continuous_sampling
+        and launching a near_wall_routine immediatly after"""
         if self.near_walls_last_check_stamp == None:
             self.near_walls_last_check_stamp = Time(sec=0, nanosec=0)
             if self.thread_continuous_sampling != None:
@@ -100,6 +105,7 @@ class VlxReadjustment:
             self.parent.get_logger().info("near wall routine already running")
 
     def stop_near_wall_routine(self):
+        """Stop the near wall routine by stopping the thread_continuous_sampling"""
         if self.near_walls_last_check_stamp != None:
             self.near_walls_last_check_stamp = None
             self.stop_continuous_sampling_thread()
@@ -107,6 +113,8 @@ class VlxReadjustment:
             self.parent.get_logger().info("near wall routine already stopped")
 
     def start_continuous_sampling_thread(self, sleep_time, continuous_samp):
+        """Start the thread_continuous_sampling with an initial waiting time
+        and mode given by continuous_samp: 0->stopped, 1->nominal, 2->near_wall"""
         if self.thread_continuous_sampling == None:
             self.thread_continuous_sampling = threading.Thread(
                 target=self.continuous_vlx_sampling,
@@ -120,6 +128,7 @@ class VlxReadjustment:
             self.parent.get_logger().info("vlx_thread thread is already running !")
 
     def stop_continuous_sampling_thread(self):
+        """Safely stop the thread_continuous_sampling"""
         if self.thread_continuous_sampling != None:
             self.parent.get_logger().info(
                 f"stopping continuous sampling:{self.continuous_sampling}"
@@ -131,6 +140,8 @@ class VlxReadjustment:
             self.parent.get_logger().info("vlx_thread thread isn't running !")
 
     def continuous_vlx_sampling(self, sleep_time_before_sampling, continuous_samp):
+        """Thread function, wait sleep_time_before_sampling seconds before
+        continuous sampling until continuous_sampling==0"""
         self.continuous_sampling = continuous_samp
         self.parent.get_logger().info(
             f"starting continuous sampling:{self.continuous_sampling}"
@@ -149,6 +160,9 @@ class VlxReadjustment:
             time.sleep(0.02)
 
     def try_to_readjust_with_vlx(self, x, y, q, stamp):
+        """Retrieve the nearest vlx values stamped from the given stamp then
+        send those values to compute_data function that returns the corrected
+        pose if not None then send this corrected pose to parent.create_and_send_tf"""
         now = datetime.now()
         if self.continuous_sampling != 2:
             send_vision_tf = True
@@ -190,7 +204,8 @@ class VlxReadjustment:
         self.parent.get_logger().info(f"delais: {delay}")
 
     def compute_data(self, pose_considered, vlx_values):
-
+        """Fetching data for calculations detailed in README, computing new_pose
+        from these data, estimate if this pose is valid before returning it"""
         data = self.fetch_data(pose_considered, vlx_values)
 
         if data == None:
@@ -250,7 +265,8 @@ class VlxReadjustment:
                 return None
 
     def fetch_data(self, pose_considered, values):
-
+        """Returning data as described in the table at the end of README
+        + all other data that are needed for the pose calculations"""
         angle = quaternion_to_euler(pose_considered.orientation)[2]
 
         if in_rectangle(bottom_blue_area, self.parent.robot_pose):
@@ -440,6 +456,7 @@ class VlxReadjustment:
         }
 
     def get_pose_from_vlx(self, d1, d2, d3, vlx_0x30):
+        """Computing a pose relative to the wall considering vlx measured distances"""
         theta = np.arctan((d2 - d1) / (2 * self.vlx_face_y))
         if vlx_0x30:
             x = (d3 + self.vlx_lat_y) * np.cos(theta) - self.vlx_lat_x * np.sin(theta)
@@ -449,6 +466,7 @@ class VlxReadjustment:
         return (x, y, theta)
 
     def get_vlx_from_pose(self, robot_pose_wall_relative, theta, vlx_0x30):
+        """Computing an estimation of vlx distances from a given pose and orientation"""
         d1 = (
             (robot_pose_wall_relative[1]) / np.cos(theta)
             + self.vlx_face_y * np.tan(theta)
@@ -484,6 +502,8 @@ class VlxReadjustment:
         inv_angle=False,
         inv_lat=False,
     ):
+        """Computing an estimation of the projection of vlx wall hit from a given
+        position relative to the wall and an estimation of the vlx distance"""
         if case in [1, 2]:
             considered_angle = rectif_angle
             considered_vlx_face_y = self.vlx_face_y
@@ -522,5 +542,6 @@ class VlxStamped:
     """ VlxStamped class, an instance contains stamp + vlx values """
 
     def __init__(self, values, stamp):
+        """ Init VlxStamped """
         self.values = copy.deepcopy(values)
         self.stamp = stamp

@@ -34,6 +34,7 @@ class Sensors:
         return distances
 
     def get_time_stamp(self):
+        """get time stamp from webots"""
         self.node.robot.step(0)
         t = self.node.robot.getTime()
         return Time(sec=int(t), nanosec=int((t % int(t)) * 1e9))
@@ -48,5 +49,5 @@ class VlxSupervisor(WebotsNode):
     """Vlx manager node."""
 
     def __init__(self, supervisor, args=None):
-        """Init pharaon sim node."""
+        """Init VlxSupervisor sim node."""
         super().__init__(supervisor, args)
