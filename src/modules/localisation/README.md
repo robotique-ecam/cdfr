@@ -72,7 +72,7 @@ This paragraph is about to explain you how we can compute the pose (position/ori
 As all geometrical problem it's way easier to understand what's happening with a schematic of the situation:
 
 <p align="center">
-<img src="./schematic_pictures/vlx_math_schematic.png" title="" width="40%">
+<img src="./schematic_pictures/vlx_math_schematic.png" title="" width="70%">
 </p>
 <br/>
 
@@ -88,7 +88,7 @@ Considering the triangle surrounded in purple and basic trigonometric formula:\
 Now that we now ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta), it's fairly simple to get x and y by projecting vlx distances using it.
 
 <p align="center">
-<img src="./schematic_pictures/vlx_x_y_determination.png" title="" width="40%">
+<img src="./schematic_pictures/vlx_x_y_determination.png" title="" width="70%">
 </p>
 <br/>
 
@@ -115,11 +115,11 @@ Now that we now ![formula](https://render.githubusercontent.com/render/math?math
 + ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta,d1,d2,d3)=(d1\_proj,d2\_proj,d3\_proj))
 
 <p align="center">
-<img src="./schematic_pictures/vlx_proj.png" title="" width="40%">
+<img src="./schematic_pictures/vlx_proj.png" title="" width="70%">
 </p>
 <br/>
 
-All theses are just simple projection knowing ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x,y,\theta) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3)). It constitutes an extra tool to validate the pose estimation. Indeed, if a projection is negative, it's because the vlx doesn't measure the distance to the desired wall, so the resulting pose will obviously be incorrect.\
+All theses are just simple projection knowing ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x,y,\theta) and ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}f(x,y,\theta)=(d1,d2,d3)). It constitutes an extra tool to validate the pose estimation. Indeed, if a projection is negative, it's because the vlx doesn't measure the distance to the desired wall, so the resulting pose will obviously be incorrect.
 
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d1\_\proj=x%2B(d1%2Bd).\sin{\theta}-e.\cos{\theta}})\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\boxed{d2\_\proj=x%2B(d2%2Bd).\sin{\theta}%2Be.\cos{\theta}})\
@@ -148,8 +148,9 @@ Now that we've establish the theory, time to find all the cases. The table below
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) the distance between the robot and its sideways wall.\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y) the distance between the robot and its facing wall.\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta) the orientation of the robot relative to the wall as described in the first schematic.\
-![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi) the orientation of the robot relative to the map.\
-\
+![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi) the orientation of the robot relative to the map.
+
+
 | Position | Orientation | d1  | d2 | d3 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\theta) | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y) |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Top blue | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\phi\in[\frac{\pi}{4},\frac{3\pi}{4}])| vlx_0x31 | vlx_0x32 | vlx_0x33 | ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}\frac{\pi}{2}-\phi) | robot_pose_x . 1000 | 2000 - robot_pose_y . 1000 |

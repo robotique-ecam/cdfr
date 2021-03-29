@@ -139,11 +139,14 @@ class VlxReadjustement:
             self.values_stamped_array.insert(0, VlxStamped(vlx_values, actual_stamp))
             if len(self.values_stamped_array) > 10:
                 self.values_stamped_array.pop()
-            time.sleep(0.02)
+            time.sleep(0.03)
 
     def try_to_readjust_with_vlx(self, x, y, q, stamp):
         now = datetime.now()
-        send_tf = True
+        if self.continuous_sampling != 2:
+            send_vision_tf = True
+        else:
+            send_vision_tf = False
         for i in range(len(self.values_stamped_array)):
             if (
                 abs(
@@ -164,11 +167,12 @@ class VlxReadjustement:
                 pose.orientation = q
                 news = self.compute_data(pose, self.values_stamped_array[i].values)
                 if news != None:
-                    send_tf = False
-                    self.parent.get_logger().warn("publish affined position")
+                    send_vision_tf = False
+                    self.parent.get_logger().warn("publish refined position")
                     self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
-        if send_tf:
+        if send_vision_tf:
+            self.parent.get_logger().warn("publish vision position")
             self.parent.create_and_send_tf(x, y, q, stamp)
         if self.continuous_sampling == 1:
             self.stop_continuous_sampling_thread()
