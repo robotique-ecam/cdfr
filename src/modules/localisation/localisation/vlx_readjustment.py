@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-"""Vlx readjustement for localisation"""
+"""Vlx readjustment for localisation"""
 
 import numpy as np
 import copy
@@ -22,7 +22,9 @@ bottom_yellow_area = [2.1, 0.0, 3.0, 1.0]
 top_yellow_area = [1.5, 1.0, 3.0, 2.0]
 
 
-class VlxReadjustement:
+class VlxReadjustment:
+    """ Vlx readjustment class, contains routine and algorithm relative to vlx"""
+
     def __init__(self, parent_node):
         self.parent = parent_node
         self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
@@ -139,7 +141,7 @@ class VlxReadjustement:
             self.values_stamped_array.insert(0, VlxStamped(vlx_values, actual_stamp))
             if len(self.values_stamped_array) > 10:
                 self.values_stamped_array.pop()
-            time.sleep(0.03)
+            time.sleep(0.02)
 
     def try_to_readjust_with_vlx(self, x, y, q, stamp):
         now = datetime.now()
@@ -512,6 +514,8 @@ class VlxReadjustement:
 
 
 class VlxStamped:
+    """ VlxStamped class, an instance contains stamp + vlx values """
+
     def __init__(self, values, stamp):
         self.values = copy.deepcopy(values)
         self.stamp = stamp

@@ -15,7 +15,7 @@ from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from transformix_msgs.srv import TransformixParametersTransformStamped
-from localisation.vlx_readjustement import VlxReadjustement
+from localisation.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import *
@@ -62,7 +62,7 @@ class Localisation(rclpy.node.Node):
         )
         self.last_odom_update = 0
         self.get_logger().info(f"Default side is {self.side.value}")
-        self.vlx = VlxReadjustement(self)
+        self.vlx = VlxReadjustment(self)
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
