@@ -31,7 +31,7 @@ jobs:
 
       - name: Cache ros_ws
         id: cache-ws
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/ros_ws/
           key: cache-teb-foxy-devel
@@ -70,3 +70,11 @@ jobs:
         with:
           name: simulation-results
           path: ~/animation/*.rbsd
+
+  remove-old-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Remove old artifacts
+      uses: c-hive/gha-remove-artifacts@v1.2.0
+      with:
+        age: '2 weeks'
