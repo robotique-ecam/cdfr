@@ -18,7 +18,6 @@ from .vlx.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import transform_to_kdl, do_transform_frame
-from datetime import datetime
 
 
 class Localisation(rclpy.node.Node):
@@ -124,7 +123,6 @@ class Localisation(rclpy.node.Node):
                 ):  # simulate marker delais (image analysis from assurancetourix)
                     time.sleep(0.15)
                 if self.vlx.continuous_sampling == 0:
-                    self.get_logger().info(f"initial continuous_sampling == 0")
                     self.create_and_send_tf(
                         ally_marker.pose.position.x,
                         ally_marker.pose.position.y,
@@ -153,7 +151,6 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.translation.z = float(0)
         self._tf.transform.rotation = q
         self.last_odom_update = self.get_clock().now().to_msg().sec
-        self.get_logger().info(f"publishing tf")
         self.tf_publisher_.publish(self._tf)
 
     def odom_callback(self, msg):

@@ -17,8 +17,6 @@ if is_simulation():
 else:
     from .sensors import Sensors
 
-from datetime import datetime
-
 bottom_blue_area = [0.0, 0.0, 0.9, 1.0]
 top_blue_area = [0.0, 1.0, 1.5, 2.0]
 
@@ -79,7 +77,6 @@ class VlxReadjustment:
             )
             < 0.5
         ):
-            self.parent.get_logger().warn("near_wall_routine")
             self.try_to_readjust_with_vlx(
                 pose_stamped.pose.position.x,
                 pose_stamped.pose.position.y,
@@ -102,7 +99,7 @@ class VlxReadjustment:
             self.start_continuous_sampling_thread(0.0, 2)
             self.near_wall_routine(pose_stamped)
         else:
-            self.parent.get_logger().info("near wall routine already running")
+            None
 
     def stop_near_wall_routine(self):
         """Stop the near wall routine by stopping the thread_continuous_sampling"""
@@ -110,7 +107,7 @@ class VlxReadjustment:
             self.near_walls_last_check_stamp = None
             self.stop_continuous_sampling_thread()
         else:
-            self.parent.get_logger().info("near wall routine already stopped")
+            None
 
     def start_continuous_sampling_thread(self, sleep_time, continuous_samp):
         """Start the thread_continuous_sampling with an initial waiting time
@@ -125,27 +122,21 @@ class VlxReadjustment:
             )
             self.thread_continuous_sampling.start()
         else:
-            self.parent.get_logger().info("vlx_thread thread is already running !")
+            None
 
     def stop_continuous_sampling_thread(self):
         """Safely stop the thread_continuous_sampling"""
         if self.thread_continuous_sampling != None:
-            self.parent.get_logger().info(
-                f"stopping continuous sampling:{self.continuous_sampling}"
-            )
             self.continuous_sampling = 0
             self.thread_continuous_sampling.join()
             self.thread_continuous_sampling = None
         else:
-            self.parent.get_logger().info("vlx_thread thread isn't running !")
+            None
 
     def continuous_vlx_sampling(self, sleep_time_before_sampling, continuous_samp):
         """Thread function, wait sleep_time_before_sampling seconds before
         continuous sampling until continuous_sampling==0"""
         self.continuous_sampling = continuous_samp
-        self.parent.get_logger().info(
-            f"starting continuous sampling:{self.continuous_sampling}"
-        )
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
             actual_stamp = (
@@ -163,7 +154,6 @@ class VlxReadjustment:
         """Retrieve the nearest vlx values stamped from the given stamp then
         send those values to compute_data function that returns the corrected
         pose if not None then send this corrected pose to parent.create_and_send_tf"""
-        now = datetime.now()
         if self.continuous_sampling != 2:
             send_vision_tf = True
         else:
@@ -189,19 +179,14 @@ class VlxReadjustment:
                 news = self.compute_data(pose, self.values_stamped_array[i].values)
                 if news != None:
                     send_vision_tf = False
-                    self.parent.get_logger().warn("publish refined position")
                     self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
         if send_vision_tf:
-            self.parent.get_logger().warn("publish vision position")
             self.parent.create_and_send_tf(x, y, q, stamp)
         if self.continuous_sampling == 1:
             self.stop_continuous_sampling_thread()
         if self.near_walls_last_check_stamp != None:
             self.start_continuous_sampling_thread(0.0, 2)
-        later = datetime.now()
-        delay = (later - now).total_seconds()
-        self.parent.get_logger().info(f"delais: {delay}")
 
     def compute_data(self, pose_considered, vlx_values):
         """Fetching data for calculations detailed in README, computing new_pose
@@ -209,10 +194,8 @@ class VlxReadjustment:
         data = self.fetch_data(pose_considered, vlx_values)
 
         if data == None:
-            self.parent.get_logger().info("data_None")
             return None
         else:
-            self.parent.get_logger().info("we can (hopefully) compute !")
             x, y, theta = self.get_pose_from_vlx(
                 data["d"][0], data["d"][1], data["d"][2], data["vlx_0x30"]
             )
@@ -237,19 +220,6 @@ class VlxReadjustment:
                 data["inv_lat"],
             )
 
-            d = data["d"]
-            self.parent.get_logger().info(
-                f"error computed vlx - true vlx d1:{d1_est - d[0]}, d2:{d2_est- d[1]}, d3:{d3_est -d[2]}"
-            )
-            self.parent.get_logger().info(
-                f"error computed pose - true pose x:{round(new_x-pose_considered.position.x, 4)}, \
-                y:{round(new_y-pose_considered.position.y, 4)}, \
-                theta:{round(new_theta-quaternion_to_euler(pose_considered.orientation)[2], 4)}"
-            )
-            self.parent.get_logger().info(f"test d1:{d1_proj_est}")
-            self.parent.get_logger().info(f"test d2:{d2_proj_est}")
-            self.parent.get_logger().info(f"test d3:{d3_proj_est}")
-
             if (
                 d1_est > 0
                 and d2_est > 0
@@ -259,7 +229,6 @@ class VlxReadjustment:
                 and abs(new_theta - quaternion_to_euler(pose_considered.orientation)[2])
                 < 0.1
             ):
-                self.parent.get_logger().warn(f"able to correct")
                 return new_x, new_y, euler_to_quaternion(new_theta)
             else:
                 return None
@@ -270,7 +239,6 @@ class VlxReadjustment:
         angle = quaternion_to_euler(pose_considered.orientation)[2]
 
         if in_rectangle(bottom_blue_area, self.parent.robot_pose):
-            self.parent.get_logger().info("bottom_blue_area")
             x_wall, y_wall = (
                 pose_considered.position.x * 1000,
                 (pose_considered.position.y - self.sim_offset) * 1000,
@@ -312,7 +280,6 @@ class VlxReadjustment:
             inv_lat_condition = True if case in [1, 2] else False
 
         elif in_rectangle(top_blue_area, self.parent.robot_pose):
-            self.parent.get_logger().info("top_blue_area")
             x_wall, y_wall = (
                 pose_considered.position.x * 1000,
                 2000 - pose_considered.position.y * 1000,
@@ -354,7 +321,6 @@ class VlxReadjustment:
             inv_lat_condition = False
 
         elif in_rectangle(bottom_yellow_area, self.parent.robot_pose):
-            self.parent.get_logger().info("bottom_yellow_area")
             x_wall, y_wall = (
                 3000 - (pose_considered.position.x - self.sim_offset) * 1000,
                 (pose_considered.position.y - self.sim_offset) * 1000,
@@ -396,7 +362,6 @@ class VlxReadjustment:
             inv_lat_condition = True
 
         elif in_rectangle(top_yellow_area, self.parent.robot_pose):
-            self.parent.get_logger().info("top_yellow_area")
             x_wall, y_wall = (
                 3000 - (pose_considered.position.x - self.sim_offset) * 1000,
                 2000 - pose_considered.position.y * 1000,
@@ -438,7 +403,6 @@ class VlxReadjustment:
             inv_lat_condition = True if case in [3, 4] else False
 
         else:
-            self.parent.get_logger().info("None")
             return None
 
         return {
