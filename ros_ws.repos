@@ -1,7 +1,7 @@
 repositories:
   BehaviorTree/BehaviorTree.CPP:
     type: git
-    url: https://github.com/BehaviorTree/BehaviorTree.CPP.git
+    url: https://github.com/robotique-ecam/BehaviorTree.CPP
     version: master
   nav/ceres-solver:
     type: git
@@ -26,7 +26,7 @@ repositories:
   nav/slam_toolbox:
     type: git
     url: https://github.com/SteveMacenski/slam_toolbox.git
-    version: ros2
+    version: foxy-devel
   nav/teb_local_planner:
     type: git
     url: https://github.com/robotique-ecam/teb_local_planner.git
