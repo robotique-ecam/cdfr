@@ -7,7 +7,7 @@
 - Compute the transformation to re-adjust odometry and publish it.
 
 
-## Odometry re-adjustement method
+## Odometry re-adjustment method
 
 In order to re-adjust the odometry, 2 things are used:
 - Vision from assurancetourix package,
@@ -19,7 +19,7 @@ Assurancetourix is publishing aruco positions and orientation through /allies_po
 
 ### VL53L1X
 
-There are 6 VL53L1X on the robot, by knowing there positions relative to the robot and by getting the distance they're returning, with a certain amount of mathematical considerations (described below), the position and orientation of the robot can re found.
+There are 6 VL53L1X on the robot, by knowing there positions relative to the robot and by getting the distance they're returning, with an certain amount of mathematical consideration (described below), the position and orientation of the robot can re found.
 
 The limitation of this algorithm is that **we do have to know an estimation of the position and orientation of the robot to validate and refine the pose (position/orientation).**
 
@@ -27,7 +27,7 @@ The limitation of this algorithm is that **we do have to know an estimation of t
 
 We're estimating the vision localization precision of about 1 centimeter average which isn't enough in some cases (particularly near walls).
 
-So, in order to increase the precision, the information given by the vision needs to be refined by a vlx measure. But keep in mind that vision gives a pose STAMPED information which means the marker given by assurancetourix has a delay of a few milliseconds (~350ms average). The vlx measure takes (in simulation) about 60ms which gives a final difference between theses stamps of about 400ms.
+So, in order to increase the precision, the information given by the vision needs to be refined by a vlx measure. But keep in mind that vision gives a pose STAMPED information which means the marker given by assurancetourix has a delay of a few milliseconds (~350ms average). The vlx measure takes (in simulation) about 60ms which give a final difference between theses stamps of about 400ms.
 
 If the robot is moving at something like 20cm/s, we do have to allow a difference of 8cm between the vision pose and vlx computed pose. Unrealistic, goblet have a 7cm diameter.
 
@@ -41,27 +41,27 @@ With this nearest queue element, we have a maximum difference of stamps of 0.04m
 
 We now just have to compare the vlx computed pose and vision pose of the robot, if those are really near ( < 5cm, <0.1rad ) and the estimated projection of vlx on the walls are effectively on the right wall, we're considering the correction as valid. The valid transformation is sent to drive for it to re-adjust odometry. If the vlx computed pose isn't considered as valid, the vision pose is sent to drive.
 
-After sending the correction transformation to drive, we have to restart the vlx sample thread with a starting delay of 0.65 seconds.
+After sending the correction transformation to drive, we have to restart the vlx sample thread with a starting delay of 0.65 second.
 
 ### Near walls routine
 
 There's a specific behavior of this package near walls: in the odom callback, while detecting the robot position being near walls (<30cm from a wall), the node short circuit the behavior previously presented and adopt a new strategy.
 
-This strategy consider an "infinite" sampling of the vlx sampling thread with no starting delay. Each 0.5 seconds odom callback, the node ask for an odometry re-adjustment considering the last robot pose that sent drive.
+This strategy considers an "infinite" sampling of the vlx sampling thread with no starting delay. Each 0.5 seconds odom callback, the node ask for an odometry re-adjustment considering the last robot pose that sent drive.
 
 As previously, there's a comparison between stamps to get the nearest one of the queue that gives the sample to consider for calculation. When calculating the new pose from the vlx distance values, the thread is stopped avoid overloading of the localisation_node thread.
 
-If the computed pose is considered as valid, it's sent to drive to re-adjust odometry. Else the pose is just thrown away and nothing is sent to re-adjust odometry.
+If the computed pose is considered as valid, it's sent to drive to re-adjust odometry. Else the pose is just thrown away, and nothing is sent to re-adjust odometry.
 
-Then, the vlx sampling thread is restarted with no delay because the node can continues trying to readjust odometry with vision callback with the strategy described in the previous paragraph.
+Then, the vlx sampling thread is restarted with no delay because the node can continue trying to readjust odometry with vision callback with the strategy described in the previous paragraph.
 
 ### Avoiding concurrency problems
 
-You've understood it, the localisation node contains several threads (odom callback, marker callback and vlx sample). In order to avoid concurrency problems (especially deadlocks, several thread starting, overloading etc.) several strategies are deployed:
+You've understood it, the localisation node contains several threads (odom callback, marker callback and vlx sample). In order to avoid concurrency problems (especially deadlocks, several thread starting, overloading, etc.) several strategies are deployed:
 - **Deadlocks:**
  The resources shared by several threads can be writable only in one thread, in other threads, this resources is only readable.
  - **Several thread starting:**
-Only one vlx sampling thread can be started, when asking for the creation of this thread, there's a check of this existing thread before creating it or raising that this thread is already running. Same thing for stopping this thread, if no vlx sampling thread is existing, the node raising that this thread doesn't exist.
+Only one vlx sampling thread can be started, when asking for the creation of this thread, there's a check of this existing thread before creating it or raising that this thread is already running. Same thing for stopping this thread, if no vlx sampling thread exists, the node raises that this thread doesn't exist.
 - **Overloading:**
 Getting vlx values is a blocking call, so there's a need of a small non-blocking delay between each sample that allow the node doing its other works.
 
@@ -143,7 +143,7 @@ All theses are just simple projection knowing ![formula](https://render.githubus
 
 ## In practice
 
-Now that we've establish the theory, time to find all the cases. The table below summarize the different cases implemented in the algorithm, it also considers some tweaks in the algorithm (such as invert angle in some cases due to some symmetries etc.).  
+Now that we've established the theory, time to find all the cases. The table below summarizes the different cases implemented in the algorithm, it also considers some tweaks in the algorithm (such as invert angle in some cases due to some symmetries, etc.).
 
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}x) the distance between the robot and its sideways wall.\
 ![formula](https://render.githubusercontent.com/render/math?math=\color{brown}y) the distance between the robot and its facing wall.\

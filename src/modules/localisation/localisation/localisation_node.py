@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-"""Robot localisation node."""
+""" Robot localisation node """
 
 
 import math
@@ -21,7 +21,7 @@ from tf2_kdl import transform_to_kdl, do_transform_frame
 
 
 class Localisation(rclpy.node.Node):
-    """Robot localisation node."""
+    """ Robot localisation node """
 
     def __init__(self):
         """ Init Localisation node """
@@ -101,7 +101,7 @@ class Localisation(rclpy.node.Node):
         return None
 
     def update_transform(self):
-        """ Update and publish transform odom --> map """
+        """ Update and publish odom --> map transform """
         self._tf.header.stamp = self.get_clock().now().to_msg()
         self._tf.transform.translation.x = self.robot_pose.pose.position.x
         self._tf.transform.translation.y = self.robot_pose.pose.position.y
@@ -110,9 +110,9 @@ class Localisation(rclpy.node.Node):
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
-        """Identity the robot marker in assurancetourix marker_array detection,
+        """ Identity the robot marker in assurancetourix marker_array detection,
         send the marker to vlx_readjustment in order to try to refine the position
-        at stamp given by the marker"""
+        at a stamp given by the marker """
         for ally_marker in msg.markers:
             if (
                 ally_marker.text.lower() == self.robot
@@ -144,7 +144,7 @@ class Localisation(rclpy.node.Node):
         return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
 
     def create_and_send_tf(self, x, y, q, stamp):
-        """ create and send tf to drive for it to re-adjust odometry """
+        """ Create and send tf to drive for it to re-adjust odometry """
         self._tf.header.stamp = stamp
         self._tf.transform.translation.x = x
         self._tf.transform.translation.y = y
@@ -154,9 +154,9 @@ class Localisation(rclpy.node.Node):
         self.tf_publisher_.publish(self._tf)
 
     def odom_callback(self, msg):
-        """Odom callback, compute the new pose of the robot relative to map,
+        """ Odom callback, computes the new pose of the robot relative to map,
         send this new pose on odom_map_relative topic and start vlx routine
-        if this pose is near walls"""
+        if this pose is near walls """
         robot_tf = TransformStamped()
         robot_tf.transform.translation.x = msg.pose.pose.position.x
         robot_tf.transform.translation.y = msg.pose.pose.position.y
