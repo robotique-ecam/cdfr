@@ -32,7 +32,7 @@ class Teb_obstacles(Node):
         )
         self.enemies_subscription_ = self.create_subscription(
             MarkerArray,
-            "/enemies_positions_markers",
+            "/ennemies_positions_markers",
             self.enemies_subscription_callback,
             10,
         )
