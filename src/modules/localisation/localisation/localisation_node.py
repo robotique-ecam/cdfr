@@ -110,9 +110,9 @@ class Localisation(rclpy.node.Node):
         self._tf_brodcaster.sendTransform(self._tf)
 
     def allies_subscription_callback(self, msg):
-        """ Identity the robot marker in assurancetourix marker_array detection,
+        """Identity the robot marker in assurancetourix marker_array detection,
         send the marker to vlx_readjustment in order to try to refine the position
-        at a stamp given by the marker """
+        at a stamp given by the marker"""
         for ally_marker in msg.markers:
             if (
                 ally_marker.text.lower() == self.robot
@@ -154,9 +154,9 @@ class Localisation(rclpy.node.Node):
         self.tf_publisher_.publish(self._tf)
 
     def odom_callback(self, msg):
-        """ Odom callback, computes the new pose of the robot relative to map,
+        """Odom callback, computes the new pose of the robot relative to map,
         send this new pose on odom_map_relative topic and start vlx routine
-        if this pose is near walls """
+        if this pose is near walls"""
         robot_tf = TransformStamped()
         robot_tf.transform.translation.x = msg.pose.pose.position.x
         robot_tf.transform.translation.y = msg.pose.pose.position.y

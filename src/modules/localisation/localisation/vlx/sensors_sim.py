@@ -10,6 +10,8 @@ from webots_ros2_core.webots_node import WebotsNode
 
 
 class Sensors:
+    """ Sensors class """
+
     def __init__(self, node, addrs=[]):
         """ Init Sensors """
         supervisor = node.robot + "_vlx_manager"
