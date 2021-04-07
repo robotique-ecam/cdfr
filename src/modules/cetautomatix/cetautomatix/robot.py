@@ -28,13 +28,14 @@ class Robot(Node):
         # Detect simulation mode
         self.simulation = True if machine() != "aarch64" else False
         self.name = self.get_namespace().strip("/")
+        # Declare parameters
         self.triggered = False
         self.declare_parameter("length")
         self.declare_parameter("width")
         self.declare_parameter("strategy_mode")
-        self.length = self.get_parameter("length")._value
-        self.width = self.get_parameter("width")._value
-        self.strategy_mode = self.get_parameter("strategy_mode")._value
+        self.length = self.get_parameter("length")
+        self.width = self.get_parameter("width")
+        self.strategy_mode = self.get_parameter("strategy_mode")
         # Bind actuators
         self.actuators = import_module(f"actuators.{self.name}").actuators
         # Do selftest
@@ -141,6 +142,7 @@ class Robot(Node):
         self.current_action = action if response.success else None
         if self.current_action is not None:
             self.set_goal_pose()
+        actions.get(self.current_action).preempt_action(self, actions)
         return response.success
 
     def drop_current_action(self):
@@ -154,6 +156,7 @@ class Robot(Node):
         )
         if response is None:
             return False
+        actions.get(self.current_action).release_action(self)
         self.current_action = None
         return response.success
 
@@ -168,6 +171,7 @@ class Robot(Node):
         )
         if response is None:
             return False
+        actions.get(self.current_action).finish_action(self)
         self.current_action = None
         return response.success
 
@@ -241,6 +245,7 @@ class Robot(Node):
 
     def euler_to_quaternion(self, yaw, pitch=0, roll=0):
         """Conversion between euler angles and quaternions."""
+        yaw, pitch, roll = np.deg2rad(yaw), np.deg2rad(pitch), np.deg2rad(roll)
         qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
             roll / 2
         ) * np.sin(pitch / 2) * np.sin(yaw / 2)
@@ -307,7 +312,7 @@ class Robot(Node):
         return response.success
 
     def compute_best_action(self, action_list):
-        """Calculate best action to choose from its distance to the robot."""
+        """Calculate best action to choose from its distance to the robot and the time passed."""
         if not action_list:
             return None
         coefficient_list = []
@@ -320,10 +325,11 @@ class Robot(Node):
             )
             coefficient += 100 * (1 - distance / 3.6)
             # coefficient += get_time_coeff(
-            #     self.get_clock().now().nanoseconds * 1e-9 - self._start_time,
+            #     self.get_clock().now().nanoseconds * 1e-9 - self.start_time,
             #     action,
             #     self.strategy_mode_param.value,
             # )
             coefficient_list.append(coefficient)
+        # Return best action based on the one with a maximum coefficient
         best_action = action_list[coefficient_list.index(max(coefficient_list))]
         return best_action
