@@ -19,6 +19,7 @@ from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
 from transformix_msgs.srv import TransformixParametersTransformStamped
 from strategix.actions import actions
+from strategix.strategy_modes import get_time_coeff
 from cetautomatix.selftest import Selftest
 
 
@@ -324,11 +325,11 @@ class Robot(Node):
                 + (action.position[1] - self.position[1]) ** 2
             )
             coefficient += 100 * (1 - distance / 3.6)
-            # coefficient += get_time_coeff(
-            #     self.get_clock().now().nanoseconds * 1e-9 - self.start_time,
-            #     action,
-            #     self.strategy_mode_param.value,
-            # )
+            coefficient += get_time_coeff(
+                self.get_clock().now().nanoseconds * 1e-9 - self.start_time,
+                action,
+                self.strategy_mode.value,
+            )
             coefficient_list.append(coefficient)
         # Return best action based on the one with a maximum coefficient
         best_action = action_list[coefficient_list.index(max(coefficient_list))]

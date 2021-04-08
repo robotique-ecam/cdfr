@@ -52,7 +52,9 @@ class Gobelet(Action):
                 for action_id, action_dict in action_list:
                     if action_dict == self:
                         pump_dict["status"] = action_id
-                        robot.get_logger().info(f"Pump {pump_id} preempted {action_id}.")
+                        robot.get_logger().info(
+                            f"Pump {pump_id} preempted {action_id}."
+                        )
                         return
 
     def release_action(self, robot):
