@@ -18,6 +18,7 @@ from .vlx.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import transform_to_kdl, do_transform_frame
+from .map.map_launcher import launch_map
 
 
 class Localisation(rclpy.node.Node):
@@ -62,6 +63,7 @@ class Localisation(rclpy.node.Node):
         self.last_odom_update = 0
         self.get_logger().info(f"Default side is {self.side.value}")
         self.vlx = VlxReadjustment(self)
+        launch_map(self)
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
