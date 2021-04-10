@@ -44,10 +44,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     )
 
     robot_launch_file_dir = os.path.dirname(__file__)
-    map_dir = os.path.join(get_package_share_directory("map"), "map", "map.yml")
-    nav2_launch_file_dir = os.path.join(
-        get_package_share_directory("nav2_bringup"), "launch"
-    )
     nav2_bt_xml_file = os.path.join(
         get_package_share_directory("robot"),
         "behavior_trees",
@@ -70,11 +66,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
             ),
             DeclareLaunchArgument(
                 "autostart", default_value="true", description="Autostart the nav stack"
-            ),
-            DeclareLaunchArgument(
-                "map",
-                default_value=map_dir,
-                description="Full path to map yaml file to load",
             ),
             DeclareLaunchArgument(
                 "use_sim_time", default_value="false", description="Use /clock if true"
@@ -119,14 +110,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         remappings=remappings,
                     ),
                     Node(
-                        package="nav2_map_server",
-                        executable="map_server",
-                        name="map_server",
-                        output="screen",
-                        parameters=[params.name],
-                        remappings=remappings,
-                    ),
-                    Node(
                         package="teb_obstacles",
                         executable="teb_obstacles",
                         output="screen",
@@ -137,12 +120,9 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                             [nav2_launch_file_dir, "/navigation_launch.py"]
                         ),
                         launch_arguments={
-                            "map": map,
                             "autostart": autostart,
                             "namespace": namespace,
-                            "use_namespace": use_namespace,
                             "use_sim_time": use_sim_time,
-                            "use_lifecycle_mgr": "false",
                             "default_bt_xml_filename": default_bt_xml_filename,
                             "params_file": params.name,
                         }.items(),
