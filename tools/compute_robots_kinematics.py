@@ -6,7 +6,6 @@
 
 from math import pi
 
-import os
 import yaml
 
 
@@ -40,7 +39,6 @@ globals = {
     "max_steps_frequency": 10000,
     "speedramp_resolution": 128,
     "min_turning_radius": 0.0,
-    "map_path": os.getcwd().split("tools")[0] + "/src/modules/map/map/map.yml",
 }
 
 asterix = {
