@@ -117,7 +117,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                     ),
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(
-                            [nav2_launch_file_dir, "/navigation_launch.py"]
+                            [robot_launch_file_dir, "/navigation_launch.py"]
                         ),
                         launch_arguments={
                             "autostart": autostart,

@@ -250,7 +250,7 @@ local_costmap:
         inflate_unknown: false
         inflate_around_unknown: false
       always_send_full_costmap: true
-      
+
 
 planner_server:
   ros__parameters:
@@ -278,3 +278,7 @@ bt_navigator_rclcpp_node:
       distance_from_walls: !Var distance_from_walls
       specific_area_coords: !Var specific_area_coords
       exit_area_coords: !Var exit_area_coords
+
+map_server:
+  ros__parameters:
+    yaml_filename: dynamically_computed
