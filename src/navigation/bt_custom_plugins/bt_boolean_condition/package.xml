@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>bt_boolean_condition</name>
-  <version>0.4.5</version>
+  <version>0.9.0</version>
   <description>This BT plugin is a naïve SUCCESS/FAILURE sender from a boolean type</description>
   <maintainer email="phileas.lambert@ecam.fr">Philéas LAMBERT</maintainer>
-  <license>Club Robotique ECAM :: CDFR 2021</license>
+  <license>ECAM Makers :: CDFR 2021</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
