@@ -36,7 +36,7 @@ ros2 service call /obelix/enable_drivers  std_srvs/SetBool "{data: true}"
 ##### Send action goal
 
 ```
-ros2 action send_goal /obelix/navigate_to_pose nav2_msgs/action/NavigateToPose "{'pose': {'pose': {'position': {'x': 1, 'y': 1}}}}"
+ros2 action send_goal /asterix/navigate_to_pose nav2_msgs/action/NavigateToPose "{'pose': {'pose': {'position': {'x': 1.25, 'y': 0.25}, 'orientation':{'z':0.7071068, 'w':0.7071068}}}}"
 ```
 
 ##### Deploy pharaon
@@ -59,6 +59,26 @@ ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
 
 
 ### Changelog
+
+#### v0.9.0
+- Improved overall documentation rules
+- Fixed map_server launcher (#44)
+- Improved odometry readjustment routine (#43)
+- Added Vlx odometry readjustment functionality (#43)
+- Added odom_map_relative Pose_Stamped topic (#43)
+- Refactored Localisation (#43)
+- Added vlx_manager in Webots (#43)
+- Added 2 teb_controllers (nominal, accurate) (#36)
+- Added custom_goal_checker plugin (#36)
+- Added costmap_converter_custom plugin (#36)
+- Added bt_boolean_condition plugin (#36)
+- Added bt_split_goal plugin (#36)
+- Added costmap_converter_custom plugin (#35)
+- Added black python code formatter check in CI (#32)
+- Added service adjust_odometry (#31)
+- Added possibility to readjust odometry (#31)
+- Improved teb_controller parameters (#29)
+- Improved navigation2 parameters (#29)
 
 #### v0.8.4
 - Added localisation node compatible with side selection interfaces with service call for odometry correction
