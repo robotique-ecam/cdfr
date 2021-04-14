@@ -68,6 +68,8 @@ ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
 - Added odom_map_relative Pose_Stamped topic [#43](https://github.com/robotique-ecam/cdfr/pull/43)
 - Refactored Localisation [#43](https://github.com/robotique-ecam/cdfr/pull/43)
 - Added vlx_manager in Webots [#43](https://github.com/robotique-ecam/cdfr/pull/43)
+- CI will fail if any node crashes [#42](https://github.com/robotique-ecam/cdfr/pull/42)
+- CI automaticaly removes artifacts older than 2 weeks [#37](https://github.com/robotique-ecam/cdfr/pull/37)
 - Added 2 teb_controllers (nominal, accurate) [#36](https://github.com/robotique-ecam/cdfr/pull/36)
 - Added custom_goal_checker plugin [#36](https://github.com/robotique-ecam/cdfr/pull/36)
 - Added costmap_converter_custom plugin [#36](https://github.com/robotique-ecam/cdfr/pull/36)
@@ -79,6 +81,7 @@ ros2 topic pub -1 /obelix/lcd lcd_msgs/Lcd "{text: 'sudo reboot', line: 1}"
 - Added possibility to readjust odometry [#31](https://github.com/robotique-ecam/cdfr/pull/31)
 - Improved teb_controller parameters [#29](https://github.com/robotique-ecam/cdfr/pull/29)
 - Improved navigation2 parameters [#29](https://github.com/robotique-ecam/cdfr/pull/29)
+- Updated packages.xml to add support for [mothership](https://github.com/robotique-ecam/mothership) and [valhalla](https://github.com/robotique-ecam/valhalla)
 
 #### v0.8.4
 - Added localisation node compatible with side selection interfaces with service call for odometry correction
