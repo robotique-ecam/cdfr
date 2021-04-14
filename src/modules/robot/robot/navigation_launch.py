@@ -32,9 +32,6 @@ def generate_launch_description():
         "use_sim_time": use_sim_time,
         "default_bt_xml_filename": default_bt_xml_filename,
         "autostart": autostart,
-        "yaml_filename": os.path.join(
-            get_package_share_directory("map"), "map", "map.yml"
-        ),
     }
 
     configured_params = RewrittenYaml(
@@ -91,7 +88,13 @@ def generate_launch_description():
                 executable="map_server",
                 name="map_server",
                 output="screen",
-                parameters=[configured_params],
+                parameters=[
+                    {
+                        "yaml_filename": os.path.join(
+                            get_package_share_directory("map"), "map", "map.yml"
+                        )
+                    }
+                ],
                 remappings=remappings,
             ),
             Node(
