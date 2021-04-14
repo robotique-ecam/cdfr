@@ -10,7 +10,8 @@ find_package(ament_cmake REQUIRED)
 ################################################################################
 # Install
 ################################################################################
-execute_process(COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/map/map.py ${CMAKE_CURRENT_SOURCE_DIR})
+execute_process(COMMAND python3 map.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/map)
 
 install(
   DIRECTORY map
