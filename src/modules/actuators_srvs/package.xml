@@ -2,13 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>actuators_srvs</name>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
   <description>
     Messages definitions for Actuators
   </description>
 
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
-  <license>Club Robotique ECAM :: CDR2020</license>
+  <license>ECAM Makers :: CDFR 2021</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
