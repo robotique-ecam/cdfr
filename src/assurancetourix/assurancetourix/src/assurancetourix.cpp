@@ -85,31 +85,29 @@ void Assurancetourix::init_camera_settings(){
   this->declare_parameter("camera_settings.auto_WB");
   this->declare_parameter("camera_settings.exposure");
 
-  bool auto_WB;
-  int width, height, brightness, contrast, saturation, hue, gamma, gain, backlight_compensation, exposure;
-  this->get_parameter<int>("camera_settings.width", width);
-  this->get_parameter<int>("camera_settings.height", height);
-  this->get_parameter<int>("camera_settings.brightness", brightness);
-  this->get_parameter<int>("camera_settings.contrast", contrast);
-  this->get_parameter<int>("camera_settings.saturation", saturation);
-  this->get_parameter<int>("camera_settings.hue", hue);
-  this->get_parameter<int>("camera_settings.gamma", gamma);
-  this->get_parameter<int>("camera_settings.gain", gain);
-  this->get_parameter<int>("camera_settings.backlight_compensation", backlight_compensation);
-  this->get_parameter<bool>("camera_settings.auto_WB", auto_WB);
-  this->get_parameter<int>("camera_settings.exposure", exposure);
+  this->get_parameter<int>("camera_settings.width", _camera_settings.width);
+  this->get_parameter<int>("camera_settings.height", _camera_settings.height);
+  this->get_parameter<int>("camera_settings.brightness", _camera_settings.brightness);
+  this->get_parameter<int>("camera_settings.contrast", _camera_settings.contrast);
+  this->get_parameter<int>("camera_settings.saturation", _camera_settings.saturation);
+  this->get_parameter<int>("camera_settings.hue", _camera_settings.hue);
+  this->get_parameter<int>("camera_settings.gamma", _camera_settings.gamma);
+  this->get_parameter<int>("camera_settings.gain", _camera_settings.gain);
+  this->get_parameter<int>("camera_settings.backlight_compensation", _camera_settings.backlight_compensation);
+  this->get_parameter<bool>("camera_settings.auto_WB", _camera_settings.auto_WB);
+  this->get_parameter<int>("camera_settings.exposure", _camera_settings.exposure);
 
-  _cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
-  _cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-  _cap.set(cv::CAP_PROP_BRIGHTNESS, brightness);
-  _cap.set(cv::CAP_PROP_CONTRAST, contrast);
-  _cap.set(cv::CAP_PROP_SATURATION, saturation);
-  _cap.set(cv::CAP_PROP_HUE, hue);
-  _cap.set(cv::CAP_PROP_GAMMA, gamma);
-  _cap.set(cv::CAP_PROP_GAIN, gain);
-  _cap.set(cv::CAP_PROP_BACKLIGHT, backlight_compensation);
-  _cap.set(cv::CAP_PROP_AUTO_WB, auto_WB);
-  _cap.set(cv::CAP_PROP_EXPOSURE, exposure);
+  _cap.set(cv::CAP_PROP_FRAME_WIDTH, _camera_settings.width);
+  _cap.set(cv::CAP_PROP_FRAME_HEIGHT, _camera_settings.height);
+  _cap.set(cv::CAP_PROP_BRIGHTNESS, _camera_settings.brightness);
+  _cap.set(cv::CAP_PROP_CONTRAST, _camera_settings.contrast);
+  _cap.set(cv::CAP_PROP_SATURATION, _camera_settings.saturation);
+  _cap.set(cv::CAP_PROP_HUE, _camera_settings.hue);
+  _cap.set(cv::CAP_PROP_GAMMA, _camera_settings.gamma);
+  _cap.set(cv::CAP_PROP_GAIN, _camera_settings.gain);
+  _cap.set(cv::CAP_PROP_BACKLIGHT, _camera_settings.backlight_compensation);
+  _cap.set(cv::CAP_PROP_AUTO_WB, _camera_settings.auto_WB);
+  _cap.set(cv::CAP_PROP_EXPOSURE, _camera_settings.exposure);
 }
 
 void Assurancetourix::get_image() {
@@ -122,7 +120,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
                                                     const std_srvs::srv::SetBool::Response::SharedPtr response) {
 
   if (request->data) {
-    timer_ = this->create_wall_timer(0.3s, std::bind(&Assurancetourix::detect, this));
+    timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
     response->message = "Aruco detection is enabled";
     RCLCPP_WARN(this->get_logger(), "Aruco detection is enabled");
   } else {
@@ -413,23 +411,18 @@ void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.08, _cameraMatrix, _distCoeffs, _rvecs, _tvecs);
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.08, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs, _tvecs);
 
     for (int i = 0; i < int(_detected_ids.size()); i++) {
 
       if (show_image) {
         // drawAxis on the image (activate only for debug)
-        cv::aruco::drawAxis(img, _cameraMatrix, _distCoeffs, _rvecs[i], _tvecs[i], 0.1);
+        cv::aruco::drawAxis(img, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs[i], _tvecs[i], 0.1);
       }
 
-      double x, y, z;
-      x = _tvecs[i].operator[](0);
-      y = _tvecs[i].operator[](1);
-      z = _tvecs[i].operator[](2);
-
-      marker.pose.position.x = x;
-      marker.pose.position.y = y;
-      marker.pose.position.z = z;
+      marker.pose.position.x = _tvecs[i].operator[](0);
+      marker.pose.position.y = _tvecs[i].operator[](1);
+      marker.pose.position.z = _tvecs[i].operator[](2);
 
       double angle = norm(_rvecs[i]);
       Vec3d axis = _rvecs[i] / angle;
@@ -458,14 +451,10 @@ void Assurancetourix::_anotate_image(Mat img) {
 
       tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
-      float colorSideCoeff = 0;
       if (side.compare("yellow") == 0) {
-        colorSideCoeff = 0.28;
+        tmpPoseOut.pose.position.x += 0.28;
       }
 
-      // tmpPoseOut.pose.position.x += 0.6 + colorSideCoeff;
-      tmpPoseOut.pose.position.x = 1.34 + 0.6 + colorSideCoeff - (1.34 + 0.6 + colorSideCoeff - tmpPoseOut.pose.position.x) / 2;
-      tmpPoseOut.pose.position.y += -0.4;
       tmpPoseOut.pose.position.z = 0;
       transformed_marker = marker;
       transformed_marker.header = tmpPoseOut.header;
@@ -500,7 +489,7 @@ rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_rob
 
 Assurancetourix::~Assurancetourix() {
 #ifdef CAMERA
-  //realease camera
+  _cap.release();
 #endif // CAMERA
   RCLCPP_INFO(this->get_logger(), "Assurancetourix node terminated");
 }

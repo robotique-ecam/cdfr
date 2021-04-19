@@ -55,6 +55,11 @@ private:
   void get_image();
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
   VideoCapture _cap;
+  struct Camera_settings {
+    bool auto_WB;
+    int width, height, brightness, contrast, saturation, hue, gamma, gain, backlight_compensation, exposure;
+  };
+  Camera_settings _camera_settings;
 #endif
 
 #ifdef SIMULATION
@@ -73,11 +78,17 @@ private:
 
   std::vector<cv::Vec3d> _rvecs, _tvecs;
 
-  double mat_dist_coeffs[1][5] = {{0.5 * -0.05507153604545092, -0.036754144220704506, 0.004500420597462287, -0.01843020862512126, 0.017075316951618093}};
-  double mat_camera_matrix_coeff[3][3] = {{1.2 * 978.2290511854844, 0.0, 1.2 * 722.0173011119409}, {0.0, 1.2 * 982.4076393453565, 1.2 * 653.1296070005849}, {0.0, 0.0, 1.0}};
+  double mat_dist_coeffs_fisheye[1][4] = {{-0.036070207475902644, -0.002003213487781793, -0.0007185511458800288, -0.0004833997296696256}};
+  double mat_camera_matrix_coeff_fisheye[3][3] = {{1426.4349637104904, 0.0, 1919.8425216336193}, {0.0, 1423.1510790046468, 1094.9067233281635}, {0.0, 0.0, 1.0}};
 
-  cv::Mat _distCoeffs = Mat(5, 1, CV_64F, mat_dist_coeffs);
-  cv::Mat _cameraMatrix = Mat(3, 3, CV_64F, mat_camera_matrix_coeff);
+  double mat_dist_coeffs_pinhole[1][5] = {{-0.00131221, -0.00089388, 0.00234124, 0.00322031, 0.00010104}};
+  double mat_camera_matrix_coeff_pinhole[3][3] = {{8.51158290e+02, 0.0, 1.89003916e+03}, {0.0, 8.47796721e+02, 1.17912096e+03}, {0.0, 0.0, 1.0}};
+
+  cv::Mat _distCoeffs_fisheye = Mat(4, 1, CV_64F, mat_dist_coeffs_fisheye);
+  cv::Mat _cameraMatrix_fisheye = Mat(3, 3, CV_64F, mat_camera_matrix_coeff_fisheye);
+
+  cv::Mat _distCoeffs_pinhole = Mat(5, 1, CV_64F, mat_dist_coeffs_pinhole);
+  cv::Mat _cameraMatrix_pinhole = Mat(3, 3, CV_64F, mat_camera_matrix_coeff_pinhole);
 
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_250);
