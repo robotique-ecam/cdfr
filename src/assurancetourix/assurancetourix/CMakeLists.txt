@@ -57,9 +57,8 @@ add_executable(${EXEC_NAME}
   src/assurancetourix_node.cpp
 )
 
-option(MIPI_CAMERA "Use MIPI camera" OFF)
+option(CAMERA "Use camera" OFF)
 option(SIMULATION "Simulation mode" OFF)
-option(EXTERN_CAMERA "Use computer camera/webcam" OFF)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
@@ -72,13 +71,8 @@ if(SIMULATION)
   target_link_libraries(${EXEC_NAME} ${LIBRARIES})
 endif()
 
-if(MIPI_CAMERA)
-  add_definitions(-DMIPI_CAMERA)
-  target_link_libraries(${EXEC_NAME} -larducam_mipicamera)
-endif()
-
-if(EXTERN_CAMERA)
-  add_definitions(-DEXTERN_CAMERA)
+if(CAMERA)
+  add_definitions(-DCAMERA)
 endif()
 
 if(EXTRALOG)

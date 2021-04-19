@@ -18,7 +18,6 @@
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
-#include "arducam_mipicamera.hpp"
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/buffer.h>
@@ -48,17 +47,13 @@ private:
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
   visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
 
-#ifdef MIPI_CAMERA
+#ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
   void handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                      const std_srvs::srv::SetBool::Response::SharedPtr response);
-  arducam::CAMERA_INSTANCE camera_instance;
   void get_image();
   int width, height;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
-#endif
-
-#ifdef EXTERN_CAMERA
   int _api_id = cv::CAP_ANY;
   VideoCapture _cap;
 #endif

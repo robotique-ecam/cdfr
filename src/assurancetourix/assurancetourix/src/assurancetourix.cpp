@@ -26,26 +26,20 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("transformix/get_transform");
   getTransformation(assurancetourix_to_map_transformation);
 
-#ifdef MIPI_CAMERA
+#ifdef CAMERA
 
-  RCLCPP_INFO(this->get_logger(), "define MIPI_CAMERA ");
+  RCLCPP_INFO(this->get_logger(), "Starting CAMERA mode");
   if ((mode > 6) || (mode < 0)) {
     RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
     exit(-1);
   }
-  arducam::arducam_init_camera(&camera_instance);
-  arducam::arducam_set_mode(camera_instance, mode);
-  arducam::arducam_reset_control(camera_instance, 0x00980911);
-  arducam::arducam_set_control(camera_instance, 0x00980911, exposure);
-  arducam::arducam_software_auto_white_balance(camera_instance, 1);
-  arducam::arducam_manual_set_awb_compensation(rgain, bgain);
 
   timer_ = NULL;
 
   _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
       "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-#endif // MIPI_CAMERA
+#endif // CAMERA
 
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
@@ -58,7 +52,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   savedeee = false;
 
 #ifdef SIMULATION
-  RCLCPP_INFO(this->get_logger(), "SIMULATION defined");
+  RCLCPP_INFO(this->get_logger(), "Starting SIMULATION mode");
   RCLCPP_INFO(this->get_logger(), "Simulated robots:");
   for (auto robot : robots) {
     RCLCPP_INFO(this->get_logger(), "%s", robot.c_str());
@@ -75,24 +69,13 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
-#ifdef MIPI_CAMERA
-// image capture trough mipi_camera
+#ifdef CAMERA
+// image capture trough CAMERA
 void Assurancetourix::get_image() {
-  arducam::IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
-  arducam::BUFFER *buffer = arducam::arducam_capture(camera_instance, &fmt, 3000);
-  if (buffer) {
-    width = VCOS_ALIGN_UP(3280, 32);
-    height = VCOS_ALIGN_UP(2464, 16);
-    cv::Mat *image = new cv::Mat(cv::Size(width, (int)(height * 1.5)), CV_8UC1, buffer->data);
-    cv::cvtColor(*image, *image, cv::COLOR_YUV2GRAY_I420);
-    arducam::arducam_release_buffer(buffer);
-    // cv::flip(*image, *image, -1);
-    _frame = *image;
-    delete image;
-  }
+
 }
 
-// service enabling/disabling aruco detection, enabled by default
+// service enabling/disabling aruco detection, disabled by default
 // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
 void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                                     const std_srvs::srv::SetBool::Response::SharedPtr response) {
@@ -108,7 +91,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
   }
   response->success = true;
 }
-#endif // MIPI_CAMERA
+#endif // CAMERA
 
 #ifdef SIMULATION
 // webots element positioning
@@ -208,7 +191,7 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("image.show_image");
   this->get_parameter_or<bool>("image.show_image", show_image, false);
 
-#ifdef MIPI_CAMERA
+#ifdef CAMERA
   this->declare_parameter("camera.exposure");
   this->declare_parameter("camera.rgain");
   this->declare_parameter("camera.bgain");
@@ -217,7 +200,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
   this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
   this->get_parameter_or<int>("camera.mode", mode, 0);
-#endif // MIPI_CAMERA
+#endif // CAMERA
 
 #ifdef SIMULATION
   this->declare_parameter("simulation.robots");
@@ -295,12 +278,10 @@ void Assurancetourix::detect() {
   std::ios_base::sync_with_stdio(false);
 #endif
 
-#ifdef MIPI_CAMERA
+#ifdef CAMERA
   get_image();
-#else
-  // read an image from an image file
-  _frame = imread("/home/phileas/covid_home.jpg", IMREAD_GRAYSCALE);
-#endif // MIPI_CAMERA
+#endif // CAMERA
+
 
 #ifdef EXTRALOG
   auto end_camera = std::chrono::high_resolution_clock::now();
@@ -368,13 +349,11 @@ void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &tr
     }
     RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
   }
-  RCLCPP_INFO(this->get_logger(), "Getting transform...");
 
   auto result = transformClient->async_send_request(request);
 
   if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::executor::FutureReturnCode::SUCCESS) {
     transformation = result.get()->transform_stamped;
-    RCLCPP_INFO(this->get_logger(), "Get transform");
   } else {
     RCLCPP_ERROR(this->get_logger(), "Failed to get transformation");
   }
@@ -495,8 +474,8 @@ rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_rob
 #endif /* SIMULATION */
 
 Assurancetourix::~Assurancetourix() {
-#ifdef MIPI_CAMERA
-  arducam::arducam_close_camera(camera_instance);
-#endif // MIPI_CAMERA
+#ifdef CAMERA
+  //realease camera
+#endif // CAMERA
   RCLCPP_INFO(this->get_logger(), "Assurancetourix node terminated");
 }
