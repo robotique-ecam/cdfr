@@ -79,9 +79,12 @@ class GameManager(WebotsNode):
         index = dumps({"id": ids})
         with open(path.join(path.dirname(animation_path), "animation.json"), "r") as m:
             moves = m.read()
+        with open(path.join(path.dirname(animation_path), "animation.x3d"), "r") as a:
+            scene = a.read()
         with ZipFile(filename, "w") as rbsd:
             rbsd.writestr("index.json", index)
             rbsd.writestr("moves.json", moves)
+            rbsd.writestr("scene.x3d", scene)
 
     def _timer_callback(self):
         if (self.robot.getTime() - self._startup_time) <= 101:

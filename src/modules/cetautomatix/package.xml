@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>cetautomatix</name>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
   <description>Cetautomatix package</description>
   <maintainer email="maximilien.hirtz@ecam.fr">Max HIRTZ</maintainer>
-  <license>ECAM Makers :: CDFR 2020</license>
+  <license>ECAM Makers :: CDFR 2021</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>

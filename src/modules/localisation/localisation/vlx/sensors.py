@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-"""Sensors definition for localisation."""
+""" Sensors definition for localisation """
 
 
 from VL53L1X import VL53L1X
@@ -9,7 +9,7 @@ from VL53L1X import VL53L1X
 
 class Sensors:
     def __init__(self, i2c_bus=3, addrs=[]):
-        """Init sensors baseclass."""
+        """ Init Sensors """
         self._i2c_bus = i2c_bus
         self._vlx_array = []
         for addr in addrs:
@@ -24,14 +24,14 @@ class Sensors:
                 )
 
     def get_distances(self):
-        """Fetch distances from VL53L1Xs."""
+        """ Fetch distances from VL53L1X """
         distances = {}
         for vlx in self._vlx_array:
             distances.update({vlx.i2c_address: vlx.get_distance()})
         return distances
 
     def __del__(self):
-        """Destructor."""
+        """ Destructor """
         for vlx in self._vlx_array:
             vlx.stop_ranging()
             vlx.close()

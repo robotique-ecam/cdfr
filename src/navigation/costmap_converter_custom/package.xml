@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>costmap_converter_custom</name>
-  <version>1.0.0</version>
+  <version>0.9.0</version>
   <description>custom costmap converter</description>
   <maintainer email="phileas.lambert@gmail.com">Philéas Lambert</maintainer>
-  <license>Club Robotique ECAM :: CDFR 2021</license>
+  <license>ECAM Makers :: CDFR 2021</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

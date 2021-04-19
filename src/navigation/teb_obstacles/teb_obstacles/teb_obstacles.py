@@ -11,9 +11,8 @@ from rclpy.node import Node
 from costmap_converter_msgs.msg import ObstacleArrayMsg, ObstacleMsg
 from visualization_msgs.msg import MarkerArray, Marker
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point32
+from geometry_msgs.msg import Point32, PoseStamped
 from platform import machine
-from transformix_msgs.srv import TransformixParametersTransformStamped
 
 
 class Teb_obstacles(Node):
@@ -25,14 +24,15 @@ class Teb_obstacles(Node):
             "obelix" if self.get_namespace().strip("/") == "asterix" else "asterix"
         )
 
-        self.get_ally_odom_transformation()
-
         self.allies_subscription_ = self.create_subscription(
-            Odometry, f"/{self.ally}/odom", self.allies_subscription_callback, 10
+            PoseStamped,
+            f"/{self.ally}/odom_map_relative",
+            self.allies_subscription_callback,
+            10,
         )
         self.enemies_subscription_ = self.create_subscription(
             MarkerArray,
-            "/enemies_positions_markers",
+            "/ennemies_positions_markers",
             self.enemies_subscription_callback,
             10,
         )
@@ -50,29 +50,6 @@ class Teb_obstacles(Node):
         self.create_timer(0.5, self.send_obstacles)
 
         self.get_logger().info("teb_dynamic_obstacles node is ready")
-
-    def get_ally_odom_transformation(self):
-        if self.simulation:
-            return
-
-        get_tf_client = self.create_client(
-            TransformixParametersTransformStamped, f"/{self.ally}/get_odom_map_tf"
-        )
-
-        if not get_tf_client.wait_for_service(timeout_sec=15.0):
-            self.get_logger().info(
-                f"No service /{self.ally}/get_odom_map_tf availible, is there ony one robot?"
-            )
-            return
-        get_tf_request = TransformixParametersTransformStamped.Request()
-        future = get_tf_client.call_async(get_tf_request)
-        rclpy.spin_until_future_complete(self, future)
-        try:
-            response = future.result()
-        except Exception as e:
-            self.get_logger().info("Service call failed %r" % (e,))
-        else:
-            self.odom_map_tf = response.transform_stamped
 
     def initObstaclesArray(self):
         """ObstacleArray index 0: ally, index 1-2: enemies"""
@@ -130,9 +107,8 @@ class Teb_obstacles(Node):
             )
             > 0.3
         ):
-            pose = msg.pose.pose
-            x = pose.position.x + self.odom_map_tf.transform.translation.x
-            y = pose.position.y + self.odom_map_tf.transform.translation.y
+            x = msg.pose.position.x
+            y = msg.pose.position.y
             tmp_marker = Marker()
             tmp_marker.pose.position.x = x
             tmp_marker.pose.position.y = y

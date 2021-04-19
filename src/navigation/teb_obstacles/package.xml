@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>teb_obstacles</name>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
   <description>teb_obstacles node compute and send dynamic teb_obstacles</description>
   <maintainer email="phileas.lambert@gmail.com">Philéas LAMBERT</maintainer>
   <license>ECAM Makers :: CDFR 2021</license>

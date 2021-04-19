@@ -2,11 +2,11 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>actuators</name>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
   <description>Actuators Hardware Interface</description>
   <maintainer email="ewen.brun@ecam.fr">Ewen BRUN</maintainer>
 
-  <license>ECAM Makers :: CDFR 2020</license>
+  <license>ECAM Makers :: CDFR 2021</license>
 
   <exec_depend>rclpy</exec_depend>
 

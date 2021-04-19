@@ -9,7 +9,7 @@ wheels_separation: 0.244
 wheels_radius: 0.0405
 min_turning_radius: 0.0
 max_vel_x_nominal: 2.0
-max_vel_x_accurate: 0.15
+max_vel_x_accurate: 0.1
 max_vel_theta: 3.1
 max_vel_theta_accurate: 0.5
 acc_lim_x: 0.5
@@ -49,6 +49,14 @@ asterix:
       strategy_mode: NORMAL
 
 
+  localisation_node:
+    ros__parameters:
+      vlx_lat_x: 80.0
+      vlx_lat_y: 130.5
+      vlx_face_x: 100.5
+      vlx_face_y: 110.0
+
+
   lcd_driver:
     ros__parameters:
       use_sim_time: !Var use_sim_time
@@ -62,7 +70,7 @@ asterix:
   tree:
     ros__parameters:
       use_sim_time: !Var use_sim_time
-
+      
 
 controller_server:
   ros__parameters:
