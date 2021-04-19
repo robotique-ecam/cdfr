@@ -29,10 +29,20 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #ifdef CAMERA
 
   RCLCPP_INFO(this->get_logger(), "Starting CAMERA mode");
-  if ((mode > 6) || (mode < 0)) {
-    RCLCPP_ERROR(this->get_logger(), "Invalid camera.mode in assurancetourix.yml, choose an integer between 0 and 6, current mode: %d", mode);
-    exit(-1);
-  }
+
+  _cap.open(2, _api_id);
+  _cap.set(cv::CAP_PROP_FRAME_WIDTH, 3840);
+  _cap.set(cv::CAP_PROP_FRAME_HEIGHT, 2160);
+  _cap.set(cv::CAP_PROP_BRIGHTNESS , 29);
+  _cap.set(cv::CAP_PROP_CONTRAST, 12);
+  _cap.set(cv::CAP_PROP_SATURATION, 56);
+  _cap.set(cv::CAP_PROP_HUE, 129);
+  _cap.set(cv::CAP_PROP_GAMMA, 130);
+  _cap.set(cv::CAP_PROP_GAIN, 60);
+  _cap.set(cv::CAP_PROP_BACKLIGHT, 64);
+  _cap.set(cv::CAP_PROP_AUTO_WB, true);
+  _cap.set(cv::CAP_PROP_EXPOSURE, 11);
+  _cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
 
   timer_ = NULL;
 
@@ -72,7 +82,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #ifdef CAMERA
 // image capture trough CAMERA
 void Assurancetourix::get_image() {
-
+  _cap.read(_anotated);
 }
 
 // service enabling/disabling aruco detection, disabled by default
@@ -288,9 +298,9 @@ void Assurancetourix::detect() {
 #endif
 
   // cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
-  _frame.convertTo(raised_contrast, -1, contrast, 0);
+  //_frame.convertTo(raised_contrast, -1, contrast, 0);
 
-  raised_contrast.copyTo(_anotated);
+  //raised_contrast.copyTo(_anotated);
 
 #ifdef EXTRALOG
   marker.header.stamp = this->get_clock()->now();
@@ -322,6 +332,7 @@ void Assurancetourix::detect() {
 #endif
 
   if (show_image) {
+    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", _anotated);
     // cv::imshow("origin", _frame);
     cv::waitKey(3);

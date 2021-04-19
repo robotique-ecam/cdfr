@@ -54,7 +54,7 @@ private:
   void get_image();
   int width, height;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
-  int _api_id = cv::CAP_ANY;
+  int _api_id = cv::CAP_V4L2;
   VideoCapture _cap;
 #endif
 
@@ -81,7 +81,7 @@ private:
   cv::Mat _cameraMatrix = Mat(3, 3, CV_64F, mat_camera_matrix_coeff);
 
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
-  cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+  cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_250);
 
   rclcpp::TimerBase::SharedPtr timer_;
 
