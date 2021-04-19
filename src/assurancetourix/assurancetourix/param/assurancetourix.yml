@@ -3,13 +3,19 @@ assurancetourix:
   ros__parameters:
     topic_for_allies_position: /allies_positions_markers
     topic_for_gradient_layer: /ennemies_positions_markers
-    camera:
-      bgain: 2500
-      exposure: 250
-      mode: 0
-      rgain: 1500
-    image:
-      contrast: 35.0
+    camera_settings:
+      width: 3840
+      height: 2160
+      brightness: 29
+      contrast: 12
+      saturation: 56
+      hue: 129
+      gamma: 130
+      gain: 60
+      backlight_compensation: 64
+      auto_WB: true
+      exposure: 11
+    image_post_processing:
       show_image: true
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]
@@ -20,7 +26,6 @@ assurancetourix:
       robot_type: 2
       game_element_type: 1
       lifetime_sec: 5
-      lifetime_nano_sec: 0
       header_frame_id: "assurancetourix"
     simulation:
       robots :

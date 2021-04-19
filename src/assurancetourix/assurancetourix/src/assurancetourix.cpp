@@ -30,19 +30,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   RCLCPP_INFO(this->get_logger(), "Starting CAMERA mode");
 
-  _cap.open(2, _api_id);
-  _cap.set(cv::CAP_PROP_FRAME_WIDTH, 3840);
-  _cap.set(cv::CAP_PROP_FRAME_HEIGHT, 2160);
-  _cap.set(cv::CAP_PROP_BRIGHTNESS , 29);
-  _cap.set(cv::CAP_PROP_CONTRAST, 12);
-  _cap.set(cv::CAP_PROP_SATURATION, 56);
-  _cap.set(cv::CAP_PROP_HUE, 129);
-  _cap.set(cv::CAP_PROP_GAMMA, 130);
-  _cap.set(cv::CAP_PROP_GAIN, 60);
-  _cap.set(cv::CAP_PROP_BACKLIGHT, 64);
-  _cap.set(cv::CAP_PROP_AUTO_WB, true);
-  _cap.set(cv::CAP_PROP_EXPOSURE, 11);
-  _cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
+  init_camera_settings();
 
   timer_ = NULL;
 
@@ -80,7 +68,50 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 }
 
 #ifdef CAMERA
-// image capture trough CAMERA
+
+void Assurancetourix::init_camera_settings(){
+  _cap.open(2, cv::CAP_V4L2);
+  _cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
+
+  this->declare_parameter("camera_settings.width");
+  this->declare_parameter("camera_settings.height");
+  this->declare_parameter("camera_settings.brightness");
+  this->declare_parameter("camera_settings.contrast");
+  this->declare_parameter("camera_settings.saturation");
+  this->declare_parameter("camera_settings.hue");
+  this->declare_parameter("camera_settings.gamma");
+  this->declare_parameter("camera_settings.gain");
+  this->declare_parameter("camera_settings.backlight_compensation");
+  this->declare_parameter("camera_settings.auto_WB");
+  this->declare_parameter("camera_settings.exposure");
+
+  bool auto_WB;
+  int width, height, brightness, contrast, saturation, hue, gamma, gain, backlight_compensation, exposure;
+  this->get_parameter<int>("camera_settings.width", width);
+  this->get_parameter<int>("camera_settings.height", height);
+  this->get_parameter<int>("camera_settings.brightness", brightness);
+  this->get_parameter<int>("camera_settings.contrast", contrast);
+  this->get_parameter<int>("camera_settings.saturation", saturation);
+  this->get_parameter<int>("camera_settings.hue", hue);
+  this->get_parameter<int>("camera_settings.gamma", gamma);
+  this->get_parameter<int>("camera_settings.gain", gain);
+  this->get_parameter<int>("camera_settings.backlight_compensation", backlight_compensation);
+  this->get_parameter<bool>("camera_settings.auto_WB", auto_WB);
+  this->get_parameter<int>("camera_settings.exposure", exposure);
+
+  _cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+  _cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+  _cap.set(cv::CAP_PROP_BRIGHTNESS, brightness);
+  _cap.set(cv::CAP_PROP_CONTRAST, contrast);
+  _cap.set(cv::CAP_PROP_SATURATION, saturation);
+  _cap.set(cv::CAP_PROP_HUE, hue);
+  _cap.set(cv::CAP_PROP_GAMMA, gamma);
+  _cap.set(cv::CAP_PROP_GAIN, gain);
+  _cap.set(cv::CAP_PROP_BACKLIGHT, backlight_compensation);
+  _cap.set(cv::CAP_PROP_AUTO_WB, auto_WB);
+  _cap.set(cv::CAP_PROP_EXPOSURE, exposure);
+}
+
 void Assurancetourix::get_image() {
   _cap.read(_anotated);
 }
@@ -198,19 +229,8 @@ visualization_msgs::msg::Marker Assurancetourix::predictEnnemiesPos(visualizatio
 void Assurancetourix::init_parameters() {
 
   // declare variables from yml
-  this->declare_parameter("image.show_image");
-  this->get_parameter_or<bool>("image.show_image", show_image, false);
-
-#ifdef CAMERA
-  this->declare_parameter("camera.exposure");
-  this->declare_parameter("camera.rgain");
-  this->declare_parameter("camera.bgain");
-  this->declare_parameter("camera.mode");
-  this->get_parameter_or<int>("camera.exposure", exposure, 250);
-  this->get_parameter_or<uint>("camera.rgain", rgain, 3110);
-  this->get_parameter_or<uint>("camera.bgain", bgain, 5160);
-  this->get_parameter_or<int>("camera.mode", mode, 0);
-#endif // CAMERA
+  this->declare_parameter("image_post_processing.show_image");
+  this->get_parameter_or<bool>("image_post_processing.show_image", show_image, false);
 
 #ifdef SIMULATION
   this->declare_parameter("simulation.robots");
@@ -219,7 +239,6 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
 #endif // SIMULATION
 
-  this->declare_parameter("image.contrast");
   this->declare_parameter("rviz_settings.blue_color_ArUco");
   this->declare_parameter("rviz_settings.yellow_color_ArUco");
   this->declare_parameter("rviz_settings.default_color_ArUco");
@@ -228,13 +247,11 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.robot_type");
   this->declare_parameter("rviz_settings.game_element_type");
   this->declare_parameter("rviz_settings.lifetime_sec");
-  this->declare_parameter("rviz_settings.lifetime_nano_sec");
   this->declare_parameter("rviz_settings.header_frame_id");
   this->declare_parameter("topic_for_gradient_layer");
   this->declare_parameter("topic_for_allies_position");
   this->declare_parameter("side");
 
-  this->get_parameter_or<double>("image.contrast", contrast, 1.2);
   this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_ArUco", blue_color_ArUco, {0.0, 0.0, 255.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_ArUco", yellow_color_ArUco, {255.0, 255.0, 0.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_ArUco", default_color_ArUco, {120.0, 120.0, 120.0});
@@ -243,7 +260,6 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<uint>("rviz_settings.robot_type", robot_type, 2);
   this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
   this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
-  this->get_parameter_or<int>("rviz_settings.lifetime_nano_sec", lifetime_nano_sec, 0);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
   this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
   this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
@@ -254,14 +270,12 @@ void Assurancetourix::init_parameters() {
   marker.color.a = 1.0;
   marker.action = visualization_msgs::msg::Marker::ADD;
   marker.lifetime.sec = lifetime_sec;
-  marker.lifetime.nanosec = lifetime_nano_sec;
 
   base_frame = "map";
   transformed_marker.header.frame_id = base_frame;
   transformed_marker.color.a = 1.0;
   transformed_marker.action = visualization_msgs::msg::Marker::ADD;
   transformed_marker.lifetime.sec = lifetime_sec;
-  transformed_marker.lifetime.nanosec = lifetime_nano_sec;
 }
 
 void Assurancetourix::detect() {
@@ -320,7 +334,7 @@ void Assurancetourix::detect() {
 
   double time_taken_camera = std::chrono::duration_cast<std::chrono::nanoseconds>(end_camera - start_camera).count();
   double time_taken_detection = std::chrono::duration_cast<std::chrono::nanoseconds>(end_detection - start_detection).count();
-  double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_total).count();
+  double time_taken_total = std::chrono::duration_cast<std::chrono::nanoseconds>(end_total - start_camera).count();
 
   time_taken_camera *= 1e-9;
   time_taken_detection *= 1e-9;

@@ -51,10 +51,9 @@ private:
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
   void handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                      const std_srvs::srv::SetBool::Response::SharedPtr response);
+  void init_camera_settings();
   void get_image();
-  int width, height;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
-  int _api_id = cv::CAP_V4L2;
   VideoCapture _cap;
 #endif
 
@@ -101,10 +100,9 @@ private:
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
   // Parameters
-  int _camera_id, mode, lifetime_sec, lifetime_nano_sec, exposure;
+  int lifetime_sec, lifetime_nano_sec, exposure;
   bool show_image, savedeee;
-  uint rgain, bgain, robot_type, game_element_type;
-  double contrast;
+  uint robot_type, game_element_type;
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
 
