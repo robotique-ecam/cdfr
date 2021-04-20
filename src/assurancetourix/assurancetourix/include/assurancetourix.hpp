@@ -50,6 +50,10 @@ private:
   void project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids);
   void compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort);
 
+  void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
+  visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids);
+
+
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
   void handle_aruco_detection_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
@@ -76,7 +80,6 @@ private:
 
   Mat _frame, _anotated, raised_contrast, tmp;
 
-  std::vector<cv::Vec3d> _rvecs, _tvecs;
   std::vector<int> _small_detected_ids, _huge_detected_ids;
   std::vector<std::vector<cv::Point2f>> _small_marker_corners_projection, _huge_marker_corners_projection;
 

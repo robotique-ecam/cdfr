@@ -449,74 +449,85 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
   transformed_marker.scale.z = scale[2];
 }
 
-void Assurancetourix::_anotate_image(Mat img) {
-  if (_detected_ids.size() > 0) {
+void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
+    visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids){
+  for (int i = 0; i < int(detected_ids.size()); i++) {
+    if (show_image) {
+      // drawAxis on the image (activate only for debug)
+      cv::aruco::drawAxis(tmp, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs[i], tvecs[i], 0.1);
+    }
+
+    marker.pose.position.x = tvecs[i].operator[](0);
+    marker.pose.position.y = tvecs[i].operator[](1);
+    marker.pose.position.z = tvecs[i].operator[](2);
+
+    double angle = norm(rvecs[i]);
+    Vec3d axis = rvecs[i] / angle;
+
+    tf2::Quaternion q;
+    q.setRotation(tf2::Vector3(axis[0], axis[1], axis[2]), angle);
+
+    marker.pose.orientation.x = q.x();
+    marker.pose.orientation.y = q.y();
+    marker.pose.orientation.z = q.z();
+    marker.pose.orientation.w = q.w();
+
+    marker.id = detected_ids[i];
+
+    geometry_msgs::msg::PoseStamped tmpPoseIn, tmpPoseOut;
+    tmpPoseIn.header = marker.header;
+    tmpPoseIn.pose = marker.pose;
+
+    tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
+
+    if (side.compare("yellow") == 0) {
+      tmpPoseOut.pose.position.x += 0.28;
+    }
+
+    tmpPoseOut.pose.position.z = 0;
+    transformed_marker = marker;
+    transformed_marker.header = tmpPoseOut.header;
+    transformed_marker.pose = tmpPoseOut.pose;
+
+    if ((marker.id <= 5) && (1 <= marker.id)) {
+      set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
+    } else if ((marker.id <= 10) && (6 <= marker.id)) {
+      set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);
+    } else {
+      set_vision_for_rviz(default_color_ArUco, game_elements_scale, game_element_type);
+    }
+
+    if (side.compare("blue") == 0 && marker.id <= 10 && 6 <= marker.id) {
+      marker_array_ennemies.markers.push_back(transformed_marker);
+    } else if ((side.compare("yellow") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
+      marker_array_ennemies.markers.push_back(transformed_marker);
+    }
+
+    if ((side.compare("yellow") == 0 && marker.id <= 10 && 6 <= marker.id) || marker.id >100) {
+      marker_array_allies.markers.push_back(transformed_marker);
+    } else if ((side.compare("blue") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
+      marker_array_allies.markers.push_back(transformed_marker);
+    }
+
+    marker_pub_->publish(marker);
+  }
+}
+
+void Assurancetourix::estimate_arucos_poses() {
+  if (_small_detected_ids.size() > 0 || _huge_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners_projection, 0.115, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs, _tvecs);
-
-    for (int i = 0; i < int(_detected_ids.size()); i++) {
-
-      if (show_image) {
-        // drawAxis on the image (activate only for debug)
-        cv::aruco::drawAxis(img, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs[i], _tvecs[i], 0.1);
-      }
-
-      marker.pose.position.x = _tvecs[i].operator[](0);
-      marker.pose.position.y = _tvecs[i].operator[](1);
-      marker.pose.position.z = _tvecs[i].operator[](2);
-
-      double angle = norm(_rvecs[i]);
-      Vec3d axis = _rvecs[i] / angle;
-
-      tf2::Quaternion q;
-      q.setRotation(tf2::Vector3(axis[0], axis[1], axis[2]), angle);
-
-      marker.pose.orientation.x = q.x();
-      marker.pose.orientation.y = q.y();
-      marker.pose.orientation.z = q.z();
-      marker.pose.orientation.w = q.w();
-
-      if ((_detected_ids[i] <= 5) && (1 <= _detected_ids[i])) {
-        set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
-      } else if ((_detected_ids[i] <= 10) && (6 <= _detected_ids[i])) {
-        set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);
-      } else {
-        set_vision_for_rviz(default_color_ArUco, game_elements_scale, game_element_type);
-      }
-
-      marker.id = _detected_ids[i];
-
-      geometry_msgs::msg::PoseStamped tmpPoseIn, tmpPoseOut;
-      tmpPoseIn.header = marker.header;
-      tmpPoseIn.pose = marker.pose;
-
-      tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
-
-      if (side.compare("yellow") == 0) {
-        tmpPoseOut.pose.position.x += 0.28;
-      }
-
-      tmpPoseOut.pose.position.z = 0;
-      transformed_marker = marker;
-      transformed_marker.header = tmpPoseOut.header;
-      transformed_marker.pose = tmpPoseOut.pose;
-
-      if ((side.compare("blue") == 0) && (marker.id <= 10) && (6 <= marker.id)) {
-        marker_array_ennemies.markers.push_back(transformed_marker);
-      } else if ((side.compare("yellow") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
-        marker_array_ennemies.markers.push_back(transformed_marker);
-      }
-
-      if ((side.compare("yellow") == 0) && (marker.id <= 10) && (6 <= marker.id)) {
-        marker_array_allies.markers.push_back(transformed_marker);
-      } else if ((side.compare("blue") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
-        marker_array_allies.markers.push_back(transformed_marker);
-      }
-void Assurancetourix::estimate_arucos_poses() {
-
-      marker_pub_->publish(marker);
+    if (_small_detected_ids.size() > 0){
+      std::vector<cv::Vec3d> rvecs, tvecs;
+      cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, small_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _small_detected_ids);
     }
+    if (_huge_detected_ids.size() > 0){
+      std::vector<cv::Vec3d> rvecs, tvecs;
+      cv::aruco::estimatePoseSingleMarkers(_huge_marker_corners_projection, huge_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _huge_detected_ids);
+    }
+
     transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
     transformed_marker_pub_allies_->publish(marker_array_allies);
   }
