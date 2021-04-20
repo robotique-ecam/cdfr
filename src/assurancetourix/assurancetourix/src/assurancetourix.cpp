@@ -387,6 +387,17 @@ void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &tr
   }
 }
 
+void Assurancetourix::compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort){
+  coordinates_vector.push_back({ {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0} });
+  for(int j=0; j<4; j++){
+    coordinates_vector.back()[j] = {
+        undistort[j].x * mat_camera_matrix_coeff_fisheye_balanced[0][0] +
+        mat_camera_matrix_coeff_fisheye_balanced[0][2],
+        undistort[j].y * mat_camera_matrix_coeff_fisheye_balanced[1][1] +
+        mat_camera_matrix_coeff_fisheye_balanced[1][2]
+      };
+  }
+}
 
 void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids) {
   _small_marker_corners_projection.clear();
