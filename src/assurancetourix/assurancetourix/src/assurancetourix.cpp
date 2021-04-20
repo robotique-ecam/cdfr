@@ -111,7 +111,8 @@ void Assurancetourix::init_camera_settings(){
 }
 
 void Assurancetourix::get_image() {
-  _cap.read(_anotated);
+  //_cap.read(_anotated);
+  _anotated = imread("/home/phileas/vision/calibration/undistorded_results/board_overview.jpg", IMREAD_GRAYSCALE);
 }
 
 // service enabling/disabling aruco detection, disabled by default
@@ -348,8 +349,8 @@ void Assurancetourix::detect() {
 #endif
 
   if (show_image) {
-    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
-    cv::imshow("anotated", _anotated);
+    cv::resize(tmp, tmp, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    cv::imshow("anotated", tmp);
     // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
@@ -406,12 +407,16 @@ void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector
 }
 
 void Assurancetourix::_detect_aruco(Mat img) {
-  cv::aruco::detectMarkers(img, _dictionary, _marker_corners, _detected_ids, _parameters, _rejected_candidates);
-  if (show_image) {
-    // drawDetectedMarkers on the image (activate only for debug)
-    cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
-  if (_detected_ids.size() > 0){
-    project_corners_pinhole_to_fisheye();
+  std::vector<std::vector<cv::Point2f>> marker_corners, rejected_candidates;
+  std::vector<int> detected_ids;
+  cv::aruco::detectMarkers(img, _dictionary, marker_corners, detected_ids, _parameters, rejected_candidates);
+  if (detected_ids.size() > 0){
+    project_corners_pinhole_to_fisheye(marker_corners, detected_ids);
+    if (show_image) {
+      tmp = imread("/home/phileas/vision/calibration/undistorded_results/200_pictures_fisheye/board_overview_undistord_balance_0_3.jpg");
+      // drawDetectedMarkers on the image (activate only for debug)
+      cv::aruco::drawDetectedMarkers(tmp, _small_marker_corners_projection, _small_detected_ids);
+      cv::aruco::drawDetectedMarkers(tmp, _huge_marker_corners_projection, _huge_detected_ids);
     }
   }
 }

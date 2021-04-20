@@ -73,12 +73,11 @@ private:
   void simulation_marker_callback();
 #endif
 
-  Mat _frame, _anotated, raised_contrast, image_minus_t, xor_image, xor_image_inv;
-
-  std::vector<int> _detected_ids;
-  std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates, _marker_corners_projection;
+  Mat _frame, _anotated, raised_contrast, tmp;
 
   std::vector<cv::Vec3d> _rvecs, _tvecs;
+  std::vector<int> _small_detected_ids, _huge_detected_ids;
+  std::vector<std::vector<cv::Point2f>> _small_marker_corners_projection, _huge_marker_corners_projection;
 
   double mat_dist_coeffs_fisheye[1][4] = {{-0.036070207475902644, -0.002003213487781793, -0.0007185511458800288, -0.0004833997296696256}};
   double mat_camera_matrix_coeff_fisheye[3][3] = {{1426.4349637104904, 0.0, 1919.8425216336193}, {0.0, 1423.1510790046468, 1094.9067233281635}, {0.0, 0.0, 1.0}};
