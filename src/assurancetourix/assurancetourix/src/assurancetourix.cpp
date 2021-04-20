@@ -386,17 +386,21 @@ void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &tr
   }
 }
 
-void Assurancetourix::project_corners_pinhole_to_fisheye() {
-  _marker_corners_projection = _marker_corners;
-  for(int i=0; i<int(_detected_ids.size()); i++){
+
+void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids) {
+  _small_marker_corners_projection.clear();
+  _huge_marker_corners_projection.clear();
+  _small_detected_ids.clear();
+  _huge_detected_ids.clear();
+  for(int i=0; i<int(detected_ids.size()); i++){
     std::vector<cv::Point2f> undistort;
-    cv::fisheye::undistortPoints(_marker_corners_projection[i], undistort, _cameraMatrix_fisheye, _distCoeffs_fisheye);
-    for(int j=0; j<4; j++){
-      _marker_corners_projection[i][j] = {
-          undistort[j].x * mat_camera_matrix_coeff_fisheye_balanced[0][0] +
-          mat_camera_matrix_coeff_fisheye_balanced[0][2],
-          undistort[j].y * mat_camera_matrix_coeff_fisheye_balanced[1][1] +
-          mat_camera_matrix_coeff_fisheye_balanced[1][2]};
+    cv::fisheye::undistortPoints(marker_corners[i], undistort, _cameraMatrix_fisheye, _distCoeffs_fisheye);
+    if(detected_ids[i]<50){
+      _small_detected_ids.push_back(detected_ids[i]);
+      compute_final_projection(_small_marker_corners_projection, undistort);
+    } else {
+      _huge_detected_ids.push_back(detected_ids[i]);
+      compute_final_projection(_huge_marker_corners_projection, undistort);
     }
   }
 }

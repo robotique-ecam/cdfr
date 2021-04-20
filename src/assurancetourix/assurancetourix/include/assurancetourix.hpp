@@ -47,7 +47,7 @@ private:
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
   visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
-  void project_corners_pinhole_to_fisheye();
+  void project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids);
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
