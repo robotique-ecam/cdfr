@@ -382,11 +382,29 @@ void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &tr
   }
 }
 
+void Assurancetourix::project_corners_pinhole_to_fisheye() {
+  _marker_corners_projection = _marker_corners;
+  for(int i=0; i<int(_detected_ids.size()); i++){
+    std::vector<cv::Point2f> undistort;
+    cv::fisheye::undistortPoints(_marker_corners_projection[i], undistort, _cameraMatrix_fisheye, _distCoeffs_fisheye);
+    for(int j=0; j<4; j++){
+      _marker_corners_projection[i][j] = {
+          undistort[j].x * mat_camera_matrix_coeff_fisheye_balanced[0][0] +
+          mat_camera_matrix_coeff_fisheye_balanced[0][2],
+          undistort[j].y * mat_camera_matrix_coeff_fisheye_balanced[1][1] +
+          mat_camera_matrix_coeff_fisheye_balanced[1][2]};
+    }
+  }
+}
+
 void Assurancetourix::_detect_aruco(Mat img) {
   cv::aruco::detectMarkers(img, _dictionary, _marker_corners, _detected_ids, _parameters, _rejected_candidates);
   if (show_image) {
     // drawDetectedMarkers on the image (activate only for debug)
     cv::aruco::drawDetectedMarkers(img, _marker_corners, _detected_ids);
+  if (_detected_ids.size() > 0){
+    project_corners_pinhole_to_fisheye();
+    }
   }
 }
 
@@ -411,7 +429,7 @@ void Assurancetourix::_anotate_image(Mat img) {
   if (_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
-    cv::aruco::estimatePoseSingleMarkers(_marker_corners, 0.08, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs, _tvecs);
+    cv::aruco::estimatePoseSingleMarkers(_marker_corners_projection, 0.115, _cameraMatrix_pinhole, _distCoeffs_pinhole, _rvecs, _tvecs);
 
     for (int i = 0; i < int(_detected_ids.size()); i++) {
 

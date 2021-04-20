@@ -12,6 +12,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
+#include <opencv2/calib3d.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <tf2/LinearMath/Quaternion.h>
@@ -46,6 +47,7 @@ private:
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
   visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
+  void project_corners_pinhole_to_fisheye();
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
@@ -74,12 +76,13 @@ private:
   Mat _frame, _anotated, raised_contrast, image_minus_t, xor_image, xor_image_inv;
 
   std::vector<int> _detected_ids;
-  std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates;
+  std::vector<std::vector<cv::Point2f>> _marker_corners, _rejected_candidates, _marker_corners_projection;
 
   std::vector<cv::Vec3d> _rvecs, _tvecs;
 
   double mat_dist_coeffs_fisheye[1][4] = {{-0.036070207475902644, -0.002003213487781793, -0.0007185511458800288, -0.0004833997296696256}};
   double mat_camera_matrix_coeff_fisheye[3][3] = {{1426.4349637104904, 0.0, 1919.8425216336193}, {0.0, 1423.1510790046468, 1094.9067233281635}, {0.0, 0.0, 1.0}};
+  float mat_camera_matrix_coeff_fisheye_balanced[3][3] = {{8.59993203e+02, 0.00000000e+00, 1.87111502e+03}, {0.00000000e+00, 8.58013359e+02, 1.16514527e+03}, {0.0, 0.0, 1.0}};
 
   double mat_dist_coeffs_pinhole[1][5] = {{-0.00131221, -0.00089388, 0.00234124, 0.00322031, 0.00010104}};
   double mat_camera_matrix_coeff_pinhole[3][3] = {{8.51158290e+02, 0.0, 1.89003916e+03}, {0.0, 8.47796721e+02, 1.17912096e+03}, {0.0, 0.0, 1.0}};
