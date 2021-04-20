@@ -228,7 +228,11 @@ void Assurancetourix::init_parameters() {
 
   // declare variables from yml
   this->declare_parameter("image_post_processing.show_image");
+  this->declare_parameter("image_post_processing.small_aruco_size");
+  this->declare_parameter("image_post_processing.huge_aruco_size");
   this->get_parameter_or<bool>("image_post_processing.show_image", show_image, false);
+  this->get_parameter_or<double>("image_post_processing.small_aruco_size", small_aruco_size, 0.07);
+  this->get_parameter_or<double>("image_post_processing.huge_aruco_size", huge_aruco_size, 0.115);
 
 #ifdef SIMULATION
   this->declare_parameter("simulation.robots");
@@ -324,7 +328,7 @@ void Assurancetourix::detect() {
 #endif
 
   _detect_aruco(_anotated);
-  _anotate_image(_anotated);
+  estimate_arucos_poses();
 
 #ifdef EXTRALOG
   auto end_detection = std::chrono::high_resolution_clock::now();
@@ -489,6 +493,7 @@ void Assurancetourix::_anotate_image(Mat img) {
       } else if ((side.compare("blue") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
         marker_array_allies.markers.push_back(transformed_marker);
       }
+void Assurancetourix::estimate_arucos_poses() {
 
       marker_pub_->publish(marker);
     }

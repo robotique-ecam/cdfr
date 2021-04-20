@@ -17,6 +17,8 @@ assurancetourix:
       exposure: 11
     image_post_processing:
       show_image: true
+      small_aruco_size: 0.07
+      huge_aruco_size: 0.115
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]
       yellow_color_ArUco: [255.0,255.0,0.0]

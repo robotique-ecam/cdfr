@@ -43,7 +43,7 @@ public:
 private:
   void init_parameters();
   void _detect_aruco(Mat img);
-  void _anotate_image(Mat img);
+  void estimate_arucos_poses();
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
   void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
   visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
@@ -114,6 +114,7 @@ private:
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
   // Parameters
+  double huge_aruco_size, small_aruco_size;
   int lifetime_sec, lifetime_nano_sec, exposure;
   bool show_image, savedeee;
   uint robot_type, game_element_type;
