@@ -229,11 +229,39 @@ void Assurancetourix::init_parameters() {
 
   // declare variables from yml
   this->declare_parameter("image_post_processing.show_image");
-  this->declare_parameter("image_post_processing.small_aruco_size");
-  this->declare_parameter("image_post_processing.huge_aruco_size");
+  this->declare_parameter("arucos.small_aruco_size");
+  this->declare_parameter("arucos.huge_aruco_size");
+  this->declare_parameter("arucos.asterix.side_right");
+  this->declare_parameter("arucos.asterix.front_right");
+  this->declare_parameter("arucos.asterix.front_left");
+  this->declare_parameter("arucos.asterix.side_left");
+  this->declare_parameter("arucos.asterix.back_left");
+  this->declare_parameter("arucos.asterix.back_right");
+  this->declare_parameter("arucos.obelix.side_right");
+  this->declare_parameter("arucos.obelix.front_right");
+  this->declare_parameter("arucos.obelix.front_left");
+  this->declare_parameter("arucos.obelix.side_left");
+  this->declare_parameter("arucos.obelix.back_left");
+  this->declare_parameter("arucos.obelix.back_right");
+  this->declare_parameter("arucos.enemies");
+
   this->get_parameter_or<bool>("image_post_processing.show_image", show_image, false);
-  this->get_parameter_or<double>("image_post_processing.small_aruco_size", small_aruco_size, 0.07);
-  this->get_parameter_or<double>("image_post_processing.huge_aruco_size", huge_aruco_size, 0.115);
+  this->get_parameter_or<double>("arucos.small_aruco_size", small_aruco_size, 0.07);
+  this->get_parameter_or<double>("arucos.huge_aruco_size", huge_aruco_size, 0.115);
+  this->get_parameter_or<int>("arucos.asterix.side_right", _asterix_arucos_nb[0], 172);
+  this->get_parameter_or<int>("arucos.asterix.front_right", _asterix_arucos_nb[1], 173);
+  this->get_parameter_or<int>("arucos.asterix.front_left", _asterix_arucos_nb[2], 174);
+  this->get_parameter_or<int>("arucos.asterix.side_left", _asterix_arucos_nb[3], 175);
+  this->get_parameter_or<int>("arucos.asterix.back_left", _asterix_arucos_nb[4], 176);
+  this->get_parameter_or<int>("arucos.asterix.back_right", _asterix_arucos_nb[5], 177);
+  this->get_parameter_or<int>("arucos.obelix.side_right", _obelix_arucos_nb[0], 182);
+  this->get_parameter_or<int>("arucos.obelix.front_right", _obelix_arucos_nb[1], 183);
+  this->get_parameter_or<int>("arucos.obelix.front_left", _obelix_arucos_nb[2], 184);
+  this->get_parameter_or<int>("arucos.obelix.side_left", _obelix_arucos_nb[3], 185);
+  this->get_parameter_or<int>("arucos.obelix.back_left", _obelix_arucos_nb[4], 186);
+  this->get_parameter_or<int>("arucos.obelix.back_right", _obelix_arucos_nb[5], 187);
+  this->get_parameter_or<std::vector<double>>("arucos.enemies", _enemies_arucos_nb, {0.0});
+
 
 #ifdef SIMULATION
   this->declare_parameter("simulation.robots");
@@ -489,7 +517,7 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     transformed_marker.header = tmpPoseOut.header;
     transformed_marker.pose = tmpPoseOut.pose;
 
-    if ((marker.id <= 5) && (1 <= marker.id)) {
+    if ((marker.id <= 5 && 1 <= marker.id) || marker.id >100) {
       set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
     } else if ((marker.id <= 10) && (6 <= marker.id)) {
       set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);

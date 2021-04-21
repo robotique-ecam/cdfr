@@ -121,7 +121,8 @@ private:
   int lifetime_sec, lifetime_nano_sec, exposure;
   bool show_image, savedeee;
   uint robot_type, game_element_type;
-  std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale;
+  int _asterix_arucos_nb[6], _obelix_arucos_nb[6];
+  std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale, _enemies_arucos_nb;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
 
   rclcpp::Client<transformix_msgs::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;

@@ -17,8 +17,24 @@ assurancetourix:
       exposure: 11
     image_post_processing:
       show_image: true
+    arucos:
       small_aruco_size: 0.07
       huge_aruco_size: 0.115
+      asterix:
+        side_right: 172
+        front_right: 173
+        front_left: 174
+        side_left: 175
+        back_left: 176
+        back_right: 177
+      obelix:
+        side_right: 182
+        front_right: 183
+        front_left: 184
+        side_left: 185
+        back_left: 186
+        back_right: 187
+      enemies: [192.0, 193.0, 194.0, 195.0]
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]
       yellow_color_ArUco: [255.0,255.0,0.0]
