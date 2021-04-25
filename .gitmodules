@@ -2,5 +2,5 @@
 	path = src/modules/lcd-driver
 	url = https://github.com/funtech-makers/ros2-i2c-lcd-driver.git
 [submodule "src/modules/odrive_ros"]
-	path = src/modules/odrive_ros
-	url = git@github.com:robotique-ecam/odrive_ros.git
+	path = src/modules/odrive
+	url = https://github.com/robotique-ecam/odrive-ros2-node.git
