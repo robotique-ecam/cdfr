@@ -16,6 +16,7 @@ def generate_launch_description():
     use_namespace = LaunchConfiguration("use_namespace")
     use_sim_time = LaunchConfiguration("use_sim_time")
     params = LaunchConfiguration("params_file")
+    use_odrive = LaunchConfiguration("use_odrive")
 
     remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
@@ -31,7 +32,34 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "use_sim_time", default_value="false", description="Use /clock if true"
             ),
+            DeclareLaunchArgument(
+                "use_odrive",
+                default_value="false",
+                description="Whether to launch odrive node",
+            ),
             GroupAction(
+                [
+                    PushRosNamespace(
+                        condition=IfCondition(use_namespace), namespace=namespace
+                    ),
+                    Node(
+                        package="odrive_node",
+                        executable="odrive_node",
+                        output="screen",
+                        parameters=[params],
+                        remappings=remappings,
+                    ),
+                    Node(
+                        package="drive",
+                        executable="drive",
+                        output={"both": "log"},
+                        parameters=[params],
+                        remappings=remappings,
+                    ),
+                ]
+            )
+            if use_odrive == "true"
+            else GroupAction(
                 [
                     SetEnvironmentVariable("WEBOTS_ROBOT_NAME", namespace),
                     PushRosNamespace(

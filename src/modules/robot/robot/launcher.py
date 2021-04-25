@@ -26,6 +26,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     use_sim_time = LaunchConfiguration("use_sim_time")
     autostart = LaunchConfiguration("autostart")
     default_bt_xml_filename = LaunchConfiguration("default_bt_xml_filename")
+    use_odrive = LaunchConfiguration("use_odrive")
 
     params = tempfile.NamedTemporaryFile(mode="w", delete=False)
     robot_params = os.path.join(
@@ -49,6 +50,8 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
         "behavior_trees",
         "navigate_w_replanning_time.xml",
     )
+
+    odrive_condition = not simulation
 
     remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
@@ -74,6 +77,11 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                 "default_bt_xml_filename",
                 default_value=nav2_bt_xml_file,
                 description="Full path to the behavior tree xml file to use",
+            ),
+            DeclareLaunchArgument(
+                "use_odrive",
+                default_value=str(odrive_condition),
+                description="Whether to launch odrive node",
             ),
             GroupAction(
                 [
@@ -139,6 +147,7 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                     "use_namespace": use_namespace,
                     "use_sim_time": use_sim_time,
                     "params_file": params.name,
+                    "use_odrive": use_odrive,
                 }.items(),
             ),
         ]
