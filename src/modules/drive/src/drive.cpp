@@ -1,7 +1,5 @@
 #include <drive.hpp>
 
-#define I2C_ADDR_MOTOR_LEFT 0x10
-#define I2C_ADDR_MOTOR_RIGHT 0x11
 #define I2C_ADDR_SLIDER 0x12
 
 Drive::Drive() : Node("drive_node") {
@@ -110,7 +108,7 @@ void Drive::init_parameters() {
 
 void Drive::init_variables() {
   /* Compute initial values */
-  _wheel_perimeter = 2 * M_PI * _wheel_radius;
+  _wheel_circumference = 2 * M_PI * _wheel_radius;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -222,8 +220,8 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
 void Drive::compute_pose_velocity(Differential turns_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = turns_returned.left * _wheel_perimeter;
-  differential_move_.right = turns_returned.right * _wheel_perimeter;
+  differential_move_.left = turns_returned.left * _wheel_circumference;
+  differential_move_.right = turns_returned.right * _wheel_circumference;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
@@ -294,18 +292,6 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
-#ifdef USE_I2C
-  this->i2c_mutex.lock();
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c_mutex.unlock();
-#endif
-
   if (request->data) {
     response->message = "Stepper drivers are enabled";
     RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
@@ -459,13 +445,5 @@ double Drive::dummy_tree_digits_precision(double a){
 }
 
 Drive::~Drive() {
-#ifdef USE_I2C
-  this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
-  this->i2c_mutex.unlock();
-#endif /* SIMULATION */
   RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
 }
