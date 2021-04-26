@@ -17,6 +17,8 @@ Drive::Drive() : Node("drive_node") {
   i2c = std::make_shared<I2C>(i2c_bus);
 #endif//I2C
 
+  odrive = new ODrive(_odrive_usb_port, this);
+
   /* Init speed before starting odom */
 #else
   /* Init webots supervisor */
@@ -82,6 +84,12 @@ void Drive::init_parameters() {
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
 #endif//I2C
+  this->declare_parameter("gearbox_ratio");
+  this->declare_parameter("odrive_usb_port");
+  this->declare_parameter("invert_wheel");
+  this->get_parameter_or<double>("gearbox_ratio", _gearbox_ratio, 1.0);
+  this->get_parameter_or<std::string>("odrive_usb_port", _odrive_usb_port, "/dev/ttyS1");
+  this->get_parameter_or<bool>("invert_wheel", _invert_wheel, false);
 #endif /* SIMULATION */
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
@@ -109,6 +117,10 @@ void Drive::init_variables() {
   diagnostics_array_.header.stamp = this->get_clock()->now();
 
 #ifndef SIMULATION
+  if (_invert_wheel) {
+    odrive_motor_order[0] = 1;
+    odrive_motor_order[1] = 0;
+  }
   time_since_last_sync_ = this->get_clock()->now();
 #else
   time_since_last_sync_ = get_sim_time();

@@ -2,6 +2,7 @@
 #define DRIVE_NODE_HPP
 
 #ifndef SIMULATION
+#include <ODrive.hpp>
 
 #ifdef USE_I2C
 #include "i2c.hpp"
@@ -79,6 +80,11 @@ private:
   };
 
 #ifndef SIMULATION
+  std::string _odrive_usb_port;
+  bool _invert_wheel;
+  double _gearbox_ratio;
+  ODrive *odrive;
+  int odrive_motor_order[2] = {0, 1};
 #ifdef USE_I2C
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
