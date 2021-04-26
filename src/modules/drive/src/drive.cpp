@@ -20,6 +20,15 @@ Drive::Drive() : Node("drive_node") {
   odrive = new ODrive(_odrive_usb_port, this);
 
   /* Init speed before starting odom */
+  odrive->setVelocity(0, 0.0);
+  odrive->setVelocity(1, 0.0);
+
+  double left_motor_turns_returned, right_motor_turns_returned;
+  get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
+
+  old_motor_turns_returned.left = left_motor_turns_returned;
+  old_motor_turns_returned.right = right_motor_turns_returned;
+
 #else
   /* Init webots supervisor */
   std::string namespace_str(Node::get_namespace()), webots_robot_name("WEBOTS_ROBOT_NAME=");
@@ -160,17 +169,25 @@ void Drive::get_motors_turns_from_odrive(double &left, double &right){
 #endif
 
 void Drive::update_velocity() {
-  differential_speed_cmd_.left = compute_velocity_cmd(cmd_vel_.left);
-  differential_speed_cmd_.right = compute_velocity_cmd(cmd_vel_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
+  float cmd_odrive_left = compute_velocity_cmd(cmd_vel_.left);
+  float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
+  odrive->setVelocity(odrive_motor_order[0], cmd_odrive_left);
+  odrive->setVelocity(odrive_motor_order[1], cmd_odrive_right);
 
+  double left_motor_turns_returned, right_motor_turns_returned;
+  get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
 
+  wheels_turns_returned_.left = (left_motor_turns_returned - old_motor_turns_returned.left) / _gearbox_ratio; //turns
+  wheels_turns_returned_.right = (right_motor_turns_returned - old_motor_turns_returned.right) / _gearbox_ratio; //turns
+  old_motor_turns_returned.left = left_motor_turns_returned;
+  old_motor_turns_returned.right = right_motor_turns_returned;
 
 #else
   time_since_last_sync_ = get_sim_time();

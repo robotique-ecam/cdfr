@@ -85,6 +85,7 @@ private:
   double _gearbox_ratio;
   ODrive *odrive;
   int odrive_motor_order[2] = {0, 1};
+  Differential old_motor_turns_returned;
   void get_motors_turns_from_odrive(double &left, double &right);
   float compute_velocity_cmd(double velocity);
 #ifdef USE_I2C
@@ -163,8 +164,7 @@ private:
   bool sign_steps_right = false;
 
   TinyData attiny_speed_cmd_;
-  TinyData attiny_steps_returned_;
-  TinyCMD differential_speed_cmd_;
+  Differential wheels_turns_returned_;
   OdometricPose odom_pose_;
   Differential cmd_vel_;
   Differential differential_speed_;
