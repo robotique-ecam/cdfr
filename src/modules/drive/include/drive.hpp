@@ -100,7 +100,7 @@ private:
   webots::Motor *wb_right_motor;
   webots::PositionSensor *wp_left_encoder;
   webots::PositionSensor *wp_right_encoder;
-  Differential old_steps_returned;
+  Differential old_turns_returned;
   double timestep;
   rclcpp::TimerBase::SharedPtr time_stepper_;
 #endif

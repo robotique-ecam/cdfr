@@ -194,16 +194,16 @@ void Drive::update_velocity() {
   time_since_last_sync_ = get_sim_time();
   wb_left_motor->setVelocity(cmd_vel_.left / _wheel_radius);
   wb_right_motor->setVelocity(cmd_vel_.right / _wheel_radius);
-  double lsteps = wp_left_encoder->getValue();
-  double rsteps = wp_right_encoder->getValue();
-  if (std::isnan(lsteps) || std::isnan(rsteps)) {
-    lsteps = rsteps = 0;
+  double lturns = wp_left_encoder->getValue(); //rad
+  double rturns = wp_right_encoder->getValue(); //rad
+  if (std::isnan(lturns) || std::isnan(rturns)) {
+    lturns = rturns = 0;
     RCLCPP_WARN(this->get_logger(), "Robot wheel encoders return NaN");
   }
-  attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / _rads_per_step;
-  attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / _rads_per_step;
-  old_steps_returned.left = lsteps;
-  old_steps_returned.right = rsteps;
+  wheels_turns_returned_.left = (lturns - old_turns_returned.left) / (2 * M_PI); //turns
+  wheels_turns_returned_.right = (rturns - old_turns_returned.right) / (2 * M_PI); //turns
+  old_turns_returned.left = lturns;
+  old_turns_returned.right = rturns;
 #endif /* SIMULATION */
 
   compute_pose_velocity(wheels_turns_returned_);
@@ -343,7 +343,7 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
   int right_stamp_index = 0;
   while (stamp_msg < (rclcpp::Time)_previous_tf.at(right_stamp_index).header.stamp){
     right_stamp_index++;
-    if (right_stamp_index == _previous_tf.size()) {
+    if (right_stamp_index == int(_previous_tf.size())) {
       RCLCPP_WARN(this->get_logger(), "Not enough tf stored to readjust odometry");
       return;
     }
