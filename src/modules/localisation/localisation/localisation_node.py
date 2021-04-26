@@ -21,10 +21,10 @@ from tf2_kdl import transform_to_kdl, do_transform_frame
 
 
 class Localisation(rclpy.node.Node):
-    """ Robot localisation node """
+    """Robot localisation node"""
 
     def __init__(self):
-        """ Init Localisation node """
+        """Init Localisation node"""
         super().__init__("localisation_node")
         self.robot = self.get_namespace().strip("/")
         self.side = self.declare_parameter("side", "blue")
@@ -65,7 +65,7 @@ class Localisation(rclpy.node.Node):
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
-        """ Handle Parameter events especially for side """
+        """Handle Parameter events especially for side"""
         result = SetParametersResult()
         try:
             for param in params:
@@ -87,7 +87,7 @@ class Localisation(rclpy.node.Node):
         return result
 
     def fetchStartPosition(self):
-        """ Fetch start position for side and robot """
+        """Fetch start position for side and robot"""
         if self.robot == "asterix":
             if self.side.value == "blue":
                 return (0.29, 1.33, 0)
@@ -101,7 +101,7 @@ class Localisation(rclpy.node.Node):
         return None
 
     def update_transform(self):
-        """ Update and publish odom --> map transform """
+        """Update and publish odom --> map transform"""
         self._tf.header.stamp = self.get_clock().now().to_msg()
         self._tf.transform.translation.x = self.robot_pose.pose.position.x
         self._tf.transform.translation.y = self.robot_pose.pose.position.y
@@ -140,11 +140,11 @@ class Localisation(rclpy.node.Node):
                     self.vlx.start_continuous_sampling_thread(0.65, 1)
 
     def is_near_walls(self, pt):
-        """ Return true if the robot if less than 30cm from the wall """
+        """Return true if the robot if less than 30cm from the wall"""
         return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
 
     def create_and_send_tf(self, x, y, q, stamp):
-        """ Create and send tf to drive for it to re-adjust odometry """
+        """Create and send tf to drive for it to re-adjust odometry"""
         self._tf.header.stamp = stamp
         self._tf.transform.translation.x = x
         self._tf.transform.translation.y = y
