@@ -150,6 +150,7 @@ private:
   /* Computed values */
   uint16_t _total_steps_per_turn;
   double _rads_per_step;
+  double _wheel_perimeter;
   double _meters_per_step;
   double _speed_multiplier;
   double _max_speed;
@@ -181,6 +182,7 @@ private:
   void update_velocity();
   void update_diagnostic();
   void read_from_serial();
+  void compute_pose_velocity(Differential turns_returned);
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,

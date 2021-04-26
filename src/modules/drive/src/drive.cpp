@@ -110,6 +110,7 @@ void Drive::init_parameters() {
 
 void Drive::init_variables() {
   /* Compute initial values */
+  _wheel_perimeter = 2 * M_PI * _wheel_radius;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -205,7 +206,7 @@ void Drive::update_velocity() {
   old_steps_returned.right = rsteps;
 #endif /* SIMULATION */
 
-  compute_pose_velocity(attiny_steps_returned_);
+  compute_pose_velocity(wheels_turns_returned_);
   update_odometry();
   update_tf();
   update_joint_states();
@@ -218,11 +219,11 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   update_velocity();
 }
 
-void Drive::compute_pose_velocity(TinyData steps_returned) {
+void Drive::compute_pose_velocity(Differential turns_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = _meters_per_step * steps_returned.left;
-  differential_move_.right = _meters_per_step * steps_returned.right;
+  differential_move_.left = turns_returned.left * _wheel_perimeter;
+  differential_move_.right = turns_returned.right * _wheel_perimeter;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
@@ -282,10 +283,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] += attiny_steps_returned_.left * _rads_per_step;
-  joint_states_.position[RIGHT] += attiny_steps_returned_.right * _rads_per_step;
-  joint_states_.velocity[LEFT] = attiny_steps_returned_.left * _rads_per_step / dt;
-  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * _rads_per_step / dt;
+  joint_states_.position[LEFT] += wheels_turns_returned_.left * (2 * M_PI);
+  joint_states_.position[RIGHT] += wheels_turns_returned_.right * (2 * M_PI);
+  joint_states_.velocity[LEFT] = wheels_turns_returned_.left * (2 * M_PI) / dt;
+  joint_states_.velocity[RIGHT] = wheels_turns_returned_.right * (2 * M_PI) / dt;
   joint_states_pub_->publish(joint_states_);
 }
 
