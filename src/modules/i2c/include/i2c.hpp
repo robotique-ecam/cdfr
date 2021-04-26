@@ -1,7 +1,7 @@
 #ifndef I2C_HEADER_HPP
 #define I2C_HEADER_HPP
 
-#ifndef SIMULATION
+#ifdef USE_I2C
 
 #include <cstdio>
 #include <string>

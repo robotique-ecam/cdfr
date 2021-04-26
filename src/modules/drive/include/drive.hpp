@@ -2,13 +2,17 @@
 #define DRIVE_NODE_HPP
 
 #ifndef SIMULATION
+
+#ifdef USE_I2C
 #include "i2c.hpp"
+#endif //USE_I2C
+
 #else
 #include <limits>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
-#endif
+#endif //SIMULATION
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "actuators_srvs/srv/slider.hpp"
@@ -75,10 +79,12 @@ private:
   };
 
 #ifndef SIMULATION
+#ifdef USE_I2C
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
   std::mutex i2c_mutex;
+#endif//I2C
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor *wb_left_motor;

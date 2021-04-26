@@ -12,8 +12,10 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
 #ifndef SIMULATION
+#ifdef USE_I2C
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
+#endif//I2C
 
   /* Init speed before starting odom */
 #else
@@ -76,8 +78,10 @@ void Drive::init_parameters() {
 
 // Get parameters from yaml
 #ifndef SIMULATION
+#ifdef USE_I2C
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
+#endif//I2C
 #endif /* SIMULATION */
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
@@ -244,7 +248,7 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
-#ifndef SIMULATION
+#ifdef USE_I2C
   this->i2c_mutex.lock();
 
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
@@ -268,7 +272,7 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
 
 void Drive::handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
                                        const actuators_srvs::srv::Slider::Response::SharedPtr response) {
-#ifndef SIMULATION
+#ifdef USE_I2C
   this->i2c_mutex.lock();
 
   this->i2c->set_address(I2C_ADDR_SLIDER);
@@ -409,7 +413,7 @@ double Drive::dummy_tree_digits_precision(double a){
 }
 
 Drive::~Drive() {
-#ifndef SIMULATION
+#ifdef USE_I2C
   this->i2c_mutex.lock();
   this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
   this->i2c->write_byte_data(STEPPER_CMD, 0x10);
