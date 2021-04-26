@@ -39,28 +39,6 @@ def generate_launch_description():
             ),
             GroupAction(
                 [
-                    PushRosNamespace(
-                        condition=IfCondition(use_namespace), namespace=namespace
-                    ),
-                    Node(
-                        package="odrive_node",
-                        executable="odrive_node",
-                        output="screen",
-                        parameters=[params],
-                        remappings=remappings,
-                    ),
-                    Node(
-                        package="drive",
-                        executable="drive",
-                        output={"both": "log"},
-                        parameters=[params],
-                        remappings=remappings,
-                    ),
-                ]
-            )
-            if use_odrive == "true"
-            else GroupAction(
-                [
                     SetEnvironmentVariable("WEBOTS_ROBOT_NAME", namespace),
                     PushRosNamespace(
                         condition=IfCondition(use_namespace), namespace=namespace
