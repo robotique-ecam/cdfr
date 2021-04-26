@@ -141,7 +141,23 @@ void Drive::init_variables() {
   for (int i = 0; i<30; i++) _previous_tf.push_back(init_vector);
 }
 
+#ifndef SIMULATION
+float Drive::compute_velocity_cmd(double velocity) {
+  /* Compute velocity command (in turn/s) to be sent to odrive */
+  double omega_wheel = velocity / _wheel_radius;
+  double n_wheel = omega_wheel / (2 * M_PI);
+  return float(_gearbox_ratio * n_wheel);
 }
+
+void Drive::get_motors_turns_from_odrive(double &left, double &right){
+  std::pair<float, float> left_turns_speed_returned, right_turns_speed_returned;
+  left_turns_speed_returned = odrive->getPosition_Velocity(odrive_motor_order[0]);
+  right_turns_speed_returned = odrive->getPosition_Velocity(odrive_motor_order[1]);
+
+  left = double(std::get<0>(left_turns_speed_returned));
+  right = double(std::get<0>(right_turns_speed_returned));
+}
+#endif
 
 void Drive::update_velocity() {
   differential_speed_cmd_.left = compute_velocity_cmd(cmd_vel_.left);

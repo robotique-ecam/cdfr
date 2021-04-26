@@ -85,6 +85,8 @@ private:
   double _gearbox_ratio;
   ODrive *odrive;
   int odrive_motor_order[2] = {0, 1};
+  void get_motors_turns_from_odrive(double &left, double &right);
+  float compute_velocity_cmd(double velocity);
 #ifdef USE_I2C
   // For communicating with ATTiny85 over I2C
   int i2c_bus;
