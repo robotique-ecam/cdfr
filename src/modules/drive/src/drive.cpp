@@ -16,12 +16,6 @@ Drive::Drive() : Node("drive_node") {
   i2c = std::make_shared<I2C>(i2c_bus);
 
   /* Init speed before starting odom */
-  this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->read_word_data(0);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->read_word_data(0);
-  this->i2c_mutex.unlock();
 #else
   /* Init webots supervisor */
   std::string namespace_str(Node::get_namespace()), webots_robot_name("WEBOTS_ROBOT_NAME=");
@@ -74,16 +68,11 @@ Drive::Drive() : Node("drive_node") {
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("accel");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
-  this->declare_parameter("steps_per_turn");
-  this->declare_parameter("microsteps");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
-  this->declare_parameter("microcontroler.max_steps_frequency");
-  this->declare_parameter("microcontroler.speedramp_resolution");
 
 // Get parameters from yaml
 #ifndef SIMULATION
@@ -93,25 +82,13 @@ void Drive::init_parameters() {
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
-  this->get_parameter_or<int>("steps_per_turn", _steps_per_turn, 200);
-  this->get_parameter_or<int>("microsteps", _microsteps, 16);
   this->get_parameter_or<double>("wheels.separation", _wheel_separation, 0.25);
   this->get_parameter_or<double>("wheels.radius", _wheel_radius, 0.080);
-  this->get_parameter_or<int>("microcontroler.max_steps_frequency", _max_freq, 10000);
-  this->get_parameter_or<int>("microcontroler.speedramp_resolution", _speed_resolution, 128);
-  this->get_parameter_or<double>("speedramp.accel", _accel, 9.81);
+
 }
 
 void Drive::init_variables() {
   /* Compute initial values */
-  _total_steps_per_turn = _microsteps * _steps_per_turn;
-  _rads_per_step = 2 * M_PI / _total_steps_per_turn;
-  _meters_per_turn = 2 * M_PI * _wheel_radius;
-  _meters_per_step = _meters_per_turn / _total_steps_per_turn;
-
-  _speed_multiplier = _max_freq / _speed_resolution;
-  _max_speed = _max_freq * _meters_per_step;
-  _min_speed = _speed_multiplier * _meters_per_step;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -148,16 +125,6 @@ void Drive::init_variables() {
   for (int i = 0; i<30; i++) _previous_tf.push_back(init_vector);
 }
 
-int8_t Drive::compute_velocity_cmd(double velocity) {
-  /* Compute absolute velocity command to be sent to microcontroler */
-  double abs_velocity = abs(velocity);
-  if (abs_velocity >= _max_speed) {
-    return (int8_t)((velocity < 0) ? (-1) : (1)) * (_speed_resolution - 1);
-  } else if (abs_velocity < _min_speed) {
-    return 0;
-  } else {
-    return (int8_t)round(velocity * (_speed_resolution - 1) / _max_speed) - ((velocity < 0) ? (1) : (0));
-  }
 }
 
 void Drive::update_velocity() {
@@ -167,28 +134,14 @@ void Drive::update_velocity() {
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
-  this->i2c_mutex.lock();
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * (this->i2c->read_word_data(differential_speed_cmd_.left) & 0xFFF);
-  this->sign_steps_left = signbit(differential_speed_cmd_.left);
 
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * (this->i2c->read_word_data(differential_speed_cmd_.right) & 0xFFF);
-  this->sign_steps_right = signbit(differential_speed_cmd_.right);
 
-  this->i2c_mutex.unlock();
 
-#ifdef DEBUG
-  std::cout << "---" << std::endl;
-  std::cout << "speed_cmd_.left:" << static_cast<int>(differential_speed_cmd_.left) << " speed_cmd_.right" << static_cast<int>(differential_speed_cmd_.right) << std::endl;
-  std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
-#endif /* DEBUG */
 #else
   time_since_last_sync_ = get_sim_time();
-
   wb_left_motor->setVelocity(cmd_vel_.left / _wheel_radius);
   wb_right_motor->setVelocity(cmd_vel_.right / _wheel_radius);
   double lsteps = wp_left_encoder->getValue();

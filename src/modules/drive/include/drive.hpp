@@ -125,7 +125,6 @@ private:
   std::vector<geometry_msgs::msg::TransformStamped> _previous_tf;
   rclcpp::Subscription<geometry_msgs::msg::TransformStamped>::SharedPtr _adjust_odometry_sub;
 
-  double _accel;
   double _wheel_separation;
   double _wheel_radius;
   int _max_freq;
@@ -136,7 +135,6 @@ private:
   /* Computed values */
   uint16_t _total_steps_per_turn;
   double _rads_per_step;
-  double _meters_per_turn;
   double _meters_per_step;
   double _speed_multiplier;
   double _max_speed;
@@ -169,10 +167,8 @@ private:
   void update_velocity();
   void update_diagnostic();
   void read_from_serial();
-  void compute_pose_velocity(TinyData steps_returned);
   void steps_received_callback(int32_t steps, uint8_t id);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
-  int8_t compute_velocity_cmd(double velocity);
   void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
   void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
