@@ -164,7 +164,6 @@ void Drive::get_motors_turns_from_odrive(double &left, double &right){
 
   left = double(std::get<0>(left_turns_speed_returned));
   right = double(std::get<0>(right_turns_speed_returned));
-  RCLCPP_WARN(this->get_logger(), "left: %f, right:%f", left, right);
 }
 #endif
 

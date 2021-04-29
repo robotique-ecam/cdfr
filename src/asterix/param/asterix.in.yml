@@ -18,6 +18,7 @@ asterix:
     ros__parameters:
       use_sim_time: !Var use_sim_time
       odrive_usb_port: "/dev/ttyS1"
+      invert_wheel: false
 
       wheels:
         separation: !Var wheels_separation
@@ -30,16 +31,6 @@ asterix:
       joint_states_frame: "base_link"
       odom_frame: "odom"
       base_frame: "base_link"
-
-
-  odrive_node:
-    ros__parameters:
-      port: "/dev/ttyS1"
-      motor: 2
-      priority_position_velocity: 1
-      priority_bus_voltage: 0
-      priority_temperature: 0
-      priority_torque: 0
 
 
   cetautomatix:
