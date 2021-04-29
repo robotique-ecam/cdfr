@@ -167,27 +167,11 @@ std::string ODrive::receive(const std::string *funct_name)
     }
 
     std::string ans = read_buf;
+    
+    if (ans.length() >= 17){
+      return ans.substr(0, 17);
+    }
 
-    // check checksum
-    size_t i = ans.find('*');
-    if (i == std::string::npos)
-    {
-        RCLCPP_INFO(node->get_logger(), "%s received no checksum", funct_name->c_str());
-        return "";
-    }
-    std::string prefix = ans.substr(0, i);
-    std::string suffix = ans.substr(i + 1);
-    try
-    {
-        if (checksum(prefix) == stoi(suffix))
-        {
-            return prefix;
-        }
-    }
-    catch (const std::invalid_argument &e)
-    {
-        RCLCPP_INFO(node->get_logger(), "%s received broken checksum\nMessage: %s\n", ans, funct_name->c_str());
-    }
     return "";
 }
 
@@ -231,25 +215,29 @@ std::pair<float, float> ODrive::getPosition_Velocity(const int motor)
     const std::string funct_name = "getPosition_Velocity";
     std::string msg = "f ";
     msg += std::to_string(motor);
-    if (send(msg, &funct_name) > 0)
+    std::string ans;
+    for (int i = 0; i<10; i++){
+      if (send(msg, &funct_name) > 0)
+      {
+        ans = receive(&funct_name);
+        if (ans.size() > 0) break;
+      }
+      if (i==10) return std::pair<float, float>(-1, -1);
+    }
+
+    if (check_double_output(ans, &funct_name))
     {
-        std::string ans = receive(&funct_name);
-        if (ans.size() > 0)
+        size_t i = ans.find(' ');
+        try
         {
-            if (check_double_output(ans, &funct_name))
-            {
-                size_t i = ans.find(' ');
-                try
-                {
-                    std::pair<float, float> output(std::stof(ans.substr(0, i)), std::stof(ans.substr(i + 1)));
-                    return output;
-                }
-                catch (const std::invalid_argument &e)
-                {
-                    RCLCPP_INFO(node->get_logger(), "&s: received wrong data after regex check: %s: %s\n", funct_name.c_str(), e.what(), ans);
-                }
-            }
+            std::pair<float, float> output(std::stof(ans.substr(0, i)), std::stof(ans.substr(i + 1)));
+            return output;
+        }
+        catch (const std::invalid_argument &e)
+        {
+            RCLCPP_INFO(node->get_logger(), "&s: received wrong data after regex check: %s: %s\n", funct_name.c_str(), e.what(), ans);
         }
     }
+
     return std::pair<float, float>(-1, -1);
 }

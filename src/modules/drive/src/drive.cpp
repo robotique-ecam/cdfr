@@ -164,6 +164,7 @@ void Drive::get_motors_turns_from_odrive(double &left, double &right){
 
   left = double(std::get<0>(left_turns_speed_returned));
   right = double(std::get<0>(right_turns_speed_returned));
+  RCLCPP_WARN(this->get_logger(), "left: %f, right:%f", left, right);
 }
 #endif
 
@@ -182,6 +183,11 @@ void Drive::update_velocity() {
 
   double left_motor_turns_returned, right_motor_turns_returned;
   get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
+
+  if (left_motor_turns_returned == -1 || right_motor_turns_returned == -1){
+    left_motor_turns_returned = old_motor_turns_returned.left;
+    right_motor_turns_returned = old_motor_turns_returned.right;
+  }
 
   wheels_turns_returned_.left = (left_motor_turns_returned - old_motor_turns_returned.left) / _gearbox_ratio; //turns
   wheels_turns_returned_.right = (right_motor_turns_returned - old_motor_turns_returned.right) / _gearbox_ratio; //turns
