@@ -80,8 +80,8 @@ private:
 
   Mat _frame, _anotated, raised_contrast, tmp;
 
-  std::vector<int> _small_detected_ids, _huge_detected_ids;
-  std::vector<std::vector<cv::Point2f>> _small_marker_corners_projection, _huge_marker_corners_projection;
+  std::vector<int> _small_detected_ids, _huge_detected_ids, _center_detected_id;
+  std::vector<std::vector<cv::Point2f>> _small_marker_corners_projection, _huge_marker_corners_projection, _center_corner_projection;
 
   double mat_dist_coeffs_fisheye[1][4] = {{-0.04904779188817534, 0.01390908063326121, -0.0115756108661675, 0.0022569907575344978}};
   double mat_camera_matrix_coeff_fisheye[3][3] = {{1445.8697620143487, 0.0, 1920.3261632236809}, {0.0, 1443.631593109402, 1097.1329487765142}, {0.0, 0.0, 1.0}};
@@ -103,7 +103,7 @@ private:
 
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
 
-  visualization_msgs::msg::Marker marker;
+  visualization_msgs::msg::Marker marker, center_marker;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
   visualization_msgs::msg::Marker transformed_marker;

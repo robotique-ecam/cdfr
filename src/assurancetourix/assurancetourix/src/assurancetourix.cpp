@@ -382,6 +382,8 @@ void Assurancetourix::detection_timer_callback_routine() {
   if (show_image) {
     cv::resize(tmp, tmp, Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", tmp);
+    //cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    //cv::imshow("anotated", _anotated);
     // cv::imshow("origin", _frame);
     cv::waitKey(3);
   }
@@ -438,7 +440,11 @@ void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector
   for(int i=0; i<int(detected_ids.size()); i++){
     std::vector<cv::Point2f> undistort;
     cv::fisheye::undistortPoints(marker_corners[i], undistort, _cameraMatrix_fisheye, _distCoeffs_fisheye);
-    if(detected_ids[i]<50){
+    if (detected_ids[i]==42){
+      _center_detected_id.push_back(detected_ids[i]);
+      compute_final_projection(_center_corner_projection, undistort);
+    }
+    else if(detected_ids[i]<50){
       _small_detected_ids.push_back(detected_ids[i]);
       compute_final_projection(_small_marker_corners_projection, undistort);
     } else {
@@ -455,7 +461,7 @@ void Assurancetourix::_detect_aruco(Mat img) {
   if (detected_ids.size() > 0){
     project_corners_pinhole_to_fisheye(marker_corners, detected_ids);
     if (show_image) {
-      tmp = imread("/home/phileas/vision/calibration/undistorded_results/200_pictures_fisheye/board_overview_undistord_balance_0_3.jpg");
+      tmp = imread("/home/phileas/vision/calibration/undistorded_results/400_pictures_fisheye/board_overview_undistord_balance_0_3.jpg");
       // drawDetectedMarkers on the image (activate only for debug)
       cv::aruco::drawDetectedMarkers(tmp, _small_marker_corners_projection, _small_detected_ids);
       cv::aruco::drawDetectedMarkers(tmp, _huge_marker_corners_projection, _huge_detected_ids);
@@ -541,6 +547,7 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     }
 
     marker_pub_->publish(marker);
+    if (marker.id == 42) center_marker = marker;
   }
 }
 
@@ -548,6 +555,11 @@ void Assurancetourix::estimate_arucos_poses() {
   if (_small_detected_ids.size() > 0 || _huge_detected_ids.size() > 0) {
     visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
 
+    if (_center_detected_id.size() > 0){
+      std::vector<cv::Vec3d> rvecs, tvecs;
+      cv::aruco::estimatePoseSingleMarkers(_center_corner_projection, 0.1, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _center_detected_id);
+    }
     if (_small_detected_ids.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
       cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, small_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
