@@ -25,6 +25,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "transformix_msgs/srv/transformix_parameters_transform_stamped.hpp"
 #include "transformix_msgs/srv/transformix_parameters_transfrom_pose.hpp"
+#include <tf2_kdl/tf2_kdl.h>
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>
 #endif
@@ -60,6 +61,7 @@ private:
                                      const std_srvs::srv::SetBool::Response::SharedPtr response);
   void init_camera_settings();
   void get_image();
+  void estimate_initial_camera_pose();
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
   VideoCapture _cap;
   struct Camera_settings {

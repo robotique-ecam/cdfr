@@ -64,10 +64,60 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1000 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
+  estimate_initial_camera_pose();
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
+
+
 #ifdef CAMERA
+
+void Assurancetourix::estimate_initial_camera_pose(){
+  get_image();
+  _detect_aruco(_anotated);
+  estimate_arucos_poses();
+  //if(center_marker != non existing){
+    geometry_msgs::msg::TransformStamped tf_to_center_marker, tf_from_marker_to_camera;
+
+    tf_to_center_marker.transform.translation.x = 1.5;
+    tf_to_center_marker.transform.translation.y = 0.75;
+
+    tf_from_marker_to_camera.transform.translation.x = center_marker.pose.position.x;
+    tf_from_marker_to_camera.transform.translation.y = center_marker.pose.position.y;
+    tf_from_marker_to_camera.transform.translation.z = center_marker.pose.position.z;
+    tf_from_marker_to_camera.transform.rotation = center_marker.pose.orientation;
+
+    auto camera_from_marker_tf = tf2::transformToKDL(tf_from_marker_to_camera);
+    camera_from_marker_tf = camera_from_marker_tf.Inverse();
+
+    geometry_msgs::msg::PoseStamped pose_stamped_camera_from_marker_tf;
+    pose_stamped_camera_from_marker_tf.pose = tf2::toMsg(camera_from_marker_tf);
+
+    tf2::Stamped<KDL::Frame> camera_pose_kdl, kdl_tmp_frame;
+    tf2::fromMsg(tf2::toMsg(pose_stamped_camera_from_marker_tf), kdl_tmp_frame);
+    tf2::doTransform(kdl_tmp_frame, camera_pose_kdl, tf_to_center_marker);
+
+    assurancetourix_to_map_transformation.transform.translation.x = camera_pose_kdl.p[0];
+    assurancetourix_to_map_transformation.transform.translation.y = camera_pose_kdl.p[1];
+    assurancetourix_to_map_transformation.transform.translation.z = camera_pose_kdl.p[2];
+    camera_pose_kdl.M.GetQuaternion(
+      assurancetourix_to_map_transformation.transform.rotation.x,
+      assurancetourix_to_map_transformation.transform.rotation.y,
+      assurancetourix_to_map_transformation.transform.rotation.z,
+      assurancetourix_to_map_transformation.transform.rotation.w
+    );
+
+    RCLCPP_WARN(this->get_logger(), "x: %f, y: %f, z: %f, R.x: %f, R.y: %f, R.z: %f, R.w: %f",
+      assurancetourix_to_map_transformation.transform.translation.x,
+      assurancetourix_to_map_transformation.transform.translation.y,
+      assurancetourix_to_map_transformation.transform.translation.z,
+      assurancetourix_to_map_transformation.transform.rotation.x,
+      assurancetourix_to_map_transformation.transform.rotation.y,
+      assurancetourix_to_map_transformation.transform.rotation.z,
+      assurancetourix_to_map_transformation.transform.rotation.w
+    );
+  //}
+}
 
 void Assurancetourix::init_camera_settings(){
   _cap.open(2, cv::CAP_V4L2);
