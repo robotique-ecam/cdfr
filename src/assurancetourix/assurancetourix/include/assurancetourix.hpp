@@ -23,8 +23,6 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include "transformix_msgs/srv/transformix_parameters_transform_stamped.hpp"
-#include "transformix_msgs/srv/transformix_parameters_transfrom_pose.hpp"
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_kdl/tf2_kdl.h>
 #ifdef SIMULATION
@@ -47,14 +45,11 @@ private:
   void _detect_aruco(Mat img);
   void estimate_arucos_poses();
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
-  void getTransformation(geometry_msgs::msg::TransformStamped &transformation);
   visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
   void project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids);
   void compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort);
-
   void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
   visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids);
-
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
@@ -127,8 +122,6 @@ private:
   int _asterix_arucos_nb[6], _obelix_arucos_nb[6];
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale, _enemies_arucos_nb;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
-
-  rclcpp::Client<transformix_msgs::srv::TransformixParametersTransformStamped>::SharedPtr transformClient;
 
 #ifdef SIMULATION
   rclcpp::Time get_sim_time(std::shared_ptr<webots::Robot> wb_robot);

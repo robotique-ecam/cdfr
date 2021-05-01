@@ -30,12 +30,6 @@ def generate_launch_description():
                 description="Use simulation (Gazebo) clock if true",
             ),
             Node(
-                package="transformix",
-                executable="transformix",
-                output="screen",
-                arguments=[],
-            ),
-            Node(
                 package="panoramix",
                 executable="panoramix",
                 output="screen",
@@ -46,21 +40,6 @@ def generate_launch_description():
                 executable="strategix",
                 output="screen",
                 arguments=[],
-            ),
-            Node(
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                output="screen",
-                arguments=[
-                    "1.34",
-                    "2",
-                    "1",
-                    "0",
-                    "3.141592654",
-                    "0.4848096202",
-                    "map",
-                    "assurancetourix",
-                ],
             ),
             Node(
                 package="assurancetourix",

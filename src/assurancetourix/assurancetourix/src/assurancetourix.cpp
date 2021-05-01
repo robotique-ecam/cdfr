@@ -23,8 +23,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
   parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
 
-  transformClient = this->create_client<transformix_msgs::srv::TransformixParametersTransformStamped>("transformix/get_transform");
-  getTransformation(assurancetourix_to_map_transformation);
 
 #ifdef CAMERA
 
@@ -437,32 +435,6 @@ void Assurancetourix::detection_timer_callback_routine() {
   if (!savedeee) {
     cv::imwrite("test.jpg", _anotated);
     savedeee = true;
-  }
-}
-
-void Assurancetourix::getTransformation(geometry_msgs::msg::TransformStamped &transformation) {
-  auto request = std::make_shared<transformix_msgs::srv::TransformixParametersTransformStamped::Request>();
-
-  std_msgs::msg::String fromFrame, toFrame;
-  fromFrame.data = header_frame_id;
-  toFrame.data = base_frame;
-  request->from_frame = fromFrame;
-  request->to_frame = toFrame;
-
-  while (!transformClient->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
-      return;
-    }
-    RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
-  }
-
-  auto result = transformClient->async_send_request(request);
-
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::executor::FutureReturnCode::SUCCESS) {
-    transformation = result.get()->transform_stamped;
-  } else {
-    RCLCPP_ERROR(this->get_logger(), "Failed to get transformation");
   }
 }
 
