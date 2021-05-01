@@ -83,12 +83,12 @@ private:
   std::vector<int> _small_detected_ids, _huge_detected_ids;
   std::vector<std::vector<cv::Point2f>> _small_marker_corners_projection, _huge_marker_corners_projection;
 
-  double mat_dist_coeffs_fisheye[1][4] = {{-0.036070207475902644, -0.002003213487781793, -0.0007185511458800288, -0.0004833997296696256}};
-  double mat_camera_matrix_coeff_fisheye[3][3] = {{1426.4349637104904, 0.0, 1919.8425216336193}, {0.0, 1423.1510790046468, 1094.9067233281635}, {0.0, 0.0, 1.0}};
-  float mat_camera_matrix_coeff_fisheye_balanced[3][3] = {{8.59993203e+02, 0.00000000e+00, 1.87111502e+03}, {0.00000000e+00, 8.58013359e+02, 1.16514527e+03}, {0.0, 0.0, 1.0}};
+  double mat_dist_coeffs_fisheye[1][4] = {{-0.04904779188817534, 0.01390908063326121, -0.0115756108661675, 0.0022569907575344978}};
+  double mat_camera_matrix_coeff_fisheye[3][3] = {{1445.8697620143487, 0.0, 1920.3261632236809}, {0.0, 1443.631593109402, 1097.1329487765142}, {0.0, 0.0, 1.0}};
+  float mat_camera_matrix_coeff_fisheye_balanced[3][3] = {{8.65569129e+02, 0.00000000e+00, 1.95015357e+03}, {0.00000000e+00, 8.64229250e+02, 1.14386597e+03}, {0.0, 0.0, 1.0}};
 
-  double mat_dist_coeffs_pinhole[1][5] = {{-0.00131221, -0.00089388, 0.00234124, 0.00322031, 0.00010104}};
-  double mat_camera_matrix_coeff_pinhole[3][3] = {{8.51158290e+02, 0.0, 1.89003916e+03}, {0.0, 8.47796721e+02, 1.17912096e+03}, {0.0, 0.0, 1.0}};
+  double mat_dist_coeffs_pinhole[1][5] = {{0.00697532, -0.00194599, 0.00243645, 0.00061587, 0.00020362}};
+  double mat_camera_matrix_coeff_pinhole[3][3] = {{8.65569129e+02, 0.0, 1.95015357e+03}, {0.0, 8.64229250e+02, 1.15323758e+03}, {0.0, 0.0, 1.0}};
 
   cv::Mat _distCoeffs_fisheye = Mat(4, 1, CV_64F, mat_dist_coeffs_fisheye);
   cv::Mat _cameraMatrix_fisheye = Mat(3, 3, CV_64F, mat_camera_matrix_coeff_fisheye);
