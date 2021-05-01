@@ -39,7 +39,7 @@ class Sensors:
         """Get time stamp from Webots"""
         self.node.robot.step(0)
         t = self.node.robot.getTime()
-        if (int(t) != 0):
+        if int(t) != 0:
             return Time(sec=int(t), nanosec=int((t % int(t)) * 1e9))
         else:
             return Time(sec=0, nanosec=0)
