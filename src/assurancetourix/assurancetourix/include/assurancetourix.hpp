@@ -38,7 +38,7 @@ class Assurancetourix : public rclcpp::Node {
 public:
   Assurancetourix();
   ~Assurancetourix();
-  void detect();
+  void detection_timer_callback_routine();
 
 private:
   void init_parameters();
@@ -64,7 +64,7 @@ private:
   VideoCapture _cap;
   struct Camera_settings {
     bool auto_WB;
-    int width, height, brightness, contrast, saturation, hue, gamma, gain, backlight_compensation, exposure;
+    int width, height, brightness, contrast, saturation, hue, gamma, gain, backlight_compensation, exposure, sharpness;
   };
   Camera_settings _camera_settings;
 #endif

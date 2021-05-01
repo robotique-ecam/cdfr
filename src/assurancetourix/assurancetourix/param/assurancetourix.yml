@@ -15,6 +15,7 @@ assurancetourix:
       backlight_compensation: 64
       auto_WB: true
       exposure: 11
+      sharpness: 1
     image_post_processing:
       show_image: true
     arucos:

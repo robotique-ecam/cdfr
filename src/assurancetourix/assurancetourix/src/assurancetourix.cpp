@@ -84,6 +84,7 @@ void Assurancetourix::init_camera_settings(){
   this->declare_parameter("camera_settings.backlight_compensation");
   this->declare_parameter("camera_settings.auto_WB");
   this->declare_parameter("camera_settings.exposure");
+  this->declare_parameter("camera_settings.sharpness");
 
   this->get_parameter<int>("camera_settings.width", _camera_settings.width);
   this->get_parameter<int>("camera_settings.height", _camera_settings.height);
@@ -96,6 +97,7 @@ void Assurancetourix::init_camera_settings(){
   this->get_parameter<int>("camera_settings.backlight_compensation", _camera_settings.backlight_compensation);
   this->get_parameter<bool>("camera_settings.auto_WB", _camera_settings.auto_WB);
   this->get_parameter<int>("camera_settings.exposure", _camera_settings.exposure);
+  this->get_parameter<int>("camera_settings.sharpness", _camera_settings.sharpness);
 
   _cap.set(cv::CAP_PROP_FRAME_WIDTH, _camera_settings.width);
   _cap.set(cv::CAP_PROP_FRAME_HEIGHT, _camera_settings.height);
@@ -108,6 +110,7 @@ void Assurancetourix::init_camera_settings(){
   _cap.set(cv::CAP_PROP_BACKLIGHT, _camera_settings.backlight_compensation);
   _cap.set(cv::CAP_PROP_AUTO_WB, _camera_settings.auto_WB);
   _cap.set(cv::CAP_PROP_EXPOSURE, _camera_settings.exposure);
+  _cap.set(cv::CAP_PROP_SHARPNESS , _camera_settings.sharpness);
 }
 
 void Assurancetourix::get_image() {
@@ -121,7 +124,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
                                                     const std_srvs::srv::SetBool::Response::SharedPtr response) {
 
   if (request->data) {
-    timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detect, this));
+    timer_ = this->create_wall_timer(0.1s, std::bind(&Assurancetourix::detection_timer_callback_routine, this));
     response->message = "Aruco detection is enabled";
     RCLCPP_WARN(this->get_logger(), "Aruco detection is enabled");
   } else {
@@ -309,7 +312,7 @@ void Assurancetourix::init_parameters() {
   transformed_marker.lifetime.sec = lifetime_sec;
 }
 
-void Assurancetourix::detect() {
+void Assurancetourix::detection_timer_callback_routine() {
 
 #ifdef EXTRALOG // if enabled show the time elapsed to do some actions (capture the image, find the coordonates of the arucos in it and the total)
   // will also show a marker at the assurancetourix origin frame position
