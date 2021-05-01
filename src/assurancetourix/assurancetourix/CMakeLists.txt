@@ -16,15 +16,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(transformix_msgs REQUIRED)
-find_package(transformix REQUIRED)
 find_package(std_srvs REQUIRED)
 
 
@@ -38,15 +34,11 @@ include_directories(
 set(dependencies
   "tf2"
   "rclcpp"
-  "sensor_msgs"
   "visualization_msgs"
   "OpenCV"
   "geometry_msgs"
-  "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
-  "transformix_msgs"
-  "transformix"
   "std_srvs"
 )
 

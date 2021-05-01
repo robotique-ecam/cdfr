@@ -23,20 +23,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
   parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
 
-
-#ifdef CAMERA
-
-  RCLCPP_INFO(this->get_logger(), "Starting CAMERA mode");
-
-  init_camera_settings();
-
-  timer_ = NULL;
-
-  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
-      "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-#endif // CAMERA
-
   marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
@@ -62,11 +48,24 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1000 / refresh_frequency), std::bind(&Assurancetourix::simulation_marker_callback, this));
 #endif
+
+#ifdef CAMERA
+
+  RCLCPP_INFO(this->get_logger(), "Starting CAMERA mode");
+
+  init_camera_settings();
+
+  timer_ = NULL;
+
+  _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
+      "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
   estimate_initial_camera_pose();
+
+#endif // CAMERA
+
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
-
-
 
 #ifdef CAMERA
 
@@ -522,10 +521,7 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     tf2::Quaternion q;
     q.setRotation(tf2::Vector3(axis[0], axis[1], axis[2]), angle);
 
-    marker.pose.orientation.x = q.x();
-    marker.pose.orientation.y = q.y();
-    marker.pose.orientation.z = q.z();
-    marker.pose.orientation.w = q.w();
+    marker.pose.orientation = tf2::toMsg(q);
 
     marker.id = detected_ids[i];
 
@@ -534,10 +530,6 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     tmpPoseIn.pose = marker.pose;
 
     tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
-
-    if (side.compare("yellow") == 0) {
-      tmpPoseOut.pose.position.x += 0.28;
-    }
 
     tmpPoseOut.pose.position.z = 0;
     transformed_marker = marker;
