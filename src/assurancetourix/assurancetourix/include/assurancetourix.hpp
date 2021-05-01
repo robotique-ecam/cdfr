@@ -25,6 +25,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "transformix_msgs/srv/transformix_parameters_transform_stamped.hpp"
 #include "transformix_msgs/srv/transformix_parameters_transfrom_pose.hpp"
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_kdl/tf2_kdl.h>
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>

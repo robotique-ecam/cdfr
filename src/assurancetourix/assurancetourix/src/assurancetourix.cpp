@@ -73,10 +73,14 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 #ifdef CAMERA
 
 void Assurancetourix::estimate_initial_camera_pose(){
+  tf2_ros::StaticTransformBroadcaster static_tf_broadcaster(this);
+  assurancetourix_to_map_transformation.header.frame_id = "map";
+  assurancetourix_to_map_transformation.child_frame_id = header_frame_id;
+
   get_image();
   _detect_aruco(_anotated);
   estimate_arucos_poses();
-  //if(center_marker != non existing){
+  if(center_marker.pose.position.z != 0){
     geometry_msgs::msg::TransformStamped tf_to_center_marker, tf_from_marker_to_camera;
 
     tf_to_center_marker.transform.translation.x = 1.5;
@@ -107,16 +111,8 @@ void Assurancetourix::estimate_initial_camera_pose(){
       assurancetourix_to_map_transformation.transform.rotation.w
     );
 
-    RCLCPP_WARN(this->get_logger(), "x: %f, y: %f, z: %f, R.x: %f, R.y: %f, R.z: %f, R.w: %f",
-      assurancetourix_to_map_transformation.transform.translation.x,
-      assurancetourix_to_map_transformation.transform.translation.y,
-      assurancetourix_to_map_transformation.transform.translation.z,
-      assurancetourix_to_map_transformation.transform.rotation.x,
-      assurancetourix_to_map_transformation.transform.rotation.y,
-      assurancetourix_to_map_transformation.transform.rotation.z,
-      assurancetourix_to_map_transformation.transform.rotation.w
-    );
-  //}
+    static_tf_broadcaster.sendTransform(assurancetourix_to_map_transformation);
+  }
 }
 
 void Assurancetourix::init_camera_settings(){
