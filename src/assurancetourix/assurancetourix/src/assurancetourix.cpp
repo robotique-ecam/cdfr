@@ -73,20 +73,31 @@ void Assurancetourix::estimate_initial_camera_pose(){
   tf2_ros::StaticTransformBroadcaster static_tf_broadcaster(this);
   assurancetourix_to_map_transformation.header.frame_id = "map";
   assurancetourix_to_map_transformation.child_frame_id = header_frame_id;
+  geometry_msgs::msg::Vector3 initial_center_point;
+  tf2::Quaternion initial_center_q;
+  int sample_nb = 10;
 
-  get_image();
-  _detect_aruco(_anotated);
-  estimate_arucos_poses();
+  for (int i=0; i<sample_nb; i++){
+    get_image();
+    _detect_aruco(_anotated);
+    estimate_arucos_poses();
+    initial_center_point.x += center_marker.pose.position.x/sample_nb;
+    initial_center_point.y += center_marker.pose.position.y/sample_nb;
+    initial_center_point.z += center_marker.pose.position.z/sample_nb;
+    tf2::Quaternion q;
+    tf2::fromMsg(center_marker.pose.orientation, q);
+    if (i==0) initial_center_q=q;
+    else initial_center_q.slerp(q, 1/sample_nb);
+  }
+
   if(center_marker.pose.position.z != 0){
     geometry_msgs::msg::TransformStamped tf_to_center_marker, tf_from_marker_to_camera;
 
     tf_to_center_marker.transform.translation.x = 1.5;
     tf_to_center_marker.transform.translation.y = 0.75;
 
-    tf_from_marker_to_camera.transform.translation.x = center_marker.pose.position.x;
-    tf_from_marker_to_camera.transform.translation.y = center_marker.pose.position.y;
-    tf_from_marker_to_camera.transform.translation.z = center_marker.pose.position.z;
-    tf_from_marker_to_camera.transform.rotation = center_marker.pose.orientation;
+    tf_from_marker_to_camera.transform.translation = initial_center_point;
+    tf_from_marker_to_camera.transform.rotation = tf2::toMsg(initial_center_q);
 
     auto camera_from_marker_tf = tf2::transformToKDL(tf_from_marker_to_camera);
     camera_from_marker_tf = camera_from_marker_tf.Inverse();
