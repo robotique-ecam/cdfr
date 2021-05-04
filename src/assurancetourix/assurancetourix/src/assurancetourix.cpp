@@ -60,6 +60,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
       "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
+    _parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
+
   estimate_initial_camera_pose();
 
 #endif // CAMERA
@@ -543,6 +545,8 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
     tmpPoseOut.pose.position.z = 0;
+    tmpPoseOut.pose.position.x -= (tmpPoseOut.pose.position.x-1.5)*0.07/1.5;
+    tmpPoseOut.pose.position.y += 0.06 - tmpPoseOut.pose.position.y*0.06/2;
     transformed_marker = marker;
     transformed_marker.header = tmpPoseOut.header;
     transformed_marker.pose = tmpPoseOut.pose;
