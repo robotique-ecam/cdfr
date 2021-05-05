@@ -47,6 +47,7 @@ set(EXEC_NAME "assurancetourix")
 add_executable(${EXEC_NAME}
   src/assurancetourix.cpp
   src/assurancetourix_node.cpp
+  src/geometrix.cpp
 )
 
 option(CAMERA "Use camera" OFF)
