@@ -28,6 +28,9 @@ assurancetourix:
         side_left: 175
         back_left: 176
         back_right: 177
+        front_x_offset: 0.09
+        front_y_offset: 0.06
+        side_y_offset: 0.18
       obelix:
         side_right: 182
         front_right: 183
@@ -35,7 +38,12 @@ assurancetourix:
         side_left: 185
         back_left: 186
         back_right: 187
-      enemies: [192.0, 193.0, 194.0, 195.0]
+        front_x_offset: 0.09
+        front_y_offset: 0.06
+        side_y_offset: 0.18
+      enemies:
+        x_y_offset: 0.05
+        arucos: [192.0, 193.0, 194.0, 195.0]
     rviz_settings:
       blue_color_ArUco: [0.0, 0.0, 255.0]
       yellow_color_ArUco: [255.0,255.0,0.0]
