@@ -16,6 +16,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_kdl/tf2_kdl.h>
+#include <geometrix.hpp>
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>
 #endif
@@ -24,6 +25,8 @@
 using namespace rclcpp;
 using namespace cv;
 using namespace std::chrono;
+
+class Geometrix;
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -113,6 +116,8 @@ private:
   int _asterix_arucos_nb[6], _obelix_arucos_nb[6];
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale, _enemies_arucos_nb;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
+
+  Geometrix* geometrix;
 
 #ifdef SIMULATION
   rclcpp::Time get_sim_time(std::shared_ptr<webots::Robot> wb_robot);
