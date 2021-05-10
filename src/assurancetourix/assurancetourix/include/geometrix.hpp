@@ -34,6 +34,9 @@ private:
   tf2::Vector3 get_vector_from_markers(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2);
   geometry_msgs::msg::Point middle_point(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2);
   geometry_msgs::msg::Point point_from_marker(visualization_msgs::msg::Marker &m);
+  double distance_2d_2_points(geometry_msgs::msg::Point pt1, geometry_msgs::msg::Point pt2);
+  bool is_ally(int id, Ally ally);
+  bool is_enemy(int id, bool first);
 
   Assurancetourix* node;
 

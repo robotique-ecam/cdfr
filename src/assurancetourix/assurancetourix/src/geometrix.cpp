@@ -53,6 +53,17 @@ void Geometrix::init_parameters(){
   for (int i = 0; i<(int)arucos.size(); i++) enemies.arucos.push_back((int)arucos[i]);
 }
 
+bool Geometrix::is_ally(int id, Ally ally){
+  for (int i = 0; i<6; i++) if (id == ally.arucos[i]) return true;
+  return false;
+}
+
+bool Geometrix::is_enemy(int id, bool first){
+  if (first && (id == enemies.arucos[0] || id == enemies.arucos[1])) return true;
+  if (!first && (id == enemies.arucos[2] || id == enemies.arucos[3])) return true;
+  return false;
+}
+
 tf2::Vector3 Geometrix::get_perpandicular_vector_from_markers(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2, bool reverse){
   double angle = reverse ? (-M_PI/2) : (M_PI/2);
   tf2::Vector3 vec = get_vector_from_markers(m1, m2);
@@ -79,6 +90,10 @@ geometry_msgs::msg::Point Geometrix::middle_point(visualization_msgs::msg::Marke
 
 geometry_msgs::msg::Point Geometrix::point_from_marker(visualization_msgs::msg::Marker &m){
   return m.pose.position;
+}
+
+double Geometrix::distance_2d_2_points(geometry_msgs::msg::Point pt1, geometry_msgs::msg::Point pt2){
+  return sqrt( (pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y) );
 }
 
 Geometrix::~Geometrix(){
