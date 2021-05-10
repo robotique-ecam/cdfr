@@ -53,6 +53,23 @@ void Geometrix::init_parameters(){
   for (int i = 0; i<(int)arucos.size(); i++) enemies.arucos.push_back((int)arucos[i]);
 }
 
+void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies){
+  visualization_msgs::msg::MarkerArray actual_asterix, actual_obelix, actual_first_enemy, actual_second_enemy, unknown_allies, unknown_enemies;
+
+  for (int i = 0; i<(int)marker_array_allies.markers.size(); i++){
+    if (is_ally(marker_array_allies.markers[i].id, asterix)) actual_asterix.markers.push_back(marker_array_allies.markers[i]);
+    else if (is_ally(marker_array_allies.markers[i].id, obelix)) actual_obelix.markers.push_back(marker_array_allies.markers[i]);
+    else if (marker_array_allies.markers[i].id<=10) unknown_allies.markers.push_back(marker_array_allies.markers[i]);
+  }
+
+  for (int i = 0; i<(int)marker_array_ennemies.markers.size(); i++){
+    if (is_enemy(marker_array_ennemies.markers[i].id, true)) actual_first_enemy.markers.push_back(marker_array_ennemies.markers[i]);
+    else if (is_enemy(marker_array_ennemies.markers[i].id, false)) actual_second_enemy.markers.push_back(marker_array_ennemies.markers[i]);
+    else if (marker_array_ennemies.markers[i].id<=10) unknown_enemies.markers.push_back(marker_array_ennemies.markers[i]);
+  }
+
+}
+
 bool Geometrix::is_ally(int id, Ally ally){
   for (int i = 0; i<6; i++) if (id == ally.arucos[i]) return true;
   return false;
