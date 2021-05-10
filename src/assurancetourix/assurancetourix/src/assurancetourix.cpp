@@ -23,7 +23,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
   parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
 
-  marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("detected_aruco_position", qos);
+  marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
 
@@ -492,7 +492,8 @@ void Assurancetourix::set_vision_for_rviz(std::vector<double> color, std::vector
 }
 
 void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
-    visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids){
+    visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies,
+    std::vector<int> detected_ids, visualization_msgs::msg::MarkerArray &markers_camera_relative){
   for (int i = 0; i < int(detected_ids.size()); i++) {
     if (show_image) {
       // drawAxis on the image (activate only for debug)
@@ -546,31 +547,32 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
       marker_array_allies.markers.push_back(transformed_marker);
     }
 
-    marker_pub_->publish(marker);
+    markers_camera_relative.markers.push_back(marker);
     if (marker.id == 42) center_marker = marker;
   }
 }
 
 void Assurancetourix::estimate_arucos_poses() {
   if (_small_detected_ids.size() > 0 || _huge_detected_ids.size() > 0) {
-    visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
+    visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies, markers_camera_relative;
 
     if (_center_detected_id.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
       cv::aruco::estimatePoseSingleMarkers(_center_corner_projection, 0.1, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
-      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _center_detected_id);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _center_detected_id, markers_camera_relative);
     }
     if (_small_detected_ids.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
       cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, small_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
-      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _small_detected_ids);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _small_detected_ids, markers_camera_relative);
     }
     if (_huge_detected_ids.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
       cv::aruco::estimatePoseSingleMarkers(_huge_marker_corners_projection, huge_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
-      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _huge_detected_ids);
+      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _huge_detected_ids, markers_camera_relative);
     }
 
+    marker_pub_->publish(markers_camera_relative);
     transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
     transformed_marker_pub_allies_->publish(marker_array_allies);
   }

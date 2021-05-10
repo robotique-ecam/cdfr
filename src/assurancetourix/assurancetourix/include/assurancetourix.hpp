@@ -43,7 +43,7 @@ private:
   void project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids);
   void compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort);
   void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
-  visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids);
+  visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids, visualization_msgs::msg::MarkerArray &markers_camera_relative);
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
@@ -96,10 +96,9 @@ private:
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
 
   visualization_msgs::msg::Marker marker, center_marker;
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
 
   visualization_msgs::msg::Marker transformed_marker;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_, marker_pub_;
 
   visualization_msgs::msg::MarkerArray lastEnnemiesMarkers, ennemiesMarkersOnThisCycle;
 
