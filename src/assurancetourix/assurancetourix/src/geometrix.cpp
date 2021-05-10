@@ -68,6 +68,71 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
     else if (marker_array_ennemies.markers[i].id<=10) unknown_enemies.markers.push_back(marker_array_ennemies.markers[i]);
   }
 
+  for (int i = 0; i<(int)unknown_allies.markers.size(); i++){
+    if (is_this_unknown_marker_ally(unknown_allies.markers[i], asterix, actual_asterix)) actual_asterix.markers.push_back(unknown_allies.markers[i]);
+    else if (is_this_unknown_marker_ally(unknown_allies.markers[i], obelix, actual_obelix)) actual_obelix.markers.push_back(unknown_allies.markers[i]);
+  }
+
+  for (int i = 0; i<(int)unknown_enemies.markers.size(); i++){
+    if (is_this_unknown_marker_enemy(unknown_enemies.markers[i], actual_first_enemy)) actual_first_enemy.markers.push_back(unknown_enemies.markers[i]);
+    else if (is_this_unknown_marker_enemy(unknown_enemies.markers[i], actual_second_enemy)) actual_second_enemy.markers.push_back(unknown_enemies.markers[i]);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nAsterix markers");
+  for (int i = 0; i<(int)actual_asterix.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", actual_asterix.markers[i].id);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nObelix markers");
+  for (int i = 0; i<(int)actual_obelix.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", actual_obelix.markers[i].id);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nFirst enemy markers");
+  for (int i = 0; i<(int)actual_first_enemy.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", actual_first_enemy.markers[i].id);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nSecond enemy markers");
+  for (int i = 0; i<(int)actual_second_enemy.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", actual_second_enemy.markers[i].id);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nUnknown enemy markers");
+  for (int i = 0; i<(int)unknown_enemies.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", unknown_enemies.markers[i].id);
+  }
+
+  RCLCPP_INFO(node->get_logger(), "\nUnknown ally markers");
+  for (int i = 0; i<(int)unknown_allies.markers.size(); i++){
+    RCLCPP_INFO(node->get_logger(), "%d", unknown_allies.markers[i].id);
+  }
+
+}
+
+bool Geometrix::is_this_unknown_marker_ally(visualization_msgs::msg::Marker &m, Ally ally, visualization_msgs::msg::MarkerArray &ally_marker_array){
+  if (ally_marker_array.markers.size()==0) return false;
+  geometry_msgs::msg::Point radius_point = m.pose.position;
+  radius_point.x += ally.front_x_offset;
+  radius_point.y += ally.side_y_offset;
+  double radius = distance_2d_2_points(m.pose.position, radius_point);
+  for (int i = 0; i<(int)ally_marker_array.markers.size(); i ++){
+    if ( distance_2d_2_points(m.pose.position, ally_marker_array.markers[i].pose.position) > radius) return false;
+  }
+  return true;
+}
+
+bool Geometrix::is_this_unknown_marker_enemy(visualization_msgs::msg::Marker &m, visualization_msgs::msg::MarkerArray &enemy_marker_array){
+  if (enemy_marker_array.markers.size()==0) return false;
+
+  geometry_msgs::msg::Point radius_point = m.pose.position;
+  radius_point.x += enemies.x_y_offset;
+  radius_point.y += enemies.x_y_offset;
+  double radius = distance_2d_2_points(m.pose.position, radius_point);
+  for (int i = 0; i<(int)enemy_marker_array.markers.size(); i ++){
+    if ( distance_2d_2_points(m.pose.position, enemy_marker_array.markers[i].pose.position) > radius) return false;
+  }
+  return true;
 }
 
 bool Geometrix::is_ally(int id, Ally ally){

@@ -36,6 +36,8 @@ private:
   geometry_msgs::msg::Point middle_point(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2);
   geometry_msgs::msg::Point point_from_marker(visualization_msgs::msg::Marker &m);
   double distance_2d_2_points(geometry_msgs::msg::Point pt1, geometry_msgs::msg::Point pt2);
+  bool is_this_unknown_marker_ally(visualization_msgs::msg::Marker &m, Ally ally, visualization_msgs::msg::MarkerArray &ally_marker_array);
+  bool is_this_unknown_marker_enemy(visualization_msgs::msg::Marker &m, visualization_msgs::msg::MarkerArray &enemy_marker_array);
   bool is_ally(int id, Ally ally);
   bool is_enemy(int id, bool first);
 
