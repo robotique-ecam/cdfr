@@ -78,24 +78,25 @@ void Assurancetourix::estimate_initial_camera_pose(){
   tf2_ros::StaticTransformBroadcaster static_tf_broadcaster(this);
   assurancetourix_to_map_transformation.header.frame_id = "map";
   assurancetourix_to_map_transformation.child_frame_id = header_frame_id;
-  geometry_msgs::msg::Vector3 initial_center_point;
-  tf2::Quaternion initial_center_q;
-  int sample_nb = 10;
 
-  for (int i=0; i<sample_nb; i++){
-    get_image();
-    _detect_aruco(_anotated);
-    estimate_arucos_poses();
-    initial_center_point.x += center_marker.pose.position.x/sample_nb;
-    initial_center_point.y += center_marker.pose.position.y/sample_nb;
-    initial_center_point.z += center_marker.pose.position.z/sample_nb;
-    tf2::Quaternion q;
-    tf2::fromMsg(center_marker.pose.orientation, q);
-    if (i==0) initial_center_q=q;
-    else initial_center_q.slerp(q, 1/sample_nb);
-  }
+  for (int i = 0; i<10; i++){
+    geometry_msgs::msg::Vector3 initial_center_point;
+    tf2::Quaternion initial_center_q;
+    int sample_nb = 20;
 
-  if(center_marker.pose.position.z != 0){
+    for (int i=0; i<sample_nb; i++){
+      get_image();
+      _detect_aruco(_anotated);
+      estimate_arucos_poses();
+      initial_center_point.x += center_marker.pose.position.x/sample_nb;
+      initial_center_point.y += center_marker.pose.position.y/sample_nb;
+      initial_center_point.z += center_marker.pose.position.z/sample_nb;
+      tf2::Quaternion q;
+      tf2::fromMsg(center_marker.pose.orientation, q);
+      if (i==0) initial_center_q=q;
+      else initial_center_q.slerp(q, 1/sample_nb);
+    }
+
     geometry_msgs::msg::TransformStamped tf_to_center_marker, tf_from_marker_to_camera;
 
     tf_to_center_marker.transform.translation.x = 1.5;
@@ -124,8 +125,17 @@ void Assurancetourix::estimate_initial_camera_pose(){
       assurancetourix_to_map_transformation.transform.rotation.w
     );
 
-    static_tf_broadcaster.sendTransform(assurancetourix_to_map_transformation);
+    if (assurancetourix_to_map_transformation.transform.rotation.x != 0.0) break;
+    else if (i==9) {
+      RCLCPP_FATAL(this->get_logger(), "Cannot estimate tf, exiting...");
+      exit(-1);
+    }
+    else RCLCPP_WARN(this->get_logger(), "Cannot estimate tf for the %d time, retrying...", i+1);
+
   }
+
+  static_tf_broadcaster.sendTransform(assurancetourix_to_map_transformation);
+
 }
 
 void Assurancetourix::init_camera_settings(){
