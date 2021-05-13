@@ -33,6 +33,7 @@ public:
   Assurancetourix();
   ~Assurancetourix();
   void detection_timer_callback_routine();
+  geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
 
 private:
   void init_parameters();

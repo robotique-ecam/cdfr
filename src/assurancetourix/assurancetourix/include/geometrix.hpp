@@ -40,6 +40,9 @@ private:
   bool is_this_unknown_marker_enemy(visualization_msgs::msg::Marker &m, visualization_msgs::msg::MarkerArray &enemy_marker_array);
   bool is_ally(int id, Ally ally);
   bool is_enemy(int id, bool first);
+  void remove_top_marker_if_necessary(visualization_msgs::msg::MarkerArray &marker_array);
+  void compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &ennemies_markers_to_publish);
+
 
   Assurancetourix* node;
 

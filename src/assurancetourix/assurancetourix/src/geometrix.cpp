@@ -78,6 +78,7 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
     else if (is_this_unknown_marker_enemy(unknown_enemies.markers[i], actual_second_enemy)) actual_second_enemy.markers.push_back(unknown_enemies.markers[i]);
   }
 
+  /*
   RCLCPP_INFO(node->get_logger(), "\nAsterix markers");
   for (int i = 0; i<(int)actual_asterix.markers.size(); i++){
     RCLCPP_INFO(node->get_logger(), "%d", actual_asterix.markers[i].id);
@@ -107,7 +108,79 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
   for (int i = 0; i<(int)unknown_allies.markers.size(); i++){
     RCLCPP_INFO(node->get_logger(), "%d", unknown_allies.markers[i].id);
   }
+  */
+  visualization_msgs::msg::MarkerArray allies_markers_to_publish, ennemies_markers_to_publish;
 
+
+
+}
+
+void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &ennemies_markers_to_publish){
+  remove_top_marker_if_necessary(enemy_marker_array);
+
+  if (enemy_marker_array.markers.size() == 1){
+    ennemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
+  }
+  else if (enemy_marker_array.markers.size() == 2){
+
+    for (int i = 0; i<2; i++){
+      if (enemy_marker_array.markers[i].id<10) {
+        ennemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
+        return;
+      }
+    }
+
+    tf2::Vector3 vec = get_vector_from_markers(enemy_marker_array.markers[0], enemy_marker_array.markers[1]);
+    vec.rotate(z_axis, M_PI/4);
+    geometry_msgs::msg::Point avg_point;
+    if (enemy_marker_array.markers[0].pose.position.x > enemy_marker_array.markers[1].pose.position.x){
+      avg_point.x = enemy_marker_array.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
+      avg_point.y = enemy_marker_array.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
+    } else {
+      avg_point.x = enemy_marker_array.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
+      avg_point.y = enemy_marker_array.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
+    }
+
+    enemy_marker_array.markers[0].pose.position = avg_point;
+    ennemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
+  }
+  else if (enemy_marker_array.markers.size() == 3){
+    geometry_msgs::msg::Point top, avg_point, lat_avg;
+    visualization_msgs::msg::MarkerArray lat;
+
+    for (int i = 0; i<3; i++){
+      if (enemy_marker_array.markers[i].id<10) top = enemy_marker_array.markers[i].pose.position;
+      else lat.markers.push_back(enemy_marker_array.markers[i]);
+    }
+
+    if (lat.markers.size() != 2) avg_point = top;
+    else {
+      tf2::Vector3 vec = get_vector_from_markers(lat.markers[0], lat.markers[1]);
+      vec.rotate(z_axis, M_PI/4);
+      if (lat.markers[0].pose.position.x > lat.markers[1].pose.position.x){
+        lat_avg.x = lat.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
+        lat_avg.y = lat.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
+      } else {
+        lat_avg.x = lat.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
+        lat_avg.y = lat.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
+      }
+
+      avg_point.x = (lat_avg.x + top.x)/2;
+      avg_point.y = (lat_avg.y + top.y)/2;
+    }
+
+    enemy_marker_array.markers[0].pose.position = avg_point;
+    ennemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
+  }
+}
+
+void Geometrix::remove_top_marker_if_necessary(visualization_msgs::msg::MarkerArray &marker_array){
+  for (int i = 0; i<(int)marker_array.markers.size(); i++){
+    if (marker_array.markers[i].id < 10){
+      if (abs(marker_array.markers[i].pose.position.x  - node->assurancetourix_to_map_transformation.transform.translation.x) > 1 ||
+          marker_array.markers[i].pose.position.y < 1) marker_array.markers.erase(marker_array.markers.begin()+i);
+    }
+  }
 }
 
 bool Geometrix::is_this_unknown_marker_ally(visualization_msgs::msg::Marker &m, Ally ally, visualization_msgs::msg::MarkerArray &ally_marker_array){
