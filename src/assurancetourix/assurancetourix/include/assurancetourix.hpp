@@ -106,8 +106,6 @@ private:
   rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
   rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
 
-  geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
-
   // Parameters
   double huge_aruco_size, small_aruco_size;
   int lifetime_sec, lifetime_nano_sec, exposure;
