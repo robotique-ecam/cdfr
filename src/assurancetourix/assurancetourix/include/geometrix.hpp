@@ -36,6 +36,7 @@ private:
   geometry_msgs::msg::Point middle_point(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2);
   geometry_msgs::msg::Point point_from_marker(visualization_msgs::msg::Marker &m);
   double distance_2d_2_points(geometry_msgs::msg::Point pt1, geometry_msgs::msg::Point pt2);
+  double distance_2d_2_points(double x1, double x2, double y1, double y2);
   bool is_this_unknown_marker_ally(visualization_msgs::msg::Marker &m, Ally ally, visualization_msgs::msg::MarkerArray &ally_marker_array);
   bool is_this_unknown_marker_enemy(visualization_msgs::msg::Marker &m, visualization_msgs::msg::MarkerArray &enemy_marker_array);
   bool is_ally(int id, Ally ally);
@@ -44,6 +45,7 @@ private:
   void compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &ennemies_markers_to_publish);
   void compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish);
   double get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q);
+  double normalize_angle(double angle);
 
   Assurancetourix* node;
 

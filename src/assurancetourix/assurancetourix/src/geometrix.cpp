@@ -78,7 +78,6 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
     else if (is_this_unknown_marker_enemy(unknown_enemies.markers[i], actual_second_enemy)) actual_second_enemy.markers.push_back(unknown_enemies.markers[i]);
   }
 
-  /*
   RCLCPP_INFO(node->get_logger(), "\nAsterix markers");
   for (int i = 0; i<(int)actual_asterix.markers.size(); i++){
     RCLCPP_INFO(node->get_logger(), "%d", actual_asterix.markers[i].id);
@@ -108,11 +107,9 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
   for (int i = 0; i<(int)unknown_allies.markers.size(); i++){
     RCLCPP_INFO(node->get_logger(), "%d", unknown_allies.markers[i].id);
   }
-  */
+
   visualization_msgs::msg::MarkerArray allies_markers_to_publish, enemies_markers_to_publish;
-
-
-
+  compute_ally_position(actual_asterix, asterix, allies_markers_to_publish);
 }
 
 void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish){
@@ -131,25 +128,32 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
   }
 
   if (front.markers.size() == 2){
-    considered += 2;
-    tf2::Vector3 orient = get_perpandicular_vector_from_markers(front.markers[0], front.markers[1], false);
-    tf2::Vector3 vec = get_perpandicular_vector_from_markers(front.markers[0], front.markers[1], true);
+    considered += 1;
+    int front_right_index = front.markers[0].id==ally.arucos[1] ? 0 : 1;
+    int front_left_index = (front_right_index+1) % 2;
+    tf2::Vector3 vec = get_perpandicular_vector_from_markers(front.markers[front_left_index], front.markers[front_right_index], true);
     geometry_msgs::msg::Point middle = middle_point(front.markers[0], front.markers[1]);
-    avg_point.x += 2*(middle.x + ally.front_x_offset*vec.x());
-    avg_point.y += 2*(middle.y + ally.front_x_offset*vec.y());
-    avg_angle += atan(orient.y()/orient.x());
+    //RCLCPP_INFO(node->get_logger(), "\nfront");
+    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
+    avg_point.x += (middle.x + ally.front_x_offset*vec.x());
+    avg_point.y += (middle.y + ally.front_x_offset*vec.y());
     avg_angle += (get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2;
+    //RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2)*180/M_PI);
+
   }
 
   if (back.markers.size() == 2){
-    considered += 2;
-    tf2::Vector3 orient = get_perpandicular_vector_from_markers(back.markers[0], back.markers[1], true);
-    tf2::Vector3 vec = get_perpandicular_vector_from_markers(back.markers[0], back.markers[1], false);
+    considered += 1;
+    int back_right_index = back.markers[0].id==ally.arucos[5] ? 0 : 1;
+    int back_left_index = (back_right_index+1) % 2;
+    tf2::Vector3 vec = get_perpandicular_vector_from_markers(back.markers[back_right_index], back.markers[back_left_index], true);
     geometry_msgs::msg::Point middle = middle_point(back.markers[0], back.markers[1]);
-    avg_point.x += 2*(middle.x + ally.front_x_offset*vec.x());
-    avg_point.y += 2*(middle.y + ally.front_x_offset*vec.y());
-    avg_angle += atan(orient.y()/orient.x());
-    avg_angle += (get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2;
+    avg_point.x += (middle.x + ally.front_x_offset*vec.x());
+    avg_point.y += (middle.y + ally.front_x_offset*vec.y());
+    //RCLCPP_INFO(node->get_logger(), "\nback");
+    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
+    avg_angle += (get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI;
+    //RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI)*180/M_PI);
   }
 
   if (side.markers.size() == 1){
@@ -157,8 +161,16 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
     avg_point.x += side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI);
     avg_point.y += side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI);
-    if (side.markers[0].id == ally.arucos[0]) avg_angle += marker_yaw + M_PI/2;
-    else avg_angle += marker_yaw - M_PI/2;
+    RCLCPP_INFO(node->get_logger(), "\nside");
+    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI), side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI));
+    if (side.markers[0].id == ally.arucos[0]){
+      RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
+      avg_angle += normalize_angle(marker_yaw + M_PI/2);
+    }
+    else{
+      RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
+      avg_angle += normalize_angle(marker_yaw - M_PI/2);
+    }
   }
 
   if (top.markers.size() == 1){
@@ -193,6 +205,8 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       ally_marker_array.markers[0].id = 2;
     }
     allies_markers_to_publish.markers.push_back(ally_marker_array.markers[0]);
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
+    RCLCPP_INFO(node->get_logger(), "\nangle: %f", avg_angle*180/M_PI);
   }
 
 }
@@ -213,12 +227,13 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
     }
 
     tf2::Vector3 vec = get_vector_from_markers(enemy_marker_array.markers[0], enemy_marker_array.markers[1]);
-    vec.rotate(z_axis, M_PI/4);
     geometry_msgs::msg::Point avg_point;
     if (enemy_marker_array.markers[0].pose.position.x > enemy_marker_array.markers[1].pose.position.x){
+      vec.rotate(z_axis, M_PI/4);
       avg_point.x = enemy_marker_array.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
       avg_point.y = enemy_marker_array.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
     } else {
+      vec.rotate(z_axis, -M_PI/4);
       avg_point.x = enemy_marker_array.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
       avg_point.y = enemy_marker_array.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
     }
@@ -238,11 +253,12 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
     if (lat.markers.size() != 2) avg_point = top;
     else {
       tf2::Vector3 vec = get_vector_from_markers(lat.markers[0], lat.markers[1]);
-      vec.rotate(z_axis, M_PI/4);
       if (lat.markers[0].pose.position.x > lat.markers[1].pose.position.x){
+        vec.rotate(z_axis, M_PI/4);
         lat_avg.x = lat.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
         lat_avg.y = lat.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
       } else {
+        vec.rotate(z_axis, -M_PI/4);
         lat_avg.x = lat.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
         lat_avg.y = lat.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
       }
@@ -307,12 +323,10 @@ tf2::Vector3 Geometrix::get_perpandicular_vector_from_markers(visualization_msgs
   return vec.rotate(z_axis, angle);
 }
 
-tf2::Vector3 Geometrix::get_vector_from_markers(visualization_msgs::msg::Marker &m1, visualization_msgs::msg::Marker &m2){
-  geometry_msgs::msg::Point pt1 = point_from_marker(m1),
+tf2::Vector3 Geometrix::get_vector_from_markers(visualization_msgs::msg::Marker &origin, visualization_msgs::msg::Marker &m2){
+  geometry_msgs::msg::Point pt1 = point_from_marker(origin),
                             pt2 = point_from_marker(m2);
-  tf2::Vector3 vec;
-  if (pt1.x < pt2.x) vec = tf2::Vector3(pt2.x - pt1.x, pt2.y - pt1.y, 0);
-  else vec = tf2::Vector3(pt1.x - pt2.x, pt1.y - pt2.y, 0);
+  tf2::Vector3 vec = tf2::Vector3(pt2.x - pt1.x, pt2.y - pt1.y, 0);
   return vec.normalize();
 }
 
@@ -330,7 +344,11 @@ geometry_msgs::msg::Point Geometrix::point_from_marker(visualization_msgs::msg::
 }
 
 double Geometrix::distance_2d_2_points(geometry_msgs::msg::Point pt1, geometry_msgs::msg::Point pt2){
-  return sqrt( (pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y) );
+  return distance_2d_2_points(pt1.x, pt2.x, pt1.y, pt2.y);
+}
+
+double Geometrix::distance_2d_2_points(double x1, double x2, double y1, double y2){
+  return sqrt( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) );
 }
 
 double Geometrix::get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q){
@@ -339,7 +357,13 @@ double Geometrix::get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q){
   tf2::Matrix3x3 m(q_tf2);
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
-  return yaw;
+  return yaw + M_PI/2;
+}
+
+double Geometrix::normalize_angle(double angle){
+  if (angle > M_PI) return -2*M_PI+angle;
+  if (angle < -M_PI) return 2*M_PI+angle;
+  return angle;
 }
 
 Geometrix::~Geometrix(){
