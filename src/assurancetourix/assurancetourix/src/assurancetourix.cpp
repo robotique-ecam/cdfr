@@ -66,6 +66,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   geometrix = new Geometrix(this);
   estimate_initial_camera_pose();
 
+  RCLCPP_WARN(this->get_logger(), "tf x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
+  assurancetourix_to_map_transformation.transform.translation.y);
 
 #endif // CAMERA
 
@@ -82,7 +84,7 @@ void Assurancetourix::estimate_initial_camera_pose(){
   for (int i = 0; i<10; i++){
     geometry_msgs::msg::Vector3 initial_center_point;
     tf2::Quaternion initial_center_q;
-    int sample_nb = 20;
+    int sample_nb = 5;
 
     for (int i=0; i<sample_nb; i++){
       get_image();
@@ -531,9 +533,9 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
 
     tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
-    tmpPoseOut.pose.position.z = 0;
-    tmpPoseOut.pose.position.x -= (tmpPoseOut.pose.position.x-1.5)*0.07/1.5;
-    tmpPoseOut.pose.position.y += 0.06 - tmpPoseOut.pose.position.y*0.06/2;
+    //tmpPoseOut.pose.position.z = 0;
+    //tmpPoseOut.pose.position.x -= (tmpPoseOut.pose.position.x-1.5)*0.07/1.5;
+    //tmpPoseOut.pose.position.y += 0.06 - tmpPoseOut.pose.position.y*0.06/2;
     transformed_marker = marker;
     transformed_marker.header = tmpPoseOut.header;
     transformed_marker.pose = tmpPoseOut.pose;
