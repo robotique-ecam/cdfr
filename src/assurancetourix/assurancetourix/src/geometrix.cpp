@@ -117,7 +117,7 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
 
   visualization_msgs::msg::MarkerArray front, back, top, side;
   geometry_msgs::msg::Point avg_point;
-  double avg_angle;
+  std::vector<double> avg_angle;
   int considered = 0;
 
   for (int i = 0; i<(int)ally_marker_array.markers.size(); i++){
@@ -133,12 +133,13 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     int front_left_index = (front_right_index+1) % 2;
     tf2::Vector3 vec = get_perpandicular_vector_from_markers(front.markers[front_left_index], front.markers[front_right_index], true);
     geometry_msgs::msg::Point middle = middle_point(front.markers[0], front.markers[1]);
-    //RCLCPP_INFO(node->get_logger(), "\nfront");
-    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
+    RCLCPP_INFO(node->get_logger(), "\nfront");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
     avg_point.x += (middle.x + ally.front_x_offset*vec.x());
     avg_point.y += (middle.y + ally.front_x_offset*vec.y());
-    avg_angle += (get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2;
-    //RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2)*180/M_PI);
+    avg_angle.push_back( ( get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation) )/2);
+    //avg_angle += normalize_angle((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2);
+    RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2)*180/M_PI);
 
   }
 
@@ -150,10 +151,11 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     geometry_msgs::msg::Point middle = middle_point(back.markers[0], back.markers[1]);
     avg_point.x += (middle.x + ally.front_x_offset*vec.x());
     avg_point.y += (middle.y + ally.front_x_offset*vec.y());
-    //RCLCPP_INFO(node->get_logger(), "\nback");
-    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
-    avg_angle += (get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI;
-    //RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI)*180/M_PI);
+    RCLCPP_INFO(node->get_logger(), "\nback");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
+    avg_angle.push_back((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI);
+    //avg_angle += normalize_angle((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI);
+    RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI)*180/M_PI);
   }
 
   if (side.markers.size() == 1){
@@ -162,14 +164,16 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     avg_point.x += side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI);
     avg_point.y += side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI);
     RCLCPP_INFO(node->get_logger(), "\nside");
-    //RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI), side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI));
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI), side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI));
     if (side.markers[0].id == ally.arucos[0]){
       RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
-      avg_angle += normalize_angle(marker_yaw + M_PI/2);
+      avg_angle.push_back(marker_yaw + M_PI/2);
+      //avg_angle += normalize_angle(marker_yaw + M_PI/2);
     }
     else{
       RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
-      avg_angle += normalize_angle(marker_yaw - M_PI/2);
+      avg_angle.push_back(marker_yaw - M_PI/2);
+      //avg_angle += normalize_angle(marker_yaw - M_PI/2);
     }
   }
 
@@ -248,9 +252,9 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     avg_point.y = avg_point.y/considered;
     ally_marker_array.markers[0].pose.position = avg_point;
 
-    avg_angle = avg_angle/considered;
+    double angle = mean_angle(avg_angle);
     tf2::Quaternion q;
-    q.setRotation(z_axis, avg_angle);
+    q.setRotation(z_axis, angle);
     ally_marker_array.markers[0].pose.orientation = tf2::toMsg(q);
 
     if (ally.arucos[0] == asterix.arucos[0]){
@@ -262,7 +266,7 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     }
     allies_markers_to_publish.markers.push_back(ally_marker_array.markers[0]);
     RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
-    RCLCPP_INFO(node->get_logger(), "\nangle: %f", avg_angle*180/M_PI);
+    RCLCPP_INFO(node->get_logger(), "\nangle: %f", angle*180/M_PI);
   }
 
 }
@@ -420,6 +424,16 @@ double Geometrix::normalize_angle(double angle){
   if (angle > M_PI) return -2*M_PI+angle;
   if (angle < -M_PI) return 2*M_PI+angle;
   return angle;
+}
+
+double Geometrix::mean_angle(std::vector<double> &angles){
+  double x = 0,
+         y = 0;
+  for (int i = 0; i<(int)angles.size(); i++){
+    x += cos(angles[i]);
+    y += sin(angles[i]);
+  }
+  return atan2(y, x);
 }
 
 Geometrix::~Geometrix(){

@@ -46,6 +46,7 @@ private:
   void compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish);
   double get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q);
   double normalize_angle(double angle);
+  double mean_angle(std::vector<double> &angles);
 
   Assurancetourix* node;
 
