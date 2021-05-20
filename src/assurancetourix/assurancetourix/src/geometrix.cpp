@@ -175,11 +175,67 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
 
   if (top.markers.size() == 1){
     if (front.markers.size() > 0){
-      //TODO
+      int front_right_index = -1,
+          front_left_index = -1;
+      if (front.markers[0].id==ally.arucos[1]) front_right_index = 0;
+      if (front.markers[0].id==ally.arucos[2]) front_left_index = 0;
+      if (front.markers.size() > 1) {
+        if (front.markers[1].id==ally.arucos[1]) front_right_index = 1;
+        if (front.markers[1].id==ally.arucos[2]) front_left_index = 1;
+      }
+
+      if (front_right_index != -1){
+        considered +=1;
+        avg_point.x += top.markers[0].pose.position.x;
+        avg_point.y += top.markers[0].pose.position.y;
+        avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation));
+        //avg_angle += normalize_angle(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation));
+        RCLCPP_INFO(node->get_logger(), "\ntop+front_right");
+        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation)))*180/M_PI);
+      }
+      if (front_left_index != -1){
+        considered +=1;
+        avg_point.x += top.markers[0].pose.position.x;
+        avg_point.y += top.markers[0].pose.position.y;
+        avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation));
+        //avg_angle += normalize_angle(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation));
+        RCLCPP_INFO(node->get_logger(), "\ntop+front_left");
+        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation)))*180/M_PI);
+      }
     }
 
     if (back.markers.size() > 0){
-      //TODO
+      int back_right_index = -1,
+          back_left_index = -1;
+      if (back.markers[0].id==ally.arucos[5]) back_right_index = 0;
+      if (back.markers[0].id==ally.arucos[4]) back_left_index = 0;
+      if (back.markers.size() > 1) {
+        if (back.markers[1].id==ally.arucos[5]) back_right_index = 1;
+        if (back.markers[1].id==ally.arucos[4]) back_left_index = 1;
+      }
+
+      if (back_right_index != -1){
+        considered +=1;
+        avg_point.x += top.markers[0].pose.position.x;
+        avg_point.y += top.markers[0].pose.position.y;
+        avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation) - M_PI);
+        //avg_angle += normalize_angle(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation) - M_PI);
+        RCLCPP_INFO(node->get_logger(), "\ntop+back_right");
+        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation)- M_PI))*180/M_PI);
+      }
+      if (back_left_index != -1){
+        considered +=1;
+        avg_point.x += top.markers[0].pose.position.x;
+        avg_point.y += top.markers[0].pose.position.y;
+        avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation) - M_PI);
+        //avg_angle += normalize_angle(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation) - M_PI);
+        RCLCPP_INFO(node->get_logger(), "\ntop+back_left");
+        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation)- M_PI))*180/M_PI);
+      }
     }
 
     if (side.markers.size() > 0){
