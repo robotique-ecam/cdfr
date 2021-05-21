@@ -462,7 +462,9 @@ void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector
       _center_detected_id.push_back(detected_ids[i]);
       compute_final_projection(_center_corner_projection, undistort);
     }
-    else if(detected_ids[i]<50){
+    else if(detected_ids[i]<50 || detected_ids[i] == geometrix->enemies.arucos[0] ||
+            detected_ids[i] == geometrix->enemies.arucos[1] || detected_ids[i] == geometrix->enemies.arucos[2] ||
+            detected_ids[i] == geometrix->enemies.arucos[3]){
       _small_detected_ids.push_back(detected_ids[i]);
       compute_final_projection(_small_marker_corners_projection, undistort);
     } else {
@@ -576,7 +578,7 @@ void Assurancetourix::estimate_arucos_poses() {
     }
     if (_small_detected_ids.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
-      cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, small_aruco_size, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+      cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, /*small_aruco_size*/0.067, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
       compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _small_detected_ids, markers_camera_relative);
     }
     if (_huge_detected_ids.size() > 0){

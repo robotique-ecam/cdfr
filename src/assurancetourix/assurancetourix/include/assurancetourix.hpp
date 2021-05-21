@@ -34,6 +34,7 @@ public:
   ~Assurancetourix();
   void detection_timer_callback_routine();
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
+  std::string side;
 
 private:
   void init_parameters();
@@ -112,7 +113,7 @@ private:
   bool show_image, savedeee;
   uint robot_type, game_element_type;
   std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale, _enemies_arucos_nb;
-  std::string base_frame, header_frame_id, topic_for_gradient_layer, side, allies_positions_topic;
+  std::string base_frame, header_frame_id, topic_for_gradient_layer, allies_positions_topic;
 
   Geometrix* geometrix;
 
