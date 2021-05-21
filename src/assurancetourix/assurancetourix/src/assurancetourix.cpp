@@ -542,25 +542,18 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     transformed_marker.header = tmpPoseOut.header;
     transformed_marker.pose = tmpPoseOut.pose;
 
-    if ((marker.id <= 5 && 1 <= marker.id) || marker.id >100) {
+    int marker_type = geometrix->ally_or_enemy(marker.id);
+
+    if ((marker.id <= 5 && 1 <= marker.id)) {
       set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
     } else if ((marker.id <= 10) && (6 <= marker.id)) {
       set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);
     } else {
-      set_vision_for_rviz(default_color_ArUco, game_elements_scale, game_element_type);
+      set_vision_for_rviz(default_color_ArUco, arrow_scale, robot_type);
     }
 
-    if (side.compare("blue") == 0 && marker.id <= 10 && 6 <= marker.id) {
-      marker_array_ennemies.markers.push_back(transformed_marker);
-    } else if ((side.compare("yellow") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
-      marker_array_ennemies.markers.push_back(transformed_marker);
-    }
-
-    if ((side.compare("yellow") == 0 && marker.id <= 10 && 6 <= marker.id) || marker.id >100) {
-      marker_array_allies.markers.push_back(transformed_marker);
-    } else if ((side.compare("blue") == 0) && (marker.id <= 5) && (1 <= marker.id)) {
-      marker_array_allies.markers.push_back(transformed_marker);
-    }
+    if (marker_type == 0) marker_array_allies.markers.push_back(transformed_marker);
+    else if (marker_type == 1) marker_array_ennemies.markers.push_back(transformed_marker);
 
     markers_camera_relative.markers.push_back(marker);
     if (marker.id == 42) center_marker = marker;
