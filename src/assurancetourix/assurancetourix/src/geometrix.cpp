@@ -128,6 +128,7 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
 
   visualization_msgs::msg::MarkerArray allies_markers_to_publish, enemies_markers_to_publish;
   compute_ally_position(actual_asterix, asterix, allies_markers_to_publish);
+  compute_enemy_position(actual_first_enemy, enemies_markers_to_publish);
 }
 
 void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish){
@@ -293,29 +294,34 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
   remove_top_marker_if_necessary(enemy_marker_array);
 
   if (enemy_marker_array.markers.size() == 1){
+    geometry_msgs::msg::Point point;
+    if (enemy_marker_array.markers[0].id < 10) point = enemy_marker_array.markers[0].pose.position;
+    else{
+      double angle = get_yaw_from_quaternion(enemy_marker_array.markers[0].pose.orientation);
+      point.x += enemy_marker_array.markers[0].pose.position.x - enemies.x_y_offset * cos(angle);
+      point.y += enemy_marker_array.markers[0].pose.position.y - enemies.x_y_offset * sin(angle);
+    }
+    RCLCPP_INFO(node->get_logger(), "\nenemy 1 markers");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", point.x, point.y);
+    enemy_marker_array.markers[0].pose.position = point;
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
   }
   else if (enemy_marker_array.markers.size() == 2){
 
     for (int i = 0; i<2; i++){
-      if (enemy_marker_array.markers[i].id<10) {
+      if (enemy_marker_array.markers[i].id<=10) {
         enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
         return;
       }
     }
-
-    tf2::Vector3 vec = get_vector_from_markers(enemy_marker_array.markers[0], enemy_marker_array.markers[1]);
     geometry_msgs::msg::Point avg_point;
-    if (enemy_marker_array.markers[0].pose.position.x > enemy_marker_array.markers[1].pose.position.x){
-      vec.rotate(z_axis, M_PI/4);
-      avg_point.x = enemy_marker_array.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
-      avg_point.y = enemy_marker_array.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
-    } else {
-      vec.rotate(z_axis, -M_PI/4);
-      avg_point.x = enemy_marker_array.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
-      avg_point.y = enemy_marker_array.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
+    for (int i=0; i<2; i++){
+      double angle = get_yaw_from_quaternion(enemy_marker_array.markers[i].pose.orientation);
+      avg_point.x += (enemy_marker_array.markers[i].pose.position.x - enemies.x_y_offset * cos(angle))/2;
+      avg_point.y += (enemy_marker_array.markers[i].pose.position.y - enemies.x_y_offset * sin(angle))/2;
     }
-
+    RCLCPP_INFO(node->get_logger(), "\nenemy 2 markers");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     enemy_marker_array.markers[0].pose.position = avg_point;
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
   }
@@ -324,26 +330,23 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
     visualization_msgs::msg::MarkerArray lat;
 
     for (int i = 0; i<3; i++){
-      if (enemy_marker_array.markers[i].id<10) top = enemy_marker_array.markers[i].pose.position;
+      if (enemy_marker_array.markers[i].id<=10) top = enemy_marker_array.markers[i].pose.position;
       else lat.markers.push_back(enemy_marker_array.markers[i]);
     }
 
     if (lat.markers.size() != 2) avg_point = top;
     else {
-      tf2::Vector3 vec = get_vector_from_markers(lat.markers[0], lat.markers[1]);
-      if (lat.markers[0].pose.position.x > lat.markers[1].pose.position.x){
-        vec.rotate(z_axis, M_PI/4);
-        lat_avg.x = lat.markers[0].pose.position.x + enemies.x_y_offset*vec.x();
-        lat_avg.y = lat.markers[0].pose.position.y + enemies.x_y_offset*vec.y();
-      } else {
-        vec.rotate(z_axis, -M_PI/4);
-        lat_avg.x = lat.markers[1].pose.position.x + enemies.x_y_offset*vec.x();
-        lat_avg.y = lat.markers[1].pose.position.y + enemies.x_y_offset*vec.y();
+      for (int i=0; i<2; i++){
+        double angle = get_yaw_from_quaternion(lat.markers[i].pose.orientation);
+        lat_avg.x += lat.markers[i].pose.position.x - enemies.x_y_offset * cos(angle);
+        lat_avg.y += lat.markers[i].pose.position.y - enemies.x_y_offset * sin(angle);
       }
 
-      avg_point.x = (lat_avg.x + top.x)/2;
-      avg_point.y = (lat_avg.y + top.y)/2;
+      avg_point.x = (lat_avg.x + top.x)/3;
+      avg_point.y = (lat_avg.y + top.y)/3;
     }
+    RCLCPP_INFO(node->get_logger(), "\nenemy 3 markers");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
 
     enemy_marker_array.markers[0].pose.position = avg_point;
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
