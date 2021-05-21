@@ -24,8 +24,8 @@ void Geometrix::init_parameters(){
   node->declare_parameter("arucos.obelix.back_left");
   node->declare_parameter("arucos.obelix.back_right");
 
-  node->declare_parameter("arucos.x_y_offset");
-  node->declare_parameter("arucos.enemies");
+  node->declare_parameter("arucos.enemies.x_y_offset");
+  node->declare_parameter("arucos.enemies.arucos");
 
   node->get_parameter_or<int>("arucos.asterix.side_right", asterix.arucos[0], 172);
   node->get_parameter_or<int>("arucos.asterix.front_right", asterix.arucos[1], 173);
@@ -47,11 +47,29 @@ void Geometrix::init_parameters(){
   node->get_parameter_or<double>("arucos.obelix.front_y_offset", obelix.front_y_offset, 0.06);
   node->get_parameter_or<double>("arucos.obelix.side_y_offset", obelix.side_y_offset, 0.18);
 
-  node->get_parameter_or<double>("arucos.x_y_offset", enemies.x_y_offset, 0.05);
+  node->get_parameter_or<double>("arucos.enemies.x_y_offset", enemies.x_y_offset, 0.05);
   std::vector<double> arucos;
-  node->get_parameter_or<std::vector<double>>("arucos.enemies", arucos, {0.0});
+  node->get_parameter_or<std::vector<double>>("arucos.enemies.arucos", arucos, {0.0});
   for (int i = 0; i<(int)arucos.size(); i++) enemies.arucos.push_back((int)arucos[i]);
 }
+
+int Geometrix::ally_or_enemy(int id){
+  if (id>50){
+    for (int i = 0; i<6; i++) if (id == asterix.arucos[i]) return 0;
+    for (int i = 0; i<6; i++) if (id == obelix.arucos[i]) return 0;
+    for (int i = 0; i<int(enemies.arucos.size()); i++) if (id == enemies.arucos[i]) return 1;
+  } else {
+    if (node->side.compare("yellow") == 0){
+      if (id <= 10 && 6 <= id) return 0;
+      else if (id <= 5 && 1 <= id) return 1;
+    } else {
+      if (id <= 10 && 6 <= id) return 1;
+      else if (id <= 5 && 1 <= id) return 0;
+    }
+  }
+  return -1;
+}
+
 
 void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies){
   visualization_msgs::msg::MarkerArray actual_asterix, actual_obelix, actual_first_enemy, actual_second_enemy, unknown_allies, unknown_enemies;

@@ -22,6 +22,7 @@ public:
   Geometrix(Assurancetourix* node);
   ~Geometrix();
   void compute_and_send_markers(visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies);
+  int ally_or_enemy(int id);
 
   Ally asterix;
   Ally obelix;
