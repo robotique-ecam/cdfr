@@ -290,65 +290,66 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
 
 }
 
-void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &enemies_markers_to_publish){
-  remove_top_marker_if_necessary(enemy_marker_array);
-
-  if (enemy_marker_array.markers.size() == 1){
-    geometry_msgs::msg::Point point;
-    if (enemy_marker_array.markers[0].id < 10) point = enemy_marker_array.markers[0].pose.position;
-    else{
-      double angle = get_yaw_from_quaternion(enemy_marker_array.markers[0].pose.orientation);
-      point.x += enemy_marker_array.markers[0].pose.position.x - enemies.x_y_offset * cos(angle);
-      point.y += enemy_marker_array.markers[0].pose.position.y - enemies.x_y_offset * sin(angle);
-    }
-    RCLCPP_INFO(node->get_logger(), "\nenemy 1 markers");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", point.x, point.y);
-    enemy_marker_array.markers[0].pose.position = point;
-    enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
-  }
-  else if (enemy_marker_array.markers.size() == 2){
-
-    for (int i = 0; i<2; i++){
-      if (enemy_marker_array.markers[i].id<=10) {
-        enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
-        return;
-      }
-    }
+void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &enemies_markers_to_publish, bool is_first_enemy){
+  if (enemy_marker_array.markers.size() > 0){
+    remove_top_marker_if_necessary(enemy_marker_array);
     geometry_msgs::msg::Point avg_point;
-    for (int i=0; i<2; i++){
-      double angle = get_yaw_from_quaternion(enemy_marker_array.markers[i].pose.orientation);
-      avg_point.x += (enemy_marker_array.markers[i].pose.position.x - enemies.x_y_offset * cos(angle))/2;
-      avg_point.y += (enemy_marker_array.markers[i].pose.position.y - enemies.x_y_offset * sin(angle))/2;
+    if (enemy_marker_array.markers.size() == 1){
+      if (enemy_marker_array.markers[0].id < 10) avg_point = enemy_marker_array.markers[0].pose.position;
+      else{
+        double angle = get_yaw_from_quaternion(enemy_marker_array.markers[0].pose.orientation);
+        avg_point.x += enemy_marker_array.markers[0].pose.position.x - enemies.x_y_offset * cos(angle);
+        avg_point.y += enemy_marker_array.markers[0].pose.position.y - enemies.x_y_offset * sin(angle);
+      }
+      RCLCPP_INFO(node->get_logger(), "\nenemy 1 markers");
+      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     }
-    RCLCPP_INFO(node->get_logger(), "\nenemy 2 markers");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
-    enemy_marker_array.markers[0].pose.position = avg_point;
-    enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
-  }
-  else if (enemy_marker_array.markers.size() == 3){
-    geometry_msgs::msg::Point top, avg_point, lat_avg;
-    visualization_msgs::msg::MarkerArray lat;
+    else if (enemy_marker_array.markers.size() == 2){
 
-    for (int i = 0; i<3; i++){
-      if (enemy_marker_array.markers[i].id<=10) top = enemy_marker_array.markers[i].pose.position;
-      else lat.markers.push_back(enemy_marker_array.markers[i]);
-    }
-
-    if (lat.markers.size() != 2) avg_point = top;
-    else {
+      for (int i = 0; i<2; i++){
+        if (enemy_marker_array.markers[i].id<=10) {
+          if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
+          else enemy_marker_array.markers[0].id = 4;
+          enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
+          return;
+        }
+      }
       for (int i=0; i<2; i++){
-        double angle = get_yaw_from_quaternion(lat.markers[i].pose.orientation);
-        lat_avg.x += lat.markers[i].pose.position.x - enemies.x_y_offset * cos(angle);
-        lat_avg.y += lat.markers[i].pose.position.y - enemies.x_y_offset * sin(angle);
+        double angle = get_yaw_from_quaternion(enemy_marker_array.markers[i].pose.orientation);
+        avg_point.x += (enemy_marker_array.markers[i].pose.position.x - enemies.x_y_offset * cos(angle))/2;
+        avg_point.y += (enemy_marker_array.markers[i].pose.position.y - enemies.x_y_offset * sin(angle))/2;
+      }
+      RCLCPP_INFO(node->get_logger(), "\nenemy 2 markers");
+      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
+    }
+    else if (enemy_marker_array.markers.size() == 3){
+      geometry_msgs::msg::Point top, lat_avg;
+      visualization_msgs::msg::MarkerArray lat;
+
+      for (int i = 0; i<3; i++){
+        if (enemy_marker_array.markers[i].id<=10) top = enemy_marker_array.markers[i].pose.position;
+        else lat.markers.push_back(enemy_marker_array.markers[i]);
       }
 
-      avg_point.x = (lat_avg.x + top.x)/3;
-      avg_point.y = (lat_avg.y + top.y)/3;
-    }
-    RCLCPP_INFO(node->get_logger(), "\nenemy 3 markers");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
+      if (lat.markers.size() != 2) avg_point = top;
+      else {
+        for (int i=0; i<2; i++){
+          double angle = get_yaw_from_quaternion(lat.markers[i].pose.orientation);
+          lat_avg.x += lat.markers[i].pose.position.x - enemies.x_y_offset * cos(angle);
+          lat_avg.y += lat.markers[i].pose.position.y - enemies.x_y_offset * sin(angle);
+        }
 
+        avg_point.x = (lat_avg.x + top.x)/3;
+        avg_point.y = (lat_avg.y + top.y)/3;
+      }
+      RCLCPP_INFO(node->get_logger(), "\nenemy 3 markers");
+      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
+    }
+    if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
+    else enemy_marker_array.markers[0].id = 4;
     enemy_marker_array.markers[0].pose.position = avg_point;
+    RCLCPP_WARN(node->get_logger(), "\nenemy markers");
+    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
   }
 }

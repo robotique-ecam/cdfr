@@ -43,7 +43,7 @@ private:
   bool is_ally(int id, Ally ally);
   bool is_enemy(int id, bool first);
   void remove_top_marker_if_necessary(visualization_msgs::msg::MarkerArray &marker_array);
-  void compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &ennemies_markers_to_publish);
+  void compute_enemy_position(visualization_msgs::msg::MarkerArray &enemy_marker_array, visualization_msgs::msg::MarkerArray &ennemies_markers_to_publish, bool is_first_enemy);
   void compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish);
   double get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q);
   double normalize_angle(double angle);
