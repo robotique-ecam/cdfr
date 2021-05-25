@@ -32,7 +32,9 @@ class Assurancetourix : public rclcpp::Node {
 public:
   Assurancetourix();
   ~Assurancetourix();
-  void detection_timer_callback_routine();
+  visualization_msgs::msg::Marker predict_enemies_pos(visualization_msgs::msg::Marker detectedMarkers);
+  visualization_msgs::msg::MarkerArray last_enemies_markers, enemies_markers_on_this_cycle;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_, marker_pub_;
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
   std::string side;
 
@@ -40,8 +42,8 @@ private:
   void init_parameters();
   void _detect_aruco(Mat img);
   void estimate_arucos_poses();
+  void detection_timer_callback_routine();
   void set_vision_for_rviz(std::vector<double> color, std::vector<double> scale, uint type);
-  visualization_msgs::msg::Marker predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarkers);
   void project_corners_pinhole_to_fisheye(std::vector<std::vector<cv::Point2f>> marker_corners, std::vector<int> detected_ids);
   void compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort);
   void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
@@ -82,7 +84,7 @@ private:
   float mat_camera_matrix_coeff_fisheye_balanced[3][3] = {{8.65569129e+02, 0.00000000e+00, 1.95015357e+03}, {0.00000000e+00, 8.64229250e+02, 1.14386597e+03}, {0.0, 0.0, 1.0}};
 
   double mat_dist_coeffs_pinhole[1][5] = {{0.00697532, -0.00194599, 0.00243645, 0.00061587, 0.00020362}};
-  double mat_camera_matrix_coeff_pinhole[3][3] = {{8.65569129e+02, 0.0, 1.95015357e+03}, {0.0, 8.64229250e+02, 1.15323758e+03}, {0.0, 0.0, 1.0}};
+  double mat_camera_matrix_coeff_pinhole[3][3] = {{900, 0.0, 1920}, {0.0, 900, 1080}, {0.0, 0.0, 1.0}};
 
   cv::Mat _distCoeffs_fisheye = Mat(4, 1, CV_64F, mat_dist_coeffs_fisheye);
   cv::Mat _cameraMatrix_fisheye = Mat(3, 3, CV_64F, mat_camera_matrix_coeff_fisheye);
@@ -100,9 +102,6 @@ private:
   visualization_msgs::msg::Marker marker, center_marker;
 
   visualization_msgs::msg::Marker transformed_marker;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_, marker_pub_;
-
-  visualization_msgs::msg::MarkerArray lastEnnemiesMarkers, ennemiesMarkersOnThisCycle;
 
   rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
   rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;

@@ -272,23 +272,23 @@ void Assurancetourix::simulation_marker_callback() {
   webots_marker.text = "test";
   webots_marker.id = id;
   marker_array_ennemies.markers.push_back(webots_marker);
-  marker_array_ennemies.markers.push_back(predictEnnemiesPos(webots_marker));
+  marker_array_ennemies.markers.push_back(predict_enemies_pos(webots_marker));
 
   transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
-  lastEnnemiesMarkers = ennemiesMarkersOnThisCycle;
-  ennemiesMarkersOnThisCycle.markers.clear();
+  last_enemies_markers = enemies_markers_on_this_cycle;
+  enemies_markers_on_this_cycle.markers.clear();
 
   transformed_marker_pub_allies_->publish(marker_array_allies);
 }
 #endif // SIMULATION
 
-visualization_msgs::msg::Marker Assurancetourix::predictEnnemiesPos(visualization_msgs::msg::Marker detectedMarker){
-  ennemiesMarkersOnThisCycle.markers.push_back(detectedMarker);
-  for(int i = 0; i< int(lastEnnemiesMarkers.markers.size()); i++ ){
-    if (lastEnnemiesMarkers.markers[i].id == detectedMarker.id){
+visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualization_msgs::msg::Marker detectedMarker){
+  enemies_markers_on_this_cycle.markers.push_back(detectedMarker);
+  for(int i = 0; i< int(last_enemies_markers.markers.size()); i++ ){
+    if (last_enemies_markers.markers[i].id == detectedMarker.id){
       visualization_msgs::msg::Marker predictedMarker = detectedMarker;
-      predictedMarker.pose.position.x += detectedMarker.pose.position.x - lastEnnemiesMarkers.markers[i].pose.position.x;
-      predictedMarker.pose.position.y += detectedMarker.pose.position.y - lastEnnemiesMarkers.markers[i].pose.position.y;
+      predictedMarker.pose.position.x += detectedMarker.pose.position.x - last_enemies_markers.markers[i].pose.position.x;
+      predictedMarker.pose.position.y += detectedMarker.pose.position.y - last_enemies_markers.markers[i].pose.position.y;
       predictedMarker.id = detectedMarker.id + 10;
       predictedMarker.header.stamp = this->get_clock()->now();
       predictedMarker.color.r = 0;
