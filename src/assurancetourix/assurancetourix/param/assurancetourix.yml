@@ -19,7 +19,7 @@ assurancetourix:
     image_post_processing:
       show_image: true
     arucos:
-      small_aruco_size: 0.07
+      small_aruco_size: 0.067
       huge_aruco_size: 0.115
       asterix:
         side_right: 172

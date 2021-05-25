@@ -570,9 +570,27 @@ void Assurancetourix::estimate_arucos_poses() {
       compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _center_detected_id, markers_camera_relative);
     }
     if (_small_detected_ids.size() > 0){
-      std::vector<cv::Vec3d> rvecs, tvecs;
-      cv::aruco::estimatePoseSingleMarkers(_small_marker_corners_projection, /*small_aruco_size*/0.067, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
-      compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, _small_detected_ids, markers_camera_relative);
+      std::vector<int> corners_ids_7, corners_ids_custom_size;
+      std::vector<std::vector<cv::Point2f>> corners_7, corners_small_size;
+      for (int i = 0; i<(int)_small_detected_ids.size(); i++){
+        if (_small_detected_ids[i]<=10) {
+          corners_ids_7.push_back(_small_detected_ids[i]);
+          corners_7.push_back(_small_marker_corners_projection[i]);
+        } else {
+          corners_ids_custom_size.push_back(_small_detected_ids[i]);
+          corners_small_size.push_back(_small_marker_corners_projection[i]);
+        }
+      }
+      if (corners_ids_7.size() > 0){
+        std::vector<cv::Vec3d> rvecs, tvecs;
+        cv::aruco::estimatePoseSingleMarkers(corners_7, 0.07, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+        compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, corners_ids_7, markers_camera_relative);
+      }
+      if (corners_ids_custom_size.size() > 0) {
+        std::vector<cv::Vec3d> rvecs, tvecs;
+        cv::aruco::estimatePoseSingleMarkers(corners_small_size, 0.067, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs, tvecs);
+        compute_estimation_markers(rvecs, tvecs, marker_array_ennemies, marker_array_allies, corners_ids_custom_size, markers_camera_relative);
+      }
     }
     if (_huge_detected_ids.size() > 0){
       std::vector<cv::Vec3d> rvecs, tvecs;
