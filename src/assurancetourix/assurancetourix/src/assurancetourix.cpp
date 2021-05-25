@@ -599,8 +599,8 @@ void Assurancetourix::estimate_arucos_poses() {
     }
 
     marker_pub_->publish(markers_camera_relative);
-    transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
-    transformed_marker_pub_allies_->publish(marker_array_allies);
+    //transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
+    //transformed_marker_pub_allies_->publish(marker_array_allies);
     geometrix->compute_and_send_markers(marker_array_ennemies, marker_array_allies);
   }
 }

@@ -128,7 +128,20 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
 
   visualization_msgs::msg::MarkerArray allies_markers_to_publish, enemies_markers_to_publish;
   compute_ally_position(actual_asterix, asterix, allies_markers_to_publish);
-  compute_enemy_position(actual_first_enemy, enemies_markers_to_publish);
+  compute_ally_position(actual_obelix, obelix, allies_markers_to_publish);
+  compute_enemy_position(actual_first_enemy, enemies_markers_to_publish, true);
+  compute_enemy_position(actual_second_enemy, enemies_markers_to_publish, false);
+
+  int size_enemies_markers_array = (int)enemies_markers_to_publish.markers.size();
+  for (int i = 0; i < size_enemies_markers_array; i++){
+    enemies_markers_to_publish.markers.push_back(node->predict_enemies_pos(enemies_markers_to_publish.markers[i]));
+  }
+
+  node->transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
+  node->transformed_marker_pub_allies_->publish(marker_array_allies);
+
+  node->last_enemies_markers = node->enemies_markers_on_this_cycle;
+  node->enemies_markers_on_this_cycle.markers.clear();
 }
 
 void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish){
@@ -143,7 +156,7 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     if (ally_marker_array.markers[i].id == ally.arucos[1] || ally_marker_array.markers[i].id == ally.arucos[2]) front.markers.push_back(ally_marker_array.markers[i]);
     else if (ally_marker_array.markers[i].id == ally.arucos[4] || ally_marker_array.markers[i].id == ally.arucos[5]) back.markers.push_back(ally_marker_array.markers[i]);
     else if (ally_marker_array.markers[i].id == ally.arucos[0] || ally_marker_array.markers[i].id == ally.arucos[3]) side.markers.push_back(ally_marker_array.markers[i]);
-    else if (ally_marker_array.markers[i].id<10) top.markers.push_back(ally_marker_array.markers[i]);
+    else if (ally_marker_array.markers[i].id<=10) top.markers.push_back(ally_marker_array.markers[i]);
   }
 
   if (front.markers.size() == 2){
