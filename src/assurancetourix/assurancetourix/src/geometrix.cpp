@@ -296,6 +296,13 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       ally_marker_array.markers[0].text = "OBELIX";
       ally_marker_array.markers[0].id = 2;
     }
+    ally_marker_array.markers[0].type = 0;
+    ally_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
+    ally_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
+    ally_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
+    ally_marker_array.markers[0].scale.x = 0.2;
+    ally_marker_array.markers[0].scale.y = 0.05;
+    ally_marker_array.markers[0].scale.z = 0.05;
     allies_markers_to_publish.markers.push_back(ally_marker_array.markers[0]);
     RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     RCLCPP_INFO(node->get_logger(), "\nangle: %f", angle*180/M_PI);
@@ -323,6 +330,15 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
         if (enemy_marker_array.markers[i].id<=10) {
           if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
           else enemy_marker_array.markers[0].id = 4;
+          enemy_marker_array.markers[0].type = 3;
+          enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
+          enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
+          enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
+          enemy_marker_array.markers[0].scale.x = 0.4;
+          enemy_marker_array.markers[0].scale.y = 0.4;
+          enemy_marker_array.markers[0].scale.z = 0.1;
+          tf2::Quaternion q(0,0,0,1);
+          enemy_marker_array.markers[0].pose.orientation = tf2::toMsg(q);
           enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
           return;
         }
@@ -360,7 +376,17 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
     }
     if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
     else enemy_marker_array.markers[0].id = 4;
+    enemy_marker_array.markers[0].type = 3;
+    enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
+    enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
+    enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
+    enemy_marker_array.markers[0].scale.x = 0.4;
+    enemy_marker_array.markers[0].scale.y = 0.4;
+    enemy_marker_array.markers[0].scale.z = 0.1;
     enemy_marker_array.markers[0].pose.position = avg_point;
+    tf2::Quaternion q(0,0,0,1);
+    enemy_marker_array.markers[0].pose.orientation = tf2::toMsg(q);
+
     RCLCPP_WARN(node->get_logger(), "\nenemy markers");
     RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);

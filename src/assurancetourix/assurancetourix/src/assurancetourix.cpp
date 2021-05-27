@@ -304,8 +304,10 @@ visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualizati
       predictedMarker.pose.position.y += detectedMarker.pose.position.y - last_enemies_markers.markers[i].pose.position.y;
       predictedMarker.id = detectedMarker.id + 10;
       predictedMarker.header.stamp = this->get_clock()->now();
-      predictedMarker.color.r = 0;
-      predictedMarker.color.g = 255;
+      predictedMarker.color.r = 185.0;
+      predictedMarker.color.g = 76.0;
+      predictedMarker.color.b = 225.0;
+      predictedMarker.color.a = 0.5;
       return predictedMarker;
     }
   }
