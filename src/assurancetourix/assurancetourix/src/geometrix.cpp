@@ -137,8 +137,8 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
     enemies_markers_to_publish.markers.push_back(node->predict_enemies_pos(enemies_markers_to_publish.markers[i]));
   }
 
-  node->transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
-  node->transformed_marker_pub_allies_->publish(marker_array_allies);
+  node->transformed_marker_pub_ennemies_->publish(enemies_markers_to_publish);
+  node->transformed_marker_pub_allies_->publish(allies_markers_to_publish);
 
   node->last_enemies_markers = node->enemies_markers_on_this_cycle;
   node->enemies_markers_on_this_cycle.markers.clear();
@@ -170,7 +170,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     avg_point.x += (middle.x + ally.front_x_offset*vec.x());
     avg_point.y += (middle.y + ally.front_x_offset*vec.y());
     avg_angle.push_back( ( get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation) )/2);
-    //avg_angle += normalize_angle((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2);
     RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2)*180/M_PI);
 
   }
@@ -186,7 +185,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     RCLCPP_INFO(node->get_logger(), "\nback");
     RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
     avg_angle.push_back((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI);
-    //avg_angle += normalize_angle((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI);
     RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI)*180/M_PI);
   }
 
@@ -200,12 +198,10 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     if (side.markers[0].id == ally.arucos[0]){
       RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
       avg_angle.push_back(marker_yaw + M_PI/2);
-      //avg_angle += normalize_angle(marker_yaw + M_PI/2);
     }
     else{
       RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
       avg_angle.push_back(marker_yaw - M_PI/2);
-      //avg_angle += normalize_angle(marker_yaw - M_PI/2);
     }
   }
 
@@ -225,7 +221,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation));
-        //avg_angle += normalize_angle(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation));
         RCLCPP_INFO(node->get_logger(), "\ntop+front_right");
         RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
         RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation)))*180/M_PI);
@@ -235,7 +230,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation));
-        //avg_angle += normalize_angle(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation));
         RCLCPP_INFO(node->get_logger(), "\ntop+front_left");
         RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
         RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation)))*180/M_PI);
@@ -257,7 +251,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation) - M_PI);
-        //avg_angle += normalize_angle(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation) - M_PI);
         RCLCPP_INFO(node->get_logger(), "\ntop+back_right");
         RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
         RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation)- M_PI))*180/M_PI);
@@ -267,7 +260,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation) - M_PI);
-        //avg_angle += normalize_angle(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation) - M_PI);
         RCLCPP_INFO(node->get_logger(), "\ntop+back_left");
         RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
         RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation)- M_PI))*180/M_PI);
