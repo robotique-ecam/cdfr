@@ -274,8 +274,21 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       }
     }
 
-    if (side.markers.size() > 0){
-      //TODO
+    if (side.markers.size() == 1){
+      considered++;
+      avg_point.x += top.markers[0].pose.position.x;
+      avg_point.y += top.markers[0].pose.position.y;
+      RCLCPP_INFO(node->get_logger(), "\ntop + side");
+      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
+      double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
+      if (side.markers[0].id == ally.arucos[0]){
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
+        avg_angle.push_back(marker_yaw + M_PI/2);
+      }
+      else{
+        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
+        avg_angle.push_back(marker_yaw - M_PI/2);
+      }
     }
   }
 
