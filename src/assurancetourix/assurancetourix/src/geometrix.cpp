@@ -96,36 +96,6 @@ void Geometrix::compute_and_send_markers(visualization_msgs::msg::MarkerArray &m
     else if (is_this_unknown_marker_enemy(unknown_enemies.markers[i], actual_second_enemy)) actual_second_enemy.markers.push_back(unknown_enemies.markers[i]);
   }
 
-  RCLCPP_INFO(node->get_logger(), "\nAsterix markers");
-  for (int i = 0; i<(int)actual_asterix.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", actual_asterix.markers[i].id);
-  }
-
-  RCLCPP_INFO(node->get_logger(), "\nObelix markers");
-  for (int i = 0; i<(int)actual_obelix.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", actual_obelix.markers[i].id);
-  }
-
-  RCLCPP_INFO(node->get_logger(), "\nFirst enemy markers");
-  for (int i = 0; i<(int)actual_first_enemy.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", actual_first_enemy.markers[i].id);
-  }
-
-  RCLCPP_INFO(node->get_logger(), "\nSecond enemy markers");
-  for (int i = 0; i<(int)actual_second_enemy.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", actual_second_enemy.markers[i].id);
-  }
-
-  RCLCPP_INFO(node->get_logger(), "\nUnknown enemy markers");
-  for (int i = 0; i<(int)unknown_enemies.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", unknown_enemies.markers[i].id);
-  }
-
-  RCLCPP_INFO(node->get_logger(), "\nUnknown ally markers");
-  for (int i = 0; i<(int)unknown_allies.markers.size(); i++){
-    RCLCPP_INFO(node->get_logger(), "%d", unknown_allies.markers[i].id);
-  }
-
   visualization_msgs::msg::MarkerArray allies_markers_to_publish, enemies_markers_to_publish;
   compute_ally_position(actual_asterix, asterix, allies_markers_to_publish);
   compute_ally_position(actual_obelix, obelix, allies_markers_to_publish);
@@ -165,13 +135,9 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     int front_left_index = (front_right_index+1) % 2;
     tf2::Vector3 vec = get_perpandicular_vector_from_markers(front.markers[front_left_index], front.markers[front_right_index], true);
     geometry_msgs::msg::Point middle = middle_point(front.markers[0], front.markers[1]);
-    RCLCPP_INFO(node->get_logger(), "\nfront");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
     avg_point.x += (middle.x + ally.front_x_offset*vec.x());
     avg_point.y += (middle.y + ally.front_x_offset*vec.y());
     avg_angle.push_back( ( get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation) )/2);
-    RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(front.markers[0].pose.orientation) + get_yaw_from_quaternion(front.markers[1].pose.orientation))/2)*180/M_PI);
-
   }
 
   if (back.markers.size() == 2){
@@ -182,10 +148,7 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     geometry_msgs::msg::Point middle = middle_point(back.markers[0], back.markers[1]);
     avg_point.x += (middle.x + ally.front_x_offset*vec.x());
     avg_point.y += (middle.y + ally.front_x_offset*vec.y());
-    RCLCPP_INFO(node->get_logger(), "\nback");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", middle.x + ally.front_x_offset*vec.x(), middle.y + ally.front_x_offset*vec.y());
     avg_angle.push_back((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI);
-    RCLCPP_INFO(node->get_logger(), "\nangle: %f", ((get_yaw_from_quaternion(back.markers[0].pose.orientation) + get_yaw_from_quaternion(back.markers[1].pose.orientation))/2 - M_PI)*180/M_PI);
   }
 
   if (side.markers.size() == 1){
@@ -193,14 +156,10 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
     avg_point.x += side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI);
     avg_point.y += side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI);
-    RCLCPP_INFO(node->get_logger(), "\nside");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI), side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI));
     if (side.markers[0].id == ally.arucos[0]){
-      RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
       avg_angle.push_back(marker_yaw + M_PI/2);
     }
     else{
-      RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
       avg_angle.push_back(marker_yaw - M_PI/2);
     }
   }
@@ -221,18 +180,12 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation));
-        RCLCPP_INFO(node->get_logger(), "\ntop+front_right");
-        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_right_index].pose.orientation)))*180/M_PI);
       }
       if (front_left_index != -1){
         considered +=1;
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation));
-        RCLCPP_INFO(node->get_logger(), "\ntop+front_left");
-        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(front.markers[front_left_index].pose.orientation)))*180/M_PI);
       }
     }
 
@@ -251,18 +204,12 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation) - M_PI);
-        RCLCPP_INFO(node->get_logger(), "\ntop+back_right");
-        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_right_index].pose.orientation)- M_PI))*180/M_PI);
       }
       if (back_left_index != -1){
         considered +=1;
         avg_point.x += top.markers[0].pose.position.x;
         avg_point.y += top.markers[0].pose.position.y;
         avg_angle.push_back(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation) - M_PI);
-        RCLCPP_INFO(node->get_logger(), "\ntop+back_left");
-        RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (normalize_angle(get_yaw_from_quaternion(back.markers[back_left_index].pose.orientation)- M_PI))*180/M_PI);
       }
     }
 
@@ -270,15 +217,11 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       considered++;
       avg_point.x += top.markers[0].pose.position.x;
       avg_point.y += top.markers[0].pose.position.y;
-      RCLCPP_INFO(node->get_logger(), "\ntop + side");
-      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", top.markers[0].pose.position.x, top.markers[0].pose.position.y);
       double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
       if (side.markers[0].id == ally.arucos[0]){
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw + M_PI/2)*180/M_PI);
         avg_angle.push_back(marker_yaw + M_PI/2);
       }
       else{
-        RCLCPP_INFO(node->get_logger(), "\nangle: %f", (marker_yaw - M_PI/2)*180/M_PI);
         avg_angle.push_back(marker_yaw - M_PI/2);
       }
     }
@@ -309,8 +252,6 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     ally_marker_array.markers[0].scale.y = 0.05;
     ally_marker_array.markers[0].scale.z = 0.05;
     allies_markers_to_publish.markers.push_back(ally_marker_array.markers[0]);
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
-    RCLCPP_INFO(node->get_logger(), "\nangle: %f", angle*180/M_PI);
   }
 
 }
@@ -326,8 +267,6 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
         avg_point.x += enemy_marker_array.markers[0].pose.position.x - enemies.x_y_offset * cos(angle);
         avg_point.y += enemy_marker_array.markers[0].pose.position.y - enemies.x_y_offset * sin(angle);
       }
-      RCLCPP_INFO(node->get_logger(), "\nenemy 1 markers");
-      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     }
     else if (enemy_marker_array.markers.size() == 2){
 
@@ -353,8 +292,6 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
         avg_point.x += (enemy_marker_array.markers[i].pose.position.x - enemies.x_y_offset * cos(angle))/2;
         avg_point.y += (enemy_marker_array.markers[i].pose.position.y - enemies.x_y_offset * sin(angle))/2;
       }
-      RCLCPP_INFO(node->get_logger(), "\nenemy 2 markers");
-      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     }
     else if (enemy_marker_array.markers.size() == 3){
       geometry_msgs::msg::Point top, lat_avg;
@@ -376,8 +313,6 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
         avg_point.x = (lat_avg.x + top.x)/3;
         avg_point.y = (lat_avg.y + top.y)/3;
       }
-      RCLCPP_INFO(node->get_logger(), "\nenemy 3 markers");
-      RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     }
     if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
     else enemy_marker_array.markers[0].id = 4;
@@ -391,9 +326,6 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
     enemy_marker_array.markers[0].pose.position = avg_point;
     tf2::Quaternion q(0,0,0,1);
     enemy_marker_array.markers[0].pose.orientation = tf2::toMsg(q);
-
-    RCLCPP_WARN(node->get_logger(), "\nenemy markers");
-    RCLCPP_INFO(node->get_logger(), "\nx: %f, y; %f", avg_point.x, avg_point.y);
     enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[0]);
   }
 }
