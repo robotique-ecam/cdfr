@@ -49,6 +49,9 @@ private:
   double get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q);
   double normalize_angle(double angle);
 
+  std::vector<double> ally_scale, enemy_scale;
+  uint ally_type, enemy_type;
+
   Assurancetourix* node;
 
   tf2::Vector3 z_axis;

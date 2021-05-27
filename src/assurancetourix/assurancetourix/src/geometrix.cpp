@@ -27,6 +27,11 @@ void Geometrix::init_parameters(){
   node->declare_parameter("arucos.enemies.x_y_offset");
   node->declare_parameter("arucos.enemies.arucos");
 
+  node->declare_parameter("rviz_settings.ally_scale");
+  node->declare_parameter("rviz_settings.enemy_scale");
+  node->declare_parameter("rviz_settings.ally_type");
+  node->declare_parameter("rviz_settings.enemy_type");
+
   node->get_parameter_or<int>("arucos.asterix.side_right", asterix.arucos[0], 172);
   node->get_parameter_or<int>("arucos.asterix.front_right", asterix.arucos[1], 173);
   node->get_parameter_or<int>("arucos.asterix.front_left", asterix.arucos[2], 174);
@@ -51,6 +56,11 @@ void Geometrix::init_parameters(){
   std::vector<double> arucos;
   node->get_parameter_or<std::vector<double>>("arucos.enemies.arucos", arucos, {0.0});
   for (int i = 0; i<(int)arucos.size(); i++) enemies.arucos.push_back((int)arucos[i]);
+
+  node->get_parameter_or<std::vector<double>>("rviz_settings.ally_scale", ally_scale, {0.2, 0.05, 0.05});
+  node->get_parameter_or<std::vector<double>>("rviz_settings.enemy_scale", enemy_scale, {0.4, 0.4, 0.1});
+  node->get_parameter_or<uint>("rviz_settings.ally_type", ally_type, 0);
+  node->get_parameter_or<uint>("rviz_settings.enemy_type", enemy_type, 3);
 }
 
 int Geometrix::ally_or_enemy(int id){
@@ -156,12 +166,8 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
     double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
     avg_point.x += side.markers[0].pose.position.x + ally.side_y_offset*cos(marker_yaw + M_PI);
     avg_point.y += side.markers[0].pose.position.y + ally.side_y_offset*sin(marker_yaw + M_PI);
-    if (side.markers[0].id == ally.arucos[0]){
-      avg_angle.push_back(marker_yaw + M_PI/2);
-    }
-    else{
-      avg_angle.push_back(marker_yaw - M_PI/2);
-    }
+    if (side.markers[0].id == ally.arucos[0]) avg_angle.push_back(marker_yaw + M_PI/2);
+    else avg_angle.push_back(marker_yaw - M_PI/2);
   }
 
   if (top.markers.size() == 1){
@@ -218,12 +224,8 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       avg_point.x += top.markers[0].pose.position.x;
       avg_point.y += top.markers[0].pose.position.y;
       double marker_yaw = get_yaw_from_quaternion(side.markers[0].pose.orientation);
-      if (side.markers[0].id == ally.arucos[0]){
-        avg_angle.push_back(marker_yaw + M_PI/2);
-      }
-      else{
-        avg_angle.push_back(marker_yaw - M_PI/2);
-      }
+      if (side.markers[0].id == ally.arucos[0]) avg_angle.push_back(marker_yaw + M_PI/2);
+      else avg_angle.push_back(marker_yaw - M_PI/2);
     }
   }
 
@@ -244,13 +246,13 @@ void Geometrix::compute_ally_position(visualization_msgs::msg::MarkerArray &ally
       ally_marker_array.markers[0].text = "OBELIX";
       ally_marker_array.markers[0].id = 2;
     }
-    ally_marker_array.markers[0].type = 0;
-    ally_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
-    ally_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
-    ally_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
-    ally_marker_array.markers[0].scale.x = 0.2;
-    ally_marker_array.markers[0].scale.y = 0.05;
-    ally_marker_array.markers[0].scale.z = 0.05;
+    ally_marker_array.markers[0].type = ally_type;
+    ally_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? node->yellow_color_aruco[0] : node->blue_color_aruco[0];
+    ally_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? node->yellow_color_aruco[1] : node->blue_color_aruco[1];
+    ally_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? node->yellow_color_aruco[2] : node->blue_color_aruco[2];
+    ally_marker_array.markers[0].scale.x = ally_scale[0];
+    ally_marker_array.markers[0].scale.y = ally_scale[1];
+    ally_marker_array.markers[0].scale.z = ally_scale[2];
     allies_markers_to_publish.markers.push_back(ally_marker_array.markers[0]);
   }
 
@@ -274,13 +276,13 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
         if (enemy_marker_array.markers[i].id<=10) {
           if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
           else enemy_marker_array.markers[0].id = 4;
-          enemy_marker_array.markers[0].type = 3;
-          enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
-          enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
-          enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
-          enemy_marker_array.markers[0].scale.x = 0.4;
-          enemy_marker_array.markers[0].scale.y = 0.4;
-          enemy_marker_array.markers[0].scale.z = 0.1;
+          enemy_marker_array.markers[0].type = enemy_type;
+          enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[0] : node->yellow_color_aruco[0];
+          enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[1] : node->yellow_color_aruco[1];
+          enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[2] : node->yellow_color_aruco[2];
+          enemy_marker_array.markers[0].scale.x = enemy_scale[0];
+          enemy_marker_array.markers[0].scale.y = enemy_scale[1];
+          enemy_marker_array.markers[0].scale.z = enemy_scale[2];
           tf2::Quaternion q(0,0,0,1);
           enemy_marker_array.markers[0].pose.orientation = tf2::toMsg(q);
           enemies_markers_to_publish.markers.push_back(enemy_marker_array.markers[i]);
@@ -309,20 +311,19 @@ void Geometrix::compute_enemy_position(visualization_msgs::msg::MarkerArray &ene
           lat_avg.x += lat.markers[i].pose.position.x - enemies.x_y_offset * cos(angle);
           lat_avg.y += lat.markers[i].pose.position.y - enemies.x_y_offset * sin(angle);
         }
-
         avg_point.x = (lat_avg.x + top.x)/3;
         avg_point.y = (lat_avg.y + top.y)/3;
       }
     }
     if (is_first_enemy) enemy_marker_array.markers[0].id = 3;
     else enemy_marker_array.markers[0].id = 4;
-    enemy_marker_array.markers[0].type = 3;
-    enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
-    enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? 0.0 : 255.0;
-    enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? 255.0 : 0.0;
-    enemy_marker_array.markers[0].scale.x = 0.4;
-    enemy_marker_array.markers[0].scale.y = 0.4;
-    enemy_marker_array.markers[0].scale.z = 0.1;
+    enemy_marker_array.markers[0].type = enemy_type;
+    enemy_marker_array.markers[0].color.r = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[0] : node->yellow_color_aruco[0];
+    enemy_marker_array.markers[0].color.g = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[1] : node->yellow_color_aruco[1];
+    enemy_marker_array.markers[0].color.b = (node->side.compare("yellow") == 0) ? node->blue_color_aruco[2] : node->yellow_color_aruco[2];
+    enemy_marker_array.markers[0].scale.x = enemy_scale[0];
+    enemy_marker_array.markers[0].scale.y = enemy_scale[1];
+    enemy_marker_array.markers[0].scale.z = enemy_scale[2];
     enemy_marker_array.markers[0].pose.position = avg_point;
     tf2::Quaternion q(0,0,0,1);
     enemy_marker_array.markers[0].pose.orientation = tf2::toMsg(q);

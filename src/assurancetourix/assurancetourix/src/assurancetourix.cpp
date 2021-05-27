@@ -65,8 +65,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   geometrix = new Geometrix(this);
   estimate_initial_camera_pose();
 
-  RCLCPP_WARN(this->get_logger(), "tf x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
-  assurancetourix_to_map_transformation.transform.translation.y);
+  RCLCPP_WARN(this->get_logger(), "Assurancetourix camera position guessing x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
+    assurancetourix_to_map_transformation.transform.translation.y);
 
 #endif // CAMERA
 
@@ -225,7 +225,7 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
 void Assurancetourix::simulation_marker_callback() {
   visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
   visualization_msgs::msg::Marker webots_marker;
-  webots_marker.type = robot_type;
+  webots_marker.type = aruco_element_type;
   webots_marker.color.r = 255;
   webots_marker.color.a = 1;
   webots_marker.scale.x = 0.1;
@@ -304,10 +304,10 @@ visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualizati
       predictedMarker.pose.position.y += detectedMarker.pose.position.y - last_enemies_markers.markers[i].pose.position.y;
       predictedMarker.id = detectedMarker.id + 10;
       predictedMarker.header.stamp = this->get_clock()->now();
-      predictedMarker.color.r = 185.0;
-      predictedMarker.color.g = 76.0;
-      predictedMarker.color.b = 225.0;
-      predictedMarker.color.a = 0.5;
+      predictedMarker.color.r = prediction_color[0];
+      predictedMarker.color.g = prediction_color[1];
+      predictedMarker.color.b = prediction_color[2];
+      predictedMarker.color.a = prediction_color[3];
       return predictedMarker;
     }
   }
@@ -332,12 +332,13 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
 #endif // SIMULATION
 
-  this->declare_parameter("rviz_settings.blue_color_ArUco");
-  this->declare_parameter("rviz_settings.yellow_color_ArUco");
-  this->declare_parameter("rviz_settings.default_color_ArUco");
-  this->declare_parameter("rviz_settings.arrow_scale");
+  this->declare_parameter("rviz_settings.blue_color_aruco");
+  this->declare_parameter("rviz_settings.yellow_color_aruco");
+  this->declare_parameter("rviz_settings.prediction_color");
+  this->declare_parameter("rviz_settings.default_color_aruco");
+  this->declare_parameter("rviz_settings.aruco_element_scale");
   this->declare_parameter("rviz_settings.game_elements_scale");
-  this->declare_parameter("rviz_settings.robot_type");
+  this->declare_parameter("rviz_settings.aruco_element_type");
   this->declare_parameter("rviz_settings.game_element_type");
   this->declare_parameter("rviz_settings.lifetime_sec");
   this->declare_parameter("rviz_settings.header_frame_id");
@@ -345,12 +346,13 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("topic_for_allies_position");
   this->declare_parameter("side");
 
-  this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_ArUco", blue_color_ArUco, {0.0, 0.0, 255.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_ArUco", yellow_color_ArUco, {255.0, 255.0, 0.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_ArUco", default_color_ArUco, {120.0, 120.0, 120.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.arrow_scale", arrow_scale, {0.05, 0.05, 0.05});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_aruco", blue_color_aruco, {0.0, 0.0, 255.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_aruco", yellow_color_aruco, {255.0, 255.0, 0.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.prediction_color", prediction_color, {185.0, 76.0, 225.0, 0.5});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_aruco", default_color_aruco, {120.0, 120.0, 120.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.aruco_element_scale", aruco_element_scale, {0.05, 0.05, 0.05});
   this->get_parameter_or<std::vector<double>>("rviz_settings.game_elements_scale", game_elements_scale, {0.07, 0.07, 0.01});
-  this->get_parameter_or<uint>("rviz_settings.robot_type", robot_type, 2);
+  this->get_parameter_or<uint>("rviz_settings.aruco_element_type", aruco_element_type, 2);
   this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
   this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
@@ -382,7 +384,7 @@ void Assurancetourix::detection_timer_callback_routine() {
   marker.pose.position.x = 0;
   marker.pose.position.y = 0;
   marker.pose.position.z = 0;
-  marker.type = robot_type;
+  marker.type = aruco_element_type;
   marker.color.r = 255;
   marker.color.g = 0;
   marker.color.b = 0;
@@ -560,11 +562,13 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     int marker_type = geometrix->ally_or_enemy(marker.id);
 
     if ((marker.id <= 5 && 1 <= marker.id)) {
-      set_vision_for_rviz(blue_color_ArUco, arrow_scale, robot_type);
-    } else if ((marker.id <= 10) && (6 <= marker.id)) {
-      set_vision_for_rviz(yellow_color_ArUco, arrow_scale, robot_type);
+      set_vision_for_rviz(blue_color_aruco, aruco_element_scale, aruco_element_type);
+    } else if (marker.id <= 10) {
+      set_vision_for_rviz(yellow_color_aruco, aruco_element_scale, aruco_element_type);
+    } else if (marker.id <= 50) {
+      set_vision_for_rviz(default_color_aruco, game_elements_scale, game_element_type);
     } else {
-      set_vision_for_rviz(default_color_ArUco, arrow_scale, robot_type);
+      set_vision_for_rviz(prediction_color, aruco_element_scale, aruco_element_type);
     }
 
     if (marker_type == 0) marker_array_allies.markers.push_back(transformed_marker);

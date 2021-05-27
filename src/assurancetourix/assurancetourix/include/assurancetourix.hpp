@@ -33,6 +33,7 @@ public:
   Assurancetourix();
   ~Assurancetourix();
   visualization_msgs::msg::Marker predict_enemies_pos(visualization_msgs::msg::Marker detectedMarkers);
+  std::vector<double> blue_color_aruco, yellow_color_aruco;
   visualization_msgs::msg::MarkerArray last_enemies_markers, enemies_markers_on_this_cycle;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr transformed_marker_pub_ennemies_, transformed_marker_pub_allies_, marker_pub_;
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_transformation;
@@ -110,8 +111,8 @@ private:
   double huge_aruco_size, small_aruco_size;
   int lifetime_sec, lifetime_nano_sec, exposure;
   bool show_image, savedeee;
-  uint robot_type, game_element_type;
-  std::vector<double> blue_color_ArUco, yellow_color_ArUco, default_color_ArUco, arrow_scale, game_elements_scale, _enemies_arucos_nb;
+  uint aruco_element_type, game_element_type;
+  std::vector<double> prediction_color, default_color_aruco, aruco_element_scale, game_elements_scale, _enemies_arucos_nb;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, allies_positions_topic;
 
   Geometrix* geometrix;

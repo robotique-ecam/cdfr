@@ -45,12 +45,17 @@ assurancetourix:
         x_y_offset: 0.05
         arucos: [192.0, 193.0, 194.0, 195.0]
     rviz_settings:
-      blue_color_ArUco: [0.0, 0.0, 255.0]
-      yellow_color_ArUco: [255.0,255.0,0.0]
-      default_color_ArUco: [120.0,120.0,120.0]
-      arrow_scale: [0.05,0.05,0.05]
+      blue_color_aruco: [0.0, 0.0, 255.0]
+      yellow_color_aruco: [255.0,255.0,0.0]
+      prediction_color: [107.0, 1.0, 125.0, 0.5]
+      default_color_aruco: [120.0,120.0,120.0]
+      aruco_element_scale: [0.05,0.05,0.05]
       game_elements_scale: [0.07,0.07,0.01]
-      robot_type: 2
+      ally_scale: [0.2, 0.05, 0.05]
+      enemy_scale: [0.4, 0.4, 0.1]
+      aruco_element_type: 2
+      ally_type: 0
+      enemy_type: 3
       game_element_type: 1
       lifetime_sec: 5
       header_frame_id: "assurancetourix"
