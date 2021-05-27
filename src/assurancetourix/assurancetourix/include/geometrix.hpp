@@ -23,6 +23,7 @@ public:
   ~Geometrix();
   void compute_and_send_markers(visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies);
   int ally_or_enemy(int id);
+  double mean_angle(std::vector<double> &angles);
 
   Ally asterix;
   Ally obelix;
@@ -47,7 +48,6 @@ private:
   void compute_ally_position(visualization_msgs::msg::MarkerArray &ally_marker_array, Ally &ally, visualization_msgs::msg::MarkerArray &allies_markers_to_publish);
   double get_yaw_from_quaternion(geometry_msgs::msg::Quaternion &q);
   double normalize_angle(double angle);
-  double mean_angle(std::vector<double> &angles);
 
   Assurancetourix* node;
 

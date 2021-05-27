@@ -62,7 +62,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
     _parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
 
-
   geometrix = new Geometrix(this);
   estimate_initial_camera_pose();
 
@@ -84,20 +83,34 @@ void Assurancetourix::estimate_initial_camera_pose(){
   for (int i = 0; i<10; i++){
     geometry_msgs::msg::Vector3 initial_center_point;
     tf2::Quaternion initial_center_q;
-    int sample_nb = 5;
+    int sample_nb = 25;
+    std::vector<double> roll_vec, pitch_vec, yaw_vec;
+    int considered = 0;
 
     for (int i=0; i<sample_nb; i++){
       get_image();
       _detect_aruco(_anotated);
       estimate_arucos_poses();
-      initial_center_point.x += center_marker.pose.position.x/sample_nb;
-      initial_center_point.y += center_marker.pose.position.y/sample_nb;
-      initial_center_point.z += center_marker.pose.position.z/sample_nb;
-      tf2::Quaternion q;
-      tf2::fromMsg(center_marker.pose.orientation, q);
-      if (i==0) initial_center_q=q;
-      else initial_center_q.slerp(q, 1/sample_nb);
+      if (center_marker.pose.position.x!=0 && center_marker.pose.position.y!=0 && center_marker.pose.position.z!=0){
+        initial_center_point.x += center_marker.pose.position.x;
+        initial_center_point.y += center_marker.pose.position.y;
+        initial_center_point.z += center_marker.pose.position.z;
+        tf2::Quaternion q_tf2;
+        tf2::fromMsg(center_marker.pose.orientation, q_tf2);
+        tf2::Matrix3x3 m(q_tf2);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        roll_vec.push_back(roll);
+        pitch_vec.push_back(pitch);
+        yaw_vec.push_back(yaw);
+        considered ++;
+      }
     }
+    tf2::Quaternion q;
+    initial_center_q.setRPY(geometrix->mean_angle(roll_vec), geometrix->mean_angle(pitch_vec), geometrix->mean_angle(yaw_vec));
+    initial_center_point.x = initial_center_point.x/considered;
+    initial_center_point.y = initial_center_point.y/considered;
+    initial_center_point.z = initial_center_point.z/considered;
 
     geometry_msgs::msg::TransformStamped tf_to_center_marker, tf_from_marker_to_camera;
 
