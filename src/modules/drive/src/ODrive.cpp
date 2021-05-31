@@ -19,7 +19,6 @@ Cleanup by closing UART connection
 */
 ODrive::~ODrive()
 {
-
     flock(fd, LOCK_UN);
     close(fd);
     RCLCPP_INFO(node->get_logger(), "Odrive closed");
@@ -167,7 +166,6 @@ std::string ODrive::receive(const std::string *funct_name)
     }
 
     std::string ans = read_buf;
-    
     if (ans.length() >= 17){
       return ans.substr(0, 17);
     }
@@ -192,7 +190,7 @@ int ODrive::stop()
 /*
 send velocity, returns -1 if nothing is send, 0 else
 */
-int ODrive::setVelocity(const int motor, const float velocity)
+int ODrive::set_velocity(const int motor, const float velocity)
 {
     const std::string funct_name = "setVelocity";
     std::string msg = "v ";
@@ -210,7 +208,7 @@ int ODrive::setVelocity(const int motor, const float velocity)
 /*
 return tuple of position and velocity, returns both as -1 if request fails
 */
-std::pair<float, float> ODrive::getPosition_Velocity(const int motor)
+std::pair<float, float> ODrive::get_position_velocity(const int motor)
 {
     const std::string funct_name = "getPosition_Velocity";
     std::string msg = "f ";

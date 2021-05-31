@@ -16,8 +16,8 @@ Drive::Drive() : Node("drive_node") {
   odrive = new ODrive(_odrive_usb_port, this);
 
   /* Init speed before starting odom */
-  odrive->setVelocity(0, 0.0);
-  odrive->setVelocity(1, 0.0);
+  odrive->set_velocity(0, 0.0);
+  odrive->set_velocity(1, 0.0);
 
   double left_motor_turns_returned, right_motor_turns_returned;
   get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
@@ -155,8 +155,8 @@ float Drive::compute_velocity_cmd(double velocity) {
 
 void Drive::get_motors_turns_from_odrive(double &left, double &right){
   std::pair<float, float> left_turns_speed_returned, right_turns_speed_returned;
-  left_turns_speed_returned = odrive->getPosition_Velocity(odrive_motor_order[0]);
-  right_turns_speed_returned = odrive->getPosition_Velocity(odrive_motor_order[1]);
+  left_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[0]);
+  right_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[1]);
 
   left = double(std::get<0>(left_turns_speed_returned));
   right = double(std::get<0>(right_turns_speed_returned));
@@ -173,8 +173,8 @@ void Drive::update_velocity() {
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
-  odrive->setVelocity(odrive_motor_order[0], cmd_odrive_left);
-  odrive->setVelocity(odrive_motor_order[1], cmd_odrive_right);
+  odrive->set_velocity(odrive_motor_order[0], cmd_odrive_left);
+  odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
 
   double left_motor_turns_returned, right_motor_turns_returned;
   get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);

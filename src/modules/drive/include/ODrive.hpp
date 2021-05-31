@@ -51,11 +51,11 @@ public:
     ~ODrive();
 
     // Commands
-    int setVelocity(const int motor, const float velocity);
+    int set_velocity(const int motor, const float velocity);
     int stop();
 
     // Getters
-    std::pair<float, float> getPosition_Velocity(const int motor_number);
+    std::pair<float, float> get_position_velocity(const int motor_number);
 
     // General helper functions
     int checksum(const std::string cmd);
