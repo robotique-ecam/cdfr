@@ -1,4 +1,4 @@
-#ifdef USE_I2C
+#ifndef SIMULATION
 
 #include <i2c.hpp>
 

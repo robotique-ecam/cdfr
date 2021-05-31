@@ -67,7 +67,6 @@ add_executable(${EXEC_NAME}
 )
 
 option(DEBUG "Debug mode" OFF)
-option(USE_I2C "I2C mode" OFF)
 option(SIMULATION "Simulation mode" OFF)
 option(TIMER "Enable Wall Timer for odometry" ON)
 
@@ -84,10 +83,7 @@ else()
   if (DEBUG)
     add_definitions(-DDEBUG)
   endif()
-  if (USE_I2C)
-    add_definitions(-DUSE_I2C)
-    target_link_libraries(${EXEC_NAME} i2c)
-  endif()
+  target_link_libraries(${EXEC_NAME} i2c)
 endif()
 
 

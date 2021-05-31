@@ -16,7 +16,6 @@ def generate_launch_description():
     use_namespace = LaunchConfiguration("use_namespace")
     use_sim_time = LaunchConfiguration("use_sim_time")
     params = LaunchConfiguration("params_file")
-    use_odrive = LaunchConfiguration("use_odrive")
 
     remappings = [("/tf", "tf"), ("/tf_static", "tf_static")]
 
@@ -31,11 +30,6 @@ def generate_launch_description():
             DeclareLaunchArgument("params_file", description="Interfaces params file"),
             DeclareLaunchArgument(
                 "use_sim_time", default_value="false", description="Use /clock if true"
-            ),
-            DeclareLaunchArgument(
-                "use_odrive",
-                default_value="false",
-                description="Whether to launch odrive node",
             ),
             GroupAction(
                 [

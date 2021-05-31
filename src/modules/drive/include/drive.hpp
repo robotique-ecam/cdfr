@@ -2,18 +2,19 @@
 #define DRIVE_NODE_HPP
 
 #ifndef SIMULATION
-#include <ODrive.hpp>
 
-#ifdef USE_I2C
+#include <ODrive.hpp>
 #include "i2c.hpp"
-#endif //USE_I2C
 
 #else
+
 #include <limits>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
+
 #endif //SIMULATION
+
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "actuators_srvs/srv/slider.hpp"
@@ -72,12 +73,10 @@ private:
   ODrive *odrive;
   void get_motors_turns_from_odrive(double &left, double &right);
   float compute_velocity_cmd(double velocity);
-#ifdef USE_I2C
-  // For communicating with ATTiny85 over I2C
+  // For communicating with the slider over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
   std::mutex i2c_mutex;
-#endif//I2C
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor
@@ -89,7 +88,7 @@ private:
   rclcpp::TimerBase::SharedPtr time_stepper_;
   void sim_step();
   rclcpp::Time get_sim_time();
-#endif
+#endif //SIMULATION
 
   // ROS time
   rclcpp::Time

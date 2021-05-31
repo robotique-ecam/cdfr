@@ -10,10 +10,8 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
 #ifndef SIMULATION
-#ifdef USE_I2C
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
-#endif//I2C
 
   odrive = new ODrive(_odrive_usb_port, this);
 
@@ -87,10 +85,8 @@ void Drive::init_parameters() {
 
 // Get parameters from yaml
 #ifndef SIMULATION
-#ifdef USE_I2C
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
-#endif//I2C
   this->declare_parameter("gearbox_ratio");
   this->declare_parameter("odrive_usb_port");
   this->declare_parameter("invert_wheel");
@@ -309,7 +305,7 @@ void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> reques
 
 void Drive::handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
                                        const actuators_srvs::srv::Slider::Response::SharedPtr response) {
-#ifdef USE_I2C
+#ifndef SIMULATION
   this->i2c_mutex.lock();
 
   this->i2c->set_address(I2C_ADDR_SLIDER);
