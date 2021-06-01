@@ -35,7 +35,7 @@ class VlxReadjustment:
             self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
         else:
             self.sim_offset = 0.0
-            self.sensors = Sensors(addrs=[30, 31, 32, 33, 34, 35])
+            self.sensors = Sensors(addrs=[0x30, 0x31, 0x32, 0x33, 0x34, 0x35])
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
