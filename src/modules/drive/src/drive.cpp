@@ -1,7 +1,5 @@
 #include <drive.hpp>
 
-#define I2C_ADDR_MOTOR_LEFT 0x10
-#define I2C_ADDR_MOTOR_RIGHT 0x11
 #define I2C_ADDR_SLIDER 0x12
 
 Drive::Drive() : Node("drive_node") {
@@ -15,13 +13,18 @@ Drive::Drive() : Node("drive_node") {
   /* Open I2C connection */
   i2c = std::make_shared<I2C>(i2c_bus);
 
+  odrive = new ODrive(_odrive_usb_port, this);
+
   /* Init speed before starting odom */
-  this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->read_word_data(0);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->read_word_data(0);
-  this->i2c_mutex.unlock();
+  odrive->set_velocity(0, 0.0);
+  odrive->set_velocity(1, 0.0);
+
+  double left_motor_turns_returned, right_motor_turns_returned;
+  get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
+
+  old_motor_turns_returned.left = left_motor_turns_returned;
+  old_motor_turns_returned.right = right_motor_turns_returned;
+
 #else
   /* Init webots supervisor */
   std::string namespace_str(Node::get_namespace()), webots_robot_name("WEBOTS_ROBOT_NAME=");
@@ -74,44 +77,34 @@ Drive::Drive() : Node("drive_node") {
 
 void Drive::init_parameters() {
   // Declare parameters that may be set on this node
-  this->declare_parameter("accel");
   this->declare_parameter("joint_states_frame");
   this->declare_parameter("odom_frame");
   this->declare_parameter("base_frame");
-  this->declare_parameter("steps_per_turn");
-  this->declare_parameter("microsteps");
   this->declare_parameter("wheels.separation");
   this->declare_parameter("wheels.radius");
-  this->declare_parameter("microcontroler.max_steps_frequency");
-  this->declare_parameter("microcontroler.speedramp_resolution");
 
 // Get parameters from yaml
 #ifndef SIMULATION
   this->declare_parameter("i2c_bus");
   this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
+  this->declare_parameter("gearbox_ratio");
+  this->declare_parameter("odrive_usb_port");
+  this->declare_parameter("invert_wheel");
+  this->get_parameter_or<double>("gearbox_ratio", _gearbox_ratio, 1.0);
+  this->get_parameter_or<std::string>("odrive_usb_port", _odrive_usb_port, "/dev/ttyS1");
+  this->get_parameter_or<bool>("invert_wheel", _invert_wheel, false);
 #endif /* SIMULATION */
   this->get_parameter_or<std::string>("joint_states_frame", joint_states_.header.frame_id, "base_link");
   this->get_parameter_or<std::string>("odom_frame", odom_.header.frame_id, "odom");
   this->get_parameter_or<std::string>("base_frame", odom_.child_frame_id, "base_link");
-  this->get_parameter_or<int>("steps_per_turn", _steps_per_turn, 200);
-  this->get_parameter_or<int>("microsteps", _microsteps, 16);
   this->get_parameter_or<double>("wheels.separation", _wheel_separation, 0.25);
   this->get_parameter_or<double>("wheels.radius", _wheel_radius, 0.080);
-  this->get_parameter_or<int>("microcontroler.max_steps_frequency", _max_freq, 10000);
-  this->get_parameter_or<int>("microcontroler.speedramp_resolution", _speed_resolution, 128);
-  this->get_parameter_or<double>("speedramp.accel", _accel, 9.81);
+
 }
 
 void Drive::init_variables() {
   /* Compute initial values */
-  _total_steps_per_turn = _microsteps * _steps_per_turn;
-  _rads_per_step = 2 * M_PI / _total_steps_per_turn;
-  _meters_per_turn = 2 * M_PI * _wheel_radius;
-  _meters_per_step = _meters_per_turn / _total_steps_per_turn;
-
-  _speed_multiplier = _max_freq / _speed_resolution;
-  _max_speed = _max_freq * _meters_per_step;
-  _min_speed = _speed_multiplier * _meters_per_step;
+  _wheel_circumference = 2 * M_PI * _wheel_radius;
 
   joint_states_.name.push_back("wheel_left_joint");
   joint_states_.name.push_back("wheel_right_joint");
@@ -128,6 +121,10 @@ void Drive::init_variables() {
   diagnostics_array_.header.stamp = this->get_clock()->now();
 
 #ifndef SIMULATION
+  if (_invert_wheel) {
+    odrive_motor_order[0] = 1;
+    odrive_motor_order[1] = 0;
+  }
   time_since_last_sync_ = this->get_clock()->now();
 #else
   time_since_last_sync_ = get_sim_time();
@@ -148,62 +145,67 @@ void Drive::init_variables() {
   for (int i = 0; i<30; i++) _previous_tf.push_back(init_vector);
 }
 
-int8_t Drive::compute_velocity_cmd(double velocity) {
-  /* Compute absolute velocity command to be sent to microcontroler */
-  double abs_velocity = abs(velocity);
-  if (abs_velocity >= _max_speed) {
-    return (int8_t)((velocity < 0) ? (-1) : (1)) * (_speed_resolution - 1);
-  } else if (abs_velocity < _min_speed) {
-    return 0;
-  } else {
-    return (int8_t)round(velocity * (_speed_resolution - 1) / _max_speed) - ((velocity < 0) ? (1) : (0));
-  }
+#ifndef SIMULATION
+float Drive::compute_velocity_cmd(double velocity) {
+  /* Compute velocity command (in turn/s) to be sent to odrive */
+  double omega_wheel = velocity / _wheel_radius;
+  double n_wheel = omega_wheel / (2 * M_PI);
+  return float(_gearbox_ratio * n_wheel);
 }
 
+void Drive::get_motors_turns_from_odrive(double &left, double &right){
+  std::pair<float, float> left_turns_speed_returned, right_turns_speed_returned;
+  left_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[0]);
+  right_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[1]);
+
+  left = double(std::get<0>(left_turns_speed_returned));
+  right = double(std::get<0>(right_turns_speed_returned));
+}
+#endif
+
 void Drive::update_velocity() {
-  differential_speed_cmd_.left = compute_velocity_cmd(cmd_vel_.left);
-  differential_speed_cmd_.right = compute_velocity_cmd(cmd_vel_.right);
 
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
-  this->i2c_mutex.lock();
+  float cmd_odrive_left = compute_velocity_cmd(cmd_vel_.left);
+  float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  attiny_steps_returned_.left = (int32_t)(this->sign_steps_left ? -1 : 1) * (this->i2c->read_word_data(differential_speed_cmd_.left) & 0xFFF);
-  this->sign_steps_left = signbit(differential_speed_cmd_.left);
+  odrive->set_velocity(odrive_motor_order[0], cmd_odrive_left);
+  odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
 
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  attiny_steps_returned_.right = (int32_t)(this->sign_steps_right ? -1 : 1) * (this->i2c->read_word_data(differential_speed_cmd_.right) & 0xFFF);
-  this->sign_steps_right = signbit(differential_speed_cmd_.right);
+  double left_motor_turns_returned, right_motor_turns_returned;
+  get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
 
-  this->i2c_mutex.unlock();
+  if (left_motor_turns_returned == -1 || right_motor_turns_returned == -1){
+    left_motor_turns_returned = old_motor_turns_returned.left;
+    right_motor_turns_returned = old_motor_turns_returned.right;
+  }
 
-#ifdef DEBUG
-  std::cout << "---" << std::endl;
-  std::cout << "speed_cmd_.left:" << static_cast<int>(differential_speed_cmd_.left) << " speed_cmd_.right" << static_cast<int>(differential_speed_cmd_.right) << std::endl;
-  std::cout << "L" << attiny_steps_returned_.left << " R" << attiny_steps_returned_.right << std::endl;
-#endif /* DEBUG */
+  wheels_turns_returned_.left = (left_motor_turns_returned - old_motor_turns_returned.left) / _gearbox_ratio; //turns
+  wheels_turns_returned_.right = (right_motor_turns_returned - old_motor_turns_returned.right) / _gearbox_ratio; //turns
+  old_motor_turns_returned.left = left_motor_turns_returned;
+  old_motor_turns_returned.right = right_motor_turns_returned;
+
 #else
   time_since_last_sync_ = get_sim_time();
-
   wb_left_motor->setVelocity(cmd_vel_.left / _wheel_radius);
   wb_right_motor->setVelocity(cmd_vel_.right / _wheel_radius);
-  double lsteps = wp_left_encoder->getValue();
-  double rsteps = wp_right_encoder->getValue();
-  if (std::isnan(lsteps) || std::isnan(rsteps)) {
-    lsteps = rsteps = 0;
+  double lturns = wp_left_encoder->getValue(); //rad
+  double rturns = wp_right_encoder->getValue(); //rad
+  if (std::isnan(lturns) || std::isnan(rturns)) {
+    lturns = rturns = 0;
     RCLCPP_WARN(this->get_logger(), "Robot wheel encoders return NaN");
   }
-  attiny_steps_returned_.left = (lsteps - old_steps_returned.left) / _rads_per_step;
-  attiny_steps_returned_.right = (rsteps - old_steps_returned.right) / _rads_per_step;
-  old_steps_returned.left = lsteps;
-  old_steps_returned.right = rsteps;
+  wheels_turns_returned_.left = (lturns - old_turns_returned.left) / (2 * M_PI); //turns
+  wheels_turns_returned_.right = (rturns - old_turns_returned.right) / (2 * M_PI); //turns
+  old_turns_returned.left = lturns;
+  old_turns_returned.right = rturns;
 #endif /* SIMULATION */
 
-  compute_pose_velocity(attiny_steps_returned_);
+  compute_pose_velocity(wheels_turns_returned_);
   update_odometry();
   update_tf();
   update_joint_states();
@@ -216,11 +218,11 @@ void Drive::command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr
   update_velocity();
 }
 
-void Drive::compute_pose_velocity(TinyData steps_returned) {
+void Drive::compute_pose_velocity(Differential turns_returned) {
   dt = (time_since_last_sync_ - previous_time_since_last_sync_).nanoseconds() * 1e-9;
 
-  differential_move_.left = _meters_per_step * steps_returned.left;
-  differential_move_.right = _meters_per_step * steps_returned.right;
+  differential_move_.left = turns_returned.left * _wheel_circumference;
+  differential_move_.right = turns_returned.right * _wheel_circumference;
 
   differential_speed_.left = differential_move_.left / dt;
   differential_speed_.right = differential_move_.right / dt;
@@ -280,10 +282,10 @@ void Drive::update_tf() {
 
 void Drive::update_joint_states() {
   joint_states_.header.stamp = time_since_last_sync_;
-  joint_states_.position[LEFT] += attiny_steps_returned_.left * _rads_per_step;
-  joint_states_.position[RIGHT] += attiny_steps_returned_.right * _rads_per_step;
-  joint_states_.velocity[LEFT] = attiny_steps_returned_.left * _rads_per_step / dt;
-  joint_states_.velocity[RIGHT] = attiny_steps_returned_.right * _rads_per_step / dt;
+  joint_states_.position[LEFT] += wheels_turns_returned_.left * (2 * M_PI);
+  joint_states_.position[RIGHT] += wheels_turns_returned_.right * (2 * M_PI);
+  joint_states_.velocity[LEFT] = wheels_turns_returned_.left * (2 * M_PI) / dt;
+  joint_states_.velocity[RIGHT] = wheels_turns_returned_.right * (2 * M_PI) / dt;
   joint_states_pub_->publish(joint_states_);
 }
 
@@ -291,18 +293,6 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
-#ifndef SIMULATION
-  this->i2c_mutex.lock();
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, (uint8_t)1 << 4 | request->data);
-
-  this->i2c_mutex.unlock();
-#endif
-
   if (request->data) {
     response->message = "Stepper drivers are enabled";
     RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
@@ -340,7 +330,7 @@ void Drive::adjust_odometry_callback(const geometry_msgs::msg::TransformStamped:
   int right_stamp_index = 0;
   while (stamp_msg < (rclcpp::Time)_previous_tf.at(right_stamp_index).header.stamp){
     right_stamp_index++;
-    if (right_stamp_index == _previous_tf.size()) {
+    if (right_stamp_index == int(_previous_tf.size())) {
       RCLCPP_WARN(this->get_logger(), "Not enough tf stored to readjust odometry");
       return;
     }
@@ -456,13 +446,5 @@ double Drive::dummy_tree_digits_precision(double a){
 }
 
 Drive::~Drive() {
-#ifndef SIMULATION
-  this->i2c_mutex.lock();
-  this->i2c->set_address(I2C_ADDR_MOTOR_LEFT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
-  this->i2c->set_address(I2C_ADDR_MOTOR_RIGHT);
-  this->i2c->write_byte_data(STEPPER_CMD, 0x10);
-  this->i2c_mutex.unlock();
-#endif /* SIMULATION */
   RCLCPP_INFO(this->get_logger(), "Drive Node Terminated");
 }

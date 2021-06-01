@@ -2,13 +2,19 @@
 #define DRIVE_NODE_HPP
 
 #ifndef SIMULATION
+
+#include <ODrive.hpp>
 #include "i2c.hpp"
+
 #else
+
 #include <limits>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
 #include <webots/PositionSensor.hpp>
-#endif
+
+#endif //SIMULATION
+
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "actuators_srvs/srv/slider.hpp"
@@ -31,10 +37,6 @@
 #define LEFT 0
 #define RIGHT 1
 
-#define STEPPER_LEFT 1
-#define STEPPER_RIGHT 2
-#define STEPPER_CMD -128
-
 using namespace rclcpp;
 using namespace std::chrono;
 
@@ -44,18 +46,6 @@ public:
   ~Drive();
 
 private:
-  struct TinyCMD {
-    /* ATTiny speed command to I2C */
-    int8_t left = 0;
-    int8_t right = 0;
-  };
-
-  struct TinyData {
-    /* ATTiny steps from I2C */
-    int32_t left = 0;
-    int32_t right = 0;
-  };
-
   struct Differential {
     /* Computed values of d and theta from steps */
     double left = 0;
@@ -75,24 +65,34 @@ private:
   };
 
 #ifndef SIMULATION
-  // For communicating with ATTiny85 over I2C
+  std::string _odrive_usb_port;
+  bool _invert_wheel;
+  int odrive_motor_order[2] = {0, 1};
+  double _gearbox_ratio;
+  Differential old_motor_turns_returned;
+  ODrive *odrive;
+  void get_motors_turns_from_odrive(double &left, double &right);
+  float compute_velocity_cmd(double velocity);
+  // For communicating with the slider over I2C
   int i2c_bus;
   std::shared_ptr<I2C> i2c;
   std::mutex i2c_mutex;
 #else
   std::shared_ptr<webots::Robot> wb_robot;
-  webots::Motor *wb_left_motor;
-  webots::Motor *wb_right_motor;
-  webots::PositionSensor *wp_left_encoder;
-  webots::PositionSensor *wp_right_encoder;
-  Differential old_steps_returned;
+  webots::Motor
+    *wb_left_motor, *wb_right_motor;
+  webots::PositionSensor
+    *wp_left_encoder, *wp_right_encoder;
+  Differential old_turns_returned;
   double timestep;
   rclcpp::TimerBase::SharedPtr time_stepper_;
-#endif
+  void sim_step();
+  rclcpp::Time get_sim_time();
+#endif //SIMULATION
 
   // ROS time
-  rclcpp::Time time_since_last_sync_;
-  rclcpp::Time previous_time_since_last_sync_;
+  rclcpp::Time
+    time_since_last_sync_, previous_time_since_last_sync_;
 
   // ROS topic publishers
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
@@ -125,41 +125,18 @@ private:
   std::vector<geometry_msgs::msg::TransformStamped> _previous_tf;
   rclcpp::Subscription<geometry_msgs::msg::TransformStamped>::SharedPtr _adjust_odometry_sub;
 
-  double _accel;
-  double _wheel_separation;
-  double _wheel_radius;
-  int _max_freq;
-  int _speed_resolution;
-  int _steps_per_turn;
-  int _microsteps;
+  double _wheel_separation, _wheel_radius;
 
   /* Computed values */
-  uint16_t _total_steps_per_turn;
-  double _rads_per_step;
-  double _meters_per_turn;
-  double _meters_per_step;
-  double _speed_multiplier;
-  double _max_speed;
-  double _min_speed;
+  double _wheel_circumference, dt; /* us */
 
-  /* Temporary values */
-  double dt = 1; /* us */
-  double trajectory_radius = 0;
-  double trajectory_radius_left = 0;
+  Differential
+    wheels_turns_returned_, cmd_vel_, differential_speed_, differential_move_;
 
-  bool sign_steps_left = false;
-  bool sign_steps_right = false;
+  Instantaneous
+    instantaneous_speed_, instantaneous_move_;
 
-  TinyData attiny_speed_cmd_;
-  TinyData attiny_steps_returned_;
-  TinyCMD differential_speed_cmd_;
   OdometricPose odom_pose_;
-  Differential cmd_vel_;
-  Differential differential_speed_;
-  Differential differential_move_;
-  Instantaneous instantaneous_speed_;
-  Instantaneous instantaneous_move_;
-  rclcpp::TimerBase::SharedPtr serial_read_timer_;
 
   void init_parameters();
   void init_variables();
@@ -168,11 +145,8 @@ private:
   void update_odometry();
   void update_velocity();
   void update_diagnostic();
-  void read_from_serial();
-  void compute_pose_velocity(TinyData steps_returned);
-  void steps_received_callback(int32_t steps, uint8_t id);
+  void compute_pose_velocity(Differential turns_returned);
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
-  int8_t compute_velocity_cmd(double velocity);
   void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
   void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
@@ -186,11 +160,6 @@ private:
   tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Vector3 &p);
   void set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out);
   double dummy_tree_digits_precision(double a);
-
-#ifdef SIMULATION
-  void sim_step();
-  rclcpp::Time get_sim_time();
-#endif /* SIMULATION */
 };
 
 #endif /* DRIVE_NODE_HPP */

@@ -48,8 +48,17 @@ set(dependencies
   "actuators_srvs"
 )
 
-set(EXEC_NAME "drive")
+set(odrive_dependencies
+  "rclcpp"
+  "std_msgs"
+)
 
+set(EXEC_NAME "drive")
+set(ODRIVE_LIB "odrive")
+
+add_library(${ODRIVE_LIB} SHARED
+  src/ODrive.cpp
+)
 
 add_executable(${EXEC_NAME}
   src/drive_node.cpp
@@ -82,12 +91,23 @@ if(TIMER)
   add_definitions(-DUSE_TIMER)
 endif()
 
+ament_target_dependencies(${ODRIVE_LIB} ${odrive_dependencies})
+
+target_link_libraries(${EXEC_NAME} ${ODRIVE_LIB})
+
 ament_target_dependencies(${EXEC_NAME} ${dependencies})
 
 
 ################################################################################
 # Install
 ################################################################################
+install(TARGETS
+  ${ODRIVE_LIB}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 install(TARGETS ${EXEC_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )

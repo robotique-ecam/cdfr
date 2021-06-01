@@ -25,10 +25,10 @@ top_yellow_area = [1.5, 1.0, 3.0, 2.0]
 
 
 class VlxReadjustment:
-    """ Vlx readjustment class, contains routine and algorithm relative to vlx """
+    """Vlx readjustment class, contains routine and algorithm relative to vlx"""
 
     def __init__(self, parent_node):
-        """ Init VlxReadjustment """
+        """Init VlxReadjustment"""
         self.parent = parent_node
         if is_simulation():
             self.sim_offset = 0.0215
@@ -102,7 +102,7 @@ class VlxReadjustment:
             None
 
     def stop_near_wall_routine(self):
-        """ Stop the near wall routine by stopping the thread_continuous_sampling """
+        """Stop the near wall routine by stopping the thread_continuous_sampling"""
         if self.near_walls_last_check_stamp != None:
             self.near_walls_last_check_stamp = None
             self.stop_continuous_sampling_thread()
@@ -125,7 +125,7 @@ class VlxReadjustment:
             None
 
     def stop_continuous_sampling_thread(self):
-        """ Safely stop the thread_continuous_sampling """
+        """Safely stop the thread_continuous_sampling"""
         if self.thread_continuous_sampling != None:
             self.continuous_sampling = 0
             self.thread_continuous_sampling.join()
@@ -420,7 +420,7 @@ class VlxReadjustment:
         }
 
     def get_pose_from_vlx(self, d1, d2, d3, vlx_0x30):
-        """ Computing a pose relative to the wall considering vlx measured distances """
+        """Computing a pose relative to the wall considering vlx measured distances"""
         theta = np.arctan((d2 - d1) / (2 * self.vlx_face_y))
         if vlx_0x30:
             x = (d3 + self.vlx_lat_y) * np.cos(theta) - self.vlx_lat_x * np.sin(theta)
@@ -430,7 +430,7 @@ class VlxReadjustment:
         return (x, y, theta)
 
     def get_vlx_from_pose(self, robot_pose_wall_relative, theta, vlx_0x30):
-        """ Computing an estimation of vlx distances from a given pose and orientation """
+        """Computing an estimation of vlx distances from a given pose and orientation"""
         d1 = (
             (robot_pose_wall_relative[1]) / np.cos(theta)
             + self.vlx_face_y * np.tan(theta)
@@ -503,9 +503,9 @@ class VlxReadjustment:
 
 
 class VlxStamped:
-    """ VlxStamped class, an instance contains stamp + vlx values """
+    """VlxStamped class, an instance contains stamp + vlx values"""
 
     def __init__(self, values, stamp):
-        """ Init VlxStamped """
+        """Init VlxStamped"""
         self.values = copy.deepcopy(values)
         self.stamp = stamp
