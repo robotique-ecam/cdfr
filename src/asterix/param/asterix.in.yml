@@ -17,14 +17,14 @@ asterix:
   drive_node:
     ros__parameters:
       use_sim_time: !Var use_sim_time
-      odrive_usb_port: "/dev/ttyS1"
+      odrive_usb_port: "/dev/ttyACM0"
       invert_wheel: false
 
       wheels:
         separation: !Var wheels_separation
         radius: !Var wheels_radius
 
-      gearbox_ratio: 1.0
+      gearbox_ratio: 8.75
 
       i2c_bus: 1
 
