@@ -37,7 +37,7 @@ int ODrive::open_port(const std::string port = "/dev/ttyS1")
     if (fd == -1)
     {
         close(fd);
-        RCLCPP_INFO(node->get_logger(), "open_port: Unable to open %s", port);
+        RCLCPP_INFO(node->get_logger(), "open_port: Unable to open %s", port.c_str());
         return -1;
     }
 
