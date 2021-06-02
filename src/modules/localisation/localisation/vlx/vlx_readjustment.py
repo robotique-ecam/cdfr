@@ -30,12 +30,6 @@ class VlxReadjustment:
     def __init__(self, parent_node):
         """Init VlxReadjustment"""
         self.parent = parent_node
-        if is_simulation():
-            self.sim_offset = 0.0215
-            self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
-        else:
-            self.sim_offset = 0.0
-            self.sensors = Sensors(addrs=[0x30, 0x31, 0x32, 0x33, 0x34, 0x35])
         self.parent.declare_parameter("vlx_lat_x", 0.0)
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
@@ -44,6 +38,38 @@ class VlxReadjustment:
         self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
         self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
         self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
+
+        if is_simulation():
+            self.sim_offset = 0.0215
+            self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
+        else:
+            self.sim_offset = 0.0
+            vlx_addresses = [30, 31, 32, 33, 34, 35]
+            self.parent.declare_parameter("vlx_addresses.side_right", vlx_addresses[0])
+            self.parent.declare_parameter("vlx_addresses.front_right", vlx_addresses[1])
+            self.parent.declare_parameter("vlx_addresses.front_left", vlx_addresses[2])
+            self.parent.declare_parameter("vlx_addresses.side_left", vlx_addresses[3])
+            self.parent.declare_parameter("vlx_addresses.back_left", vlx_addresses[4])
+            self.parent.declare_parameter("vlx_addresses.back_right", vlx_addresses[5])
+            vlx_addresses[0] = self.parent.get_parameter(
+                "vlx_addresses.side_right"
+            )._value
+            vlx_addresses[1] = self.parent.get_parameter(
+                "vlx_addresses.front_right"
+            )._value
+            vlx_addresses[2] = self.parent.get_parameter(
+                "vlx_addresses.front_left"
+            )._value
+            vlx_addresses[3] = self.parent.get_parameter(
+                "vlx_addresses.side_left"
+            )._value
+            vlx_addresses[4] = self.parent.get_parameter(
+                "vlx_addresses.back_left"
+            )._value
+            vlx_addresses[5] = self.parent.get_parameter(
+                "vlx_addresses.back_right"
+            )._value
+            self.sensors = Sensors(addrs=vlx_addresses)
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
