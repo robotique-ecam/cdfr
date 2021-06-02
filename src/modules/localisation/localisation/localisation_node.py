@@ -188,6 +188,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     localisation.vlx.stop_continuous_sampling_thread()
-    localisation.vlx.sensors.node.destroy_node()
+    if is_simulation():
+        localisation.vlx.sensors.node.destroy_node()
     localisation.destroy_node()
     rclpy.shutdown()

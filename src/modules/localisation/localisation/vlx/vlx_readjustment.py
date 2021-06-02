@@ -47,7 +47,7 @@ class VlxReadjustment:
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
-                self.get_clock().now()
+                self.parent.get_clock().now()
                 if not is_simulation()
                 else self.sensors.get_time_stamp(),
             )
@@ -60,7 +60,7 @@ class VlxReadjustment:
         """Near wall routine: launch try_to_readjust_with_vlx every 0.5 seconds
         considering the pose_stamped given in argument"""
         actual_stamp = (
-            self.get_clock().now()
+            self.parent.get_clock().now()
             if not is_simulation()
             else self.sensors.get_time_stamp()
         )
@@ -84,7 +84,7 @@ class VlxReadjustment:
                 pose_stamped.header.stamp,
             )
             self.near_walls_last_check_stamp = (
-                self.get_clock().now()
+                self.parent.get_clock().now()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
@@ -140,7 +140,7 @@ class VlxReadjustment:
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
             actual_stamp = (
-                self.get_clock().now()
+                self.parent.get_clock().now()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
