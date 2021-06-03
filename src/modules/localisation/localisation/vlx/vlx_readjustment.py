@@ -34,10 +34,14 @@ class VlxReadjustment:
         self.parent.declare_parameter("vlx_lat_y", 0.0)
         self.parent.declare_parameter("vlx_face_x", 0.0)
         self.parent.declare_parameter("vlx_face_y", 0.0)
+        self.parent.declare_parameter("vlx_min_measure", 48)
+        self.parent.declare_parameter("vlx_max_measure", 600)
         self.vlx_lat_x = self.parent.get_parameter("vlx_lat_x")._value
         self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
         self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
         self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
+        self.vlx_min_measure = self.parent.get_parameter("vlx_min_measure")._value
+        self.vlx_max_measure = self.parent.get_parameter("vlx_max_measure")._value
 
         if is_simulation():
             self.sim_offset = 0.0215
@@ -69,7 +73,9 @@ class VlxReadjustment:
             vlx_addresses[5] = self.parent.get_parameter(
                 "vlx_addresses.back_right"
             )._value
-            self.sensors = Sensors(addrs=vlx_addresses)
+            self.parent.declare_parameter("vlx_i2c_bus", 4)
+            vlx_i2c_bus = self.parent.get_parameter("vlx_i2c_bus")._value
+            self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=vlx_addresses)
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
@@ -429,6 +435,16 @@ class VlxReadjustment:
             inv_lat_condition = True if case in [3, 4] else False
 
         else:
+            return None
+
+        if (
+            d1 < self.vlx_min_measure
+            or d2 < self.vlx_min_measure
+            or d3 < self.vlx_min_measure
+            or d1 > self.vlx_max_measure
+            or d2 > self.vlx_max_measure
+            or d3 > self.vlx_max_measure
+        ):
             return None
 
         return {

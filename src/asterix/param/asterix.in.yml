@@ -44,10 +44,13 @@ asterix:
 
   localisation_node:
     ros__parameters:
+      vlx_min_measure: 48
+      vlx_max_measure: 600
       vlx_lat_x: 80.0
       vlx_lat_y: 130.5
       vlx_face_x: 100.5
       vlx_face_y: 110.0
+      vlx_i2c_bus: 4
       vlx_addresses:
         side_right: 48
         front_right: 49
