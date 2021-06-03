@@ -39,26 +39,12 @@ class Selftest:
         if int(vcgm.get_throttled().get("raw_data"), 16) != 0:
             return
 
-        # Testing devices on Drive I2C Bus
-        code = 0x20
-        self.__write__(code)
-        try:
-            bus = SMBus(1)
-            for addr in [0x10, 0x11]:
-                code += 1
-                self.__write__(code)
-                bus.write_byte_data(addr, 0x80, 0x10)
-        except BaseException:
-            return
-
         # Testing devices on sensors I2C Bus
-        code = 0x30
-        self.__write__(code)
         try:
-            bus = SMBus(3)
-            for addr in []:
-                code += 1
-                self.__write__(code)
+            bus = SMBus(4)
+            for addr in [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]:
+                self.__write__(addr)
+                bus.read_byte(addr)
         except BaseException:
             return
 
@@ -66,7 +52,7 @@ class Selftest:
         code = 0x40
         self.__write__(code)
         try:
-            bus = SMBus(5)
+            bus = SMBus(3)
             for addr in self.node.actuators.pump_addr:
                 code += 1
                 self.__write__(code)
