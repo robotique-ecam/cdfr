@@ -40,7 +40,7 @@ DYNAMIXELS = {
 }
 
 actuators = Actuators(
-    i2c_bus=5,
+    i2c_bus=3,
     pump_addr=[0x40, 0x41],
     FANS=FANS,
     PUMPS=PUMPS,
