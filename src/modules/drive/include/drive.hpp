@@ -4,7 +4,6 @@
 #ifndef SIMULATION
 
 #include <ODrive.hpp>
-#include "i2c.hpp"
 
 #else
 
@@ -73,10 +72,6 @@ private:
   ODrive *odrive;
   void get_motors_turns_from_odrive(double &left, double &right);
   float compute_velocity_cmd(double velocity);
-  // For communicating with the slider over I2C
-  int i2c_bus;
-  std::shared_ptr<I2C> i2c;
-  std::mutex i2c_mutex;
 #else
   std::shared_ptr<webots::Robot> wb_robot;
   webots::Motor
@@ -105,9 +100,6 @@ private:
 
   // Steppers disable service
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
-
-  // Sliders service
-  rclcpp::Service<actuators_srvs::srv::Slider>::SharedPtr _set_slider_postion;
 
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
@@ -149,8 +141,6 @@ private:
   void command_velocity_callback(const geometry_msgs::msg::Twist::SharedPtr cmd_vel_msg);
   void handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                              const std_srvs::srv::SetBool::Response::SharedPtr response);
-  void handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
-                                  const actuators_srvs::srv::Slider::Response::SharedPtr response);
   void adjust_odometry_callback(const geometry_msgs::msg::TransformStamped::SharedPtr tf_stamped_msg);
   void extract_pose_from_transform(geometry_msgs::msg::TransformStamped &transform_in, geometry_msgs::msg::PoseStamped &pose_out);
   void set_transform_from_pose(geometry_msgs::msg::PoseStamped &pose_in, geometry_msgs::msg::TransformStamped &transform_out);
