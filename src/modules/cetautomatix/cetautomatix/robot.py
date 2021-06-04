@@ -80,9 +80,6 @@ class Robot(Node):
         self._get_trigger_deploy_pharaon_client = self.create_client(
             Trigger, "/pharaon/deploy"
         )
-        # Slider driver
-        self._set_slider_position_request = Slider.Request()
-        self._set_slider_position_client = self.create_client(Slider, "slider_position")
         # Odometry subscriber
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self)
@@ -136,10 +133,7 @@ class Robot(Node):
 
     def set_slider_position(self, position: int):
         """Set slider position with position in range 0 to 255."""
-        self._set_slider_position_request.position = position
-        return self._synchronous_call(
-            self._set_slider_position_client, self._set_slider_position_request
-        )
+        self.actuators.setSliderPosition(position)
 
     def fetch_available_actions(self):
         """Fetch available actions for BT."""
