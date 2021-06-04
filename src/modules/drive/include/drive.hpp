@@ -70,6 +70,7 @@ private:
   double _gearbox_ratio;
   Differential old_motor_turns_returned;
   ODrive *odrive;
+  bool armed = false;
   void get_motors_turns_from_odrive(double &left, double &right);
   float compute_velocity_cmd(double velocity);
 #else

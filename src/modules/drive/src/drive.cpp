@@ -164,9 +164,11 @@ void Drive::update_velocity() {
   float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
-  /* Send speed commands */
-  odrive->set_velocity(odrive_motor_order[0], - cmd_odrive_left);
-  odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
+  if (armed){
+    /* Send speed commands */
+    odrive->set_velocity(odrive_motor_order[0], - cmd_odrive_left);
+    odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
+  }
 
   double left_motor_turns_returned, right_motor_turns_returned;
   get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
@@ -285,13 +287,19 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
+#ifndef SIMULATION
   if (request->data) {
-    response->message = "Stepper drivers are enabled";
-    RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
+    response->message = "Odrive command through drive is enabled";
+    armed = true;
+    RCLCPP_WARN(this->get_logger(), "Odrive command through drive is enabled");
   } else {
-    response->message = "Stepper drivers are disabled";
-    RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
+    response->message = "Odrive command through drive is disabled";
+    armed = false;
+    RCLCPP_WARN(this->get_logger(), "Odrive command through drive is disabled");
   }
+  odrive->set_velocity(0, 0.0);
+  odrive->set_velocity(1, 0.0);
+#endif //SIMULATION
   response->success = true;
 }
 
