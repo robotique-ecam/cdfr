@@ -168,12 +168,12 @@ void Drive::update_velocity() {
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
-  float cmd_odrive_left = - compute_velocity_cmd(cmd_vel_.left);
+  float cmd_odrive_left = compute_velocity_cmd(cmd_vel_.left);
   float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
   /* Send speed commands */
-  odrive->set_velocity(odrive_motor_order[0], cmd_odrive_left);
+  odrive->set_velocity(odrive_motor_order[0], - cmd_odrive_left);
   odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
 
   double left_motor_turns_returned, right_motor_turns_returned;
