@@ -79,7 +79,7 @@ class VlxReadjustment:
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
-                self.parent.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp(),
             )
@@ -92,7 +92,7 @@ class VlxReadjustment:
         """Near wall routine: launch try_to_readjust_with_vlx every 0.5 seconds
         considering the pose_stamped given in argument"""
         actual_stamp = (
-            self.parent.get_clock().now()
+            self.parent.get_clock().now().to_msg()
             if not is_simulation()
             else self.sensors.get_time_stamp()
         )
@@ -107,7 +107,7 @@ class VlxReadjustment:
                     + self.near_walls_last_check_stamp.nanosec * 1e-9
                 )
             )
-            < 0.5
+            > 0.5
         ):
             self.try_to_readjust_with_vlx(
                 pose_stamped.pose.position.x,
@@ -116,7 +116,7 @@ class VlxReadjustment:
                 pose_stamped.header.stamp,
             )
             self.near_walls_last_check_stamp = (
-                self.parent.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
@@ -172,7 +172,7 @@ class VlxReadjustment:
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
             actual_stamp = (
-                self.parent.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
@@ -199,7 +199,7 @@ class VlxReadjustment:
                     )
                     - float(stamp.sec + stamp.nanosec * 1e-9)
                 )
-                < 0.06
+                < 0.08
             ):
                 new_stamp = self.values_stamped_array[i].stamp
                 self.stop_continuous_sampling_thread()
@@ -251,7 +251,6 @@ class VlxReadjustment:
                 data["inv_angle"],
                 data["inv_lat"],
             )
-
             if (
                 d1_est > 0
                 and d2_est > 0
