@@ -18,7 +18,7 @@ obelix:
     ros__parameters:
       use_sim_time: !Var use_sim_time
       odrive_usb_port: "/dev/ttyACM0"
-      invert_wheel: false
+      invert_wheel: true
 
       wheels:
         separation: !Var wheels_separation

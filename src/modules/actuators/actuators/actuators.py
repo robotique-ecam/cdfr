@@ -10,6 +10,7 @@ from .arbotix.arbotix import ArbotiX
 from .drivers.i2c import I2CDriver
 from .drivers.pumps import PumpDriver
 from .drivers.rpi_servos import RPiServos
+from .drivers.slider import I2CSliderDriver
 
 NO, NC = False, True
 
@@ -30,6 +31,7 @@ class Actuators:
         self._i2c_bus = I2CDriver(i2c_bus)
         self.rpi_servos = RPiServos(pins=[19, 6])
         self.pump_driver = PumpDriver(self._i2c_bus, addrs=self.pump_addr)
+        self.slider = I2CSliderDriver(self._i2c_bus)
         if len(self.DYNAMIXELS) > 0:
             self.arbotix = ArbotiX()
             self._setupDynamixels()
@@ -113,3 +115,7 @@ class Actuators:
             self.pump_driver.bytes_set(self.FANS)
         else:
             self.pump_driver.bytes_clear(self.FANS)
+
+    def setSliderPosition(self, position: int):
+        """Slider position"""
+        self.slider.set_position(position)
