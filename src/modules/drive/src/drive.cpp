@@ -158,7 +158,7 @@ void Drive::get_motors_turns_from_odrive(double &left, double &right){
   left_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[0]);
   right_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[1]);
 
-  left = double(std::get<0>(left_turns_speed_returned));
+  left = - double(std::get<0>(left_turns_speed_returned));
   right = double(std::get<0>(right_turns_speed_returned));
 }
 #endif
@@ -168,7 +168,7 @@ void Drive::update_velocity() {
   previous_time_since_last_sync_ = time_since_last_sync_;
 
 #ifndef SIMULATION
-  float cmd_odrive_left = compute_velocity_cmd(cmd_vel_.left);
+  float cmd_odrive_left = - compute_velocity_cmd(cmd_vel_.left);
   float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
