@@ -29,7 +29,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-    // cv::namedWindow("origin", cv::WINDOW_AUTOSIZE);
   }
   savedeee = false;
 
@@ -198,8 +197,7 @@ void Assurancetourix::init_camera_settings(){
 }
 
 void Assurancetourix::get_image() {
-  //_cap.read(_anotated);
-  _anotated = imread("/home/phileas/vision/calibration/undistorded_results/board_overview.jpg", IMREAD_GRAYSCALE);
+  _cap.read(_anotated);
 }
 
 // service enabling/disabling aruco detection, disabled by default
@@ -398,24 +396,13 @@ void Assurancetourix::detection_timer_callback_routine() {
 #endif
 
 #ifdef CAMERA
+  marker.header.stamp = this->get_clock()->now();
   get_image();
 #endif // CAMERA
 
 
 #ifdef EXTRALOG
   auto end_camera = std::chrono::high_resolution_clock::now();
-#endif
-
-  // cv::resize(_frame, _frame, Size(), 0.5, 0.5, cv::INTER_LINEAR);
-  //_frame.convertTo(raised_contrast, -1, contrast, 0);
-
-  //raised_contrast.copyTo(_anotated);
-
-#ifdef EXTRALOG
-  marker.header.stamp = this->get_clock()->now();
-  transformed_marker.header.stamp = this->get_clock()->now();
-
-  marker_pub_->publish(marker);
 
   auto start_detection = std::chrono::high_resolution_clock::now();
 #endif
@@ -441,11 +428,8 @@ void Assurancetourix::detection_timer_callback_routine() {
 #endif
 
   if (show_image) {
-    cv::resize(tmp, tmp, Size(), 0.4, 0.4, cv::INTER_LINEAR);
-    cv::imshow("anotated", tmp);
-    //cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
-    //cv::imshow("anotated", _anotated);
-    // cv::imshow("origin", _frame);
+    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    cv::imshow("anotated", _anotated);
     cv::waitKey(3);
   }
 
@@ -498,10 +482,8 @@ void Assurancetourix::_detect_aruco(Mat img) {
   if (detected_ids.size() > 0){
     project_corners_pinhole_to_fisheye(marker_corners, detected_ids);
     if (show_image) {
-      tmp = imread("/home/phileas/vision/calibration/undistorded_results/400_pictures_fisheye/board_overview_undistord_balance_0_3.jpg");
       // drawDetectedMarkers on the image (activate only for debug)
-      cv::aruco::drawDetectedMarkers(tmp, _small_marker_corners_projection, _small_detected_ids);
-      cv::aruco::drawDetectedMarkers(tmp, _huge_marker_corners_projection, _huge_detected_ids);
+      cv::aruco::drawDetectedMarkers(_anotated, marker_corners, detected_ids);
     }
   }
 }
@@ -527,10 +509,6 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies,
     std::vector<int> detected_ids, visualization_msgs::msg::MarkerArray &markers_camera_relative){
   for (int i = 0; i < int(detected_ids.size()); i++) {
-    if (show_image) {
-      // drawAxis on the image (activate only for debug)
-      cv::aruco::drawAxis(tmp, _cameraMatrix_pinhole, _distCoeffs_pinhole, rvecs[i], tvecs[i], 0.1);
-    }
 
     marker.pose.position.x = tvecs[i].operator[](0);
     marker.pose.position.y = tvecs[i].operator[](1);
@@ -552,11 +530,9 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
 
     tf2::doTransform<geometry_msgs::msg::PoseStamped>(tmpPoseIn, tmpPoseOut, assurancetourix_to_map_transformation);
 
-    //tmpPoseOut.pose.position.z = 0;
-    //tmpPoseOut.pose.position.x -= (tmpPoseOut.pose.position.x-1.5)*0.07/1.5;
-    //tmpPoseOut.pose.position.y += 0.06 - tmpPoseOut.pose.position.y*0.06/2;
     transformed_marker = marker;
     transformed_marker.header = tmpPoseOut.header;
+    transformed_marker.header.stamp = marker.header.stamp;
     transformed_marker.pose = tmpPoseOut.pose;
 
     int marker_type = geometrix->ally_or_enemy(marker.id);
@@ -618,8 +594,6 @@ void Assurancetourix::estimate_arucos_poses() {
     }
 
     marker_pub_->publish(markers_camera_relative);
-    //transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
-    //transformed_marker_pub_allies_->publish(marker_array_allies);
     geometrix->compute_and_send_markers(marker_array_ennemies, marker_array_allies);
   }
 }
