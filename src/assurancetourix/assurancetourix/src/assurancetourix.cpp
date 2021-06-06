@@ -153,8 +153,7 @@ void Assurancetourix::estimate_initial_camera_pose(){
 }
 
 void Assurancetourix::init_camera_settings(){
-  _cap.open(2, cv::CAP_V4L2);
-  _cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
+  _cap.open(0, cv::CAP_V4L2);
 
   this->declare_parameter("camera_settings.width");
   this->declare_parameter("camera_settings.height");
@@ -194,6 +193,9 @@ void Assurancetourix::init_camera_settings(){
   _cap.set(cv::CAP_PROP_AUTO_WB, _camera_settings.auto_WB);
   _cap.set(cv::CAP_PROP_EXPOSURE, _camera_settings.exposure);
   _cap.set(cv::CAP_PROP_SHARPNESS , _camera_settings.sharpness);
+  _cap.set(cv::CAP_PROP_FPS , 30);
+  _cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+  _cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
 }
 
 void Assurancetourix::get_image() {
