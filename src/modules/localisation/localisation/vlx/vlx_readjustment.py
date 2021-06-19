@@ -199,7 +199,7 @@ class VlxReadjustment:
                     )
                     - float(stamp.sec + stamp.nanosec * 1e-9)
                 )
-                < 0.08
+                < 0.12
             ):
                 new_stamp = self.values_stamped_array[i].stamp
                 self.stop_continuous_sampling_thread()
@@ -211,6 +211,7 @@ class VlxReadjustment:
                 news = self.compute_data(pose, self.values_stamped_array[i].values)
                 if news != None:
                     send_vision_tf = False
+                    self.parent.get_logger().warn(f"vlx_readjustment x: {news[0]} y: {news[1]} theta: {quaternion_to_euler(news[2])[2]}")
                     self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
         if send_vision_tf:
