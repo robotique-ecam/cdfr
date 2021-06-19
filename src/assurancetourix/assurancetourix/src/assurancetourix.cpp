@@ -59,7 +59,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
       "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-    _parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
+  _parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
+  _parameters->cornerRefinementWinSize = 11;
 
   geometrix = new Geometrix(this);
   estimate_initial_camera_pose();
