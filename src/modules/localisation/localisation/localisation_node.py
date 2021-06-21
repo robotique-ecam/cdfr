@@ -141,7 +141,7 @@ class Localisation(rclpy.node.Node):
 
     def is_near_walls(self, pt):
         """Return true if the robot if less than 30cm from the wall"""
-        return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
+        return pt.x < 0.4 or pt.y < 0.4 or pt.x > 2.6 or pt.y > 1.6
 
     def create_and_send_tf(self, x, y, q, stamp):
         """Create and send tf to drive for it to re-adjust odometry"""

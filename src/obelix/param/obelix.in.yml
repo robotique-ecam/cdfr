@@ -52,11 +52,11 @@ obelix:
       vlx_face_y: 159.0
       vlx_i2c_bus: 4
       vlx_addresses:
-        side_right: 48
-        front_right: 49
-        front_left: 50
-        side_left: 53
-        back_left: 54
+        side_right: 53
+        front_right: 54
+        front_left: 49
+        side_left: 48
+        back_left: 50
         back_right: 55
 
 
