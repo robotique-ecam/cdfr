@@ -204,6 +204,7 @@ send velocity, returns -1 if nothing is send, 0 else
 */
 int ODrive::set_velocity(const int motor, const float velocity)
 {
+    std::this_thread::sleep_for(200us);
     const std::string funct_name = "setVelocity";
     std::string msg = "v ";
     msg += std::to_string(motor);
@@ -223,6 +224,7 @@ return tuple of position and velocity, returns both as -1 if request fails
 */
 std::pair<float, float> ODrive::get_position_velocity(const int motor)
 {
+    std::this_thread::sleep_for(200us);
     const std::string funct_name = "getPosition_Velocity";
     std::string msg = "f ";
     msg += std::to_string(motor);
