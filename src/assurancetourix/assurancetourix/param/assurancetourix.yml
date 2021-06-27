@@ -20,7 +20,7 @@ assurancetourix:
       show_image: true
     arucos:
       small_aruco_size: 0.067
-      huge_aruco_size: 0.115
+      huge_aruco_size: 0.12
       asterix:
         side_right: 172
         front_right: 173
@@ -32,15 +32,15 @@ assurancetourix:
         front_y_offset: 0.0625
         side_y_offset: 0.13
       obelix:
-        side_right: 182
-        front_right: 183
+        side_right: 187
+        front_right: 185
         front_left: 184
-        side_left: 185
-        back_left: 186
-        back_right: 187
-        front_x_offset: 0.09
-        front_y_offset: 0.06
-        side_y_offset: 0.18
+        side_left: 186
+        back_left: 183
+        back_right: 182
+        front_x_offset: 0.096
+        front_y_offset: 0.066
+        side_y_offset: 0.181
       enemies:
         x_y_offset: 0.05
         arucos: [192.0, 193.0, 194.0, 195.0]
