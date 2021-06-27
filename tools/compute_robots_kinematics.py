@@ -36,37 +36,30 @@ def compute_speeds(config: dict):
 
 globals = {
     "use_sim_time": False,
-    "max_steps_frequency": 10000,
-    "speedramp_resolution": 128,
-    "min_turning_radius": 0.0,
 }
 
 asterix = {
-    "wheel_separation": 0.244,
-    "wheel_radius": 0.0405,
-    "steps_per_turn": 200,
-    "microsteps": 16,
-    "footprint": get_footprint(length=0.19, width=0.256),
+    "wheel_separation": 0.2245,
+    "wheel_radius": 0.037,
+    "footprint": get_footprint(length=0.2, width=0.25),
     "max_vel_x_nominal": 2.0,
     "max_vel_x_accurate": 0.1,
-    "max_vel_theta": 3.1,
+    "max_vel_theta": 1.5,
     "max_vel_theta_accurate": 0.5,
     "acc_lim_x": 0.5,
-    "acc_lim_theta": 2.5,
+    "acc_lim_theta": 1.0,
 }
 
 obelix = {
-    "wheel_separation": 0.282,
-    "wheel_radius": 0.061,
-    "steps_per_turn": 400,
-    "microsteps": 32,
-    "footprint": get_footprint(length=0.18, width=0.35),
+    "wheel_separation": 0.32,
+    "wheel_radius": 0.037,
+    "footprint": get_footprint(length=0.18, width=0.315),
     "max_vel_x_nominal": 2.0,
     "max_vel_x_accurate": 0.1,
     "max_vel_theta": 3.1,
     "max_vel_theta_accurate": 0.5,
-    "acc_lim_x": 0.5,
-    "acc_lim_theta": 2.5,
+    "acc_lim_x": 0.4,
+    "acc_lim_theta": 1.0,
 }
 
 obelix.update(globals)
