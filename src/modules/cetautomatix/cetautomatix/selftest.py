@@ -40,9 +40,14 @@ class Selftest:
             return
 
         # Testing devices on sensors I2C Bus
+        addrs_vlx = []
+        if node.robot == "obelix":
+            addrs_vlx = [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]
+        elif node.robot == "asterix":
+            addrs_vlx = [0x30, 0x34, 0x35, 0x36, 0x37]
         try:
             bus = SMBus(4)
-            for addr in [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]:
+            for addr in addrs_vlx:
                 self.__write__(addr)
                 bus.read_byte(addr)
         except BaseException:
@@ -57,9 +62,10 @@ class Selftest:
                 code += 1
                 self.__write__(code)
                 bus.read_byte(addr)
-            addr_slider = 0x12
-            self.__write__(addr_slider)
-            bus.read_byte(addr_slider)
+            if node.robot == "obelix":
+                addr_slider = 0x12
+                self.__write__(addr_slider)
+                bus.read_byte(addr_slider)
         except BaseException:
             return
 
@@ -68,18 +74,19 @@ class Selftest:
 
         # Testing dynamixels connection
         code = 0x50
-        self.__write__(code)
-        for dyna in self.node.actuators.DYNAMIXELS:
-            code += 1
+        if node.robot == "obelix":
             self.__write__(code)
-            if self.node.actuators.arbotix.getPosition(dyna) == -1:
-                return
-        for servo in self.node.actuators.SERVOS:
-            servo = self.node.actuators.SERVOS.get(servo)
-            code += 1
-            self.__write__(code)
-            if self.node.actuators.arbotix.getPosition(servo.get("addr")) == -1:
-                return
+            for dyna in self.node.actuators.DYNAMIXELS:
+                code += 1
+                self.__write__(code)
+                if self.node.actuators.arbotix.getPosition(dyna) == -1:
+                    return
+            for servo in self.node.actuators.SERVOS:
+                servo = self.node.actuators.SERVOS.get(servo)
+                code += 1
+                self.__write__(code)
+                if self.node.actuators.arbotix.getPosition(servo.get("addr")) == -1:
+                    return
 
         self.__write__(0xFF)
 
