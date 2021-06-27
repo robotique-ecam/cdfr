@@ -67,6 +67,18 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   RCLCPP_WARN(this->get_logger(), "Assurancetourix camera position guessing x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
     assurancetourix_to_map_transformation.transform.translation.y);
+  std::cout << "x: " << assurancetourix_to_map_transformation.transform.translation.x << std::endl;
+  std::cout << "y: " << assurancetourix_to_map_transformation.transform.translation.y << std::endl;
+  std::cout << "z: " << assurancetourix_to_map_transformation.transform.translation.z << std::endl;
+  std::cout << "rx: " << assurancetourix_to_map_transformation.transform.rotation.x << std::endl;
+  std::cout << "ry: " << assurancetourix_to_map_transformation.transform.rotation.y << std::endl;
+  std::cout << "rz: " << assurancetourix_to_map_transformation.transform.rotation.z << std::endl;
+  std::cout << "rw: " << assurancetourix_to_map_transformation.transform.rotation.w << std::endl;
+  geometry_msgs::msg::Point testee;
+  testee.x = 1.5;
+  testee.y = 0.75;
+  std_msgs::msg::ColorRGBA color;
+  get_color_from_position(testee, color);
 
 #endif // CAMERA
 
@@ -154,7 +166,7 @@ void Assurancetourix::estimate_initial_camera_pose(){
 }
 
 void Assurancetourix::init_camera_settings(){
-  _cap.open(0, cv::CAP_V4L2);
+  _cap.open(2, cv::CAP_V4L2);
 
   this->declare_parameter("camera_settings.width");
   this->declare_parameter("camera_settings.height");
@@ -431,7 +443,7 @@ void Assurancetourix::detection_timer_callback_routine() {
 #endif
 
   if (show_image) {
-    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    //cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", _anotated);
     cv::waitKey(3);
   }
@@ -599,6 +611,79 @@ void Assurancetourix::estimate_arucos_poses() {
     marker_pub_->publish(markers_camera_relative);
     geometrix->compute_and_send_markers(marker_array_ennemies, marker_array_allies);
   }
+}
+
+void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color){
+
+  geometry_msgs::msg::PointStamped pt_world;
+  pt_world.point = position;
+
+  std::cout << "x: " << position.x << std::endl;
+  std::cout << "y: " << position.y << std::endl;
+  std::cout << "z: " << position.z << std::endl;
+
+  tf2::Stamped<KDL::Vector> kdl_pt_world, kdl_pt_assurancetourix;
+  tf2::fromMsg(pt_world, kdl_pt_world);
+
+  tf2::doTransform(kdl_pt_world, kdl_pt_assurancetourix, assurancetourix_to_map_transformation);
+
+  geometry_msgs::msg::Point pt_assurancetourix = tf2::toMsg(kdl_pt_assurancetourix).point;
+
+  std::vector<cv::Point3d> cv_pts;
+  cv_pts.push_back(cv::Point3d(pt_assurancetourix.x, pt_assurancetourix.y, pt_assurancetourix.z));
+
+  std::cout << "x: " << pt_assurancetourix.x << std::endl;
+  std::cout << "y: " << pt_assurancetourix.y << std::endl;
+  std::cout << "z: " << pt_assurancetourix.z << std::endl;
+
+  /*cv::Mat r_vec(3, 3, cv::DataType<double>::type);
+  cv::Mat t_vec(3, 1, cv::DataType<double>::type);
+  Mat r_vec,rMat = (Mat_<double>(3, 3) << (1, 0, 0, 0, 1, 0, 0, 0, 1));
+  cv::Rodrigues(rMat,r_vec); //here
+
+  std::vector<cv::Point2d> pixels_pinhole;
+  cv::Mat intrinsic_matrix(3, 3, CV_64F, mat_camera_matrix_coeff_pinhole);
+  cv::Mat distorsion_matrix(1, 5, CV_64F, mat_dist_coeffs_pinhole);
+
+  cv::projectPoints(cv_pts, r_vec, t_vec, intrinsic_matrix, distorsion_matrix, pixels_pinhole);
+
+  std::cout << "x: " << pixels_pinhole[0].x << std::endl;
+  std::cout << "y: " << pixels_pinhole[0].y << std::endl;
+
+  /*auto tf = tf2::transformToKDL(assurancetourix_to_map_transformation);
+  tf = tf.Inverse();
+
+  geometry_msgs::msg::PoseStamped tes;
+  tes.pose = tf2::toMsg(tf);
+
+  tf2::Quaternion q;
+  tf2::fromMsg(tes.pose.orientation, q);
+
+  tf2::Matrix3x3 m(q);
+  cv::Mat r_vec(3, 3, CV_64F);
+  for (unsigned char i = 0; i<3; i++){
+    for (unsigned char j = 0; i<3; i++){
+      r_vec.at<double>(i, j) = m[i][j];
+    }
+  }
+  cv::Rodrigues(r_vec,r_vec); //here
+
+  cv::Mat t_vec(3, 1, CV_64F);
+  t_vec.at<double>(0,0) = tes.pose.position.x;
+  t_vec.at<double>(1,0) = tes.pose.position.y;
+  t_vec.at<double>(2,0) = tes.pose.position.z;
+
+  std::vector<cv::Point2d> pixels_pinhole;
+  cv::Mat intrinsic_matrix(3, 3, CV_64F, mat_camera_matrix_coeff_pinhole);
+  cv::Mat distorsion_matrix(1, 5, CV_64F, mat_dist_coeffs_pinhole);
+
+  std::vector<cv::Point3d> cv_pts;
+  cv_pts.push_back(cv::Point3d(1.5, 0.75, 0));
+
+  cv::projectPoints(cv_pts, r_vec, t_vec, intrinsic_matrix, distorsion_matrix, pixels_pinhole);
+
+  std::cout << "x: " << pixels_pinhole[0].x << std::endl;
+  std::cout << "y: " << pixels_pinhole[0].y << std::endl;*/
 }
 
 #ifdef SIMULATION
