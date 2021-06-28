@@ -30,8 +30,18 @@ void GradientLayer::marker_callback(const std::shared_ptr<visualization_msgs::ms
       predictedIndexes.push_back(false);
     }
   }
+
+  std::array<double, 2> tmp_coord{{ally_pose.position.x, ally_pose.position.y}};
+  coord_from_frame.push_back(tmp_coord);
+  predictedIndexes.push_back(false);
+
   need_recalculation_ = true;
 }
+
+void GradientLayer::ally_odom_callback(const std::shared_ptr<geometry_msgs::msg::PoseStamped> msg){
+  ally_pose = msg->pose;
+}
+
 // This method is called at the end of plugin initialization.
 // It contains ROS parameter(s) declaration and initialization
 // of need_recalculation_ variable.
@@ -45,6 +55,12 @@ void GradientLayer::onInitialize() {
   declareParameter("markers_topic", rclcpp::ParameterValue("/ennemies_positions_markers"));
   node_->get_parameter(name_ + "." + "markers_topic", topic);
 
+  std::string namespace_str(node_->get_namespace()), asterix("asterix");
+  if (namespace_str.find(asterix) == std::string::npos) {
+    ally_odom_subscriber = node_->create_subscription<geometry_msgs::msg::PoseStamped>("/asterix/odom_map_relative", qos, std::bind(&GradientLayer::ally_odom_callback, this, std::placeholders::_1));
+  } else {
+    ally_odom_subscriber = node_->create_subscription<geometry_msgs::msg::PoseStamped>("/obelix/odom_map_relative", qos, std::bind(&GradientLayer::ally_odom_callback, this, std::placeholders::_1));
+  }
   need_recalculation_ = false;
   coord_from_frame.clear();
   marker_subscriber = node_->create_subscription<visualization_msgs::msg::MarkerArray>(topic, qos, std::bind(&GradientLayer::marker_callback, this, std::placeholders::_1));
