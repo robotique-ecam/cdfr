@@ -130,7 +130,6 @@ int ODrive::send(const std::string msg, const std::string *funct_name)
     msg_out += " *";
     msg_out += std::to_string(checksum(msg_out));
     msg_out += "\n";
-    RCLCPP_INFO(node->get_logger(), "sending: %s\n", msg_out.c_str());
     int w = write(fd, msg_out.c_str(), msg_out.size());
     if (w == 0)
     {
@@ -167,10 +166,8 @@ std::string ODrive::receive(const std::string *funct_name)
     }
 
     std::string ans = read_buf;
-    RCLCPP_INFO(node->get_logger(), "receiving %s", ans.c_str());
 
     if (funct_name->compare("setVelocity") == 0){
-        RCLCPP_INFO(node->get_logger(), "velocity_ok");
         return "velocity_ok";
     }
 
