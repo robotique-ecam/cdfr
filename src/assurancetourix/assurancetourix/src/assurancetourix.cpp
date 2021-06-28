@@ -443,7 +443,7 @@ void Assurancetourix::detection_timer_callback_routine() {
 #endif
 
   if (show_image) {
-    //cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", _anotated);
     cv::waitKey(3);
   }
