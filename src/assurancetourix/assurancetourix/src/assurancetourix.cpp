@@ -412,6 +412,11 @@ void Assurancetourix::detection_timer_callback_routine() {
 
 #ifdef CAMERA
   marker.header.stamp = this->get_clock()->now();
+  if (marker.header.stamp.nanosec > 142000000) marker.header.stamp.nanosec -= 142000000;
+  else {
+    marker.header.stamp.sec -= 1;
+    marker.header.stamp.nanosec = 1000000000 - 142000000 + marker.header.stamp.nanosec;
+  }
   get_image();
 #endif // CAMERA
 
