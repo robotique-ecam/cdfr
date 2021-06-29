@@ -116,32 +116,33 @@ class Localisation(rclpy.node.Node):
         for ally_marker in msg.markers:
             if (
                 ally_marker.text.lower() == self.robot
-                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.75
+                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.4
             ):
                 if (
                     is_simulation()
                 ):  # simulate marker delais (image analysis from assurancetourix)
                     time.sleep(0.15)
-                if self.vlx.continuous_sampling == 0:
-                    self.create_and_send_tf(
-                        ally_marker.pose.position.x,
-                        ally_marker.pose.position.y,
-                        ally_marker.pose.orientation,
-                        ally_marker.header.stamp,
-                    )
-                else:
-                    self.vlx.try_to_readjust_with_vlx(
-                        ally_marker.pose.position.x,
-                        ally_marker.pose.position.y,
-                        ally_marker.pose.orientation,
-                        ally_marker.header.stamp,
-                    )
+                if not (x < 0.2 or x > 2.8 or y < 0.2 or y > 1.8):
+                    if self.vlx.continuous_sampling == 0:
+                        self.create_and_send_tf(
+                            ally_marker.pose.position.x,
+                            ally_marker.pose.position.y,
+                            ally_marker.pose.orientation,
+                            ally_marker.header.stamp,
+                        )
+                    else:
+                        self.vlx.try_to_readjust_with_vlx(
+                            ally_marker.pose.position.x,
+                            ally_marker.pose.position.y,
+                            ally_marker.pose.orientation,
+                            ally_marker.header.stamp,
+                        )
                 if self.vlx.continuous_sampling in [0, 1]:
                     self.vlx.start_continuous_sampling_thread(0.65, 1)
 
     def is_near_walls(self, pt):
         """Return true if the robot if less than 30cm from the wall"""
-        return pt.x < 0.4 or pt.y < 0.4 or pt.x > 2.6 or pt.y > 1.6
+        return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
 
     def create_and_send_tf(self, x, y, q, stamp):
         """Create and send tf to drive for it to re-adjust odometry"""
