@@ -14,12 +14,15 @@ SplitGoal::SplitGoal(
   node_->get_parameter("transform_tolerance", transform_tolerance_);
 
   nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.radius_accurate", rclcpp::ParameterValue(0.1));
+  nav2_util::declare_parameter_if_not_declared(
     node_, "bt_split_goal.distance_from_walls", rclcpp::ParameterValue(0.15));
   nav2_util::declare_parameter_if_not_declared(
     node_, "bt_split_goal.specific_area_coords", rclcpp::ParameterValue("NULL"));
   nav2_util::declare_parameter_if_not_declared(
     node_, "bt_split_goal.exit_area_coords", rclcpp::ParameterValue("NULL"));
 
+  node_->get_parameter("bt_split_goal.radius_accurate", radius_accurate_);
   node_->get_parameter("bt_split_goal.distance_from_walls", distance_from_walls_);
 
   std::string specific_area_coords_string;
@@ -100,9 +103,35 @@ inline BT::NodeStatus SplitGoal::tick()
 
   setAutoPositions();
 
+  if (!get_in_need_) nominalSplitter();
+
   setOutputPort();
 
   return BT::NodeStatus::SUCCESS;
+}
+
+void SplitGoal::nominalSplitter(){
+  double dist = sqrt( pow(current_pose_.pose.position.x - goal_.pose.position.x, 2) + pow(current_pose_.pose.position.y - goal_.pose.position.y, 2) );
+  if ( dist < radius_accurate_ ){
+    nominal_need_ = false;
+    get_in_need_ = true;
+    get_in_goal_ = goal_;
+  } else {
+    get_in_goal_ = goal_;
+
+    tf2::Quaternion q(
+        goal_.pose.orientation.x,
+        goal_.pose.orientation.y,
+        goal_.pose.orientation.z,
+        goal_.pose.orientation.w);
+    tf2::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+    nominal_goal_ = goal_;
+    nominal_goal_.pose.position.x = goal_.pose.position.x - radius_accurate_*cos(yaw);
+    nominal_goal_.pose.position.y = goal_.pose.position.y - radius_accurate_*sin(yaw);
+  }
 }
 
 void SplitGoal::setOutputPort(){
