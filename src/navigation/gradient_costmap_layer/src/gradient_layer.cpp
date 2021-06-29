@@ -55,6 +55,8 @@ void GradientLayer::onInitialize() {
   declareParameter("markers_topic", rclcpp::ParameterValue("/ennemies_positions_markers"));
   node_->get_parameter(name_ + "." + "markers_topic", topic);
 
+  ally_pose.position.x = -1.0;
+  ally_pose.position.y = -1.0;
   std::string namespace_str(node_->get_namespace()), asterix("asterix");
   if (namespace_str.find(asterix) == std::string::npos) {
     ally_odom_subscriber = node_->create_subscription<geometry_msgs::msg::PoseStamped>("/asterix/odom_map_relative", qos, std::bind(&GradientLayer::ally_odom_callback, this, std::placeholders::_1));
