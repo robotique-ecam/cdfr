@@ -111,26 +111,20 @@ inline BT::NodeStatus SplitGoal::tick()
 }
 
 void SplitGoal::nominalSplitter(){
+  get_in_need_ = true;
   double dist = sqrt( pow(current_pose_.pose.position.x - goal_.pose.position.x, 2) + pow(current_pose_.pose.position.y - goal_.pose.position.y, 2) );
   if ( dist < radius_accurate_ ){
     nominal_need_ = false;
-    get_in_need_ = true;
     get_in_goal_ = goal_;
   } else {
     get_in_goal_ = goal_;
 
-    tf2::Quaternion q(
-        goal_.pose.orientation.x,
-        goal_.pose.orientation.y,
-        goal_.pose.orientation.z,
-        goal_.pose.orientation.w);
-    tf2::Matrix3x3 m(q);
-    double roll, pitch, yaw;
-    m.getRPY(roll, pitch, yaw);
+    double x_dir = (current_pose_.pose.position.x - goal_.pose.position.x)/dist;
+    double y_dir = (current_pose_.pose.position.y - goal_.pose.position.y)/dist;
 
     nominal_goal_ = goal_;
-    nominal_goal_.pose.position.x = goal_.pose.position.x - radius_accurate_*cos(yaw);
-    nominal_goal_.pose.position.y = goal_.pose.position.y - radius_accurate_*sin(yaw);
+    nominal_goal_.pose.position.x = goal_.pose.position.x + radius_accurate_*x_dir;
+    nominal_goal_.pose.position.y = goal_.pose.position.y + radius_accurate_*y_dir;
   }
 }
 
