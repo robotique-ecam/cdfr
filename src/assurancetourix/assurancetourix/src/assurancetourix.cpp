@@ -152,6 +152,18 @@ void Assurancetourix::estimate_initial_camera_pose(){
       assurancetourix_to_map_transformation.transform.rotation.w
     );
 
+    auto camera_pose_kdl_inv = camera_pose_kdl.Inverse();
+
+    assurancetourix_to_map_tf_inv.transform.translation.x = camera_pose_kdl_inv.p[0];
+    assurancetourix_to_map_tf_inv.transform.translation.y = camera_pose_kdl_inv.p[1];
+    assurancetourix_to_map_tf_inv.transform.translation.z = camera_pose_kdl_inv.p[2];
+    camera_pose_kdl_inv.M.GetQuaternion(
+      assurancetourix_to_map_tf_inv.transform.rotation.x,
+      assurancetourix_to_map_tf_inv.transform.rotation.y,
+      assurancetourix_to_map_tf_inv.transform.rotation.z,
+      assurancetourix_to_map_tf_inv.transform.rotation.w
+    );
+
     if (assurancetourix_to_map_transformation.transform.rotation.x != 0.0) break;
     else if (i==9) {
       RCLCPP_FATAL(this->get_logger(), "Cannot estimate tf, exiting...");
@@ -448,15 +460,14 @@ void Assurancetourix::detection_timer_callback_routine() {
   RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
 #endif
 
+  if (!savedeee) {
+    cv::imwrite("test.jpg", _anotated);
+    savedeee = true;
+  }
   if (show_image) {
     cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", _anotated);
     cv::waitKey(3);
-  }
-
-  if (!savedeee) {
-    cv::imwrite("test.jpg", _anotated);
-    savedeee = true;
   }
 }
 
@@ -619,77 +630,51 @@ void Assurancetourix::estimate_arucos_poses() {
   }
 }
 
-void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color){
-
+cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point position){
   geometry_msgs::msg::PointStamped pt_world;
   pt_world.point = position;
+
+  tf2::Stamped<KDL::Vector> kdl_pt_world, kdl_pt_assurancetourix;
+  tf2::fromMsg(pt_world, kdl_pt_world);
+
+  tf2::doTransform(kdl_pt_world, kdl_pt_assurancetourix, assurancetourix_to_map_tf_inv);
+
+  geometry_msgs::msg::Point pt_assurancetourix = tf2::toMsg(kdl_pt_assurancetourix).point;
+
+  double arr_pt_assurancetourix[4][1] = {{pt_assurancetourix.x}, {pt_assurancetourix.y}, {pt_assurancetourix.z}, {1.0}};
+  cv::Mat mat_pt_assurancetourix(4, 1, CV_64F, arr_pt_assurancetourix);
+
+  double arr_identity[3][4] = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}};
+  cv::Mat mat_identity(3, 4, CV_64F, arr_identity);
+
+  cv::Mat mat_pixel(3, 1, CV_64F);
+
+  mat_pixel = _cameraMatrix_pinhole * mat_identity * mat_pt_assurancetourix;
+
+  cv::Point2d undistort_pixels(mat_pixel.at<double>(0,0)/mat_pixel.at<double>(2,0), mat_pixel.at<double>(1,0)/mat_pixel.at<double>(2,0));
+
+  undistort_pixels.x = ( undistort_pixels.x - mat_camera_matrix_coeff_fisheye_balanced[0][2] ) / mat_camera_matrix_coeff_fisheye_balanced[0][0];
+  undistort_pixels.y = ( undistort_pixels.y - mat_camera_matrix_coeff_fisheye_balanced[1][2] ) / mat_camera_matrix_coeff_fisheye_balanced[1][1];
+
+  std::vector<cv::Point2d> undistort_pixel_vec, distort_pixel_vec;
+  undistort_pixel_vec.push_back(undistort_pixels);
+
+  cv::fisheye::distortPoints(undistort_pixel_vec, distort_pixel_vec, _cameraMatrix_fisheye, _distCoeffs_fisheye);
+
+  return distort_pixel_vec[0];
+}
+
+
+void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color){
 
   std::cout << "x: " << position.x << std::endl;
   std::cout << "y: " << position.y << std::endl;
   std::cout << "z: " << position.z << std::endl;
 
-  tf2::Stamped<KDL::Vector> kdl_pt_world, kdl_pt_assurancetourix;
-  tf2::fromMsg(pt_world, kdl_pt_world);
+  cv::Point2d pixel = get_pixels_from_position(position);
 
-  tf2::doTransform(kdl_pt_world, kdl_pt_assurancetourix, assurancetourix_to_map_transformation);
-
-  geometry_msgs::msg::Point pt_assurancetourix = tf2::toMsg(kdl_pt_assurancetourix).point;
-
-  std::vector<cv::Point3d> cv_pts;
-  cv_pts.push_back(cv::Point3d(pt_assurancetourix.x, pt_assurancetourix.y, pt_assurancetourix.z));
-
-  std::cout << "x: " << pt_assurancetourix.x << std::endl;
-  std::cout << "y: " << pt_assurancetourix.y << std::endl;
-  std::cout << "z: " << pt_assurancetourix.z << std::endl;
-
-  /*cv::Mat r_vec(3, 3, cv::DataType<double>::type);
-  cv::Mat t_vec(3, 1, cv::DataType<double>::type);
-  Mat r_vec,rMat = (Mat_<double>(3, 3) << (1, 0, 0, 0, 1, 0, 0, 0, 1));
-  cv::Rodrigues(rMat,r_vec); //here
-
-  std::vector<cv::Point2d> pixels_pinhole;
-  cv::Mat intrinsic_matrix(3, 3, CV_64F, mat_camera_matrix_coeff_pinhole);
-  cv::Mat distorsion_matrix(1, 5, CV_64F, mat_dist_coeffs_pinhole);
-
-  cv::projectPoints(cv_pts, r_vec, t_vec, intrinsic_matrix, distorsion_matrix, pixels_pinhole);
-
-  std::cout << "x: " << pixels_pinhole[0].x << std::endl;
-  std::cout << "y: " << pixels_pinhole[0].y << std::endl;
-
-  /*auto tf = tf2::transformToKDL(assurancetourix_to_map_transformation);
-  tf = tf.Inverse();
-
-  geometry_msgs::msg::PoseStamped tes;
-  tes.pose = tf2::toMsg(tf);
-
-  tf2::Quaternion q;
-  tf2::fromMsg(tes.pose.orientation, q);
-
-  tf2::Matrix3x3 m(q);
-  cv::Mat r_vec(3, 3, CV_64F);
-  for (unsigned char i = 0; i<3; i++){
-    for (unsigned char j = 0; i<3; i++){
-      r_vec.at<double>(i, j) = m[i][j];
-    }
-  }
-  cv::Rodrigues(r_vec,r_vec); //here
-
-  cv::Mat t_vec(3, 1, CV_64F);
-  t_vec.at<double>(0,0) = tes.pose.position.x;
-  t_vec.at<double>(1,0) = tes.pose.position.y;
-  t_vec.at<double>(2,0) = tes.pose.position.z;
-
-  std::vector<cv::Point2d> pixels_pinhole;
-  cv::Mat intrinsic_matrix(3, 3, CV_64F, mat_camera_matrix_coeff_pinhole);
-  cv::Mat distorsion_matrix(1, 5, CV_64F, mat_dist_coeffs_pinhole);
-
-  std::vector<cv::Point3d> cv_pts;
-  cv_pts.push_back(cv::Point3d(1.5, 0.75, 0));
-
-  cv::projectPoints(cv_pts, r_vec, t_vec, intrinsic_matrix, distorsion_matrix, pixels_pinhole);
-
-  std::cout << "x: " << pixels_pinhole[0].x << std::endl;
-  std::cout << "y: " << pixels_pinhole[0].y << std::endl;*/
+  std::cout << "x: " << pixel.x << std::endl;
+  std::cout << "y: " << pixel.y << std::endl;
 }
 
 #ifdef SIMULATION

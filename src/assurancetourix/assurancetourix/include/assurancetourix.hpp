@@ -50,6 +50,7 @@ private:
   void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
   visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids, visualization_msgs::msg::MarkerArray &markers_camera_relative);
   void get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color);
+  cv::Point2d get_pixels_from_position(geometry_msgs::msg::Point position);
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
@@ -115,6 +116,8 @@ private:
   uint aruco_element_type, game_element_type;
   std::vector<double> prediction_color, default_color_aruco, aruco_element_scale, game_elements_scale, _enemies_arucos_nb;
   std::string base_frame, header_frame_id, topic_for_gradient_layer, allies_positions_topic;
+
+  geometry_msgs::msg::TransformStamped assurancetourix_to_map_tf_inv;
 
   Geometrix* geometrix;
 
