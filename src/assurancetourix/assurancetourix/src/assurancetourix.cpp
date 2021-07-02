@@ -75,8 +75,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   std::cout << "rz: " << assurancetourix_to_map_transformation.transform.rotation.z << std::endl;
   std::cout << "rw: " << assurancetourix_to_map_transformation.transform.rotation.w << std::endl;
   geometry_msgs::msg::Point testee;
-  testee.x = 1.5;
-  testee.y = 0.75;
+  testee.x = 1.0;
+  testee.y = 1.0;
   std_msgs::msg::ColorRGBA color;
   get_color_from_position(testee, color);
 
@@ -667,14 +667,30 @@ cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point 
 
 void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color){
 
-  std::cout << "x: " << position.x << std::endl;
-  std::cout << "y: " << position.y << std::endl;
-  std::cout << "z: " << position.z << std::endl;
-
   cv::Point2d pixel = get_pixels_from_position(position);
 
-  std::cout << "x: " << pixel.x << std::endl;
-  std::cout << "y: " << pixel.y << std::endl;
+  color.b = 0.0;
+  color.g = 0.0;
+  color.r = 0.0;
+  color.a = 255.0;
+
+  int square_to_check = 7;
+  for (int i = 0; i<square_to_check; i++){
+    for (int j = 0; j<square_to_check; j++){
+      int u = int(pixel.x + i - square_to_check/2);
+      int v = int(pixel.y + j - square_to_check/2);
+      cv::Vec3b bgr_pixel = _anotated.at<Vec3b>(cv::Point(u, v));
+      color.b += float(bgr_pixel[0]);
+      color.g += float(bgr_pixel[1]);
+      color.r += float(bgr_pixel[2]);
+    }
+  }
+
+  color.b /= pow(square_to_check, 2);
+  color.g /= pow(square_to_check, 2);
+  color.r /= pow(square_to_check, 2);
+
+  RCLCPP_INFO(this->get_logger(), "pixel at pose x: %f, y: %f, z: %f is red: %f, green: %f, blue: %f", position.x, position.y, position.z, color.r, color.g, color.b);
 }
 
 #ifdef SIMULATION
