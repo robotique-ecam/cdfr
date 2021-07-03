@@ -11,8 +11,8 @@ from std_msgs.msg import UInt8
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
 from strategix.actions import actions
+from strategix.action_objects import Phare, MancheAir, Gobelet
 from strategix.exceptions import MatchStartedException
-from strategix.score import Score
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
 
@@ -21,7 +21,6 @@ class StrategixActionServer(Node):
         super().__init__("strategix_action_server")
         self.side = self.declare_parameter("side", "blue")
         self.add_on_set_parameters_callback(self._on_set_parameters)
-        self.score = Score()
         self.todo_srv = self.create_service(
             GetAvailableActions, "/strategix/available", self.available_callback
         )
@@ -52,19 +51,19 @@ class StrategixActionServer(Node):
         """Callback function when a robot needs the list of available actions"""
         self.get_logger().info(f"GET {request.sender}")
         available = []
-        for action in actions:
-            if actions[action].get("STATUS") is None and not actions[action].get(
+        for action_id, action_object in actions.items():
+            if action_object.tags.get("STATUS") is None and not action_object.tags.get(
                 "IN_ECUEIL"
             ):
                 if (
-                    actions[action].get("ONLY_SIDE") is None
-                    or actions[action].get("ONLY_SIDE") == self.side.value
+                    action_object.tags.get("ONLY_SIDE") is None
+                    or action_object.tags.get("ONLY_SIDE") == self.side.value
                 ):
                     if (
-                        actions[action].get("ONLY_ROBOT") is None
-                        or actions[action].get("ONLY_ROBOT") == request.sender
+                        action_object.tags.get("ONLY_ROBOT") is None
+                        or action_object.tags.get("ONLY_ROBOT") == request.sender
                     ):
-                        available.append(action)
+                        available.append(action_id)
         response.available = available
         self.get_logger().info(f"AVAILABLE: {response.available}")
         return response
@@ -76,11 +75,11 @@ class StrategixActionServer(Node):
                 f"{request.sender} {request.request} {request.action}"
             )
             if request.request == "PREEMPT":
-                response.success = self.score.preempt(request.action, request.sender)
+                response.success = self.preempt(request.action, request.sender)
             elif request.request == "DROP":
-                response.success = self.score.release(request.action, request.sender)
+                response.success = self.release(request.action, request.sender)
             elif request.request == "CONFIRM":
-                response.success = self.score.finish(request.action, request.sender)
+                response.success = self.finish(request.action, request.sender)
                 # Detach update_score coroutine
                 Thread(target=self.update_score).start()
             else:
@@ -94,14 +93,81 @@ class StrategixActionServer(Node):
 
     def update_score(self):
         """Update global score."""
-        score = self.score.get_score()
+        score = self.get_score()
         lcd_msg = Lcd()
         lcd_msg.line = 1
         lcd_msg.text = f"Score: {score}"
+        self.get_logger().info(f"Score: {score}")
         score_msg = UInt8()
         score_msg.data = score
         self.score_publisher.publish(score_msg)
         self.lcd_driver.publish(lcd_msg)
+
+    def get_score(self):
+        score = 0
+        num_manche_air = 0
+        num_red_cups = 0
+        num_green_cups = 0
+        phare_raised = False
+        pavillon_raised = False
+        for action_id, action_object in actions.items():
+            if action_object.tags.get("STATUS") == "FINISHED":
+                if type(action_object) is MancheAir:
+                    num_manche_air += 1
+                elif type(action_object) is Gobelet:
+                    if action_object.color == "RED":
+                        num_red_cups += 1
+                    else:
+                        num_green_cups += 1
+                elif type(action_object) is Phare:
+                    phare_raised = True
+                elif action_id == "PAVILLON":
+                    pavillon_raised = True
+        # Bon Port
+        # if self.bonPortGros.pos == self.bonPortPetit.pos == 'Good':
+        #     self.score += 10
+        # elif self.bonPortGros.pos == self.bonPortPetit.pos == 'Wrong':
+        #     self.score += 5
+        # elif self.bonPortGros.pos == 'Good' and self.bonPortPetit.pos == 'Out':
+        #     self.score += 5
+        # elif self.bonPortGros.pos == 'Out' and self.bonPortPetit.pos == 'Good':
+        #     self.score += 5
+        # else:
+        #     self.score += 0
+        score += 15 if num_manche_air == 2 else 5 if num_manche_air == 1 else 0
+        pair = 2 * num_red_cups if num_red_cups < num_green_cups else 2 * num_green_cups
+        score += 2 * (num_red_cups + num_green_cups) + pair
+        score += 15 if phare_raised else 2
+        score += 10 if pavillon_raised else 0
+        return score
+
+    def preempt(self, action, sender):
+        actions.get(action).tags["STATUS"] = "PREEMPT"
+        actions.get(action).tags["EXECUTER"] = sender
+        # if "ECUEIL" in action:
+        #     for gob in actions[action]["GOBS"]:
+        #         actions[action]["STATUS"] = "PREEMPTED"
+        #         actions[gob]["EXECUTER"] = sender
+        return True
+
+    def release(self, action, sender):
+        actions.get(action).tags["STATUS"] = "RELEASE"
+        actions.get(action).tags["EXECUTER"] = sender
+        # if "ECUEIL" in action:
+        #     for gob in actions[action]["GOBS"]:
+        #         actions[action]["STATUS"] = "RELEASED"
+        #         actions[gob]["EXECUTER"] = None
+        # Don't add failing action again
+        return True
+
+    def finish(self, action, sender):
+        actions.get(action).tags["STATUS"] = "FINISH"
+        actions.get(action).tags["EXECUTER"] = sender
+        # if "ECUEIL" in action:
+        #     for gob in actions[action]["GOBS"]:
+        #         actions[action]["STATUS"] = "FINISHED"
+        #         actions[gob]["EXECUTER"] = sender
+        return True
 
 
 def main(args=None):

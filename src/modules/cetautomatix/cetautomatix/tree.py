@@ -57,7 +57,7 @@ def create_tree(robot) -> py_trees.behaviour.Behaviour:
 
     pavillon = PavillonAction(name="Pavillon Action", robot=robot)
 
-    # Asterix Root
+    # Robot Root
     all_actions = py_trees.composites.Parallel(
         name="All Actions",
         policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
