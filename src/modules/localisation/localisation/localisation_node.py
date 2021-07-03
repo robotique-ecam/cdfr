@@ -7,14 +7,7 @@
 import math
 import numpy as np
 import time
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import copy
-=======
-=======
->>>>>>> Stashed changes
-
->>>>>>> Stashed changes
 import rclpy
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
@@ -122,7 +115,6 @@ class Localisation(rclpy.node.Node):
         at a stamp given by the marker"""
         for ally_marker in msg.markers:
             if (
-<<<<<<< Updated upstream
                 ally_marker.text.lower() == self.robot
                 and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.75
             ):
@@ -185,28 +177,6 @@ class Localisation(rclpy.node.Node):
                 self.vlx.start_near_wall_routine(self.robot_pose)
         elif self.vlx.continuous_sampling == 2:
             self.vlx.stop_near_wall_routine()
-=======
-                allie_marker.text.lower() == self.robot
-                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 1
-            ):
-                self._x = allie_marker.pose.position.x
-                self._y = allie_marker.pose.position.y
-                q = allie_marker.pose.orientation
-                self._theta = self.quaternion_to_euler(q.x, q.y, q.z, q.w)[2]
-                self._tf.header.stamp = allie_marker.header.stamp
-                self._tf.transform.translation.x = allie_marker.pose.position.x
-                self._tf.transform.translation.y = allie_marker.pose.position.y
-                self._tf.transform.translation.z = float(0)
-                self._tf.transform.rotation = q
-                time.sleep(0.15)
-                self.tf_publisher_.publish(self._tf)
-                self.last_odom_update = self.get_clock().now().to_msg().sec
-
-    def get_initial_tf_srv_callback(self, request, response):
-        self.get_logger().info(f"incoming request for {self.robot} odom -> map tf")
-        response.transform_stamped = self._initial_tf
-        return response
->>>>>>> Stashed changes
 
 
 def main(args=None):

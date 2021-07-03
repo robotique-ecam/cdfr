@@ -44,16 +44,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
     )
 
     robot_launch_file_dir = os.path.dirname(__file__)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-    map_dir = os.path.join(get_package_share_directory("map"), "map", "params.yml")
-    nav2_launch_file_dir = os.path.join(
-        get_package_share_directory("nav2_bringup"), "launch"
-    )
->>>>>>> Stashed changes
     nav2_bt_xml_file = os.path.join(
         get_package_share_directory("robot"),
         "behavior_trees",
@@ -120,17 +110,6 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         remappings=remappings,
                     ),
                     Node(
-<<<<<<< Updated upstream
-=======
-                        package="nav2_map_server",
-                        executable="map_server",
-                        name="map_server",
-                        output="screen",
-                        parameters=[map_dir],
-                        remappings=remappings,
-                    ),
-                    Node(
->>>>>>> Stashed changes
                         package="teb_obstacles",
                         executable="teb_obstacles",
                         output="screen",
