@@ -39,7 +39,7 @@ class Sensors:
         """Get time stamp from Webots"""
         self.node.robot.step(0)
         t = self.node.robot.getTime()
-        return Time(sec=int(t), nanosec=int((t % int(t)) * 1e9))
+        return Time(sec=int(t), nanosec=int((t - int(t)) * 1e9))
 
     def __del__(self):
         """Destructor"""
