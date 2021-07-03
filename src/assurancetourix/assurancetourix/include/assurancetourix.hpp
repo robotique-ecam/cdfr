@@ -53,6 +53,7 @@ private:
   cv::Point2d get_pixels_from_position(geometry_msgs::msg::Point &position);
   void reef_goblet_callback();
   int is_goblet_at_position(geometry_msgs::msg::Point &position);
+  void compass_orientation_callback();
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"

@@ -67,6 +67,11 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   RCLCPP_WARN(this->get_logger(), "Assurancetourix camera position guessing x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
     assurancetourix_to_map_transformation.transform.translation.y);
+
+  if (assurancetourix_to_map_transformation.transform.translation.x < 1.5) this->declare_parameter<std::string>("side", "blue");
+  else this->declare_parameter<std::string>("side", "yellow");
+  this->get_parameter("side", side);
+
   std::cout << "x: " << assurancetourix_to_map_transformation.transform.translation.x << std::endl;
   std::cout << "y: " << assurancetourix_to_map_transformation.transform.translation.y << std::endl;
   std::cout << "z: " << assurancetourix_to_map_transformation.transform.translation.z << std::endl;
@@ -369,7 +374,7 @@ void Assurancetourix::init_parameters() {
   this->declare_parameter("rviz_settings.header_frame_id");
   this->declare_parameter("topic_for_gradient_layer");
   this->declare_parameter("topic_for_allies_position");
-  this->declare_parameter("side");
+  //this->declare_parameter("side");
 
   this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_aruco", blue_color_aruco, {0.0, 0.0, 255.0});
   this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_aruco", yellow_color_aruco, {255.0, 255.0, 0.0});
@@ -383,7 +388,7 @@ void Assurancetourix::init_parameters() {
   this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
   this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
   this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
-  this->get_parameter_or<std::string>("side", side, "blue");
+  //this->get_parameter_or<std::string>("side", side, "blue");
 
   // initialisation of markers
   marker.header.frame_id = header_frame_id;
@@ -715,6 +720,11 @@ void Assurancetourix::reef_goblet_callback(){
     std::cout << "color: " << color << std::endl;
   }
 }
+
+void Assurancetourix::compass_orientation_callback(){
+  
+}
+
 #ifdef SIMULATION
 rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_robot) {
   double seconds = 0;
