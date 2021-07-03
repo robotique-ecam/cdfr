@@ -630,7 +630,7 @@ void Assurancetourix::estimate_arucos_poses() {
   }
 }
 
-cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point position){
+cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point &position){
   geometry_msgs::msg::PointStamped pt_world;
   pt_world.point = position;
 
@@ -665,7 +665,7 @@ cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point 
 }
 
 
-void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color){
+void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point  &position, std_msgs::msg::ColorRGBA &color){
 
   cv::Point2d pixel = get_pixels_from_position(position);
 
@@ -693,6 +693,28 @@ void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point position
   RCLCPP_INFO(this->get_logger(), "pixel at pose x: %f, y: %f, z: %f is red: %f, green: %f, blue: %f", position.x, position.y, position.z, color.r, color.g, color.b);
 }
 
+int Assurancetourix::is_goblet_at_position(geometry_msgs::msg::Point &position){
+  std_msgs::msg::ColorRGBA color;
+  get_color_from_position(position, color);
+  if (color.r > color.g * 2.5) return 1; //red
+  else if (color.g > color.r * 2.5) return 2; //green
+  else return 0; //Nothing
+}
+
+void Assurancetourix::reef_goblet_callback(){
+  std::vector<int> reef;
+  double x_reef = 0.7;
+  geometry_msgs::msg::Point gob;
+  gob.x = x_reef;
+  gob.y = 2.067;
+  gob.z = 0.12;
+  for (int i = 0; i < 5; i++){
+    gob.x = x_reef + i*0.075;
+    int color = is_goblet_at_position(gob);
+    reef.push_back(color);
+    std::cout << "color: " << color << std::endl;
+  }
+}
 #ifdef SIMULATION
 rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_robot) {
   double seconds = 0;

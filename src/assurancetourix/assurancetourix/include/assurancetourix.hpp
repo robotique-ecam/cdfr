@@ -49,8 +49,10 @@ private:
   void compute_final_projection(std::vector<std::vector<cv::Point2f>> &coordinates_vector, std::vector<cv::Point2f> &undistort);
   void compute_estimation_markers(std::vector<cv::Vec3d> rvecs, std::vector<cv::Vec3d> tvecs,
   visualization_msgs::msg::MarkerArray &marker_array_ennemies, visualization_msgs::msg::MarkerArray &marker_array_allies, std::vector<int> detected_ids, visualization_msgs::msg::MarkerArray &markers_camera_relative);
-  void get_color_from_position(geometry_msgs::msg::Point position, std_msgs::msg::ColorRGBA & color);
-  cv::Point2d get_pixels_from_position(geometry_msgs::msg::Point position);
+  void get_color_from_position(geometry_msgs::msg::Point &position, std_msgs::msg::ColorRGBA &color);
+  cv::Point2d get_pixels_from_position(geometry_msgs::msg::Point &position);
+  void reef_goblet_callback();
+  int is_goblet_at_position(geometry_msgs::msg::Point &position);
 
 #ifdef CAMERA
   // service command line to enable aruco_detection: ros2 service call /enable_aruco_detection std_srvs/srv/SetBool "{data: true}"
