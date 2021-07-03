@@ -2,11 +2,9 @@
 
 
 import math
-import time
 from importlib import import_module
 from signal import SIGINT
 from subprocess import call
-from threading import Thread
 from platform import machine
 
 import numpy as np

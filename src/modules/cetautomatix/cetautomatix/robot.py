@@ -10,14 +10,11 @@ from subprocess import call
 from importlib import import_module
 from platform import machine
 from rclpy.node import Node
-from geometry_msgs.msg import TransformStamped
-from tf2_kdl import transform_to_kdl, do_transform_frame
-from nav_msgs.msg import Odometry
 from lcd_msgs.msg import Lcd
 from std_srvs.srv import SetBool, Trigger
+from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
-from transformix_msgs.srv import TransformixParametersTransformStamped
 from strategix.actions import actions
 from strategix.strategy_modes import get_time_coeff
 from cetautomatix.selftest import Selftest
@@ -62,16 +59,9 @@ class Robot(Node):
         self.change_action_status_client = self.create_client(
             ChangeActionStatus, "/strategix/action"
         )
-        # Get initial transformation
-        self.initial_tf_client = self.create_client(
-            TransformixParametersTransformStamped, "get_odom_map_tf"
-        )
-        self.initial_tf = self.synchronous_call(
-            self.initial_tf_client, TransformixParametersTransformStamped.Request()
-        ).transform_stamped
         # Odometry subscriber
         self.odom_sub = self.create_subscription(
-            Odometry, "odom", self.odom_callback, 1
+            PoseStamped, "odom_map_relative", self.odom_callback, 1
         )
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name="NavigateToPose")
@@ -202,16 +192,10 @@ class Robot(Node):
         return resp
 
     def odom_callback(self, msg):
-        """Odom callback, compute the new pose of the robot relative to map"""
-        robot_tf = TransformStamped()
-        robot_tf.transform.translation.x = msg.pose.pose.position.x
-        robot_tf.transform.translation.y = msg.pose.pose.position.y
-        robot_tf.transform.rotation = msg.pose.pose.orientation
-        robot_frame = transform_to_kdl(robot_tf)
-        new_robot_pose_kdl = do_transform_frame(robot_frame, self.initial_tf)
-        q = new_robot_pose_kdl.M.GetQuaternion()
-        self.position = (new_robot_pose_kdl.p.x(), new_robot_pose_kdl.p.y())
-        self.orientation = self.quaternion_to_euler(q[0], q[1], q[2], q[3])[2]
+        """Odom callback"""
+        q = msg.pose.orientation
+        self.position = (msg.pose.position.x, msg.pose.position.y)
+        self.orientation = self.quaternion_to_euler(q.x, q.y, q.z, q.w)[2]
 
     def stop_robot_callback(self, req, resp):
         """Stop robot / ROS."""

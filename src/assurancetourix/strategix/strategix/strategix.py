@@ -11,6 +11,7 @@ from std_msgs.msg import UInt8
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
 from strategix.actions import actions
+from strategix.action_objects import Phare, MancheAir, Gobelet
 from strategix.exceptions import MatchStartedException
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
@@ -96,6 +97,7 @@ class StrategixActionServer(Node):
         lcd_msg = Lcd()
         lcd_msg.line = 1
         lcd_msg.text = f"Score: {score}"
+        self.get_logger().info(f"Score: {score}")
         score_msg = UInt8()
         score_msg.data = score
         self.score_publisher.publish(score_msg)
@@ -110,16 +112,16 @@ class StrategixActionServer(Node):
         pavillon_raised = False
         for action_id, action_object in actions.items():
             if action_object.tags.get("STATUS") == "FINISHED":
-                if "MANCHE" in action_id:
+                if type(action_object) is MancheAir:
                     num_manche_air += 1
-                if "GOB" in action_id:
+                elif type(action_object) is Gobelet:
                     if action_object.color == "RED":
                         num_red_cups += 1
                     else:
                         num_green_cups += 1
-                if "PHARE" in action_id:
+                elif type(action_object) is Phare:
                     phare_raised = True
-                if "PAVILLON" in action_id:
+                elif action_id == "PAVILLON":
                     pavillon_raised = True
         # Bon Port
         # if self.bonPortGros.pos == self.bonPortPetit.pos == 'Good':
