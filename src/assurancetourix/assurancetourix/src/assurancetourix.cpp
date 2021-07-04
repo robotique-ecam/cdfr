@@ -86,6 +86,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   std_msgs::msg::ColorRGBA color;
   get_color_from_position(testee, color);
 
+  set_auto_exposure();
+
   timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
 
 #endif // CAMERA
@@ -94,6 +96,21 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 }
 
 #ifdef CAMERA
+
+void Assurancetourix::set_auto_exposure(){
+  std_msgs::msg::ColorRGBA color;
+  geometry_msgs::msg::Point compass_pos;
+  compass_pos.x = 1.5;
+  compass_pos.y = 0.55;
+
+  for (_camera_settings.exposure; _camera_settings.exposure < 50; _camera_settings.exposure++){
+    get_color_from_position(compass_pos, color, 21);
+    if (color.r > 135) break;
+    else _cap.set(cv::CAP_PROP_EXPOSURE, _camera_settings.exposure);
+    std::cout << "color: " << color.b << std::endl;
+    std::cout << "exposure: " << _camera_settings.exposure << std::endl;
+  }
+}
 
 void Assurancetourix::estimate_initial_camera_pose(){
   tf2_ros::StaticTransformBroadcaster static_tf_broadcaster(this);
@@ -186,7 +203,7 @@ void Assurancetourix::estimate_initial_camera_pose(){
 }
 
 void Assurancetourix::init_camera_settings(){
-  _cap.open(2, cv::CAP_V4L2);
+  _cap.open(0, cv::CAP_V4L2);
 
   this->declare_parameter("camera_settings.width");
   this->declare_parameter("camera_settings.height");
@@ -673,7 +690,7 @@ cv::Point2d Assurancetourix::get_pixels_from_position(geometry_msgs::msg::Point 
 }
 
 
-void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point  &position, std_msgs::msg::ColorRGBA &color){
+void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point &position, std_msgs::msg::ColorRGBA &color, int square_to_check){
 
   cv::Point2d pixel = get_pixels_from_position(position);
 
@@ -682,7 +699,6 @@ void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point  &positi
   color.r = 0.0;
   color.a = 255.0;
 
-  int square_to_check = 7;
   cv::Mat img_color;
   _cap.read(img_color);
   for (int i = 0; i<square_to_check; i++){
