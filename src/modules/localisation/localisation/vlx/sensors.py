@@ -20,8 +20,12 @@ vlx_order = [30, 31, 32, 33, 34, 35]
 class Sensors:
     def __init__(self, i2c_bus=4, addrs=[]):
         """Init Sensors"""
+        self.ugly_as_f = False
         self._i2c_bus = i2c_bus
         self._vlx_array = []
+        if addrs == [0]:
+            self.ugly_as_f = True
+            return
         for addr in addrs:
             self.init_vlx(addr)
 
@@ -52,6 +56,8 @@ class Sensors:
 
     def get_distances(self):
         """Fetch distances from VL53L1X"""
+        if self.ugly_as_f:
+            return {30: 1.0, 31: 1.0, 32: 1.0, 33: 1.0, 34: 1.0, 35: 1.0}
         distances = {}
         for i in range(len(self._vlx_array)):
             distances.update({vlx_order[i]: self._vlx_array[i].get_distance()})

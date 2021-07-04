@@ -75,7 +75,12 @@ class VlxReadjustment:
             )._value
             self.parent.declare_parameter("vlx_i2c_bus", 4)
             vlx_i2c_bus = self.parent.get_parameter("vlx_i2c_bus")._value
-            self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=vlx_addresses)
+            if self.parent.robot == "asterix":
+                self.parent.get_logger().warn(f"{self.parent.robot} --> vlx OFF")
+                self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=[0])
+            else:
+                self.parent.get_logger().warn(f"{self.parent.robot} --> vlx ON")
+                self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=vlx_addresses)
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
