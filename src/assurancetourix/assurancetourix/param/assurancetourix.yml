@@ -22,24 +22,24 @@ assurancetourix:
       small_aruco_size: 0.067
       huge_aruco_size: 0.12
       asterix:
-        side_right: 172
-        front_right: 173
+        side_right: 182
+        front_right: 175
         front_left: 174
-        side_left: 175
-        back_left: 176
-        back_right: 177
-        front_x_offset: 0.0675
-        front_y_offset: 0.0625
-        side_y_offset: 0.13
-      obelix:
-        side_right: 187
-        front_right: 185
-        front_left: 184
-        side_left: 186
+        side_left: 184
         back_left: 183
-        back_right: 182
+        back_right: 185
+        front_x_offset: 0.1075
+        front_y_offset: 0.061
+        side_y_offset: 0.125
+      obelix:
+        side_right: 176
+        front_right: 186
+        front_left: 187
+        side_left: 177
+        back_left: 172
+        back_right: 173
         front_x_offset: 0.096
-        front_y_offset: 0.066
+        front_y_offset: 0.065
         side_y_offset: 0.181
       enemies:
         x_y_offset: 0.05
