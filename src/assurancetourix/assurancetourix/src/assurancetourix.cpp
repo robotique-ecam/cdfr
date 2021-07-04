@@ -26,6 +26,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
+  compass_pub = this->create_publisher<std_msgs::msg::String>("/compass", qos);
 
   if (show_image) {
     cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
@@ -84,6 +85,8 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   testee.y = 1.0;
   std_msgs::msg::ColorRGBA color;
   get_color_from_position(testee, color);
+
+  timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
 
 #endif // CAMERA
 
@@ -680,11 +683,13 @@ void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point  &positi
   color.a = 255.0;
 
   int square_to_check = 7;
+  cv::Mat img_color;
+  _cap.read(img_color);
   for (int i = 0; i<square_to_check; i++){
     for (int j = 0; j<square_to_check; j++){
       int u = int(pixel.x + i - square_to_check/2);
       int v = int(pixel.y + j - square_to_check/2);
-      cv::Vec3b bgr_pixel = _anotated.at<Vec3b>(cv::Point(u, v));
+      cv::Vec3b bgr_pixel = img_color.at<Vec3b>(cv::Point(u, v));
       color.b += float(bgr_pixel[0]);
       color.g += float(bgr_pixel[1]);
       color.r += float(bgr_pixel[2]);
@@ -722,7 +727,24 @@ void Assurancetourix::reef_goblet_callback(){
 }
 
 void Assurancetourix::compass_orientation_callback(){
-  
+  std_msgs::msg::ColorRGBA color;
+  geometry_msgs::msg::Point compass_pos;
+  compass_pos.x = 1.5;
+  compass_pos.y = 1.975;
+  compass_pos.z = 0.45;
+  get_color_from_position(compass_pos, color);
+  std::cout << "color: " << color.r << std::endl;
+  std::cout << "color: " << color.g << std::endl;
+  std::cout << "color: " << color.b << std::endl;
+
+  std_msgs::msg::String color_str;
+  if (color.r + color.g + color.b < 150) {
+    color_str.data = "north";
+  }
+  else {
+    color_str.data = "south";
+  }
+  compass_pub->publish(color_str);
 }
 
 #ifdef SIMULATION

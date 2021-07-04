@@ -20,6 +20,7 @@
 #ifdef SIMULATION
 #include <webots/Supervisor.hpp>
 #endif
+#include "std_msgs/msg/string.hpp"
 #include "std_srvs/srv/set_bool.hpp"
 
 using namespace rclcpp;
@@ -101,7 +102,7 @@ private:
   cv::Ptr<cv::aruco::DetectorParameters> _parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_250);
 
-  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::TimerBase::SharedPtr timer_, timer_compass_;
 
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
 
@@ -123,6 +124,8 @@ private:
   geometry_msgs::msg::TransformStamped assurancetourix_to_map_tf_inv;
 
   Geometrix* geometrix;
+
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr compass_pub;
 
 #ifdef SIMULATION
   rclcpp::Time get_sim_time(std::shared_ptr<webots::Robot> wb_robot);
