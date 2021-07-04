@@ -43,15 +43,13 @@ class Selftest:
         addrs_vlx = []
         if node.robot == "obelix":
             addrs_vlx = [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]
-        elif node.robot == "asterix":
-            addrs_vlx = [0x30, 0x34, 0x35, 0x36, 0x37]
-        try:
-            bus = SMBus(4)
-            for addr in addrs_vlx:
-                self.__write__(addr)
-                bus.read_byte(addr)
-        except BaseException:
-            return
+            try:
+                bus = SMBus(4)
+                for addr in addrs_vlx:
+                    self.__write__(addr)
+                    bus.read_byte(addr)
+            except BaseException:
+                return
 
         # Testing devices on actuators I2C Bus
         code = 0x40
