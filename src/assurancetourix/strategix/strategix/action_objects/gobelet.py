@@ -10,11 +10,9 @@ class Gobelet(Action):
         self.pump_id = None
 
     def get_initial_orientation(self, robot):
-        theta = 180 - np.rad2deg(
-            np.arctan(
-                (self.position[1] - robot.position[1])
-                / (self.position[0] - robot.position[0])
-            )
+        theta = np.arctan2(
+            (self.position[1] - robot.position[1]),
+            (self.position[0] - robot.position[0])
         )
         return theta
 
@@ -25,12 +23,7 @@ class Gobelet(Action):
             robot_to_gob = robot.actuators.PUMPS.get(self.pump_id).get("pos")
         vector_robot_to_gob = Vector(robot_to_gob[0], robot_to_gob[1], 0)
         # Find the angle between the robot's and the gobelet's position (theta)
-        theta = 180 - np.rad2deg(
-            np.arctan(
-                (self.position[1] - robot.position[1])
-                / (self.position[0] - robot.position[0])
-            )
-        )
+        theta = self.get_initial_orientation(robot)
         # Frame between gobelet and center of robot
         frame_robot_to_gob = Frame(Rotation.RotZ(theta), vector_robot_to_gob)
         # Frame between gobelet and map
@@ -49,12 +42,13 @@ class Gobelet(Action):
             if pump_dict.get("status") is None:
                 self.pump_id = pump_id
                 # Find the id of this Gobelet
-                for action_id, action_dict in action_list:
+                for action_id, action_dict in action_list.items():
                     if action_dict == self:
                         pump_dict["status"] = action_id
                         robot.get_logger().info(
                             f"Pump {pump_id} preempted {action_id}."
                         )
+                        robot.actuators.setPumpsEnabled(True, [self.pump_id])
                         return
 
     def release_action(self, robot):
@@ -68,3 +62,6 @@ class Gobelet(Action):
             return
         robot.actuators.PUMPS.get(self.pump_id).pop("status")
         self.pump_id = None
+
+    def start_actuator(self, robot):
+        robot.actuators.grabCups([self.pump_id])

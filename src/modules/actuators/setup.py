@@ -5,7 +5,7 @@
 
 
 from os import path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 package_name = "actuators"
@@ -14,7 +14,7 @@ package_name = "actuators"
 setup(
     name=package_name,
     version="0.8.3",
-    packages=[package_name],
+    packages=[find_packages(),
     data_files=[
         (path.join("share", package_name), ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
