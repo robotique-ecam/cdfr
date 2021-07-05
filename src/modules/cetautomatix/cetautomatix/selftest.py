@@ -41,7 +41,7 @@ class Selftest:
 
         # Testing devices on sensors I2C Bus
         addrs_vlx = []
-        if node.robot == "obelix":
+        if node.name == "obelix":
             addrs_vlx = [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]
             try:
                 bus = SMBus(4)
@@ -60,7 +60,7 @@ class Selftest:
                 code += 1
                 self.__write__(code)
                 bus.read_byte(addr)
-            if node.robot == "obelix":
+            if node.name == "obelix":
                 addr_slider = 0x12
                 self.__write__(addr_slider)
                 bus.read_byte(addr_slider)
@@ -72,7 +72,7 @@ class Selftest:
 
         # Testing dynamixels connection
         code = 0x50
-        if node.robot == "obelix":
+        if node.name == "obelix":
             self.__write__(code)
             for dyna in self.node.actuators.DYNAMIXELS:
                 code += 1
