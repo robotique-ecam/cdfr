@@ -40,7 +40,7 @@ class Robot(Node):
         # Do selftest
         self.selftest = Selftest(self)
         # Prechill engines
-        self.actuators.setFansEnabled(True)
+        # self.actuators.setFansEnabled(True)
         # Create empty action queue
         self.action_list = []
         self.current_action = None
@@ -136,9 +136,9 @@ class Robot(Node):
         if response is None:
             return False
         self.current_action = action if response.success else None
+        actions.get(self.current_action).preempt_action(self, actions)
         if self.current_action is not None:
             self.set_goal_pose()
-        actions.get(self.current_action).preempt_action(self, actions)
         return response.success
 
     def drop_current_action(self):
@@ -223,7 +223,7 @@ class Robot(Node):
             )
             # Stop fans and relax servos
             self.actuators.disableDynamixels()
-            self.actuators.setFansEnabled(False)
+            # self.actuators.setFansEnabled(False)
             # Shutdown ROS
             for p in psutil.process_iter(["pid", "name", "cmdline"]):
                 if "ros2" in p.name() and "launch" in p.cmdline():
@@ -276,6 +276,8 @@ class Robot(Node):
         msg.pose.header.frame_id = "map"
         orientation = actions.get(self.current_action).get_initial_orientation(self)
         position = actions.get(self.current_action).get_initial_position(self)
+        self.get_logger().info(f"Position - x: {position[0]}, y: {position[1]}")
+        self.get_logger().info(f"Orientation - {orientation} radians")
         msg.pose.pose.position.x = position[0]
         msg.pose.pose.position.y = position[1]
         msg.pose.pose.position.z = 0.0

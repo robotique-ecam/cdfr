@@ -80,13 +80,13 @@ class Gobelet(Action):
             if pump_dict.get("status") is None:
                 self.pump_id = pump_id
                 # Find the id of this Gobelet
-                robot.get_logger().info(f"action list {action_list}")
-                for action_id, action_dict in action_list.tems():
+                for action_id, action_dict in action_list.items():
                     if action_dict == self:
                         pump_dict["status"] = action_id
                         robot.get_logger().info(
                             f"Pump {pump_id} preempted {action_id}."
                         )
+                        robot.actuators.setPumpsEnabled(True, [self.pump_id])
                         return
 
     def release_action(self, robot):
@@ -100,3 +100,6 @@ class Gobelet(Action):
             return
         robot.actuators.PUMPS.get(self.pump_id).pop("status")
         self.pump_id = None
+
+    def start_actuator(self, robot):
+        robot.actuators.grabCups([self.pump_id])

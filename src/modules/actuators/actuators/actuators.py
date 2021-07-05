@@ -6,11 +6,11 @@
 
 from time import sleep
 
-from .arbotix.arbotix import ArbotiX
-from .drivers.i2c import I2CDriver
-from .drivers.pumps import PumpDriver
-from .drivers.rpi_servos import RPiServos
-from .drivers.slider import I2CSliderDriver
+from actuators.arbotix.arbotix import ArbotiX
+from actuators.drivers.i2c import I2CDriver
+from actuators.drivers.slider import I2CSliderDriver
+from actuators.drivers.pumps import PumpDriver
+from actuators.drivers.rpi_servos import RPiServos
 
 NO, NC = False, True
 
