@@ -1,6 +1,9 @@
 from .action import Action
 import numpy as np
+
 from PyKDL import Vector, Rotation, Frame
+from tf2_kdl import transform_to_kdl, do_transform_frame
+from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
 
 
 class Gobelet(Action):
@@ -10,36 +13,64 @@ class Gobelet(Action):
         self.pump_id = None
 
     def get_initial_orientation(self, robot):
-        theta = 180 - np.rad2deg(
-            np.arctan(
-                (self.position[1] - robot.position[1])
-                / (self.position[0] - robot.position[0])
-            )
+        vec_pose_to_goal = Vector(
+            self.position[0] - robot.position[0],
+            self.position[1] - robot.position[1],
+            0,
         )
-        return theta
+        vec_pose_to_goal.Normalize()
+
+        return (
+            np.arccos(vec_pose_to_goal[0])
+            if vec_pose_to_goal[1] > 0
+            else -np.arccos(vec_pose_to_goal[0])
+        )
 
     def get_initial_position(self, robot):
         if robot.simulation:
             robot_to_gob = (0.04, 0.08)
         else:
             robot_to_gob = robot.actuators.PUMPS.get(self.pump_id).get("pos")
-        vector_robot_to_gob = Vector(robot_to_gob[0], robot_to_gob[1], 0)
-        # Find the angle between the robot's and the gobelet's position (theta)
-        theta = 180 - np.rad2deg(
-            np.arctan(
-                (self.position[1] - robot.position[1])
-                / (self.position[0] - robot.position[0])
-            )
+
+        gob_to_robot = TransformStamped()
+        gob_to_robot.transform.translation.x = -robot_to_gob[0]
+        gob_to_robot.transform.translation.y = -robot_to_gob[1]
+
+        goal_pose = TransformStamped()
+        goal_pose.transform.translation.x = self.position[0]
+        goal_pose.transform.translation.y = self.position[1]
+
+        robot_pose = PoseStamped()
+        robot_pose.pose.position.x = robot.position[0]
+        robot_pose.pose.position.y = robot.position[1]
+
+        vec_pose_to_goal = Vector(
+            goal_pose.transform.translation.x - robot_pose.pose.position.x,
+            goal_pose.transform.translation.y - robot_pose.pose.position.y,
+            0,
         )
-        # Frame between gobelet and center of robot
-        frame_robot_to_gob = Frame(Rotation.RotZ(theta), vector_robot_to_gob)
-        # Frame between gobelet and map
-        frame_map_to_gob = Frame(
-            Rotation.Identity(), Vector(self.position[0], self.position[1], 0)
+        vec_pose_to_goal.Normalize()
+
+        angle = (
+            np.arccos(vec_pose_to_goal[0])
+            if vec_pose_to_goal[1] > 0
+            else -np.arccos(vec_pose_to_goal[0])
         )
-        # Frame between robot and map
-        frame_map_to_robot = frame_map_to_gob * frame_robot_to_gob.Inverse()
-        return (frame_map_to_robot.p.x(), frame_map_to_robot.p.y())
+
+        rot = Rotation.RotZ(angle)
+
+        q = rot.GetQuaternion()
+
+        goal_pose.transform.rotation.x = q[0]
+        goal_pose.transform.rotation.y = q[1]
+        goal_pose.transform.rotation.z = q[2]
+        goal_pose.transform.rotation.w = q[3]
+
+        gob_to_robot_kdl = transform_to_kdl(gob_to_robot)
+
+        robot_goal_pose_kdl = do_transform_frame(gob_to_robot_kdl, goal_pose)
+
+        return (robot_goal_pose_kdl.p.x(), robot_goal_pose_kdl.p.y())
 
     def preempt_action(self, robot, action_list):
         if robot.simulation:
@@ -49,7 +80,8 @@ class Gobelet(Action):
             if pump_dict.get("status") is None:
                 self.pump_id = pump_id
                 # Find the id of this Gobelet
-                for action_id, action_dict in action_list:
+                robot.get_logger().info(f"action list {action_list}")
+                for action_id, action_dict in action_list.tems():
                     if action_dict == self:
                         pump_dict["status"] = action_id
                         robot.get_logger().info(

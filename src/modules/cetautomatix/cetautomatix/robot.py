@@ -18,6 +18,7 @@ from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
 from strategix.actions import actions
 from strategix.strategy_modes import get_time_coeff
 from cetautomatix.selftest import Selftest
+from PyKDL import Rotation
 
 
 class Robot(Node):
@@ -278,7 +279,8 @@ class Robot(Node):
         msg.pose.pose.position.x = position[0]
         msg.pose.pose.position.y = position[1]
         msg.pose.pose.position.z = 0.0
-        q = self.euler_to_quaternion(orientation)
+        rot = Rotation.RotZ(orientation)
+        q = rot.GetQuaternion()
         msg.pose.pose.orientation.x = q[0]
         msg.pose.pose.orientation.y = q[1]
         msg.pose.pose.orientation.z = q[2]
