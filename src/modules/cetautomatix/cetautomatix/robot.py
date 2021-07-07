@@ -37,6 +37,7 @@ class Robot(Node):
         self.strategy_mode = self.get_parameter("strategy_mode")
         # Bind actuators
         self.actuators = import_module(f"actuators.{self.name}").actuators
+        self.actuators.robot_node = self
         # Do selftest
         self.selftest = Selftest(self)
         # Prechill engines
@@ -276,8 +277,9 @@ class Robot(Node):
         msg.pose.header.frame_id = "map"
         orientation = actions.get(self.current_action).get_initial_orientation(self)
         position = actions.get(self.current_action).get_initial_position(self)
-        self.get_logger().info(f"Position - x: {position[0]}, y: {position[1]}")
-        self.get_logger().info(f"Orientation - {orientation} radians")
+        self.get_logger().info(f"Goal objective updated to:")
+        self.get_logger().info(f'Position x: {position[0]}, y: {position[1]}')
+        self.get_logger().info(f'Orientation {orientation} radians')
         msg.pose.pose.position.x = position[0]
         msg.pose.pose.position.y = position[1]
         msg.pose.pose.position.z = 0.0
@@ -307,7 +309,9 @@ class Robot(Node):
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot and the time passed."""
         if not action_list:
+            self.get_logger().info("No actions left, aborting.")
             return None
+        self.get_logger().info(f"Available actions: {action_list}")
         coefficient_list = []
         for action_id in action_list:
             action = actions.get(action_id)

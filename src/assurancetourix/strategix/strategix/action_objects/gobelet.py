@@ -1,9 +1,9 @@
 from .action import Action
 import numpy as np
 
-from PyKDL import Vector, Rotation, Frame
+from PyKDL import Vector, Rotation
 from tf2_kdl import transform_to_kdl, do_transform_frame
-from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
+from geometry_msgs.msg import TransformStamped, PoseStamped
 
 
 class Gobelet(Action):
@@ -79,15 +79,14 @@ class Gobelet(Action):
         for pump_id, pump_dict in robot.actuators.PUMPS.items():
             if pump_dict.get("status") is None:
                 self.pump_id = pump_id
-                # Find the id of this Gobelet
-                for action_id, action_dict in action_list.items():
-                    if action_dict == self:
-                        pump_dict["status"] = action_id
-                        robot.get_logger().info(
-                            f"Pump {pump_id} preempted {action_id}."
-                        )
-                        robot.actuators.setPumpsEnabled(True, [self.pump_id])
-                        return
+                # Oneliner to find the id (key) of this Gobelet (value)
+                action_id = list(action_list.keys())[list(action_list.values()).index(self)]
+                pump_dict["status"] = action_id
+                robot.get_logger().info(
+                    f"Pump {pump_id} preempted {action_id}."
+                )
+                robot.actuators.setPumpsEnabled(True, [self.pump_id])
+                return
 
     def release_action(self, robot):
         if robot.simulation:
@@ -103,3 +102,4 @@ class Gobelet(Action):
 
     def start_actuator(self, robot):
         robot.actuators.grabCups([self.pump_id])
+        return True

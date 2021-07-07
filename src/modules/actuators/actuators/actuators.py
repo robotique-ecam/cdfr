@@ -35,6 +35,7 @@ class Actuators:
         if len(self.DYNAMIXELS) > 0:
             self.arbotix = ArbotiX()
             self._setupDynamixels()
+        self.robot_node = None
 
     def _setupDynamixels(self):
         """Setup dynamixels speed."""
@@ -60,6 +61,7 @@ class Actuators:
         flag_servo = self.SERVOS.get("flags")
         if flag_servo is not None:
             self.arbotix.setPosition(flag_servo["addr"], flag_servo["up"])
+            self.robot_node.get_logger().info("Raise the flag")
 
     def setPumpsEnabled(self, enabled: bool, pumps: list):
         """Set list of pumps as enabled or not."""
@@ -78,6 +80,7 @@ class Actuators:
                     self.pump_driver.bytes_clear([pump.get("valve")])
                 elif not enabled and pump.get("type") == NO:
                     self.pump_driver.bytes_clear([pump.get("pump"), pump.get("valve")])
+                self.robot_node.get_logger().info(f"{'Enabled' if enabled else 'Disabled'} pump {p}")
         # Relax valves to normal state after 100ms minimum delay
         if len(relax) > 0:
             sleep(0.1)
@@ -108,6 +111,7 @@ class Actuators:
         """Set list of pumps as enabled or not."""
         for addr, position in zip(addrs, positions):
             self.arbotix.setPosition(addr, position)
+            self.robot_node.get_logger().info(f"Set Dynamixel {addr} at position {position}")
 
     def setFansEnabled(self, enabled: bool):
         """Set fans on and off."""
@@ -115,7 +119,9 @@ class Actuators:
             self.pump_driver.bytes_set(self.FANS)
         else:
             self.pump_driver.bytes_clear(self.FANS)
+        self.robot_node.get_logger().info(f"{'Enabled' if enabled else 'Disabled'} fans")
 
     def setSliderPosition(self, position: int):
         """Slider position"""
         self.slider.set_position(position)
+        self.robot_node.get_logger().info(f"Set slider at position {position}")
