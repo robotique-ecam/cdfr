@@ -63,7 +63,7 @@ class Robot(Node):
         )
         # Odometry subscriber
         self.odom_sub = self.create_subscription(
-            PoseStamped, "odom_map_relative", self.odom_callback, 1
+            PoseStamped, "odom_map_relative", self.odom_callback, 10,
         )
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name="NavigateToPose")
@@ -203,6 +203,12 @@ class Robot(Node):
         self.position = (msg.pose.position.x, msg.pose.position.y)
         self.orientation = self.quaternion_to_euler(q.x, q.y, q.z, q.w)[2]
 
+    def get_position(self):
+        return self.position
+
+    def get_orientation(self):
+        return self.orientation
+
     def stop_robot_callback(self, req, resp):
         """Stop robot / ROS."""
         self.stop_ros(shutdown=False)
@@ -271,7 +277,7 @@ class Robot(Node):
         self.actuators.setFansEnabled(False)
         super().destroy_node()
 
-    def set_goal_pose(self):
+    def set_goal_pose(self, z=0.0):
         """Set goal pose of action in blackboard."""
         msg = NavigateToPose_Goal()
         msg.pose.header.frame_id = "map"
@@ -282,7 +288,7 @@ class Robot(Node):
         self.get_logger().info(f'Orientation {orientation} radians')
         msg.pose.pose.position.x = position[0]
         msg.pose.pose.position.y = position[1]
-        msg.pose.pose.position.z = 0.0
+        msg.pose.pose.position.z = z
         rot = Rotation.RotZ(orientation)
         q = rot.GetQuaternion()
         msg.pose.pose.orientation.x = q[0]
