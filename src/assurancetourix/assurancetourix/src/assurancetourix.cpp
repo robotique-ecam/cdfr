@@ -73,19 +73,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   else this->declare_parameter<std::string>("side", "yellow");
   this->get_parameter("side", side);
 
-  std::cout << "x: " << assurancetourix_to_map_transformation.transform.translation.x << std::endl;
-  std::cout << "y: " << assurancetourix_to_map_transformation.transform.translation.y << std::endl;
-  std::cout << "z: " << assurancetourix_to_map_transformation.transform.translation.z << std::endl;
-  std::cout << "rx: " << assurancetourix_to_map_transformation.transform.rotation.x << std::endl;
-  std::cout << "ry: " << assurancetourix_to_map_transformation.transform.rotation.y << std::endl;
-  std::cout << "rz: " << assurancetourix_to_map_transformation.transform.rotation.z << std::endl;
-  std::cout << "rw: " << assurancetourix_to_map_transformation.transform.rotation.w << std::endl;
-  geometry_msgs::msg::Point testee;
-  testee.x = 1.0;
-  testee.y = 1.0;
-  std_msgs::msg::ColorRGBA color;
-  get_color_from_position(testee, color);
-
   set_auto_exposure();
 
   timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
@@ -99,12 +86,12 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
 void Assurancetourix::set_auto_exposure(){
   std_msgs::msg::ColorRGBA color;
-  geometry_msgs::msg::Point compass_pos;
-  compass_pos.x = 1.5;
-  compass_pos.y = 0.55;
+  geometry_msgs::msg::Point white_paper_pos;
+  white_paper_pos.x = 1.5;
+  white_paper_pos.y = 0.55;
 
   for (_camera_settings.exposure; _camera_settings.exposure < 50; _camera_settings.exposure++){
-    get_color_from_position(compass_pos, color, 21);
+    get_color_from_position(white_paper_pos, color, 21);
     if (color.r > 135) break;
     else _cap.set(cv::CAP_PROP_EXPOSURE, _camera_settings.exposure);
     std::cout << "color: " << color.b << std::endl;
