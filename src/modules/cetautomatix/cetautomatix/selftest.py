@@ -60,10 +60,12 @@ class Selftest:
                 code += 1
                 self.__write__(code)
                 bus.read_byte(addr)
+            """
             if node.name == "obelix":
                 addr_slider = 0x12
                 self.__write__(addr_slider)
                 bus.read_byte(addr_slider)
+            """
         except BaseException:
             return
 
