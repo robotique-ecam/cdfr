@@ -47,5 +47,11 @@ def generate_launch_description():
                 output="screen",
                 parameters=[params],
             ),
+            Node(
+                package="pharaon",
+                executable="pharaon",
+                output="screen",
+                parameters=[params],
+            ),
         ]
     )
