@@ -80,11 +80,11 @@ class Gobelet(Action):
             if pump_dict.get("status") is None:
                 self.pump_id = pump_id
                 # Oneliner to find the id (key) of this Gobelet (value)
-                action_id = list(action_list.keys())[list(action_list.values()).index(self)]
+                action_id = list(action_list.keys())[
+                    list(action_list.values()).index(self)
+                ]
                 pump_dict["status"] = action_id
-                robot.get_logger().info(
-                    f"Pump {pump_id} preempted {action_id}."
-                )
+                robot.get_logger().info(f"Pump {pump_id} preempted {action_id}.")
                 robot.actuators.setPumpsEnabled(True, [self.pump_id])
                 return
 

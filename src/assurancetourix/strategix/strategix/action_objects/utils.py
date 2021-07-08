@@ -11,13 +11,12 @@ from rclpy.node import Node
 # Class taken from https://github.com/ros-planning/navigation2/issues/2283#issuecomment-853456150
 class Navigator(Node):
     def __init__(self):
-        super().__init__(node_name='navigator')
+        super().__init__(node_name="navigator")
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
         self.status = None
-        self.nav_to_pose_client = ActionClient(
-            self, NavigateToPose, 'navigate_to_pose')
+        self.nav_to_pose_client = ActionClient(self, NavigateToPose, "navigate_to_pose")
 
     def goToPose(self, pose):
         # Sends a `NavToPose` action request and waits for completion
@@ -28,21 +27,34 @@ class Navigator(Node):
         goal_msg = NavigateToPose.Goal()
         goal_msg.pose = pose
 
-        self.info('Navigating to goal: ' + str(pose.pose.position.x) + ' ' + str(pose.pose.position.y) + '...')
-        send_goal_future = self.nav_to_pose_client.send_goal_async(goal_msg,
-                                                                   self._feedbackCallback)
+        self.info(
+            "Navigating to goal: "
+            + str(pose.pose.position.x)
+            + " "
+            + str(pose.pose.position.y)
+            + "..."
+        )
+        send_goal_future = self.nav_to_pose_client.send_goal_async(
+            goal_msg, self._feedbackCallback
+        )
         rclpy.spin_until_future_complete(self, send_goal_future)
         self.goal_handle = send_goal_future.result()
 
         if not self.goal_handle.accepted:
-            self.error('Goal to ' + str(pose.pose.position.x) + ' ' + str(pose.pose.position.y) + ' was rejected!')
+            self.error(
+                "Goal to "
+                + str(pose.pose.position.x)
+                + " "
+                + str(pose.pose.position.y)
+                + " was rejected!"
+            )
             return False
 
         self.result_future = self.goal_handle.get_result_async()
         return True
 
     def cancelNav(self):
-        self.info('Canceling current goal.')
+        self.info("Canceling current goal.")
         if self.result_future:
             future = self.goal_handle.cancel_goal_async()
             rclpy.spin_until_future_complete(self, future)
@@ -52,19 +64,17 @@ class Navigator(Node):
         if not self.result_future:
             # task was cancelled or completed
             return True
-        rclpy.spin_until_future_complete(
-            self, self.result_future, timeout_sec=0.10)
+        rclpy.spin_until_future_complete(self, self.result_future, timeout_sec=0.10)
         if self.result_future.result():
             self.status = self.result_future.result().status
             if self.status != GoalStatus.STATUS_SUCCEEDED:
-                self.info(
-                    'Goal with failed with status code: {0}'.format(self.status))
+                self.info("Goal with failed with status code: {0}".format(self.status))
                 return True
         else:
             # Timed out, still processing, not complete yet
             return False
 
-        self.info('Goal succeeded!')
+        self.info("Goal succeeded!")
         return True
 
     def _feedbackCallback(self, msg):
@@ -92,7 +102,7 @@ def navigate_to_point(position, orientation, z=0.0):
     navigator = Navigator()
 
     goal_pose = PoseStamped()
-    goal_pose.header.frame_id = 'map'
+    goal_pose.header.frame_id = "map"
     goal_pose.pose.position.x = position[0]
     goal_pose.pose.position.y = position[1]
     goal_pose.pose.position.z = z

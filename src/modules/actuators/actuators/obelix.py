@@ -39,6 +39,11 @@ DYNAMIXELS = {
     4: {"speed": DYNA_SPEED, "up": DYNA_UP, "down": DYNA_DOWN},
 }
 
+SERVO_MOTORS = {
+    "arm": 0x06,
+    "reef": 0x06,
+}
+
 actuators = Actuators(
     i2c_bus=3,
     pump_addr=[0x40],
@@ -46,4 +51,6 @@ actuators = Actuators(
     PUMPS=PUMPS,
     SERVOS=SERVOS,
     DYNAMIXELS=DYNAMIXELS,
+    i2c_bus_servo_motor=5,
+    SERVO_MOTORS=SERVO_MOTORS,
 )

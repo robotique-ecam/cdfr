@@ -13,12 +13,24 @@ class Phare(Action):
 
     def get_initial_position(self, robot):
         # return (self.position[0], self.position[1] - robot.length.value / 2 - 0.1)
-        return (self.position[0] + self.displacement[0], self.position[1] - self.displacement[1])
+        return (
+            self.position[0] + self.displacement[0],
+            self.position[1] - self.displacement[1],
+        )
 
     def start_actuator(self, robot):
-        navigate_to_point((self.position[0], self.position[1] - 0.28), self.rotation, 2.0)
+        navigate_to_point(
+            (self.position[0], self.position[1] - 0.28), self.rotation, 2.0
+        )
         robot.get_logger().info("Servo on")
         time.sleep(2)
         robot.get_logger().info("Servo off")
-        navigate_to_point((self.position[0] + self.displacement[0], self.position[1] - self.displacement[1]), self.rotation, 2.0)
+        navigate_to_point(
+            (
+                self.position[0] + self.displacement[0],
+                self.position[1] - self.displacement[1],
+            ),
+            self.rotation,
+            2.0,
+        )
         return True

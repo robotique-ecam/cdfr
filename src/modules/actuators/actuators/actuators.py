@@ -20,21 +20,33 @@ class Actuators:
     """Actuators base class."""
 
     def __init__(
-        self, i2c_bus=3, pump_addr=[0x40], FANS=[7], PUMPS={}, DYNAMIXELS=[], SERVOS={}
+        self,
+        i2c_bus=3,
+        pump_addr=[0x40],
+        FANS=[7],
+        PUMPS={},
+        DYNAMIXELS=[],
+        SERVOS={},
+        i2c_bus_servo_motor=5,
+        SERVO_MOTORS={},
     ):
         """."""
         self.FANS = FANS
         self.PUMPS = PUMPS
         self.SERVOS = SERVOS
         self.DYNAMIXELS = DYNAMIXELS
+        self.SERVO_MOTORS = SERVO_MOTORS
         self.pump_addr = pump_addr
         self._i2c_bus = I2CDriver(i2c_bus)
-        self.rpi_servos = RPiServos(pins=[19, 6])
+        self._i2c_bus_servo = I2CDriver(i2c_bus_servo_motor)
         self.pump_driver = PumpDriver(self._i2c_bus, addrs=self.pump_addr)
         self.slider = I2CSliderDriver(self._i2c_bus)
         if len(self.DYNAMIXELS) > 0:
             self.arbotix = ArbotiX()
             self._setupDynamixels()
+        if len(self.SERVO_MOTORS) > 0:
+            self.rpi_servos = RPiServos(self._i2c_bus_servo, addrs=self.SERVO_MOTORS)
+            self._setupServoMotor()
         self.robot_node = None
 
     def _setupDynamixels(self):
@@ -47,6 +59,11 @@ class Actuators:
             servo = self.SERVOS[s]
             self.arbotix.setSpeed(servo.get("addr"), servo.get("speed"))
             self.arbotix.setPosition(servo.get("addr"), servo.get("down"))
+
+    def _setupServoMotor(self):
+        """setup servo_motor to initial position"""
+        self.setServoPosition("arm", 82)
+        self.setServoPosition("reef", 0)
 
     def disableDynamixels(self):
         """Setup dynamixels speed."""
@@ -80,7 +97,9 @@ class Actuators:
                     self.pump_driver.bytes_clear([pump.get("valve")])
                 elif not enabled and pump.get("type") == NO:
                     self.pump_driver.bytes_clear([pump.get("pump"), pump.get("valve")])
-                self.robot_node.get_logger().info(f"{'Enabled' if enabled else 'Disabled'} pump {p}")
+                self.robot_node.get_logger().info(
+                    f"{'Enabled' if enabled else 'Disabled'} pump {p}"
+                )
         # Relax valves to normal state after 100ms minimum delay
         if len(relax) > 0:
             sleep(0.1)
@@ -111,7 +130,9 @@ class Actuators:
         """Set list of pumps as enabled or not."""
         for addr, position in zip(addrs, positions):
             self.arbotix.setPosition(addr, position)
-            self.robot_node.get_logger().info(f"Set Dynamixel {addr} at position {position}")
+            self.robot_node.get_logger().info(
+                f"Set Dynamixel {addr} at position {position}"
+            )
 
     def setFansEnabled(self, enabled: bool):
         """Set fans on and off."""
@@ -119,7 +140,13 @@ class Actuators:
             self.pump_driver.bytes_set(self.FANS)
         else:
             self.pump_driver.bytes_clear(self.FANS)
-        self.robot_node.get_logger().info(f"{'Enabled' if enabled else 'Disabled'} fans")
+        self.robot_node.get_logger().info(
+            f"{'Enabled' if enabled else 'Disabled'} fans"
+        )
+
+    def setServoPosition(self, servo: str, position: int):
+        """servo motor position"""
+        self.rpi_servos.set_angles(servo, position)
 
     def setSliderPosition(self, position: int):
         """Slider position"""

@@ -63,7 +63,10 @@ class Robot(Node):
         )
         # Odometry subscriber
         self.odom_sub = self.create_subscription(
-            PoseStamped, "odom_map_relative", self.odom_callback, 10,
+            PoseStamped,
+            "odom_map_relative",
+            self.odom_callback,
+            10,
         )
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name="NavigateToPose")
@@ -284,8 +287,8 @@ class Robot(Node):
         orientation = actions.get(self.current_action).get_initial_orientation(self)
         position = actions.get(self.current_action).get_initial_position(self)
         self.get_logger().info(f"Goal objective updated to:")
-        self.get_logger().info(f'Position x: {position[0]}, y: {position[1]}')
-        self.get_logger().info(f'Orientation {orientation} radians')
+        self.get_logger().info(f"Position x: {position[0]}, y: {position[1]}")
+        self.get_logger().info(f"Orientation {orientation} radians")
         msg.pose.pose.position.x = position[0]
         msg.pose.pose.position.y = position[1]
         msg.pose.pose.position.z = z
