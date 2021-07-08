@@ -133,5 +133,6 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
             if self.robot.triggered:
                 return py_trees.common.Status.SUCCESS
         elif not GPIO.input(17) or self.robot.triggered:
+            self.robot.set_start_time()
             return py_trees.common.Status.SUCCESS
         return py_trees.common.Status.RUNNING

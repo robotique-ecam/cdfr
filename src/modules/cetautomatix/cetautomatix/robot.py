@@ -200,7 +200,6 @@ class Robot(Node):
             # TODO : Fix sync call
             # Thread(target=self.synchronous_call, args=[self.trigger_start_asterix_client, self.trigger_start_asterix_request]).start()
             self.get_logger().info("Obelix triggered Asterix")
-        self.start_time = self.get_clock().now().nanoseconds * 1e-9
         lcd_msg = Lcd()
         lcd_msg.line = 0
         lcd_msg.text = f"{self.name.capitalize()} running".ljust(16)
@@ -211,6 +210,9 @@ class Robot(Node):
         if hasattr(resp, "success"):
             resp.success = True
         return resp
+
+    def set_start_time(self):
+        self.start_time = self.get_clock().now().nanoseconds * 1e-9
 
     def odom_callback(self, msg):
         """Odom callback"""
@@ -342,12 +344,13 @@ class Robot(Node):
             return None
         self.get_logger().info(f"Available actions: {action_list}")
         coefficient_list = []
+        position = self.get_position()
         for action_id in action_list:
             action = actions.get(action_id)
             coefficient = 0
             distance = np.sqrt(
-                (action.position[0] - self.position[0]) ** 2
-                + (action.position[1] - self.position[1]) ** 2
+                (action.position[0] - position[0]) ** 2
+                + (action.position[1] - position[1]) ** 2
             )
             coefficient += 100 * (1 - distance / 3.6)
             coefficient += get_time_coeff(

@@ -25,9 +25,6 @@ PUMPS = {
     # 9: {"pump": 12, "valve": 13, "type": NO, "pos": (0, -0.1)},
 }
 
-# Fans addresses
-FANS = [7, 15]
-
 # Servo
 SERVOS = {"flags": {"addr": 5, "down": 485, "up": 205, "speed": 250}}
 
@@ -47,7 +44,6 @@ SERVO_MOTORS = {
 actuators = Actuators(
     i2c_bus=3,
     pump_addr=[0x40],
-    FANS=FANS,
     PUMPS=PUMPS,
     SERVOS=SERVOS,
     DYNAMIXELS=DYNAMIXELS,
