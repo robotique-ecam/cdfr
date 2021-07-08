@@ -1,6 +1,5 @@
 from .action import Action
 import numpy as np
-
 from PyKDL import Vector, Rotation
 from tf2_kdl import transform_to_kdl, do_transform_frame
 from geometry_msgs.msg import TransformStamped, PoseStamped
@@ -14,13 +13,13 @@ class Gobelet(Action):
 
     def get_initial_orientation(self, robot):
         vec_pose_to_goal = Vector(
-            self.position[0] - robot.position[0],
-            self.position[1] - robot.position[1],
+            self.position[0] - robot.get_position()[0],
+            self.position[1] - robot.get_position()[1],
             0,
         )
         vec_pose_to_goal.Normalize()
 
-        return (
+        return np.pi + (
             np.arccos(vec_pose_to_goal[0])
             if vec_pose_to_goal[1] > 0
             else -np.arccos(vec_pose_to_goal[0])
@@ -41,21 +40,10 @@ class Gobelet(Action):
         goal_pose.transform.translation.y = self.position[1]
 
         robot_pose = PoseStamped()
-        robot_pose.pose.position.x = robot.position[0]
-        robot_pose.pose.position.y = robot.position[1]
+        robot_pose.pose.position.x = robot.get_position()[0]
+        robot_pose.pose.position.y = robot.get_position()[1]
 
-        vec_pose_to_goal = Vector(
-            goal_pose.transform.translation.x - robot_pose.pose.position.x,
-            goal_pose.transform.translation.y - robot_pose.pose.position.y,
-            0,
-        )
-        vec_pose_to_goal.Normalize()
-
-        angle = (
-            np.arccos(vec_pose_to_goal[0])
-            if vec_pose_to_goal[1] > 0
-            else -np.arccos(vec_pose_to_goal[0])
-        )
+        angle = self.get_initial_orientation(robot)
 
         rot = Rotation.RotZ(angle)
 
@@ -83,9 +71,10 @@ class Gobelet(Action):
                 action_id = list(action_list.keys())[
                     list(action_list.values()).index(self)
                 ]
-                pump_dict["status"] = action_id
+                robot.actuators.PUMPS.get(pump_id)["status"] = action_id
                 robot.get_logger().info(f"Pump {pump_id} preempted {action_id}.")
-                robot.actuators.setPumpsEnabled(True, [self.pump_id])
+                # robot.actuators.setPumpsEnabled(True, [self.pump_id])
+                # robot.actuators.setPumpsEnabled(F, [self.pump_id])
                 return
 
     def release_action(self, robot):
@@ -97,9 +86,7 @@ class Gobelet(Action):
     def finish_action(self, robot):
         if robot.simulation:
             return
-        robot.actuators.PUMPS.get(self.pump_id).pop("status")
-        self.pump_id = None
 
     def start_actuator(self, robot):
-        robot.actuators.grabCups([self.pump_id])
+        robot.actuators.asterix_grab(self.pump_id)
         return True

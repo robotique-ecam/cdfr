@@ -49,6 +49,10 @@ class Robot(Node):
         self.stop_ros_service = self.create_service(
             Trigger, "stop", self.stop_robot_callback
         )
+        # Strategix client to get the side
+        self.get_side_request = SetBool.Request()
+        self.get_side_request.data = True
+        self.get_side_client = self.create_client(SetBool, "/strategix/side")
         # Strategix client to get available actions
         self.get_available_actions_request = GetAvailableActions.Request()
         self.get_available_actions_request.sender = self.name
@@ -141,6 +145,7 @@ class Robot(Node):
             return False
         self.current_action = action if response.success else None
         actions.get(self.current_action).preempt_action(self, actions)
+        self.get_logger().info(f"PREEMPT {self.current_action}")
         if self.current_action is not None:
             self.set_goal_pose()
         return response.success
@@ -157,6 +162,7 @@ class Robot(Node):
         if response is None:
             return False
         actions.get(self.current_action).release_action(self)
+        self.get_logger().info(f"DROP {self.current_action}")
         self.current_action = None
         return response.success
 
@@ -172,6 +178,7 @@ class Robot(Node):
         if response is None:
             return False
         actions.get(self.current_action).finish_action(self)
+        self.get_logger().info(f"CONFIRM {self.current_action}")
         self.current_action = None
         return response.success
 
@@ -179,6 +186,11 @@ class Robot(Node):
         """Start the actuator action after the robot has reached its destination."""
         self.get_logger().info(f"START ACTUATOR {self.current_action}")
         return actions.get(self.current_action).start_actuator(self)
+
+    def get_side(self):
+        """Fetch side from Strategix."""
+        response = self.synchronous_call(self.get_side_client, self.get_side_request)
+        return response.message
 
     def start_robot_callback(self, req, resp):
         """Start robot."""
@@ -315,8 +327,16 @@ class Robot(Node):
             return False
         return response.success
 
+    def inventory_full(self):
+        for pump_id, pump in self.actuators.PUMPS.items():
+            if pump.get("status") is None:
+                return False
+        return True
+
     def compute_best_action(self, action_list):
         """Calculate best action to choose from its distance to the robot and the time passed."""
+        if self.inventory_full():
+            return "CHENAL"
         if not action_list:
             self.get_logger().info("No actions left, aborting.")
             return None

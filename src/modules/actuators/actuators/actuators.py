@@ -105,6 +105,46 @@ class Actuators:
             sleep(0.1)
             self.pump_driver.bytes_clear(relax)
 
+    def asterix_grab(self, id):
+        pump = self.PUMPS.get(id)
+        self.pump_driver.bytes_clear([pump.get("valve")])
+        sleep(0.2)
+        self.pump_driver.bytes_set([pump.get("pump")])
+        self.pump_driver.bytes_set([pump.get("push")])
+        sleep(0.2)
+        self.pump_driver.bytes_clear([pump.get("pull")])
+        sleep(1)
+        self.pump_driver.bytes_set([pump.get("pull")])
+        sleep(0.2)
+        self.pump_driver.bytes_clear([pump.get("push")])
+
+    def asterix_drop(self, id):
+        pump = self.PUMPS.get(id)
+        self.pump_driver.bytes_clear([pump.get("pull")])
+        sleep(0.2)
+        self.pump_driver.bytes_set([pump.get("push")])
+        sleep(1)
+        self.pump_driver.bytes_clear([pump.get("pump")])
+        self.pump_driver.bytes_clear([pump.get("push")])
+        sleep(0.2)
+        self.pump_driver.bytes_set([pump.get("valve")])
+        self.pump_driver.bytes_set([pump.get("pull")])
+
+    def asterix_drop_all(self):
+        pulls = [pump.get("pull") for pump in self.PUMPS.values()]
+        pushes = [pump.get("push") for pump in self.PUMPS.values()]
+        valves = [pump.get("valve") for pump in self.PUMPS.values()]
+        pumps = [pump.get("pump") for pump in self.PUMPS.values()]
+        self.pump_driver.bytes_clear(pulls)
+        sleep(0.2)
+        self.pump_driver.bytes_set(pushes)
+        sleep(1)
+        self.pump_driver.bytes_clear(pumps)
+        self.pump_driver.bytes_clear(pushes)
+        sleep(0.2)
+        self.pump_driver.bytes_set(valves)
+        self.pump_driver.bytes_set(pulls)
+
     def grabCups(self, ports: list):
         """Grab cups at specified indexes."""
         self.setPumpsEnabled(True, ports)

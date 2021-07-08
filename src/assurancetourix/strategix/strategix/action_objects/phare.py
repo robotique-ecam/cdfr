@@ -12,7 +12,6 @@ class Phare(Action):
         self.displacement = (0.4, 0.4)
 
     def get_initial_position(self, robot):
-        # return (self.position[0], self.position[1] - robot.length.value / 2 - 0.1)
         return (
             self.position[0] + self.displacement[0],
             self.position[1] - self.displacement[1],
@@ -22,9 +21,11 @@ class Phare(Action):
         navigate_to_point(
             (self.position[0], self.position[1] - 0.28), self.rotation, 2.0
         )
-        robot.get_logger().info("Servo on")
         time.sleep(2)
-        robot.get_logger().info("Servo off")
+        response = robot.synchronous_call(
+            robot.trigger_deploy_pharaon_client,
+            robot.trigger_deploy_pharaon_request,
+        )
         navigate_to_point(
             (
                 self.position[0] + self.displacement[0],
@@ -33,4 +34,4 @@ class Phare(Action):
             self.rotation,
             2.0,
         )
-        return True
+        return response
