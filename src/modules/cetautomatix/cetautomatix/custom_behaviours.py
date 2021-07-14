@@ -131,6 +131,7 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
         """Guard condition for goupille."""
         if GPIO is None or self.robot.name == "asterix":
             if self.robot.triggered:
+                self.robot.set_start_time()
                 return py_trees.common.Status.SUCCESS
         elif not GPIO.input(17) or self.robot.triggered:
             self.robot.set_start_time()

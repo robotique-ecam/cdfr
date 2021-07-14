@@ -5,6 +5,7 @@ import py_trees
 import psutil
 import math
 import numpy as np
+from threading import Thread
 from signal import SIGINT
 from subprocess import call
 from importlib import import_module
@@ -198,7 +199,7 @@ class Robot(Node):
         self.get_logger().info("Triggered robot starter")
         if self.name == "obelix":
             # TODO : Fix sync call
-            # Thread(target=self.synchronous_call, args=[self.trigger_start_asterix_client, self.trigger_start_asterix_request]).start()
+            # self.synchronous_call(self.trigger_start_asterix_client, self.trigger_start_asterix_request)
             self.get_logger().info("Obelix triggered Asterix")
         lcd_msg = Lcd()
         lcd_msg.line = 0

@@ -10,7 +10,7 @@ actions = {
     "PHARE_JAUNE": Phare(
         position=(2.775, 2), tags={"ONLY_ROBOT": "obelix", "ONLY_SIDE": "yellow"}
     ),
-    # "MANCHE1": MancheAir(position=(0.23, 0), tags={"ONLY_SIDE": "blue"}),
+    "MANCHE1": MancheAir(position=(0.15, 0.18), tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "obelix"}),
     # "MANCHE2": MancheAir(position=(0.635, 0), tags={"ONLY_SIDE": "blue"}),
     # "MANCHE3": MancheAir(position=(2.365, 0), tags={"ONLY_SIDE": "yellow"}),
     # "MANCHE4": MancheAir(position=(2.77, 0), tags={"ONLY_SIDE": "yellow"}),
@@ -38,40 +38,40 @@ actions = {
     #     gob_list=["GOB30", "GOB31", "GOB32", "GOB33", "GOB34"],
     #     tags={"ONLY_ROBOT": "obelix", "ONLY_SIDE": "yellow"},
     # ),
-    "GOB1": Gobelet(position=(0.3, 0.8), color="GREEN", tags={"ONLY_SIDE": "blue"}),
-    "GOB2": Gobelet(position=(0.3, 1.6), color="RED", tags={"ONLY_SIDE": "blue"}),
-    "GOB3": Gobelet(position=(0.445, 0.915), color="RED", tags={"ONLY_SIDE": "blue"}),
-    "GOB4": Gobelet(position=(0.445, 1.485), color="GREEN", tags={"ONLY_SIDE": "blue"}),
-    "GOB5": Gobelet(position=(0.67, 1.9), color="RED"),
-    "GOB6": Gobelet(position=(0.956, 1.6), color="GREEN"),
-    # "GOB7": Gobelet(position=(1.005, 0.045), color="RED", tags={"ONLY_SIDE": "yellow"}),
-    "GOB8": Gobelet(
-        position=(1.065, 0.345), color="GREEN", tags={"ONLY_SIDE": "yellow"}
-    ),
-    "GOB9": Gobelet(position=(1.1, 1.2), color="RED"),
-    "GOB10": Gobelet(position=(1.27, 0.8), color="GREEN"),
-    "GOB11": Gobelet(
-        position=(1.335, 0.345), color="RED", tags={"ONLY_SIDE": "yellow"}
-    ),
-    # "GOB12": Gobelet(position=(1.395, 0.045), color="GREEN", tags={"ONLY_SIDE": "yellow"}),
-    # "GOB13": Gobelet(position=(1.605, 0.045), color="RED", tags={"ONLY_SIDE": "blue"}),
-    "GOB14": Gobelet(
-        position=(1.665, 0.345), color="GREEN", tags={"ONLY_SIDE": "blue"}
-    ),
-    "GOB15": Gobelet(position=(1.73, 0.8), color="RED"),
-    "GOB16": Gobelet(position=(1.9, 1.2), color="GREEN"),
-    "GOB17": Gobelet(position=(1.935, 0.345), color="RED", tags={"ONLY_SIDE": "blue"}),
+    # "GOB1": Gobelet(position=(0.3, 0.8), color="GREEN", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}),
+    # "GOB2": Gobelet(position=(0.3, 1.6), color="RED", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}),
+    # "GOB3": Gobelet(position=(0.445, 0.915), color="RED", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}),
+    # "GOB4": Gobelet(position=(0.445, 1.485), color="GREEN", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}),
+    # "GOB5": Gobelet(position=(0.67, 1.9), color="RED", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB6": Gobelet(position=(0.956, 1.6), color="GREEN", tags={"ONLY_ROBOT": "asterix"}),
+    # # "GOB7": Gobelet(position=(1.005, 0.045), color="RED", tags={"ONLY_SIDE": "yellow"}),
+    # "GOB8": Gobelet(
+    #     position=(1.065, 0.345), color="GREEN", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}
+    # ),
+    # "GOB9": Gobelet(position=(1.1, 1.2), color="RED", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB10": Gobelet(position=(1.27, 0.8), color="GREEN", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB11": Gobelet(
+    #     position=(1.335, 0.345), color="RED", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}
+    # ),
+    # # "GOB12": Gobelet(position=(1.395, 0.045), color="GREEN", tags={"ONLY_SIDE": "yellow"}),
+    # # "GOB13": Gobelet(position=(1.605, 0.045), color="RED", tags={"ONLY_SIDE": "blue"}),
+    # "GOB14": Gobelet(
+    #     position=(1.665, 0.345), color="GREEN", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}
+    # ),
+    "GOB15": Gobelet(position=(1.73, 0.8), color="RED", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB16": Gobelet(position=(1.9, 1.2), color="GREEN", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB17": Gobelet(position=(1.935, 0.345), color="RED", tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "asterix"}),
     # "GOB18": Gobelet(position=(1.995, 0.045), color="GREEN", tags={"ONLY_SIDE": "blue"}),
-    "GOB19": Gobelet(position=(2.044, 1.6), color="RED"),
-    "GOB20": Gobelet(position=(2.33, 1.9), color="GREEN"),
-    "GOB21": Gobelet(
-        position=(2.555, 0.915), color="GREEN", tags={"ONLY_SIDE": "yellow"}
-    ),
-    "GOB22": Gobelet(
-        position=(2.555, 1.485), color="RED", tags={"ONLY_SIDE": "yellow"}
-    ),
-    "GOB23": Gobelet(position=(2.7, 0.8), color="RED", tags={"ONLY_SIDE": "yellow"}),
-    "GOB24": Gobelet(position=(2.7, 1.6), color="GREEN", tags={"ONLY_SIDE": "yellow"}),
+    # "GOB19": Gobelet(position=(2.044, 1.6), color="RED", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB20": Gobelet(position=(2.33, 1.9), color="GREEN", tags={"ONLY_ROBOT": "asterix"}),
+    # "GOB21": Gobelet(
+    #     position=(2.555, 0.915), color="GREEN", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}
+    # ),
+    # "GOB22": Gobelet(
+    #     position=(2.555, 1.485), color="RED", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}
+    # ),
+    # "GOB23": Gobelet(position=(2.7, 0.8), color="RED", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}),
+    # "GOB24": Gobelet(position=(2.7, 1.6), color="GREEN", tags={"ONLY_SIDE": "yellow", "ONLY_ROBOT": "asterix"}),
 }
 
 # actions = {

@@ -19,13 +19,15 @@ class Phare(Action):
 
     def start_actuator(self, robot):
         navigate_to_point(
-            (self.position[0], self.position[1] - 0.28), self.rotation, 2.0
+            (self.position[0], self.position[1] - 0.20), self.rotation, 2.0
         )
+        robot.actuators.setServoPosition("arm", 58)
         time.sleep(2)
         response = robot.synchronous_call(
             robot.trigger_deploy_pharaon_client,
             robot.trigger_deploy_pharaon_request,
         )
+        robot.actuators.setServoPosition("arm", 82)
         navigate_to_point(
             (
                 self.position[0] + self.displacement[0],
