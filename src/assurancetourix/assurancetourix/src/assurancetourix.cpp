@@ -26,12 +26,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);
-  compass_pub = this->create_publisher<std_msgs::msg::String>("/compass", qos);
-
-  if (show_image) {
-    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-  }
-  savedeee = false;
 
 #ifdef SIMULATION
   RCLCPP_INFO(this->get_logger(), "Starting SIMULATION mode");
@@ -57,6 +51,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_ = NULL;
 
+  compass_pub = this->create_publisher<std_msgs::msg::String>("/compass", qos);
   _enable_aruco_detection = this->create_service<std_srvs::srv::SetBool>(
       "/enable_aruco_detection", std::bind(&Assurancetourix::handle_aruco_detection_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -77,13 +72,97 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
 
+  if (show_image) {
+    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
+  }
+  first_image_saved = false;
+
 #endif // CAMERA
 
   RCLCPP_INFO(this->get_logger(), "Assurancetourix has been started");
 }
 
-#ifdef CAMERA
+void Assurancetourix::init_parameters() {
 
+  // declare variables from yml
+  this->declare_parameter("topic_for_gradient_layer");
+  this->declare_parameter("topic_for_allies_position");
+  this->declare_parameter("rviz_settings.prediction_color");
+  this->declare_parameter("rviz_settings.aruco_element_type");
+
+  this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
+  this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
+  this->get_parameter_or<std::vector<double>>("rviz_settings.prediction_color", prediction_color, {185.0, 76.0, 225.0, 0.5});
+  this->get_parameter_or<uint>("rviz_settings.aruco_element_type", aruco_element_type, 2);
+
+#ifdef CAMERA
+  this->declare_parameter("image_post_processing.show_image");
+  this->declare_parameter("arucos.small_aruco_size");
+  this->declare_parameter("arucos.huge_aruco_size");
+
+  this->get_parameter_or<bool>("image_post_processing.show_image", show_image, false);
+  this->get_parameter_or<double>("arucos.small_aruco_size", small_aruco_size, 0.07);
+  this->get_parameter_or<double>("arucos.huge_aruco_size", huge_aruco_size, 0.115);
+
+  this->declare_parameter("rviz_settings.blue_color_aruco");
+  this->declare_parameter("rviz_settings.yellow_color_aruco");
+  this->declare_parameter("rviz_settings.default_color_aruco");
+  this->declare_parameter("rviz_settings.aruco_element_scale");
+  this->declare_parameter("rviz_settings.game_elements_scale");
+  this->declare_parameter("rviz_settings.game_element_type");
+  this->declare_parameter("rviz_settings.lifetime_sec");
+  this->declare_parameter("rviz_settings.header_frame_id");
+
+  this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_aruco", blue_color_aruco, {0.0, 0.0, 255.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_aruco", yellow_color_aruco, {255.0, 255.0, 0.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_aruco", default_color_aruco, {120.0, 120.0, 120.0});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.aruco_element_scale", aruco_element_scale, {0.05, 0.05, 0.05});
+  this->get_parameter_or<std::vector<double>>("rviz_settings.game_elements_scale", game_elements_scale, {0.07, 0.07, 0.01});
+  this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
+  this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
+  this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
+
+  // initialisation of markers
+  marker.header.frame_id = header_frame_id;
+  marker.color.a = 1.0;
+  marker.action = visualization_msgs::msg::Marker::ADD;
+  marker.lifetime.sec = lifetime_sec;
+
+  base_frame = "map";
+  transformed_marker.header.frame_id = base_frame;
+  transformed_marker.color.a = 1.0;
+  transformed_marker.action = visualization_msgs::msg::Marker::ADD;
+  transformed_marker.lifetime.sec = lifetime_sec;
+#endif //CAMERA
+
+#ifdef SIMULATION
+  this->declare_parameter("simulation.robots");
+  this->declare_parameter("simulation.refresh_frequency");
+  robots = this->get_parameter("simulation.robots").as_string_array();
+  this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
+#endif // SIMULATION
+}
+
+visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualization_msgs::msg::Marker detectedMarker){
+  enemies_markers_on_this_cycle.markers.push_back(detectedMarker);
+  for(int i = 0; i< int(last_enemies_markers.markers.size()); i++ ){
+    if (last_enemies_markers.markers[i].id == detectedMarker.id){
+      visualization_msgs::msg::Marker predictedMarker = detectedMarker;
+      predictedMarker.pose.position.x += detectedMarker.pose.position.x - last_enemies_markers.markers[i].pose.position.x;
+      predictedMarker.pose.position.y += detectedMarker.pose.position.y - last_enemies_markers.markers[i].pose.position.y;
+      predictedMarker.id = detectedMarker.id + 10;
+      predictedMarker.header.stamp = this->get_clock()->now();
+      predictedMarker.color.r = prediction_color[0];
+      predictedMarker.color.g = prediction_color[1];
+      predictedMarker.color.b = prediction_color[2];
+      predictedMarker.color.a = prediction_color[3];
+      return predictedMarker;
+    }
+  }
+  return detectedMarker;
+}
+
+#ifdef CAMERA
 void Assurancetourix::set_auto_exposure(){
   std_msgs::msg::ColorRGBA color;
   geometry_msgs::msg::Point white_paper_pos;
@@ -255,160 +334,6 @@ void Assurancetourix::handle_aruco_detection_enable(const std::shared_ptr<rmw_re
   }
   response->success = true;
 }
-#endif // CAMERA
-
-#ifdef SIMULATION
-// webots element positioning
-void Assurancetourix::simulation_marker_callback() {
-  visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
-  visualization_msgs::msg::Marker webots_marker;
-  webots_marker.type = aruco_element_type;
-  webots_marker.color.r = 255;
-  webots_marker.color.a = 1;
-  webots_marker.scale.x = 0.1;
-  webots_marker.scale.y = 0.1;
-  webots_marker.scale.z = 0.1;
-  webots_marker.header.frame_id = "map";
-  int id = 0;
-
-  for (auto robot : robots) {
-    double x, y;
-    double theta = acos(wb_supervisor->getFromDef(robot)->getOrientation()[0]);
-
-    if (theta < 0) theta = -theta;
-    if (wb_supervisor->getFromDef(robot)->getOrientation()[1] > 0) theta = -theta;
-
-    x = wb_supervisor->getFromDef(robot)->getPosition()[0];
-    y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
-
-    webots_marker.header.stamp = get_sim_time(wb_supervisor);
-    tf2::Quaternion q;
-    q.setRPY(0, 0, theta);
-
-    webots_marker.pose.orientation.x = q.x();
-    webots_marker.pose.orientation.y = q.y();
-    webots_marker.pose.orientation.z = q.z();
-    webots_marker.pose.orientation.w = q.w();
-
-    webots_marker.pose.position.x = x;
-    webots_marker.pose.position.y = y;
-
-    webots_marker.text = robot;
-    webots_marker.id = id;
-
-    marker_array_allies.markers.push_back(webots_marker);
-    id++;
-  }
-  id = 6;
-  webots_marker.pose.orientation.x = 0.0;
-  webots_marker.pose.orientation.y = 0.0;
-  webots_marker.pose.orientation.z = 0.0;
-  webots_marker.pose.orientation.w = 1.0;
-  webots_marker.header.stamp = this->get_clock()->now();
-  if (comeback) {
-    comeback_x += 0.1;
-    if (comeback_x > 2.5){
-      comeback = false;
-    }
-  } else {
-    comeback_x -= 0.1;
-    if (comeback_x < 0.5){
-      comeback = true;
-    }
-  }
-  webots_marker.pose.position.x = comeback_x;
-
-  webots_marker.pose.position.y = 1;
-  webots_marker.text = "test";
-  webots_marker.id = id;
-  marker_array_ennemies.markers.push_back(webots_marker);
-  marker_array_ennemies.markers.push_back(predict_enemies_pos(webots_marker));
-
-  transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
-  last_enemies_markers = enemies_markers_on_this_cycle;
-  enemies_markers_on_this_cycle.markers.clear();
-
-  transformed_marker_pub_allies_->publish(marker_array_allies);
-}
-#endif // SIMULATION
-
-visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualization_msgs::msg::Marker detectedMarker){
-  enemies_markers_on_this_cycle.markers.push_back(detectedMarker);
-  for(int i = 0; i< int(last_enemies_markers.markers.size()); i++ ){
-    if (last_enemies_markers.markers[i].id == detectedMarker.id){
-      visualization_msgs::msg::Marker predictedMarker = detectedMarker;
-      predictedMarker.pose.position.x += detectedMarker.pose.position.x - last_enemies_markers.markers[i].pose.position.x;
-      predictedMarker.pose.position.y += detectedMarker.pose.position.y - last_enemies_markers.markers[i].pose.position.y;
-      predictedMarker.id = detectedMarker.id + 10;
-      predictedMarker.header.stamp = this->get_clock()->now();
-      predictedMarker.color.r = prediction_color[0];
-      predictedMarker.color.g = prediction_color[1];
-      predictedMarker.color.b = prediction_color[2];
-      predictedMarker.color.a = prediction_color[3];
-      return predictedMarker;
-    }
-  }
-  return detectedMarker;
-}
-
-void Assurancetourix::init_parameters() {
-
-  // declare variables from yml
-  this->declare_parameter("image_post_processing.show_image");
-  this->declare_parameter("arucos.small_aruco_size");
-  this->declare_parameter("arucos.huge_aruco_size");
-
-  this->get_parameter_or<bool>("image_post_processing.show_image", show_image, false);
-  this->get_parameter_or<double>("arucos.small_aruco_size", small_aruco_size, 0.07);
-  this->get_parameter_or<double>("arucos.huge_aruco_size", huge_aruco_size, 0.115);
-
-#ifdef SIMULATION
-  this->declare_parameter("simulation.robots");
-  this->declare_parameter("simulation.refresh_frequency");
-  robots = this->get_parameter("simulation.robots").as_string_array();
-  this->get_parameter_or<int>("simulation.refresh_frequency", refresh_frequency, 5);
-#endif // SIMULATION
-
-  this->declare_parameter("rviz_settings.blue_color_aruco");
-  this->declare_parameter("rviz_settings.yellow_color_aruco");
-  this->declare_parameter("rviz_settings.prediction_color");
-  this->declare_parameter("rviz_settings.default_color_aruco");
-  this->declare_parameter("rviz_settings.aruco_element_scale");
-  this->declare_parameter("rviz_settings.game_elements_scale");
-  this->declare_parameter("rviz_settings.aruco_element_type");
-  this->declare_parameter("rviz_settings.game_element_type");
-  this->declare_parameter("rviz_settings.lifetime_sec");
-  this->declare_parameter("rviz_settings.header_frame_id");
-  this->declare_parameter("topic_for_gradient_layer");
-  this->declare_parameter("topic_for_allies_position");
-  //this->declare_parameter("side");
-
-  this->get_parameter_or<std::vector<double>>("rviz_settings.blue_color_aruco", blue_color_aruco, {0.0, 0.0, 255.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.yellow_color_aruco", yellow_color_aruco, {255.0, 255.0, 0.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.prediction_color", prediction_color, {185.0, 76.0, 225.0, 0.5});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.default_color_aruco", default_color_aruco, {120.0, 120.0, 120.0});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.aruco_element_scale", aruco_element_scale, {0.05, 0.05, 0.05});
-  this->get_parameter_or<std::vector<double>>("rviz_settings.game_elements_scale", game_elements_scale, {0.07, 0.07, 0.01});
-  this->get_parameter_or<uint>("rviz_settings.aruco_element_type", aruco_element_type, 2);
-  this->get_parameter_or<uint>("rviz_settings.game_element_type", game_element_type, 1);
-  this->get_parameter_or<int>("rviz_settings.lifetime_sec", lifetime_sec, 2);
-  this->get_parameter_or<std::string>("rviz_settings.header_frame_id", header_frame_id, "assurancetourix");
-  this->get_parameter_or<std::string>("topic_for_gradient_layer", topic_for_gradient_layer, "/default_topic_for_gradient_layer");
-  this->get_parameter_or<std::string>("topic_for_allies_position", allies_positions_topic, "/default_topic_for_allies_positions");
-  //this->get_parameter_or<std::string>("side", side, "blue");
-
-  // initialisation of markers
-  marker.header.frame_id = header_frame_id;
-  marker.color.a = 1.0;
-  marker.action = visualization_msgs::msg::Marker::ADD;
-  marker.lifetime.sec = lifetime_sec;
-
-  base_frame = "map";
-  transformed_marker.header.frame_id = base_frame;
-  transformed_marker.color.a = 1.0;
-  transformed_marker.action = visualization_msgs::msg::Marker::ADD;
-  transformed_marker.lifetime.sec = lifetime_sec;
-}
 
 void Assurancetourix::detection_timer_callback_routine() {
 
@@ -434,7 +359,6 @@ void Assurancetourix::detection_timer_callback_routine() {
   std::ios_base::sync_with_stdio(false);
 #endif
 
-#ifdef CAMERA
   marker.header.stamp = this->get_clock()->now();
   if (marker.header.stamp.nanosec > 70000000) marker.header.stamp.nanosec -= 70000000;
   else {
@@ -442,9 +366,6 @@ void Assurancetourix::detection_timer_callback_routine() {
     marker.header.stamp.nanosec = 1000000000 - 70000000 + marker.header.stamp.nanosec;
   }
   get_image();
-
-#endif // CAMERA
-
 
 #ifdef EXTRALOG
   auto end_camera = std::chrono::high_resolution_clock::now();
@@ -472,12 +393,12 @@ void Assurancetourix::detection_timer_callback_routine() {
   RCLCPP_INFO(this->get_logger(), "time of total: %f", time_taken_total);
 #endif
 
-  if (!savedeee) {
+  if (!first_image_saved) {
     cv::imwrite("test.jpg", _anotated);
-    savedeee = true;
+    first_image_saved = true;
   }
   if (show_image) {
-    cv::resize(_anotated, _anotated, Size(), 0.4, 0.4, cv::INTER_LINEAR);
+    cv::resize(_anotated, _anotated, cv::Size(), 0.4, 0.4, cv::INTER_LINEAR);
     cv::imshow("anotated", _anotated);
     cv::waitKey(3);
   }
@@ -519,7 +440,7 @@ void Assurancetourix::project_corners_pinhole_to_fisheye(std::vector<std::vector
   }
 }
 
-void Assurancetourix::_detect_aruco(Mat img) {
+void Assurancetourix::_detect_aruco(cv::Mat img) {
   std::vector<std::vector<cv::Point2f>> marker_corners, rejected_candidates;
   std::vector<int> detected_ids;
   cv::aruco::detectMarkers(img, _dictionary, marker_corners, detected_ids, _parameters, rejected_candidates);
@@ -559,7 +480,7 @@ void Assurancetourix::compute_estimation_markers(std::vector<cv::Vec3d> rvecs, s
     marker.pose.position.z = tvecs[i].operator[](2);
 
     double angle = norm(rvecs[i]);
-    Vec3d axis = rvecs[i] / angle;
+    cv::Vec3d axis = rvecs[i] / angle;
 
     tf2::Quaternion q;
     q.setRotation(tf2::Vector3(axis[0], axis[1], axis[2]), angle);
@@ -692,7 +613,7 @@ void Assurancetourix::get_color_from_position(geometry_msgs::msg::Point &positio
     for (int j = 0; j<square_to_check; j++){
       int u = int(pixel.x + i - square_to_check/2);
       int v = int(pixel.y + j - square_to_check/2);
-      cv::Vec3b bgr_pixel = img_color.at<Vec3b>(cv::Point(u, v));
+      cv::Vec3b bgr_pixel = img_color.at<cv::Vec3b>(cv::Point(u, v));
       color.b += float(bgr_pixel[0]);
       color.g += float(bgr_pixel[1]);
       color.r += float(bgr_pixel[2]);
@@ -749,6 +670,7 @@ void Assurancetourix::compass_orientation_callback(){
   }
   compass_pub->publish(color_str);
 }
+#endif // CAMERA
 
 #ifdef SIMULATION
 rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_robot) {
@@ -756,7 +678,80 @@ rclcpp::Time Assurancetourix::get_sim_time(std::shared_ptr<webots::Robot> wb_rob
   double nanosec = modf(wb_robot->getTime(), &seconds) * 1e9;
   return rclcpp::Time((uint32_t)seconds, (uint32_t)nanosec);
 }
-#endif /* SIMULATION */
+
+// webots element positioning
+void Assurancetourix::simulation_marker_callback() {
+  visualization_msgs::msg::MarkerArray marker_array_ennemies, marker_array_allies;
+  visualization_msgs::msg::Marker webots_marker;
+  webots_marker.type = aruco_element_type;
+  webots_marker.color.r = 255;
+  webots_marker.color.a = 1;
+  webots_marker.scale.x = 0.1;
+  webots_marker.scale.y = 0.1;
+  webots_marker.scale.z = 0.1;
+  webots_marker.header.frame_id = "map";
+  int id = 0;
+
+  for (auto robot : robots) {
+    double x, y;
+    double theta = acos(wb_supervisor->getFromDef(robot)->getOrientation()[0]);
+
+    if (theta < 0) theta = -theta;
+    if (wb_supervisor->getFromDef(robot)->getOrientation()[1] > 0) theta = -theta;
+
+    x = wb_supervisor->getFromDef(robot)->getPosition()[0];
+    y = 2 - wb_supervisor->getFromDef(robot)->getPosition()[2];
+
+    webots_marker.header.stamp = get_sim_time(wb_supervisor);
+    tf2::Quaternion q;
+    q.setRPY(0, 0, theta);
+
+    webots_marker.pose.orientation.x = q.x();
+    webots_marker.pose.orientation.y = q.y();
+    webots_marker.pose.orientation.z = q.z();
+    webots_marker.pose.orientation.w = q.w();
+
+    webots_marker.pose.position.x = x;
+    webots_marker.pose.position.y = y;
+
+    webots_marker.text = robot;
+    webots_marker.id = id;
+
+    marker_array_allies.markers.push_back(webots_marker);
+    id++;
+  }
+  id = 6;
+  webots_marker.pose.orientation.x = 0.0;
+  webots_marker.pose.orientation.y = 0.0;
+  webots_marker.pose.orientation.z = 0.0;
+  webots_marker.pose.orientation.w = 1.0;
+  webots_marker.header.stamp = this->get_clock()->now();
+  if (comeback) {
+    comeback_x += 0.1;
+    if (comeback_x > 2.5){
+      comeback = false;
+    }
+  } else {
+    comeback_x -= 0.1;
+    if (comeback_x < 0.5){
+      comeback = true;
+    }
+  }
+  webots_marker.pose.position.x = comeback_x;
+
+  webots_marker.pose.position.y = 1;
+  webots_marker.text = "test";
+  webots_marker.id = id;
+  marker_array_ennemies.markers.push_back(webots_marker);
+  marker_array_ennemies.markers.push_back(predict_enemies_pos(webots_marker));
+
+  transformed_marker_pub_ennemies_->publish(marker_array_ennemies);
+  last_enemies_markers = enemies_markers_on_this_cycle;
+  enemies_markers_on_this_cycle.markers.clear();
+
+  transformed_marker_pub_allies_->publish(marker_array_allies);
+}
+#endif // SIMULATION
 
 Assurancetourix::~Assurancetourix() {
 #ifdef CAMERA
