@@ -4,25 +4,6 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   /* Init parametrers from YAML */
   init_parameters();
 
-  auto on_parameter_event_callback = [this](const rcl_interfaces::msg::ParameterEvent::SharedPtr event) -> void {
-    for (auto &new_parameter : event->new_parameters) {
-      if (new_parameter.name == "side" && (new_parameter.value.string_value == "blue" || new_parameter.value.string_value == "yellow")) {
-        RCLCPP_INFO(this->get_logger(), "new_parameter from node %s, side = %s \n", event->node.c_str(), new_parameter.value.string_value.c_str());
-        side = new_parameter.value.string_value;
-      }
-    }
-
-    for (auto &changed_parameter : event->changed_parameters) {
-      if (changed_parameter.name == "side" && (changed_parameter.value.string_value == "blue" || changed_parameter.value.string_value == "yellow")) {
-        RCLCPP_INFO(this->get_logger(), "changed_parameter from node %s, side = %s \n", event->node.c_str(), changed_parameter.value.string_value.c_str());
-        side = changed_parameter.value.string_value;
-      }
-    }
-  };
-
-  parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
-  parameter_event_sub_ = parameters_client_->on_parameter_event(on_parameter_event_callback);
-
   marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("detected_aruco_position", qos);
   transformed_marker_pub_ennemies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(topic_for_gradient_layer, qos);
   transformed_marker_pub_allies_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(allies_positions_topic, qos);

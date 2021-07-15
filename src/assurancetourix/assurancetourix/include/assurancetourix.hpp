@@ -55,9 +55,6 @@ private:
 
   rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10));
 
-  rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
-  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
-
   uint aruco_element_type;
   std::vector<double> prediction_color;
   std::string topic_for_gradient_layer, allies_positions_topic;
