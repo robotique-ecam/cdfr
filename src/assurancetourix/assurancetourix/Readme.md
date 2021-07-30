@@ -16,7 +16,7 @@
 ### Simulation mode :
 
 - Fetches its settings from a yml file,
-- Determines poses (positions/orientations) of allies and publish them on a topic named by "topic_for_allies_position" parameter in the yml configuration file,
+- Extracts poses (positions/orientations) from webots of allies and publish them on a topic named by "topic_for_allies_position" parameter in the yml configuration file,
 - Simulates a back and forth movement of an enemy in the middle of the table and publish it on a topic named by "topic_for_gradient_layer" parameter in the yml configuration file.
 
 ## Build it
@@ -29,7 +29,9 @@ In order to get the mode you want, you have to build this package by defining ar
 ### Simulation mode :
 `colcon build --packages-select assurancetourix --cmake-args=" -DSIMULATION=ON"`
 
-# Explanation of used concepts
+# Brief explanation of used concepts
+
+### Positioning :
 
 In term of positioning, this package is based on this following *"simple"* concept:
 
@@ -93,3 +95,53 @@ They're 2 steps to project a pixel from the original picture to the fisheye corr
 <img src="./doc/formulas/projection_original_to_fisheye_corrected_balanced/formula_pic.png" title="" width="40%">
 </p>
 <br/>
+
+### Camera settings
+
+*How did we choose settings of the camera ?*
+I'll assume you have a little background on how a camera works. We used a cool tools called [guvcview](https://doc.ubuntu-fr.org/guvcview) a very useful tool in which you can configure a bunch of options of you camera.
+
+The principal difficulty was to **find a balance between motion blur and exposure time**. Keep in mind that we're capturing images of moving objects, that's not a problem if you're using a camera with a global shutter but they're way too expensive for us. That's why we're using a camera with an electronic rolling shutter.
+
+If the exposure time if high, your image will be crystal clear in terms of colors (if other settings such as in the [yml parameters](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/param/assurancetourix.yml) file are correctly balanced), **but** you'll capture motion blur, so ArUco marker detection will not work as expected. In the opposite, if you set the exposure of the camera too low, for sure motion blur will not exist, **but** the picture will be way to dark for the ArUco marker detection to work as expected.
+
+*An advice for you is to do some ArUco detection tests with settings that suits your camera and tweak them in order to have the lowest exposure time.*
+
+**Now big problem :**
+Ok that's cool, your settings are working great, but **only in your actual condition !** In fact the exposure setting is heavily dependent from the ambient light. We had to find a way to automatically configures it when starting Assurancetourix.
+
+The solution is pretty simple:
+- Put a white paper somewhere on the table (at known coordinates),
+- Initialize the exposure value at a given start value,
+- Check on the picture, at the white paper pixels, the BGR value,
+	- If the average of the BGR value isn't high enough, raise the exposure,
+	- If this average value is good enough, the time exposure is good enough, end of the auto-calibration.
+
+<p align="center">
+<img src="./doc/pictures/white_paper.jpg" title="" width="70%">
+</p>
+<br/>
+
+If you pay attention at the exposure solution, you've notice that I wrote about a way to find pixel from a given coordinate on the table. It's a bit early to discuss about it, but I will cover this topic a little later in this documentation.
+
+### Get a position from a detected ArUco marker
+
+Now it's time for you to understand how to find a pose (position, orientation) from a given ArUco marker that has been detected.
+
+Reminder on our setup :
+- Our camera is the [following](https://www.amazon.com/Camera-IMX317-Sensor-Windows-Android/dp/B08CV37Y2H?th=1): 4k camera, 170° fisheye lens, IMX317,
+- It is used as central tracking system,
+- Raspberry pi 4.
+
+Here are steps to find the location of an ArUco marker (for our setup):
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L298): Capture an image,
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L424): Find the ArUco on this image, `cv::aruco::detectMarkers` gives us a vector of vector of Point2f (typically x,y of a pixel), each Point2f represents an edge of a detected marker. Plus we have a vector of ID of ArUco markers detected in the picture.
+- [Step 3](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L400): Project all pixels of interest from the original picture to a space which represent the so called *fisheye corrected and balanced space* with the technique described in *the preamble*.
+- [Step 4](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L504): Estimate poses of detected ArUco markers, know you have projected pixels of interest into a pinhole model, you can call `cv::aruco::estimatePoseSingleMarkers` with intrinsic parameters of your pinhole model. You get two vectors of vec3D representing the translation and orientation relative to the camera.
+
+Of course that's a bit complex in terms of code because there's other stuff happening in the same time in our code. Such as the transformation of all markers from *assurancetourix* frame to a frame we're calling *map*, the estimation of robots poses extracted from all the poses of markers etc. This will be described later in the documentation.
+
+Some details I think it's good for you to know:
+- The accuracy of your positioning depends a lot of your camera models, **do not rush the model determination step** (described in "new_camera_calibration"). For example, with 400 pictures for determining the fisheye_model and another 400 pictures for the pinhole model, we achieved less than 1 cm accuracy near the camera and 3 cm accuracy in edges of the table,
+- Read a lot of documentations about what you're using. By understanding what you manipulate, it'll be a lot easier for you to understand what is going wrong,
+- Tweak the [parameters](https://docs.opencv.org/4.5.2/d1/dcd/structcv_1_1aruco_1_1DetectorParameters.html) of the ArUco detection, here's a pro tip: [corner refinement](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L39). 
