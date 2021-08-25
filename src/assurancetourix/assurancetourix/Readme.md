@@ -47,7 +47,7 @@ In term of positioning, this package is based on this following *"simple"* conce
 The way OpenCV compute position is way harder than the reverse consideration which is :
 *Finding a pixel in the picture knowing camera intrinsic parameters and a given x, y, z position relative to the camera.*
 
-In fact the difficult part of this is to understand the mathematics models we are using in this package. We haven't been capable of finding a function in OpenCV that directly solves the problem, so we had to mathematically investigate how to achieve it. Don't worry I'll describe it later.
+In fact the difficult part of this is to understand mathematics models we are using in this package. We haven't been capable of finding a function in OpenCV that directly solves the problem, so we had to mathematically investigate how to achieve it. Don't worry I'll describe it later.
 
 Knowing the pixel of interest, it's easy to get the color, indeed, an image (in OpenCV) is an array of array of unsigned char[3] such as [blue, green, red].
 
@@ -55,7 +55,7 @@ Knowing the pixel of interest, it's easy to get the color, indeed, an image (in 
 
 The basic concept of positioning explained, we can start diving into some more complex considerations.
 
-Remember, in order to get an estimation of the position of ArUco markers, we have to find camera intrinsic parameters. Luckily, I wrote for you a [complete guide](https://github.com/robotique-ecam/new_camera_calibration) to find those. This repository **isn't perfect**, maybe you'll have to modify a bit of some codes for it to achieve what you want, but overall, i think it's the **perfect way to introduce and understand** the different models involved.
+Remember, in order to get an estimation positions of ArUco markers, we have to find camera intrinsic parameters. Luckily, I wrote for you a [complete guide](https://github.com/robotique-ecam/new_camera_calibration) to find those. This repository **isn't perfect**, maybe you'll have to modify a bit of some codes for it to achieve what you want, but overall, i think it's the **perfect way to introduce and understand** the different models involved.
 
 *Disclaimer : for performance reasons, Assurancetourix package is written in cpp and not in python as in the "new_camera_calibration" repository.*
 
@@ -103,7 +103,7 @@ I'll assume you have a little background on how a camera works. We used a cool t
 
 The principal difficulty was to **find a balance between motion blur and exposure time**. Keep in mind that we're capturing images of moving objects, that's not a problem if you're using a camera with a global shutter but they're way too expensive for us. That's why we're using a camera with an electronic rolling shutter.
 
-If the exposure time if high, your image will be crystal clear in terms of colors (if other settings such as in the [yml parameters](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/param/assurancetourix.yml) file are correctly balanced), **but** you'll capture motion blur, so ArUco marker detection will not work as expected. In the opposite, if you set the exposure of the camera too low, for sure motion blur will not exist, **but** the picture will be way to dark for the ArUco marker detection to work as expected.
+If the exposure time if high, your image will be crystal clear in terms of colors (if other settings such as in the [yml parameters](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/param/assurancetourix.yml) file are correctly balanced), **but** you'll capture motion blur, so ArUco marker detection will not work as expected. In the opposite, if you set the exposure of the camera too low, for sure motion blur will not exist, **but** the picture will be way too dark for the ArUco marker detection to work as expected.
 
 *An advice for you is to do some ArUco detection tests with settings that suits your camera and tweak them in order to have the lowest exposure time.*
 
@@ -122,7 +122,7 @@ The solution is pretty simple:
 </p>
 <br/>
 
-If you pay attention at the exposure solution, you've notice that I wrote about a way to find pixel from a given coordinate on the table. It's a bit early to discuss about it, but I will cover this topic a little later in this documentation.
+If you pay attention at the exposure solution, you've noticed that I wrote about a way to find pixel from a given coordinate on the table. It's a bit early to discuss about it, but I will cover this topic a little later in this documentation.
 
 ### Get a position from a detected ArUco marker
 
@@ -137,11 +137,43 @@ Here are steps to find the location of an ArUco marker (for our setup):
 - [Step 1](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L298): Capture an image,
 - [Step 2](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L424): Find the ArUco on this image, `cv::aruco::detectMarkers` gives us a vector of vector of Point2f (typically x,y of a pixel), each Point2f represents an edge of a detected marker. Plus we have a vector of ID of ArUco markers detected in the picture.
 - [Step 3](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L400): Project all pixels of interest from the original picture to a space which represent the so called *fisheye corrected and balanced space* with the technique described in *the preamble*.
-- [Step 4](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L504): Estimate poses of detected ArUco markers, know you have projected pixels of interest into a pinhole model, you can call `cv::aruco::estimatePoseSingleMarkers` with intrinsic parameters of your pinhole model. You get two vectors of vec3D representing the translation and orientation relative to the camera.
+- [Step 4](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L504): Estimate poses of detected ArUco markers, knowing you've projected pixels of interest into a pinhole model, you can call `cv::aruco::estimatePoseSingleMarkers` with intrinsic parameters of your pinhole model. You get two vectors of vec3D representing the translation and orientation relative to the camera.
 
 Of course that's a bit complex in terms of code because there's other stuff happening in the same time in our code. Such as the transformation of all markers from *assurancetourix* frame to a frame we're calling *map*, the estimation of robots poses extracted from all the poses of markers etc. This will be described later in the documentation.
 
 Some details I think it's good for you to know:
 - The accuracy of your positioning depends a lot of your camera models, **do not rush the model determination step** (described in "new_camera_calibration"). For example, with 400 pictures for determining the fisheye_model and another 400 pictures for the pinhole model, we achieved less than 1 cm accuracy near the camera and 3 cm accuracy in edges of the table,
-- Read a lot of documentations about what you're using. By understanding what you manipulate, it'll be a lot easier for you to understand what is going wrong,
-- Tweak the [parameters](https://docs.opencv.org/4.5.2/d1/dcd/structcv_1_1aruco_1_1DetectorParameters.html) of the ArUco detection, here's a pro tip: [corner refinement](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L39). 
+- Read a lot of documentations about what you're using. By understanding what you are manipulating, it'll be a lot easier for you to understand what is going wrong,
+- Tweak [parameters](https://docs.opencv.org/4.5.2/d1/dcd/structcv_1_1aruco_1_1DetectorParameters.html) of the ArUco detection, here's a pro tip: [corner refinement](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L39).
+
+### Estimate the transformation of camera frame to map frame
+
+At this point you know how to get poses of ArUco markers in your image relative to the camera frame. **But** the problem is that we don't want coordinates of ArUco markers relative to camera but relative to map instead. Here's a screenshot of rviz2 showing both frames assurancetourix and map, the arrow is what we're looking for: **the transformation between assurancetourix and map**.
+
+<p align="center">
+<img src="./doc/pictures/assurancetourix_map_tf.jpg" title="" width="70%">
+</p>
+<br/>
+
+*A transformation is a couple "translation/rotation" which convert a frame into another one.*
+
+As a first approach, we were considering a static transformation, which is a **really bad idea** but we had to start somewhere. This was a bad idea because the slightest error in positioning the camera on the mast  will inevitably lead to a large error while computing poses of ArUco markers.
+
+**How to compute the transformation between those frames ?**
+By looking at the map, you'll see something really interesting in the middle of it. There is an ArUco marker waiting for us to be used.
+
+<p align="center">
+<img src="./doc/pictures/middle_aruco.png" title="" width="70%">
+</p>
+<br/>
+
+Remember, you know how to get poses of ArUco markers relative to camera. With the pose of this center ArUco in the camera frame and by knowing the pose of this marker in the map frame (x=1.5, y=0.75). So, mathematically there's a way to find the transformation between assurancetourix and map frames.
+
+Here are steps to find this transformation:
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L174): Capture a bunch of images, apply the algorithm to detect and estimate ArUco poses and average poses (it'll works for one image but a lot of them will increase the precision of the pose),
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L208): Inverse this pose in order to get the camera frame relative to the center marker frame,
+-  [Step 3](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L215): Now we have camera relative to center marker and center marker relative to map, we can compute camera relative to map i.e. the transformation between assurancetourix and map frames.
+
+You might get a little concerned about all those transformations stuff. Indeed the mathematical consideration is fully blurred transformation wise because we’re using  *[geometry2](https://github.com/ros2/geometry2/tree/galactic)* ros2 package which contains all we need about transformations. The idea is simple, people who made this package optimized it, by using it there will be a lot less errors than if we wrote by hand all equations.
+
+**I highly recommend** you to get a look at the [tf2_kdl](https://github.com/ros2/geometry2/blob/foxy/tf2_kdl/include/tf2_kdl/tf2_kdl.h) library which is quite easy to understand and use transformations wise.
