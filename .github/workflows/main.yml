@@ -49,6 +49,7 @@ jobs:
 
       - name: Run simulation
         run: |
+          set -e  # exit whenever something fails
           export AUDIODEV=null
           export LIBGL_ALWAYS_SOFTWARE=true
           export DEBIAN_FRONTEND=noninteractive
