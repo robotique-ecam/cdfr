@@ -77,7 +77,7 @@ If the image wasn't balanced (*balance 0.0*), it would have this appearance:
 </p>
 <br/>
 
-*(The picture isn't far away from the table from my perspective, that's why i had a little bit of balance.)*
+*(The picture isn't far away from the table from my perspective, that's why i add a little bit of balance.)*
 
 In case you haven't understand what i want to describe, it's this following projection:
 *I have a pixel from my original image that i want to transfer into my fisheye corrected image balanced.*
@@ -160,6 +160,7 @@ At this point you know how to get poses of ArUco markers in your image relative 
 As a first approach, we were considering a static transformation, which is a **really bad idea** but we had to start somewhere. This was a bad idea because the slightest error in positioning the camera on the mast  will inevitably lead to a large error while computing poses of ArUco markers.
 
 **How to compute the transformation between those frames ?**
+
 By looking at the map, you'll see something really interesting in the middle of it. There is an ArUco marker waiting for us to be used.
 
 <p align="center">
@@ -167,13 +168,97 @@ By looking at the map, you'll see something really interesting in the middle of 
 </p>
 <br/>
 
-Remember, you know how to get poses of ArUco markers relative to camera. With the pose of this center ArUco in the camera frame and by knowing the pose of this marker in the map frame (x=1.5, y=0.75). So, mathematically there's a way to find the transformation between assurancetourix and map frames.
+Remember, you know how to get poses of ArUco markers relative to camera. With the pose of this center ArUco in the camera frame and by knowing the pose of this marker in the map frame (x=1.5, y=0.75), mathematically there's a way to find the transformation between assurancetourix and map frames.
 
 Here are steps to find this transformation:
-- [Step 1](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L174): Capture a bunch of images, apply the algorithm to detect and estimate ArUco poses and average poses (it'll works for one image but a lot of them will increase the precision of the pose),
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L174): Capture a bunch of images, apply the algorithm to detect and estimate ArUco poses and average poses (it'll work for one image but a lot of them will increase the precision of the pose),
 - [Step 2](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L208): Inverse this pose in order to get the camera frame relative to the center marker frame,
 -  [Step 3](https://github.com/robotique-ecam/cdfr/blob/22f4b346f28eda8f42e1db540ca941e9027e4f86/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L215): Now we have camera relative to center marker and center marker relative to map, we can compute camera relative to map i.e. the transformation between assurancetourix and map frames.
 
 You might get a little concerned about all those transformations stuff. Indeed the mathematical consideration is fully blurred transformation wise because we’re using  *[geometry2](https://github.com/ros2/geometry2/tree/galactic)* ros2 package which contains all we need about transformations. The idea is simple, people who made this package optimized it, by using it there will be a lot less errors than if we wrote by hand all equations.
 
 **I highly recommend** you to get a look at the [tf2_kdl](https://github.com/ros2/geometry2/blob/foxy/tf2_kdl/include/tf2_kdl/tf2_kdl.h) library which is quite easy to understand and use transformations wise.
+
+### Estimate poses of markers in the map frame
+
+Pretty straight forward :
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L504): Estimate markers poses using the above description on *getting a position from a detected ArUco marker*,
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/0ad78d1e6dd02f59c0d3c98cf28d651a6cd22c88/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L477): Just transform markers assurancetourix relative to markers map relative using the transformation between assurancetourix and map (described above).
+
+### Estimate robots poses
+
+Alright, now that you know how to get markers poses relative to map, I can explain you how to compute robots poses. As you noticed, they're 6 ArUcos markers all around our robots, plus one smaller ArUco marker on top of each. They're simple reasons why:
+- It's not really longer to spot one or 10 markers on a picture during marker detection,
+- Generally in physics, we prefer to get an average value instead of a specific one not necessarily representative,
+- ArUcos on our robots are a bit larger, a lot more pixels are considered in detection so the precision is increased.
+
+To compute robots poses, let me introduce you [**Geometrix**](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/include/geometrix.hpp#L20) ! The only goal of this class is to sort ArUcos in 4 categories (asterix, obelix, enemy 1, enemy 2) and estimate poses of each robot.
+
+Here are steps of the routine:
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L543): Assurancetourix sends 2 MarkerArray of detected ArUcos of allies and enemies unsorted, there can be 0 up to 14 different markers at each iteration (here a marker is a [visualization_msgs::msg::Marker](http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/Marker.html) type),
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L87): Geometrix sort allies markers into 2 categories which are actual_asterix and actual_obelix (MarkerArray types). IDs of asterix, obelix and enemies markers are written in the [yml configuration file](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/param/assurancetourix.yml#L21). If it cannot sort a marker, it's because it's a top one which is put in unknown_allies (MarkerArray),
+-  [Step 3](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L93): Same thing for enemies, markers are stored in actual_first_enemy, actual_second_enemy and unknown_enemies (MarkerArray),
+- [Step 4](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L99): Geometrix tries to know if each unknown_allies marker are an asterix or obelix one by drawing a circle around the position of this unknown marker and checking if all asterix or obelix markers positions are into,
+- [Step 5](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L104): Same thing for unknown_enemies,
+- [Step 6](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L110): Computes asterix and obelix poses using geometric considerations explained below,
+- [Step 7](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L112): Computes enemy 1 and enemy 2 positions using geometric considerations explained below (no need to compute orientation as they're enemies),
+- [Step 8](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L117): Predict movements of each enemy marker (for robots planners) and put a one frame later estimation position marker into enemies_markers_to_publish (MarkerArray),
+- [Step 9](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L120): Publish allies and enemies MarkerArray.
+
+### Mathematical consideration for an ally :
+
+Here's a schematic of an ally and its parameters used for pose estimation in Geometrix:
+
+<p align="center">
+<img src="./doc/pictures/geometrix_ally_schematic.png" title="" width="70%">
+</p>
+<br/>
+
+The [algorithm estimating the pose of an ally](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L127).
+
+As you can imagine, they're several cases depending on the position and orientation of the considered ally (different number of ArUcos detected). The algorithm estimating the pose of an ally naively checks all known cases and average the ally pose depending on cases it was facing.
+
+The algorithm:
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L128): Removes the top marker if it's too far away from the camera (which means its pose estimation isn't good enough),
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L135): Sorts the given ally_marker_array in 4 MarkerArrays (front, back, top, side) depending on disposition of markers IDs values given in the [yml configuration file](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/param/assurancetourix.yml#L21) and whether the ally is asterix or obelix,
+- [Step 3](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L141): Goes through all known cases (for example 2 fronts and one side markers means [this](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L142) and [this](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L164) calculation),
+	- If a calculation occurs, adds the result into avg_point and avg_angle,
+- [Step 4](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L232): If there was at least one calculation, averages avg_point and avg_angle depending on how many calculations occurred then creates a markers with the resulting pose of this algorithm which is the pose of the ally.
+
+I'm not going to deep into detailing mathematics behind all cases as they are **really really basic geometric calculations**.
+
+### Mathematical consideration for an enemy :
+
+Here's a schematic of an enemy and its parameters used for position estimation in Geometrix:
+
+<p align="center">
+<img src="./doc/pictures/geometrix_enemy_schematic.png" title="" width="70%">
+</p>
+<br/>
+
+The [algorithm estimating the position of an enemy](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L261).
+
+This algorithm is pretty much the **same thing as for an ally**, so I'm not about to detail it.
+
+## Color finding :
+
+As explained in the *preamble*, we found a way to get a color from a position in the map frame.
+
+Here are steps to achieve it:
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L554): Project the 3 dimensional point from *map* frame to *assurancetourix* frame, the resulting point is about to be called pt_assurancetourix,
+- [Step 2](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L566): Find the pixel of interest in the pinhole model:
+
+<p align="center">
+<img src="./doc/formulas/color_finding/second_step.png" title="" width="70%">
+</p>
+<br/>
+
+- [Step 3](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L570): Project this pixel into the fisheye model unbalanced using the new_K matrix described in the preamble:
+
+<p align="center">
+<img src="./doc/formulas/color_finding/third_step.png" title="" width="70%">
+</p>
+<br/>
+
+- [Step 4](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L576): Call [`cv::fisheye::distortPoints`](https://docs.opencv.org/3.4/db/d58/group__calib3d__fisheye.html#ga75d8877a98e38d0b29b6892c5f8d7765) with the pixel resulting in step 3, the matrices of distortion and intrinsic parameters of your fisheye model, you now have coordinates of the pixel you want in your picture,
+- [Step 5](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L597): Get the pixel at coordinates returned in step 4 and extract the color from it.
