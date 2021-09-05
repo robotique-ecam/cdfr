@@ -187,7 +187,7 @@ Pretty straight forward :
 
 ### Estimate robots poses
 
-Alright, now that you know how to get markers poses relative to map, I can explain you how to compute robots poses. As you noticed, they're 6 ArUcos markers all around our robots, plus one smaller ArUco marker on top of each. They're simple reasons why:
+Alright, now that you know how to get markers poses relative to map, I can explain you how to compute robots poses. As you noticed, they're 6 ArUcos markers all around our robots, plus one smaller ArUco marker on top of each. There're simple reasons why:
 - It's not really longer to spot one or 10 markers on a picture during marker detection,
 - Generally in physics, we prefer to get an average value instead of a specific one not necessarily representative,
 - ArUcos on our robots are a bit larger, a lot more pixels are considered in detection so the precision is increased.
@@ -195,7 +195,7 @@ Alright, now that you know how to get markers poses relative to map, I can expla
 To compute robots poses, let me introduce you [**Geometrix**](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/include/geometrix.hpp#L20) ! The only goal of this class is to sort ArUcos in 4 categories (asterix, obelix, enemy 1, enemy 2) and estimate poses of each robot.
 
 Here are steps of the routine:
-- [Step 1](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L543): Assurancetourix sends 2 MarkerArray of detected ArUcos of allies and enemies unsorted, there can be 0 up to 14 different markers at each iteration (here a marker is a [visualization_msgs::msg::Marker](http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/Marker.html) type),
+- [Step 1](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/assurancetourix.cpp#L543): Assurancetourix sends 2 MarkerArray of detected ArUcos of allies and enemies unsorted, there can be 0 up to 14 different markers at each iteration (here a *marker* is a [visualization_msgs::msg::Marker](http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/Marker.html) type),
 - [Step 2](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L87): Geometrix sort allies markers into 2 categories which are actual_asterix and actual_obelix (MarkerArray types). IDs of asterix, obelix and enemies markers are written in the [yml configuration file](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/param/assurancetourix.yml#L21). If it cannot sort a marker, it's because it's a top one which is put in unknown_allies (MarkerArray),
 -  [Step 3](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L93): Same thing for enemies, markers are stored in actual_first_enemy, actual_second_enemy and unknown_enemies (MarkerArray),
 - [Step 4](https://github.com/robotique-ecam/cdfr/blob/d7179e35e68f9bd7a9d47b45bdf30532d12022c5/src/assurancetourix/assurancetourix/src/geometrix.cpp#L99): Geometrix tries to know if each unknown_allies marker are an asterix or obelix one by drawing a circle around the position of this unknown marker and checking if all asterix or obelix markers positions are into,
