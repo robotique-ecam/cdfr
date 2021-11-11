@@ -19,7 +19,7 @@ jobs:
           curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
           sudo mkdir -p /etc/apt-get/sources.list.d/ && \
           sudo sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' && \
-          curl -Ls https://github.com/cyberbotics/webots/releases/download/R2021a/webots_2021a_amd64.deb -o webots_2021a_amd64.deb
+          curl -Ls https://github.com/cyberbotics/webots/releases/download/R2021b/webots_2021b_amd64.deb -o webots_2021b_amd64.deb
           sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -yf ros-foxy-ros-base python3-colcon-common-extensions ros-foxy-xacro ros-foxy-libg2o \
           libopencv-dev libboost-dev libboost-python-dev ros-foxy-yaml-cpp-vendor ros-foxy-cv-bridge ros-foxy-image-transport ros-foxy-rviz2 ros-foxy-webots-ros2 \
           ros-foxy-behaviortree-cpp-v3 ros-foxy-laser-geometry ros-foxy-map-msgs ros-foxy-angles ros-foxy-tf2-geometry-msgs ros-foxy-test-msgs \
@@ -27,7 +27,7 @@ jobs:
           libi2c-dev i2c-tools libgraphicsmagick++1-dev lcov libsdl1.2-dev libsdl-image1.2-dev libboost-program-options-dev \
           libsuitesparse-dev python3-psutil python3-pykdl python3-vcstool python3-pydot python3-git xvfb python3-pip
           sudo -H pip3 install transforms3d emrichen hiyapyco
-          sudo apt-get install ./webots_2021a_amd64.deb
+          sudo apt-get install ./webots_2021b_amd64.deb
 
       - name: Cache ros_ws
         id: cache-ws
@@ -49,6 +49,7 @@ jobs:
 
       - name: Run simulation
         run: |
+          set -e  # exit whenever something fails
           export AUDIODEV=null
           export LIBGL_ALWAYS_SOFTWARE=true
           export DEBIAN_FRONTEND=noninteractive
