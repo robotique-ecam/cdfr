@@ -16,15 +16,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(transformix_msgs REQUIRED)
-find_package(transformix REQUIRED)
 find_package(std_srvs REQUIRED)
 
 
@@ -38,15 +34,11 @@ include_directories(
 set(dependencies
   "tf2"
   "rclcpp"
-  "sensor_msgs"
   "visualization_msgs"
   "OpenCV"
   "geometry_msgs"
-  "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
-  "transformix_msgs"
-  "transformix"
   "std_srvs"
 )
 
@@ -55,11 +47,11 @@ set(EXEC_NAME "assurancetourix")
 add_executable(${EXEC_NAME}
   src/assurancetourix.cpp
   src/assurancetourix_node.cpp
+  src/geometrix.cpp
 )
 
-option(MIPI_CAMERA "Use MIPI camera" OFF)
+option(CAMERA "Use camera" OFF)
 option(SIMULATION "Simulation mode" OFF)
-option(EXTERN_CAMERA "Use computer camera/webcam" OFF)
 
 if(SIMULATION)
   add_definitions(-DSIMULATION)
@@ -72,13 +64,8 @@ if(SIMULATION)
   target_link_libraries(${EXEC_NAME} ${LIBRARIES})
 endif()
 
-if(MIPI_CAMERA)
-  add_definitions(-DMIPI_CAMERA)
-  target_link_libraries(${EXEC_NAME} -larducam_mipicamera)
-endif()
-
-if(EXTERN_CAMERA)
-  add_definitions(-DEXTERN_CAMERA)
+if(CAMERA)
+  add_definitions(-DCAMERA)
 endif()
 
 if(EXTRALOG)

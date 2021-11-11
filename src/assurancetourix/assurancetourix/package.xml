@@ -14,13 +14,10 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rclcpp</buildtool_depend>
-  <buildtool_depend>sensor_msgs</buildtool_depend>
   <buildtool_depend>visualization_msgs</buildtool_depend>
   <buildtool_depend>geometry_msgs</buildtool_depend>
   <buildtool_depend>tf2_ros</buildtool_depend>
   <buildtool_depend>tf2_geometry_msgs</buildtool_depend>
-  <buildtool_depend>transformix_msgs</buildtool_depend>
-  <buildtool_depend>transformix</buildtool_depend>
 
   <depend>libopencv-dev</depend>
 

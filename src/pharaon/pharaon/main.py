@@ -14,7 +14,7 @@ class PharaonService(Node):
     def __init__(self):
         super().__init__("pharaon_service")
         self.srv = self.create_service(
-            Trigger, "/pharaon/activate", self.activate_callback
+            Trigger, "/pharaon/deploy", self.activate_callback
         )
         self.bt = BluetoothClient("00:14:03:06:61:BA", self.data_received)
         self.get_logger().info("Pharaon has been started")
