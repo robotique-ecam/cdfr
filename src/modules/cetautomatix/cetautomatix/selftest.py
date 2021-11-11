@@ -39,38 +39,33 @@ class Selftest:
         if int(vcgm.get_throttled().get("raw_data"), 16) != 0:
             return
 
-        # Testing devices on Drive I2C Bus
-        code = 0x20
-        self.__write__(code)
-        try:
-            bus = SMBus(1)
-            for addr in [0x10, 0x11]:
-                code += 1
-                self.__write__(code)
-                bus.write_byte_data(addr, 0x80, 0x10)
-        except BaseException:
-            return
-
         # Testing devices on sensors I2C Bus
-        code = 0x30
-        self.__write__(code)
-        try:
-            bus = SMBus(3)
-            for addr in []:
-                code += 1
-                self.__write__(code)
-        except BaseException:
-            return
+        addrs_vlx = []
+        if node.name == "obelix":
+            addrs_vlx = [0x30, 0x31, 0x32, 0x35, 0x36, 0x37]
+            try:
+                bus = SMBus(4)
+                for addr in addrs_vlx:
+                    self.__write__(addr)
+                    bus.read_byte(addr)
+            except BaseException:
+                return
 
         # Testing devices on actuators I2C Bus
         code = 0x40
         self.__write__(code)
         try:
-            bus = SMBus(5)
+            bus = SMBus(3)
             for addr in self.node.actuators.pump_addr:
                 code += 1
                 self.__write__(code)
                 bus.read_byte(addr)
+            """
+            if node.name == "obelix":
+                addr_slider = 0x12
+                self.__write__(addr_slider)
+                bus.read_byte(addr_slider)
+            """
         except BaseException:
             return
 
@@ -79,18 +74,19 @@ class Selftest:
 
         # Testing dynamixels connection
         code = 0x50
-        self.__write__(code)
-        for dyna in self.node.actuators.DYNAMIXELS:
-            code += 1
+        if node.name == "obelix":
             self.__write__(code)
-            if self.node.actuators.arbotix.getPosition(dyna) == -1:
-                return
-        for servo in self.node.actuators.SERVOS:
-            servo = self.node.actuators.SERVOS.get(servo)
-            code += 1
-            self.__write__(code)
-            if self.node.actuators.arbotix.getPosition(servo.get("addr")) == -1:
-                return
+            for dyna in self.node.actuators.DYNAMIXELS:
+                code += 1
+                self.__write__(code)
+                if self.node.actuators.arbotix.getPosition(dyna) == -1:
+                    return
+            for servo in self.node.actuators.SERVOS:
+                servo = self.node.actuators.SERVOS.get(servo)
+                code += 1
+                self.__write__(code)
+                if self.node.actuators.arbotix.getPosition(servo.get("addr")) == -1:
+                    return
 
         self.__write__(0xFF)
 

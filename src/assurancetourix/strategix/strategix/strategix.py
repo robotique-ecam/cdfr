@@ -10,6 +10,7 @@ from lcd_msgs.msg import Lcd
 from std_msgs.msg import UInt8
 from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
+from std_srvs.srv import SetBool
 from strategix.actions import actions
 from strategix.action_objects import Phare, MancheAir, Gobelet
 from strategix.exceptions import MatchStartedException
@@ -21,6 +22,9 @@ class StrategixActionServer(Node):
         super().__init__("strategix_action_server")
         self.side = self.declare_parameter("side", "blue")
         self.add_on_set_parameters_callback(self._on_set_parameters)
+        self.side_srv = self.create_service(
+            SetBool, "/strategix/side", self.side_callback
+        )
         self.todo_srv = self.create_service(
             GetAvailableActions, "/strategix/available", self.available_callback
         )
@@ -89,6 +93,16 @@ class StrategixActionServer(Node):
                 f"Invalid call : {request.sender} {request.request} {request.action}"
             )
             response.success = False
+        return response
+
+    def side_callback(self, request, response):
+        """Callback function when a robot has to change its current action"""
+        try:
+            self.get_logger().info("Ask for side")
+            response.message = self.side.value
+            response.success = True
+        except BaseException:
+            self.get_logger().warn(f"Invalid call! {request.data}")
         return response
 
     def update_score(self):

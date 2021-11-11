@@ -30,24 +30,61 @@ class VlxReadjustment:
     def __init__(self, parent_node):
         """Init VlxReadjustment"""
         self.parent = parent_node
+        self.parent.declare_parameter("vlx_lat_x", 0.0)
+        self.parent.declare_parameter("vlx_lat_y", 0.0)
+        self.parent.declare_parameter("vlx_face_x", 0.0)
+        self.parent.declare_parameter("vlx_face_y", 0.0)
+        self.parent.declare_parameter("vlx_min_measure", 48)
+        self.parent.declare_parameter("vlx_max_measure", 600)
+        self.vlx_lat_x = self.parent.get_parameter("vlx_lat_x")._value
+        self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
+        self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
+        self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
+        self.vlx_min_measure = self.parent.get_parameter("vlx_min_measure")._value
+        self.vlx_max_measure = self.parent.get_parameter("vlx_max_measure")._value
+
         if is_simulation():
             self.sim_offset = 0.0215
             self.sensors = Sensors(parent_node, [30, 31, 32, 33, 34, 35])
         else:
             self.sim_offset = 0.0
-            self.sensors = Sensors(addrs=[30, 31, 32, 33, 34, 35])
-        self.parent.declare_parameter("vlx_lat_x", 0.0)
-        self.parent.declare_parameter("vlx_lat_y", 0.0)
-        self.parent.declare_parameter("vlx_face_x", 0.0)
-        self.parent.declare_parameter("vlx_face_y", 0.0)
-        self.vlx_lat_x = self.parent.get_parameter("vlx_lat_x")._value
-        self.vlx_lat_y = self.parent.get_parameter("vlx_lat_y")._value
-        self.vlx_face_x = self.parent.get_parameter("vlx_face_x")._value
-        self.vlx_face_y = self.parent.get_parameter("vlx_face_y")._value
+            vlx_addresses = [30, 31, 32, 33, 34, 35]
+            self.parent.declare_parameter("vlx_addresses.side_right", vlx_addresses[0])
+            self.parent.declare_parameter("vlx_addresses.front_right", vlx_addresses[1])
+            self.parent.declare_parameter("vlx_addresses.front_left", vlx_addresses[2])
+            self.parent.declare_parameter("vlx_addresses.side_left", vlx_addresses[3])
+            self.parent.declare_parameter("vlx_addresses.back_left", vlx_addresses[4])
+            self.parent.declare_parameter("vlx_addresses.back_right", vlx_addresses[5])
+            vlx_addresses[0] = self.parent.get_parameter(
+                "vlx_addresses.side_right"
+            )._value
+            vlx_addresses[1] = self.parent.get_parameter(
+                "vlx_addresses.front_right"
+            )._value
+            vlx_addresses[2] = self.parent.get_parameter(
+                "vlx_addresses.front_left"
+            )._value
+            vlx_addresses[3] = self.parent.get_parameter(
+                "vlx_addresses.side_left"
+            )._value
+            vlx_addresses[4] = self.parent.get_parameter(
+                "vlx_addresses.back_left"
+            )._value
+            vlx_addresses[5] = self.parent.get_parameter(
+                "vlx_addresses.back_right"
+            )._value
+            self.parent.declare_parameter("vlx_i2c_bus", 4)
+            vlx_i2c_bus = self.parent.get_parameter("vlx_i2c_bus")._value
+            if self.parent.robot == "asterix":
+                self.parent.get_logger().warn(f"{self.parent.robot} --> vlx OFF")
+                self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=[0])
+            else:
+                self.parent.get_logger().warn(f"{self.parent.robot} --> vlx ON")
+                self.sensors = Sensors(i2c_bus=vlx_i2c_bus, addrs=vlx_addresses)
         self.values_stamped_array = [
             VlxStamped(
                 self.sensors.get_distances(),
-                self.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp(),
             )
@@ -60,7 +97,7 @@ class VlxReadjustment:
         """Near wall routine: launch try_to_readjust_with_vlx every 0.5 seconds
         considering the pose_stamped given in argument"""
         actual_stamp = (
-            self.get_clock().now()
+            self.parent.get_clock().now().to_msg()
             if not is_simulation()
             else self.sensors.get_time_stamp()
         )
@@ -75,7 +112,7 @@ class VlxReadjustment:
                     + self.near_walls_last_check_stamp.nanosec * 1e-9
                 )
             )
-            < 0.5
+            > 0.5
         ):
             self.try_to_readjust_with_vlx(
                 pose_stamped.pose.position.x,
@@ -84,7 +121,7 @@ class VlxReadjustment:
                 pose_stamped.header.stamp,
             )
             self.near_walls_last_check_stamp = (
-                self.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
@@ -140,7 +177,7 @@ class VlxReadjustment:
         time.sleep(sleep_time_before_sampling)
         while self.continuous_sampling != 0:
             actual_stamp = (
-                self.get_clock().now()
+                self.parent.get_clock().now().to_msg()
                 if not is_simulation()
                 else self.sensors.get_time_stamp()
             )
@@ -167,7 +204,7 @@ class VlxReadjustment:
                     )
                     - float(stamp.sec + stamp.nanosec * 1e-9)
                 )
-                < 0.06
+                < 0.12
             ):
                 new_stamp = self.values_stamped_array[i].stamp
                 self.stop_continuous_sampling_thread()
@@ -179,6 +216,9 @@ class VlxReadjustment:
                 news = self.compute_data(pose, self.values_stamped_array[i].values)
                 if news != None:
                     send_vision_tf = False
+                    self.parent.get_logger().warn(
+                        f"vlx_readjustment x: {news[0]} y: {news[1]} theta: {quaternion_to_euler(news[2])[2]}"
+                    )
                     self.parent.create_and_send_tf(news[0], news[1], news[2], new_stamp)
                 break
         if send_vision_tf:
@@ -219,7 +259,6 @@ class VlxReadjustment:
                 data["inv_angle"],
                 data["inv_lat"],
             )
-
             if (
                 d1_est > 0
                 and d2_est > 0
@@ -403,6 +442,16 @@ class VlxReadjustment:
             inv_lat_condition = True if case in [3, 4] else False
 
         else:
+            return None
+
+        if (
+            d1 < self.vlx_min_measure
+            or d2 < self.vlx_min_measure
+            or d3 < self.vlx_min_measure
+            or d1 > self.vlx_max_measure
+            or d2 > self.vlx_max_measure
+            or d3 > self.vlx_max_measure
+        ):
             return None
 
         return {

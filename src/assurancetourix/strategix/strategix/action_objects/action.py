@@ -17,16 +17,16 @@ class Action:
 
     def preempt_action(self, robot=None, action_list=None):
         """Function called when the action is preempted"""
-        pass
+        return True
 
     def finish_action(self, robot=None):
         """Function called when the action is finished"""
-        pass
+        return True
 
     def release_action(self, robot=None):
         """Function called when the action is released"""
-        pass
+        return True
 
     def start_actuator(self, robot=None):
         """Function called when the robot reaches its objective and starts the actuator"""
-        pass
+        return True

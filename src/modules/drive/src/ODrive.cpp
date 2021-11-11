@@ -37,7 +37,7 @@ int ODrive::open_port(const std::string port = "/dev/ttyS1")
     if (fd == -1)
     {
         close(fd);
-        RCLCPP_INFO(node->get_logger(), "open_port: Unable to open %s", port);
+        RCLCPP_WARN(node->get_logger(), "open_port: Unable to open %s", port.c_str());
         return -1;
     }
 
@@ -46,7 +46,7 @@ int ODrive::open_port(const std::string port = "/dev/ttyS1")
     {
         flock(fd, LOCK_UN);
         close(fd);
-        RCLCPP_INFO(node->get_logger(), "Serial port with file descriptor %s is already locked by another process.", std::to_string(fd));
+        RCLCPP_WARN(node->get_logger(), "Serial port with file descriptor %s is already locked by another process.", std::to_string(fd));
         return -1;
     }
 
@@ -56,7 +56,7 @@ int ODrive::open_port(const std::string port = "/dev/ttyS1")
     {
         flock(fd, LOCK_UN);
         close(fd);
-        RCLCPP_INFO(node->get_logger(), "error from tggetattr");
+        RCLCPP_WARN(node->get_logger(), "error from tggetattr");
         return -1;
     }
 
@@ -133,7 +133,7 @@ int ODrive::send(const std::string msg, const std::string *funct_name)
     int w = write(fd, msg_out.c_str(), msg_out.size());
     if (w == 0)
     {
-        RCLCPP_INFO(node->get_logger(), "%s send zero chars\n", funct_name->c_str());
+        RCLCPP_WARN(node->get_logger(), "%s send zero chars\n", funct_name->c_str());
     }
     return w;
 }
@@ -148,7 +148,7 @@ bool ODrive::check_double_output(const std::string msg, const std::string *funct
     {
         return true;
     }
-    RCLCPP_INFO(node->get_logger(), "%s : regex caught wrong data: '%s'\n", funct_name->c_str(), msg);
+    RCLCPP_WARN(node->get_logger(), "%s : regex caught wrong data: '%s'\n", funct_name->c_str(), msg.c_str());
     return false;
 }
 
@@ -161,16 +161,25 @@ std::string ODrive::receive(const std::string *funct_name)
     memset(read_buf, '\0', sizeof(read_buf)); // clean out buffer
     if (read(fd, read_buf, sizeof(read_buf) - 1) == 0)
     {
-        RCLCPP_INFO(node->get_logger(), "%s received no data\n", funct_name->c_str());
+        RCLCPP_WARN(node->get_logger(), "%s received no data\n", funct_name->c_str());
         return "";
     }
 
     std::string ans = read_buf;
-    if (ans.length() >= 17){
-      return ans.substr(0, 17);
+
+    if (funct_name->compare("setVelocity") == 0){
+        return "velocity_ok";
     }
 
-    return "";
+    // check checksum
+    size_t i = ans.find('*');
+    if (i == std::string::npos)
+    {
+        RCLCPP_WARN(node->get_logger(), "%s received no checksum", funct_name->c_str());
+        return "";
+    }
+    std::string prefix = ans.substr(0, i);
+    return prefix;
 }
 
 /*
@@ -197,11 +206,13 @@ int ODrive::set_velocity(const int motor, const float velocity)
     msg += std::to_string(motor);
     msg += " ";
     msg += std::to_string(velocity);
+    std::this_thread::sleep_for(200us);
     if (send(msg, &funct_name) > 0)
     {
+        std::string ans = receive(&funct_name);
         return 0;
     }
-    RCLCPP_INFO(node->get_logger(), "could not set velocity: %f", velocity);
+    RCLCPP_WARN(node->get_logger(), "could not set velocity: %f", velocity);
     return -1;
 }
 
@@ -213,29 +224,25 @@ std::pair<float, float> ODrive::get_position_velocity(const int motor)
     const std::string funct_name = "getPosition_Velocity";
     std::string msg = "f ";
     msg += std::to_string(motor);
-    std::string ans;
-    for (int i = 0; i<10; i++){
-      if (send(msg, &funct_name) > 0)
-      {
-        ans = receive(&funct_name);
-        if (ans.size() > 0) break;
-      }
-      if (i==10) return std::pair<float, float>(-1, -1);
-    }
-
-    if (check_double_output(ans, &funct_name))
+    if (send(msg, &funct_name) > 0)
     {
-        size_t i = ans.find(' ');
-        try
+        std::string ans = receive(&funct_name);
+        if (ans.size() > 0)
         {
-            std::pair<float, float> output(std::stof(ans.substr(0, i)), std::stof(ans.substr(i + 1)));
-            return output;
-        }
-        catch (const std::invalid_argument &e)
-        {
-            RCLCPP_INFO(node->get_logger(), "&s: received wrong data after regex check: %s: %s\n", funct_name.c_str(), e.what(), ans);
+            if (check_double_output(ans, &funct_name))
+            {
+                size_t i = ans.find(' ');
+                try
+                {
+                    std::pair<float, float> output(std::stof(ans.substr(0, i)), std::stof(ans.substr(i + 1)));
+                    return output;
+                }
+                catch (const std::invalid_argument &e)
+                {
+                    RCLCPP_WARN(node->get_logger(), "&s: received wrong data after regex check: %s\n", funct_name.c_str(), ans.c_str());
+                }
+            }
         }
     }
-
     return std::pair<float, float>(-1, -1);
 }
