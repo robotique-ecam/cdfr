@@ -1,15 +1,15 @@
 !Defaults
 footprint: "[[-0.090, -0.175], [-0.090, 0.175], [0.090, 0.175], [0.090, -0.175]]"
 use_sim_time: False
-wheels_separation: 0.282
-wheels_radius: 0.061
+wheels_separation: 0.32
+wheels_radius: 0.037
 min_turning_radius: 0.0
 max_vel_x_nominal: 2.0
-max_vel_x_accurate: 0.15
+max_vel_x_accurate: 0.1
 max_vel_theta: 3.1
 max_vel_theta_accurate: 0.5
-acc_lim_x: 0.5
-acc_lim_theta: 2.5
+acc_lim_x: 0.4
+acc_lim_theta: 1.0
 robotbase_length: 0.18
 robotbase_width: 0.315
 ---
@@ -17,14 +17,14 @@ obelix:
   drive_node:
     ros__parameters:
       use_sim_time: !Var use_sim_time
-      odrive_usb_port: "/dev/ttyS1"
-      invert_wheel: false
+      odrive_usb_port: "/dev/ttyACM0"
+      invert_wheel: true
 
       wheels:
         separation: !Var wheels_separation
         radius: !Var wheels_radius
 
-      gearbox_ratio: 1.0
+      gearbox_ratio: 8.75
 
       i2c_bus: 1
 
@@ -44,10 +44,20 @@ obelix:
 
   localisation_node:
     ros__parameters:
-      vlx_lat_x: 80.0
-      vlx_lat_y: 152.5
-      vlx_face_x: 70.0
-      vlx_face_y: 130.0
+      vlx_min_measure: 48
+      vlx_max_measure: 600
+      vlx_lat_x: 56.0
+      vlx_lat_y: 172.5
+      vlx_face_x: 87.0
+      vlx_face_y: 159.0
+      vlx_i2c_bus: 4
+      vlx_addresses:
+        side_right: 53
+        front_right: 54
+        front_left: 49
+        side_left: 48
+        back_left: 50
+        back_right: 55
 
 
   lcd_driver:
@@ -57,7 +67,7 @@ obelix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Obelix v0.8.3"
+      banner: "Obelix v0.9.0"
 
 
   tree:

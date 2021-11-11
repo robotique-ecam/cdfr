@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include "rclcpp/rclcpp.hpp"
 
+using namespace std::chrono_literals;
+
 class ODrive
 {
 public:

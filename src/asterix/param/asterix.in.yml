@@ -1,30 +1,30 @@
 !Defaults
-footprint: "[[-0.095, -0.128], [-0.095, 0.128], [0.095, 0.128], [0.095, -0.128]]"
+footprint: "[[-0.100, -0.125], [-0.100, 0.125], [0.100, 0.125], [0.100, -0.125]]"
 use_sim_time: False
-wheels_separation: 0.244
-wheels_radius: 0.0405
+wheels_separation: 0.2245
+wheels_radius: 0.037
 min_turning_radius: 0.0
 max_vel_x_nominal: 2.0
 max_vel_x_accurate: 0.1
 max_vel_theta: 3.1
 max_vel_theta_accurate: 0.5
 acc_lim_x: 0.5
-acc_lim_theta: 2.5
+acc_lim_theta: 1.5
 robotbase_length: 0.2
-robotbase_width: 0.26
+robotbase_width: 0.25
 ---
 asterix:
   drive_node:
     ros__parameters:
       use_sim_time: !Var use_sim_time
-      odrive_usb_port: "/dev/ttyS1"
-      invert_wheel: false
+      odrive_usb_port: "/dev/ttyACM0"
+      invert_wheel: true
 
       wheels:
         separation: !Var wheels_separation
         radius: !Var wheels_radius
 
-      gearbox_ratio: 1.0
+      gearbox_ratio: 8.75
 
       i2c_bus: 1
 
@@ -44,10 +44,20 @@ asterix:
 
   localisation_node:
     ros__parameters:
-      vlx_lat_x: 80.0
-      vlx_lat_y: 130.5
-      vlx_face_x: 100.5
-      vlx_face_y: 110.0
+      vlx_min_measure: 48
+      vlx_max_measure: 600
+      vlx_lat_x: 72.0
+      vlx_lat_y: 124.0
+      vlx_face_x: 98.5
+      vlx_face_y: 54.5
+      vlx_i2c_bus: 4
+      vlx_addresses:
+        side_right: 48
+        front_right: 53
+        front_left: 52
+        side_left: 48
+        back_left: 55
+        back_right: 54
 
 
   lcd_driver:
@@ -57,7 +67,7 @@ asterix:
       i2c_bus: 6
       i2c_addr: 0x27
 
-      banner: "Asterix v0.8.3"
+      banner: "Asterix v0.9.0"
 
 
   tree:

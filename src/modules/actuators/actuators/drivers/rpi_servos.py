@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
 
 
-"""Sliders Hardware Interface."""
-
-
-try:
-    from gpiozero import Servo
-except ImportError:
-    print("[!] RPI Servos are in simulation mode. python3-gpiozero was found !")
+"""Servo motor Hardware Interface."""
 
 
 class RPiServos:
-    """Driver interacting with Hobby servos plugged onto PWM GPIOs."""
+    """Driver interacting with Hobby servos plugged onto an external arduino nano."""
 
-    def __init__(self, pins={}):
+    def __init__(self, i2c_bus_servo, addrs={}):
         """Create driver with default values."""
-        self.servos = {}
-        try:
-            for pin in pins:
-                self.servos.update({pin: Servo(pin)})
-        except NameError:
-            pass
+        self.i2c = i2c_bus_servo
+        self.servos_addrs = addrs
 
-    def set_angles(self, pins, values):
-        """Set servo angles."""
-        try:
-            for pin, val in zip(pins, values):
-                self.servos[pin].value = val
-        except NameError:
-            print(f"Servo {pin} set to {val}", flush=True)
+    def set_angles(self, servo: str, value: int):
+        """Set servo angles. servo in ["arm", "reef"]
+        reef: 0 --> closed, 37 --> opened
+        arm: 82 --> closed, 45 --> opened
+        value between [0, 90]"""
+        if servo == "arm":
+            self.i2c.write_byte(self.servos_addrs[servo], value)
+        elif servo == "reef":
+            self.i2c.write_byte(self.servos_addrs[servo], 1 << 7 | value)

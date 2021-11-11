@@ -208,7 +208,7 @@ global_costmap:
       gradient_layer: #draw radians circle around ennemies
         plugin: "gradient_costmap_layer_plugin/GradientLayer"
         enabled: true
-        gradient_size: 7
+        gradient_size: 9
         gradient_factor: 100
         markers_topic: /ennemies_positions_markers
       inflation_layer:
@@ -239,7 +239,7 @@ local_costmap:
       gradient_layer: #draw radians circle around ennemies
         plugin: "gradient_costmap_layer_plugin/GradientLayer"
         enabled: false
-        gradient_size: 7
+        gradient_size: 9
         gradient_factor: 100
         markers_topic: /ennemies_positions_markers
       inflation_layer:
