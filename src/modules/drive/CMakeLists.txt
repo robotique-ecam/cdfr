@@ -63,7 +63,6 @@ add_library(${ODRIVE_LIB} SHARED
 add_executable(${EXEC_NAME}
   src/drive_node.cpp
   src/drive.cpp
-  src/i2c.cpp
 )
 
 option(DEBUG "Debug mode" OFF)
@@ -83,7 +82,6 @@ else()
   if (DEBUG)
     add_definitions(-DDEBUG)
   endif()
-  target_link_libraries(${EXEC_NAME} i2c)
 endif()
 
 

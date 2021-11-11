@@ -1,7 +1,5 @@
 #include <drive.hpp>
 
-#define I2C_ADDR_SLIDER 0x12
-
 Drive::Drive() : Node("drive_node") {
   /* Init parametrers from YAML */
   init_parameters();
@@ -10,9 +8,7 @@ Drive::Drive() : Node("drive_node") {
   init_variables();
 
 #ifndef SIMULATION
-  /* Open I2C connection */
-  i2c = std::make_shared<I2C>(i2c_bus);
-
+  /* Init Odrive connection */
   odrive = new ODrive(_odrive_usb_port, this);
 
   /* Init speed before starting odom */
@@ -60,8 +56,6 @@ Drive::Drive() : Node("drive_node") {
 
   _enable_drivers = this->create_service<std_srvs::srv::SetBool>(
       "enable_drivers", std::bind(&Drive::handle_drivers_enable, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  _set_slider_postion = this->create_service<actuators_srvs::srv::Slider>(
-      "slider_position", std::bind(&Drive::handle_set_slider_position, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
   _adjust_odometry_sub = this->create_subscription<geometry_msgs::msg::TransformStamped>(
       "adjust_odometry", qos, std::bind(&Drive::adjust_odometry_callback, this, std::placeholders::_1));
@@ -85,8 +79,6 @@ void Drive::init_parameters() {
 
 // Get parameters from yaml
 #ifndef SIMULATION
-  this->declare_parameter("i2c_bus");
-  this->get_parameter_or<int>("i2c_bus", i2c_bus, 1);
   this->declare_parameter("gearbox_ratio");
   this->declare_parameter("odrive_usb_port");
   this->declare_parameter("invert_wheel");
@@ -158,7 +150,7 @@ void Drive::get_motors_turns_from_odrive(double &left, double &right){
   left_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[0]);
   right_turns_speed_returned = odrive->get_position_velocity(odrive_motor_order[1]);
 
-  left = double(std::get<0>(left_turns_speed_returned));
+  left = - double(std::get<0>(left_turns_speed_returned));
   right = double(std::get<0>(right_turns_speed_returned));
 }
 #endif
@@ -172,9 +164,11 @@ void Drive::update_velocity() {
   float cmd_odrive_right = compute_velocity_cmd(cmd_vel_.right);
 
   time_since_last_sync_ = this->get_clock()->now();
-  /* Send speed commands */
-  odrive->set_velocity(odrive_motor_order[0], cmd_odrive_left);
-  odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
+  if (armed){
+    /* Send speed commands */
+    odrive->set_velocity(odrive_motor_order[0], - cmd_odrive_left);
+    odrive->set_velocity(odrive_motor_order[1], cmd_odrive_right);
+  }
 
   double left_motor_turns_returned, right_motor_turns_returned;
   get_motors_turns_from_odrive(left_motor_turns_returned, right_motor_turns_returned);
@@ -293,26 +287,20 @@ void Drive::update_diagnostic() { diagnostics_pub_->publish(diagnostics_array_);
 
 void Drive::handle_drivers_enable(const std::shared_ptr<rmw_request_id_t> request_header, const std_srvs::srv::SetBool::Request::SharedPtr request,
                                   const std_srvs::srv::SetBool::Response::SharedPtr response) {
-  if (request->data) {
-    response->message = "Stepper drivers are enabled";
-    RCLCPP_WARN(this->get_logger(), "Stepper drivers are enabled");
-  } else {
-    response->message = "Stepper drivers are disabled";
-    RCLCPP_WARN(this->get_logger(), "Stepper drivers are disabled");
-  }
-  response->success = true;
-}
-
-void Drive::handle_set_slider_position(const std::shared_ptr<rmw_request_id_t> request_header, const actuators_srvs::srv::Slider::Request::SharedPtr request,
-                                       const actuators_srvs::srv::Slider::Response::SharedPtr response) {
 #ifndef SIMULATION
-  this->i2c_mutex.lock();
-
-  this->i2c->set_address(I2C_ADDR_SLIDER);
-  this->i2c->write_byte(request->position);
-
-  this->i2c_mutex.unlock();
-#endif
+  if (request->data) {
+    response->message = "Odrive command through drive is enabled";
+    armed = true;
+    RCLCPP_WARN(this->get_logger(), "Odrive command through drive is enabled");
+  } else {
+    response->message = "Odrive command through drive is disabled";
+    armed = false;
+    RCLCPP_WARN(this->get_logger(), "Odrive command through drive is disabled");
+  }
+  odrive->set_velocity(0, 0.0);
+  odrive->set_velocity(1, 0.0);
+#endif //SIMULATION
+  response->success = true;
 }
 
 #ifdef SIMULATION

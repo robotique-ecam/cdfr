@@ -116,26 +116,27 @@ class Localisation(rclpy.node.Node):
         for ally_marker in msg.markers:
             if (
                 ally_marker.text.lower() == self.robot
-                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.75
+                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.4
             ):
                 if (
                     is_simulation()
                 ):  # simulate marker delais (image analysis from assurancetourix)
                     time.sleep(0.15)
-                if self.vlx.continuous_sampling == 0:
-                    self.create_and_send_tf(
-                        ally_marker.pose.position.x,
-                        ally_marker.pose.position.y,
-                        ally_marker.pose.orientation,
-                        ally_marker.header.stamp,
-                    )
-                else:
-                    self.vlx.try_to_readjust_with_vlx(
-                        ally_marker.pose.position.x,
-                        ally_marker.pose.position.y,
-                        ally_marker.pose.orientation,
-                        ally_marker.header.stamp,
-                    )
+                if not (x < 0.2 or x > 2.8 or y < 0.2 or y > 1.8):
+                    if self.vlx.continuous_sampling == 0:
+                        self.create_and_send_tf(
+                            ally_marker.pose.position.x,
+                            ally_marker.pose.position.y,
+                            ally_marker.pose.orientation,
+                            ally_marker.header.stamp,
+                        )
+                    else:
+                        self.vlx.try_to_readjust_with_vlx(
+                            ally_marker.pose.position.x,
+                            ally_marker.pose.position.y,
+                            ally_marker.pose.orientation,
+                            ally_marker.header.stamp,
+                        )
                 if self.vlx.continuous_sampling in [0, 1]:
                     self.vlx.start_continuous_sampling_thread(0.65, 1)
 
@@ -188,6 +189,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     localisation.vlx.stop_continuous_sampling_thread()
-    localisation.vlx.sensors.node.destroy_node()
+    if is_simulation():
+        localisation.vlx.sensors.node.destroy_node()
     localisation.destroy_node()
     rclpy.shutdown()
