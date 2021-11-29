@@ -44,11 +44,6 @@ def generate_launch_description():
             GroupAction(
                 [
                     Node(
-                        package="titan",
-                        executable="pharaon",
-                        output="screen",
-                    ),
-                    Node(
                         package="strategix",
                         executable="strategix",
                         output="screen",

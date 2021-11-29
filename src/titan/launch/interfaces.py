@@ -63,18 +63,13 @@ def generate_launch_description():
             GroupAction(
                 [
                     Node(
-                        package="titan",
-                        executable="pharaon",
-                        output="screen",
-                    ),
-                    Node(
                         package="strategix",
                         executable="strategix",
                         output="screen",
                     ),
                     WebotsLauncher(
                         mode="realtime",
-                        world="tools/simulation/worlds/cdr2020.wbt",
+                        world="tools/simulation/worlds/cdr2022.wbt",
                     ),
                 ]
             )

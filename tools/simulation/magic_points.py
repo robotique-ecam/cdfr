@@ -1,1 +1,0 @@
-../../src/modules/cetautomatix/cetautomatix/magic_points.py
