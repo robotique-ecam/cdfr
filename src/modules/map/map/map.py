@@ -213,21 +213,9 @@ def add_background(img):
 def create_blue_map():
     """Add blue side specific elements."""
     mapbleu, draw = create_map()
-    # draw.line(((cm_to_pix(240, reso), 0), (cm_to_pix(240, reso),
-    #                                     cm_to_pix(width_cm, reso))), black, 1)
     mapbleu = add_background(mapbleu)
     mapbleu.save(os.path.join(os.getcwd(), "mapbleu.pgm"))
 
 
-def create_yellow_map():
-    """Add yellow side specific elements."""
-    mapjaune, draw = create_map()
-    # draw.line(((cm_to_pix(60, reso), 0), (cm_to_pix(60, reso),
-    #                                    cm_to_pix(width_cm, reso))), black, 1)
-    mapjaune = add_background(mapjaune)
-    mapjaune.save(os.path.join(os.getcwd(), "mapjaune.pgm"))
-
-
 if __name__ == "__main__":
     create_blue_map()
-    create_yellow_map()
