@@ -43,11 +43,11 @@ PROTO Asterix [
         ]
         endPoint Solid {
           translation 0 0.130000 -0.13
-          rotation 0 1 0 0
+          rotation 1 0 0 1.570796327
           children [
             Transform {
               translation 0 0 0
-              rotation 1 0 0 3.140796
+              rotation 1 0 0 1.570796327
               children [
                 DEF WHEEL Shape {
                   appearance DEF dark PBRAppearance {
@@ -64,8 +64,7 @@ PROTO Asterix [
             }
           ]
           name "wheel_left_link"
-          physics DEF WHEEL_PHYSICS Physics {
-          }
+          physics DEF WHEEL_PHYSICS Physics{}
           boundingObject USE WHEEL
         }
       }
@@ -85,11 +84,11 @@ PROTO Asterix [
         ]
         endPoint Solid {
           translation 0 -0.13 -0.13
-          rotation 0 1 0 0
+          rotation 1 0 0 1.570796327
           children [
             Transform {
               translation 0 0 0
-              rotation 1 0 0 3.140796
+              rotation 1 0 0 1.570796327
               children [
                 USE WHEEL
               ]
