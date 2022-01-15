@@ -10,7 +10,9 @@ actions = {
     "PHARE_JAUNE": Phare(
         position=(2.775, 2), tags={"ONLY_ROBOT": "obelix", "ONLY_SIDE": "yellow"}
     ),
-    "MANCHE1": MancheAir(position=(0.15, 0.18), tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "obelix"}),
+    "MANCHE1": MancheAir(
+        position=(0.15, 0.18), tags={"ONLY_SIDE": "blue", "ONLY_ROBOT": "obelix"}
+    ),
     # "MANCHE2": MancheAir(position=(0.635, 0), tags={"ONLY_SIDE": "blue"}),
     # "MANCHE3": MancheAir(position=(2.365, 0), tags={"ONLY_SIDE": "yellow"}),
     # "MANCHE4": MancheAir(position=(2.77, 0), tags={"ONLY_SIDE": "yellow"}),
