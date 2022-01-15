@@ -1,78 +1,195 @@
 #!/usr/bin/env python3
 
+"""Script generating maps for CDR2022."""
 
-"""Script generating maps for CDR2020."""
-
-
-import sys
 import os
-from os import path
-
 from PIL import Image, ImageDraw
 
-noir = (0, 0, 0)
-blanc = (255, 255, 255)
-bg_color = (150, 150, 150)
+black = (0, 0, 0)
+white = (255, 255, 255)
+background_color = (150, 150, 150)
 
-longueur_cm = 304
-largeur_cm = 204
+length_cm = 304
+width_cm = 204
 offset_cm = 400
 
 reso = 2
 
 
-def cm_pix(taille_cm, cmpar_pixel):
+def cm_to_pix(taille_cm, cmpar_pixel):
     """Return cm per pixel."""
     return taille_cm // cmpar_pixel
 
 
-def creamap():
+def create_map():
     """Create basemap."""
-    map = Image.new("RGB", (cm_pix(longueur_cm, reso), cm_pix(largeur_cm, reso)), blanc)
+    map = Image.new(
+        "RGB", (cm_to_pix(length_cm, reso), cm_to_pix(width_cm, reso)), white
+    )
 
     draw = ImageDraw.Draw(map)
 
-    draw.line(((0, 0), (0, cm_pix(largeur_cm, reso))), noir, 2 // reso)
-    draw.line(((0, 0), (cm_pix(longueur_cm, reso), 0)), noir, 2 // reso)
+    # Borders
+    draw.line(((0, 0), (0, cm_to_pix(width_cm, reso))), black, 2 // reso)
+    draw.line(((0, 0), (cm_to_pix(length_cm, reso), 0)), black, 2 // reso)
     draw.line(
         (
-            (0, cm_pix(largeur_cm, reso) - 2 // reso),
-            (cm_pix(longueur_cm, reso), cm_pix(largeur_cm, reso) - 2 // reso),
+            (0, cm_to_pix(width_cm, reso) - 2 // reso),
+            (cm_to_pix(length_cm, reso), cm_to_pix(width_cm, reso) - 2 // reso),
         ),
-        noir,
+        black,
         2 // reso,
     )
     draw.line(
         (
-            (cm_pix(longueur_cm, reso) - 2 // reso, 0),
-            (cm_pix(longueur_cm, reso) - 2 // reso, cm_pix(largeur_cm, reso)),
+            (cm_to_pix(length_cm, reso) - 2 // reso, 0),
+            (cm_to_pix(length_cm, reso) - 2 // reso, cm_to_pix(width_cm, reso)),
         ),
-        noir,
+        black,
         2 // reso,
     )
 
+    # Abris de chantier
     draw.line(
         (
-            (cm_pix(90 + reso, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(90 + reso, reso), cm_pix(185 + reso, reso)),
+            (0, cm_to_pix(149 + reso, reso)),
+            (cm_to_pix(51 + reso, reso), cm_to_pix(width_cm, reso)),
         ),
-        noir,
+        black,
         1,
     )
     draw.line(
         (
-            (cm_pix(210 + reso, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(210 + reso, reso), cm_pix(185 + reso, reso)),
+            (cm_to_pix(length_cm, reso), cm_to_pix(149 + reso, reso)),
+            (cm_to_pix(249 + reso, reso), cm_to_pix(width_cm, reso)),
         ),
-        noir,
+        black,
+        1,
+    )
+
+    # Barre
+    draw.line(
+        (
+            (cm_to_pix(150 + reso, reso), 0),
+            (cm_to_pix(150 + reso, reso), cm_to_pix(30 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+
+    # Distributeurs
+    draw.line(
+        (
+            (0, cm_to_pix(118 + reso, reso)),
+            (cm_to_pix(10.2 + reso, reso), cm_to_pix(118 + reso, reso)),
+        ),
+        black,
         1,
     )
     draw.line(
         (
-            (cm_pix(150 + reso, reso), cm_pix(largeur_cm, reso)),
-            (cm_pix(150 + reso, reso), cm_pix(170 + reso, reso)),
+            (cm_to_pix(10.2 + reso, reso), cm_to_pix(118 + reso, reso)),
+            (cm_to_pix(10.2 + reso, reso), cm_to_pix(133 + reso, reso)),
         ),
-        noir,
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (0, cm_to_pix(133 + reso, reso)),
+            (cm_to_pix(10.2 + reso, reso), cm_to_pix(133 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(length_cm, reso), cm_to_pix(118 + reso, reso)),
+            (cm_to_pix(length_cm - 10.2 + reso, reso), cm_to_pix(118 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(length_cm - 10.2 + reso, reso), cm_to_pix(118 + reso, reso)),
+            (cm_to_pix(length_cm - 10.2 + reso, reso), cm_to_pix(133 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(length_cm, reso), cm_to_pix(133 + reso, reso)),
+            (cm_to_pix(length_cm - 10.2 + reso, reso), cm_to_pix(133 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(128 + reso, reso), 0),
+            (cm_to_pix(128 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(128 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+            (cm_to_pix(143 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(143 + reso, reso), 0),
+            (cm_to_pix(143 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(158 + reso, reso), 0),
+            (cm_to_pix(158 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(158 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+            (cm_to_pix(173 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(173 + reso, reso), 0),
+            (cm_to_pix(173 + reso, reso), cm_to_pix(10.2 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+
+    # Galeries
+    draw.line(
+        (
+            (cm_to_pix(45 + reso, reso), cm_to_pix(8.5 + reso, reso)),
+            (cm_to_pix(117 + reso, reso), cm_to_pix(8.5 + reso, reso)),
+        ),
+        black,
+        1,
+    )
+    draw.line(
+        (
+            (cm_to_pix(183 + reso, reso), cm_to_pix(8.5 + reso, reso)),
+            (cm_to_pix(255 + reso, reso), cm_to_pix(8.5 + reso, reso)),
+        ),
+        black,
         1,
     )
 
@@ -83,8 +200,8 @@ def add_background(img):
     """Create background for map."""
     back = Image.new(
         "RGB",
-        (cm_pix(longueur_cm + offset_cm, reso), cm_pix(largeur_cm + offset_cm, reso)),
-        bg_color,
+        (cm_to_pix(length_cm + offset_cm, reso), cm_to_pix(width_cm + offset_cm, reso)),
+        background_color,
     )
     bg_w, bg_h = back.size
     img_w, img_h = img.size
@@ -93,24 +210,12 @@ def add_background(img):
     return back
 
 
-def creamapbleu():
+def create_blue_map():
     """Add blue side specific elements."""
-    mapbleu, draw = creamap()
-    # draw.line(((cm_pix(240, reso), 0), (cm_pix(240, reso),
-    #                                     cm_pix(largeur_cm, reso))), noir, 1)
+    mapbleu, draw = create_map()
     mapbleu = add_background(mapbleu)
-    mapbleu.save(path.join(os.getcwd(), "mapbleu.pgm"))
-
-
-def creamapjaune():
-    """Add yellow side specific elements."""
-    mapjaune, draw = creamap()
-    # draw.line(((cm_pix(60, reso), 0), (cm_pix(60, reso),
-    #                                    cm_pix(largeur_cm, reso))), noir, 1)
-    mapjaune = add_background(mapjaune)
-    mapjaune.save(path.join(os.getcwd(), "mapjaune.pgm"))
+    mapbleu.save(os.path.join(os.getcwd(), "mapbleu.pgm"))
 
 
 if __name__ == "__main__":
-    creamapbleu()
-    creamapjaune()
+    create_blue_map()

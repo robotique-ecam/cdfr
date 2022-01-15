@@ -59,7 +59,7 @@ jobs:
           export PATH=$PATH:PATH:$WEBOTS_HOME
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$WEBOTS_HOME/lib/controller
           export PYTHONPATH=$PYTHONPATH:$WEBOTS_HOME/lib/controller/python38:~/ros_ws/build/python_orocos_kdl
-          xvfb-run --auto-servernum webots --mode=fast --no-rendering --stdout --stderr --minimize --batch tools/simulation/worlds/cdr2020.wbt &
+          xvfb-run --auto-servernum webots --mode=fast --no-rendering --stdout --stderr --minimize --batch tools/simulation/worlds/cdr2022.wbt &
           echo "Webots is starting..."
           sleep 30
           ros2 launch titan cloud-interfaces.py &

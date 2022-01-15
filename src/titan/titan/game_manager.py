@@ -33,7 +33,7 @@ class GameManager(WebotsNode):
         makedirs(path.dirname(animation_path), exist_ok=True)
         while not self._trigger_start_asterix_client.wait_for_service(timeout_sec=60.0):
             self.get_logger().info("Waiting for asterix")
-        self.get_logger().info(f"Starting match")
+        self.get_logger().info("Starting match")
         self.robot.animationStartRecording(animation_path)
         self._synchronous_call(
             self._trigger_start_asterix_client, self._trigger_start_asterix_request

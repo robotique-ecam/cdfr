@@ -122,7 +122,12 @@ class Localisation(rclpy.node.Node):
                     is_simulation()
                 ):  # simulate marker delais (image analysis from assurancetourix)
                     time.sleep(0.15)
-                if not (x < 0.2 or x > 2.8 or y < 0.2 or y > 1.8):
+                if not (
+                    ally_marker.pose.position.x < 0.2
+                    or ally_marker.pose.position.x > 2.8
+                    or ally_marker.pose.position.y < 0.2
+                    or ally_marker.pose.position.y > 1.8
+                ):
                     if self.vlx.continuous_sampling == 0:
                         self.create_and_send_tf(
                             ally_marker.pose.position.x,
