@@ -2,6 +2,8 @@
 #define SPLIT_GOAL_ACTION_HPP_
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 #include "tf2_ros/buffer.h"
 
 #include "nav2_util/robot_utils.hpp"
@@ -61,9 +63,11 @@ private:
 
   double distance_from_walls_;
   std::vector<std::vector<float>> specific_area_coords;
-  std::vector<float> exit_area_coords;
+  std::vector<float> exit_area_coords, exit_area_types;
 
   int get_out_area, get_in_area;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr specific_area_visualization_pub;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr specific_exit_visualization_pub;
 
   float radius_accurate_;
   const float sqrt2by2 = 0.7071068,

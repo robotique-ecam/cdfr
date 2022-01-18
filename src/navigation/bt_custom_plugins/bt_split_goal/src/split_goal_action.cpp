@@ -21,6 +21,10 @@ SplitGoal::SplitGoal(
     node_, "bt_split_goal.specific_area_coords", rclcpp::ParameterValue("NULL"));
   nav2_util::declare_parameter_if_not_declared(
     node_, "bt_split_goal.exit_area_coords", rclcpp::ParameterValue("NULL"));
+  nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.visualize_zones", rclcpp::ParameterValue(false));
+  nav2_util::declare_parameter_if_not_declared(
+    node_, "bt_split_goal.exit_area_type", rclcpp::ParameterValue("NULL"));
 
   node_->get_parameter("bt_split_goal.radius_accurate", radius_accurate_);
   node_->get_parameter("bt_split_goal.distance_from_walls", distance_from_walls_);
@@ -52,6 +56,139 @@ SplitGoal::SplitGoal(
     RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "No exit_area_coords in yaml, considering no exit area");
   }
   exit_area_coords = exit_area_vect[0];
+
+  RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "1");
+
+  std::string exit_area_types_string;
+  std::vector<std::vector<float>> exit_area_types_vect;
+  node_->get_parameter("bt_split_goal.exit_area_type", exit_area_types_string);
+
+  RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "2");
+
+  if (exit_area_types_string.compare("NULL") != 0) {
+    std::string error_return;
+    exit_area_types_vect = nav2_costmap_2d::parseVVF(exit_area_types_string, error_return);
+    RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "3");
+  }
+  else
+  {
+    exit_area_types_vect = {{0.0}};
+    RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "No exit_area_types in yaml, considering no exit area");
+  }
+  exit_area_types = exit_area_types_vect[0];
+
+  RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "4");
+
+  bool visualize;
+  node_->get_parameter("bt_split_goal.visualize_zones", visualize);
+
+  if (visualize){
+    RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "visualization on");
+
+    specific_area_visualization_pub = node_->create_publisher<visualization_msgs::msg::MarkerArray>("nav_specific_area", rclcpp::QoS(rclcpp::KeepLast(10)));
+    specific_exit_visualization_pub = node_->create_publisher<visualization_msgs::msg::MarkerArray>("nav_specific_exit", rclcpp::QoS(rclcpp::KeepLast(10)));
+
+    visualization_msgs::msg::MarkerArray specific_area_visualization;
+    visualization_msgs::msg::MarkerArray specific_exit_visualization;
+
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = node_->get_clock()->now();
+    marker.type = visualization_msgs::msg::Marker::CUBE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.color.a = 0.2;
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    marker.scale.z = 0.05;
+    marker.lifetime.sec = 200;
+
+    //specific_areas
+    if (specific_area_coords_string.compare("NULL") != 0) {
+      for(int i = 0; i < (int)specific_area_coords.size(); i++){
+          marker.id = i;
+          marker.scale.x = abs(specific_area_coords[i][0] - specific_area_coords[i][2]);
+          marker.scale.y = abs(specific_area_coords[i][1] - specific_area_coords[i][3]);
+          marker.pose.position.x = (specific_area_coords[i][0] + specific_area_coords[i][2])/2;
+          marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3])/2;
+          specific_area_visualization.markers.push_back(marker);
+      }
+    }
+    //walls_areas
+    marker.id = marker.id + 1;
+    marker.scale.x = 3.0;
+    marker.scale.y = distance_from_walls_;
+    marker.pose.position.x = 1.5;
+    marker.pose.position.y = distance_from_walls_/2;
+    specific_area_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.pose.position.y = 2.0-distance_from_walls_/2;
+    specific_area_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.scale.x = distance_from_walls_;
+    marker.scale.y = 2.0;
+    marker.pose.position.x = distance_from_walls_/2;
+    marker.pose.position.y = 1.0;
+    specific_area_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.pose.position.x = 3.0-distance_from_walls_/2;
+    specific_area_visualization.markers.push_back(marker);
+
+    specific_area_visualization_pub->publish(specific_area_visualization);
+
+    marker.color.g = 1.0;
+
+    //exit areas
+    if (exit_area_coords_string.compare("NULL") != 0) {
+      for(int i = 0; i < (int)exit_area_coords.size(); i++){
+          marker.id = i;
+          if (exit_area_types[i] == 0.0) {
+            //y
+            marker.scale.x = abs(specific_area_coords[i][0] - specific_area_coords[i][2]);
+            marker.scale.y = 0.05;
+            marker.pose.position.x = (specific_area_coords[i][0] + specific_area_coords[i][2])/2;
+            marker.pose.position.y = exit_area_coords[i];
+          } else if (exit_area_types[i] == 1.0){
+            //x
+            marker.scale.x = 0.05;
+            marker.scale.y = abs(specific_area_coords[i][1] - specific_area_coords[i][3]);
+            marker.pose.position.x = exit_area_coords[i];
+            marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3])/2;
+          } else {
+            //other angle
+          }
+          specific_exit_visualization.markers.push_back(marker);
+      }
+    }
+
+    //exit
+    marker.id = marker.id + 1;
+    marker.scale.x = 3.0;
+    marker.scale.y = 0.05;
+    marker.pose.position.x = 1.5;
+    marker.pose.position.y = distance_from_walls_;
+    specific_exit_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.pose.position.y = 2.0-distance_from_walls_;
+    specific_exit_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.scale.x = 0.05;
+    marker.scale.y = 2.0;
+    marker.pose.position.x = distance_from_walls_;
+    marker.pose.position.y = 1.0;
+    specific_exit_visualization.markers.push_back(marker);
+
+    marker.id = marker.id + 1;
+    marker.pose.position.x = 3.0-distance_from_walls_;
+    specific_exit_visualization.markers.push_back(marker);
+
+    specific_exit_visualization_pub->publish(specific_exit_visualization);
+  }
 }
 
 inline BT::NodeStatus SplitGoal::tick()
