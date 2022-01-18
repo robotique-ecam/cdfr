@@ -1,12 +1,10 @@
 !Defaults
 use_sim_time: False
-specific_area_coords: "[[0.9, 0.0, 1.5, 0.45],
-[1.5, 0.0, 2.1, 0.45],[0.0, 0.735, 0.55, 0.885],
-[0.0, 0.885, 0.55, 1.035],[0.0, 1.335, 0.55, 1.485],
-[0.0, 1.485, 0.55, 1.635],[2.45, 0.735, 3.0, 0.885],
-[2.45, 0.885, 3.0, 1.035],[2.45, 1.335, 3.0, 1.485],
-[2.45, 1.485, 3.0, 1.635]]"
-exit_area_coords: "[[0.45, 0.45, 0.735, 1.035, 1.335, 1.635, 0.735, 1.035, 1.335, 1.635]]"
+specific_area_coords: "[[0.45, 1.7, 2.55, 2.0],
+[0.0, 1.0, 0.4, 1.6],[2.6, 1.0, 3.0, 1.6],
+[0.0, 0.875, 0.402, 0.625],[2.598, 0.825, 3.0, 0.625]]"
+exit_area_coords: "[[1.7, 0.4, 2.6, 0.402, 2.598]]"
+exit_area_type: "[[0.0, 1.0, 1.0, 1.0, 1.0]]"
 distance_from_walls: 0.25
 ---
 amcl:
@@ -279,3 +277,5 @@ bt_navigator_rclcpp_node:
       distance_from_walls: !Var distance_from_walls
       specific_area_coords: !Var specific_area_coords
       exit_area_coords: !Var exit_area_coords
+      exit_area_type: !Var exit_area_type
+      visualize_zones: true
