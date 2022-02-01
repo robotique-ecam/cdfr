@@ -307,14 +307,18 @@ void SplitGoal::setAutoQuaternions(){
 
 void SplitGoal::setAutoPositions(){
   if (get_out_need_){
-    if (get_out_area != (int)specific_area_coords.size()) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
-    else {
+    if (get_out_area != (int)specific_area_coords.size()) {
+      if (exit_area_types[get_out_area] == 0.0) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
+      else get_out_goal_.pose.position.x = exit_area_coords[get_out_area];
+    } else {
       setPositionNearWall(get_out_goal_);
     }
   }
   if (get_in_need_){
-    if (get_in_area != (int)specific_area_coords.size()) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
-    else {
+    if (get_in_area != (int)specific_area_coords.size()) {
+      if (exit_area_types[get_out_area] == 0.0) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+      else nominal_goal_.pose.position.x = exit_area_coords[get_in_area];
+    } else {
       setPositionNearWall(nominal_goal_);
     }
   }
