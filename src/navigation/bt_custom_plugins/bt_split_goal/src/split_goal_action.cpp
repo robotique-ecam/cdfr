@@ -82,6 +82,27 @@ SplitGoal::SplitGoal(
   bool visualize;
   node_->get_parameter("bt_split_goal.visualize_zones", visualize);
 
+  for(int i = 0; i < (int)specific_area_coords.size(); i++){
+    if (exit_area_types[i] > 1.0) {
+      float dist = sqrt( pow(specific_area_coords[i][0] - specific_area_coords[i][2], 2) + pow(specific_area_coords[i][1] - specific_area_coords[i][3], 2) );
+      float x_vec_rot_dir = (specific_area_coords[i][1] - specific_area_coords[i][3])/dist;
+      float y_vec_rot_dir = -(specific_area_coords[i][0] - specific_area_coords[i][2])/dist;
+
+      float x1, y1, x2, y2;
+
+      x1 = specific_area_coords[i][0] + x_vec_rot_dir * exit_area_coords[i];
+      y1 = specific_area_coords[i][1] + y_vec_rot_dir * exit_area_coords[i];
+
+      x2 = specific_area_coords[i][2] + x_vec_rot_dir * exit_area_coords[i];
+      y2 = specific_area_coords[i][3] + y_vec_rot_dir * exit_area_coords[i];
+
+      specific_area_coords[i].push_back(x1);
+      specific_area_coords[i].push_back(y1);
+      specific_area_coords[i].push_back(x2);
+      specific_area_coords[i].push_back(y2);
+    }
+  }
+
   if (visualize){
     RCLCPP_WARN(rclcpp::get_logger("bt_split_goal"), "visualization on");
 
@@ -107,11 +128,23 @@ SplitGoal::SplitGoal(
     if (specific_area_coords_string.compare("NULL") != 0) {
       for(int i = 0; i < (int)specific_area_coords.size(); i++){
           marker.id = i;
-          marker.scale.x = abs(specific_area_coords[i][0] - specific_area_coords[i][2]);
-          marker.scale.y = abs(specific_area_coords[i][1] - specific_area_coords[i][3]);
-          marker.pose.position.x = (specific_area_coords[i][0] + specific_area_coords[i][2])/2;
-          marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3])/2;
-          specific_area_visualization.markers.push_back(marker);
+          if (exit_area_types[i] <=1.0){
+            marker.scale.x = abs(specific_area_coords[i][0] - specific_area_coords[i][2]);
+            marker.scale.y = abs(specific_area_coords[i][1] - specific_area_coords[i][3]);
+            marker.pose.position.x = (specific_area_coords[i][0] + specific_area_coords[i][2])/2;
+            marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3])/2;
+            specific_area_visualization.markers.push_back(marker);
+          }
+          else {
+            marker.scale.x = sqrt( pow(specific_area_coords[i][0] - specific_area_coords[i][2], 2) + pow(specific_area_coords[i][1] - specific_area_coords[i][3], 2) );
+            marker.scale.y = sqrt( pow(specific_area_coords[i][0] - specific_area_coords[i][4], 2) + pow(specific_area_coords[i][1] - specific_area_coords[i][5], 2) );
+            marker.pose.position.x = (specific_area_coords[i][0] + specific_area_coords[i][2] + specific_area_coords[i][4] + specific_area_coords[i][6])/4;
+            marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3] + specific_area_coords[i][5] + specific_area_coords[i][7])/4;
+            marker.pose.orientation.z = (specific_area_coords[i][4] < specific_area_coords[i][0]) ? q_z_45 : -q_z_45;
+            marker.pose.orientation.w = q_w_45;
+            specific_area_visualization.markers.push_back(marker);
+            marker.pose.orientation.z = marker.pose.orientation.w = 0.0;
+          }
       }
     }
     //walls_areas
@@ -157,10 +190,16 @@ SplitGoal::SplitGoal(
             marker.scale.y = abs(specific_area_coords[i][1] - specific_area_coords[i][3]);
             marker.pose.position.x = exit_area_coords[i];
             marker.pose.position.y = (specific_area_coords[i][1] + specific_area_coords[i][3])/2;
-          } else {
-            //other angle
+          } else if (exit_area_types[i] == 2.0) {
+            marker.scale.x = sqrt( pow(specific_area_coords[i][0] - specific_area_coords[i][2], 2) + pow(specific_area_coords[i][1] - specific_area_coords[i][3], 2) );
+            marker.scale.y = 0.05;
+            marker.pose.position.x = (specific_area_coords[i][4] + specific_area_coords[i][6])/2;
+            marker.pose.position.y = (specific_area_coords[i][5] + specific_area_coords[i][7])/2;
+            marker.pose.orientation.z = (specific_area_coords[i][4] < specific_area_coords[i][0]) ? q_z_45 : -q_z_45;
+            marker.pose.orientation.w = q_w_45;
           }
           specific_exit_visualization.markers.push_back(marker);
+          marker.pose.orientation.z = marker.pose.orientation.w = 0.0;
       }
     }
 

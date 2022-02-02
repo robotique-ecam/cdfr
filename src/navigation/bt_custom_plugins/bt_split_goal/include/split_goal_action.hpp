@@ -71,7 +71,9 @@ private:
 
   float radius_accurate_;
   const float sqrt2by2 = 0.7071068,
-              quaternionDiff = 0.22;
+              quaternionDiff = 0.22,
+              q_z_45 = 0.3826834,
+              q_w_45 = 0.9238795;
 
 };
 
