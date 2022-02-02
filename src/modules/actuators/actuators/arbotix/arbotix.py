@@ -413,7 +413,7 @@ class ArbotiX:
     ##
     # @return
     def disableWheelMode(self, index, resolution=10):
-        resolution = (2 ** resolution) - 1
+        resolution = (2**resolution) - 1
         self.write(index, ax12.P_CCW_ANGLE_LIMIT_L, [resolution % 256, resolution >> 8])
 
     # Direction definition for setWheelSpeed
