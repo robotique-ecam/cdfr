@@ -2,6 +2,7 @@
 #define SPLIT_GOAL_ACTION_HPP_
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "tf2_ros/buffer.h"
@@ -53,6 +54,8 @@ private:
   int intoSpecificZone(geometry_msgs::msg::PoseStamped & pose);
   void setPositionNearWall(geometry_msgs::msg::PoseStamped & pose);
   void nominalSplitter();
+  geometry_msgs::msg::Point findNearestPoint(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2);
+  bool belowLine(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2);
 
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;

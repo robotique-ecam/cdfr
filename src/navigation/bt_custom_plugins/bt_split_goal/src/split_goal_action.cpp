@@ -307,10 +307,44 @@ bool SplitGoal::nearWalls(geometry_msgs::msg::PoseStamped & pose){
 
 int SplitGoal::intoSpecificZone(geometry_msgs::msg::PoseStamped & pose){
   for(int i = 0; i < (int)specific_area_coords.size(); i++){
-    if (pose.pose.position.x > specific_area_coords[i][0] && pose.pose.position.x < specific_area_coords[i][2]
-      && pose.pose.position.y > specific_area_coords[i][1] && pose.pose.position.y < specific_area_coords[i][3]) return i;
+    if (exit_area_types[i] < 2.0) {
+      if (pose.pose.position.x > specific_area_coords[i][0] && pose.pose.position.x < specific_area_coords[i][2]
+        && pose.pose.position.y > specific_area_coords[i][1] && pose.pose.position.y < specific_area_coords[i][3]) return i;
+    } else {
+      geometry_msgs::msg::Point p = pose.pose.position;
+      if (!belowLine(p, specific_area_coords[i][0], specific_area_coords[i][1], specific_area_coords[i][2],specific_area_coords[i][3])
+      && belowLine(p, specific_area_coords[i][4], specific_area_coords[i][5], specific_area_coords[i][6],specific_area_coords[i][7]))
+      return i;
+    }
+
   }
   return (int)specific_area_coords.size();
+}
+
+bool SplitGoal::belowLine(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2){
+  double dir_coeff = (y1 - y2) / (x1 - x2);
+  double origin_coord = y2 - dir_coeff * x2;
+  if (p.y < dir_coeff * p.x + origin_coord) return true;
+  else return false;
+}
+
+geometry_msgs::msg::Point SplitGoal::findNearestPoint(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2){
+  double a = (y1 - y2) / (x1 - x2);
+  double b = y2 - a * x2;
+
+  geometry_msgs::msg::Point p1, p2;
+
+  p1.y = a * p.x + b;
+  p1.x = (p1.y - b) / a;
+
+  p2.x = (p.y - b) / a;
+  p2.y = a * p2.x + b;
+
+  geometry_msgs::msg::Point result;
+  result.x = (p1.x + p2.x) / 2;
+  result.y = (p1.y + p2.y) / 2;
+
+  return result;
 }
 
 void SplitGoal::setAutoQuaternions(){
@@ -318,26 +352,59 @@ void SplitGoal::setAutoQuaternions(){
 
   if (get_out_need_){
     geometry_msgs::msg::Quaternion q_out = current_pose_.pose.orientation;
-    if ( (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
-        || (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
-      q.z = q.w = sqrt2by2;
+    if (exit_area_types[get_out_area] <= 1.0 || intoSpecificZone(current_pose_)) {
+      //90°
+      if ( (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
+          || (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
+        q.z = q.w = sqrt2by2;
+      }
+      //-90°
+      else if ( (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
+          || (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
+        q.z = -sqrt2by2;
+        q.w = sqrt2by2;
+      }
+      //0°
+      else if ( (abs(q_out.z)<quaternionDiff &&  abs(q_out.w - 1.0)<quaternionDiff)
+          || (abs(q_out.z)<quaternionDiff &&  abs(q_out.w + 1.0)<quaternionDiff) ){
+        q.z = 0.0;
+        q.w = 1.0;
+      }
+      //180°
+      else if ( (abs(q_out.z - 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff)
+          || (abs(q_out.z + 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff) ){
+        q.z = 1.0;
+        q.w = 0.0;
+      }
+      //?
+      else q = q_out;
+    } else {
+      //45°
+      if ( (abs(q_out.z - q_z_45)<quaternionDiff &&  abs(q_out.w - q_w_45)<quaternionDiff)
+          || (abs(q_out.z + q_z_45)<quaternionDiff &&  abs(q_out.w + q_w_45)<quaternionDiff) ){
+        q.z = q_z_45;
+        q.w = q_w_45;
+      }
+      //-45°
+      else if ( (abs(q_out.z + q_z_45)<quaternionDiff &&  abs(q_out.w - q_w_45)<quaternionDiff)
+          || (abs(q_out.z - q_z_45)<quaternionDiff &&  abs(q_out.w + q_w_45)<quaternionDiff) ){
+        q.z = -q_z_45;
+        q.w = q_w_45;
+      }
+      //135°
+      else if ( (abs(q_out.z - q_w_45)<quaternionDiff &&  abs(q_out.w - q_z_45)<quaternionDiff)
+          || (abs(q_out.z + q_w_45)<quaternionDiff &&  abs(q_out.w + q_z_45)<quaternionDiff) ){
+        q.z = q_w_45;
+        q.w = q_z_45;
+      }
+      //-135°
+      else if ( (abs(q_out.z + q_w_45)<quaternionDiff &&  abs(q_out.w - q_z_45)<quaternionDiff)
+          || (abs(q_out.z - q_w_45)<quaternionDiff &&  abs(q_out.w + q_z_45)<quaternionDiff) ){
+          q.z = -q_w_45;
+          q.w = q_z_45;
+      }
+      else q = q_out;
     }
-    else if ( (abs(q_out.z + sqrt2by2)<quaternionDiff &&  abs(q_out.w - sqrt2by2)<quaternionDiff)
-        || (abs(q_out.z - sqrt2by2)<quaternionDiff &&  abs(q_out.w + sqrt2by2)<quaternionDiff) ){
-      q.z = -sqrt2by2;
-      q.w = sqrt2by2;
-    }
-    else if ( (abs(q_out.z)<quaternionDiff &&  abs(q_out.w - 1.0)<quaternionDiff)
-        || (abs(q_out.z)<quaternionDiff &&  abs(q_out.w + 1.0)<quaternionDiff) ){
-      q.z = 0.0;
-      q.w = 1.0;
-    }
-    else if ( (abs(q_out.z - 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff)
-        || (abs(q_out.z + 1.0)<quaternionDiff &&  abs(q_out.w)<quaternionDiff) ){
-      q.z = 1.0;
-      q.w = 0.0;
-    }
-    else q = q_out;
     get_out_goal_.pose.orientation = q;
   }
 
@@ -348,15 +415,21 @@ void SplitGoal::setAutoPositions(){
   if (get_out_need_){
     if (get_out_area != (int)specific_area_coords.size()) {
       if (exit_area_types[get_out_area] == 0.0) get_out_goal_.pose.position.y = exit_area_coords[get_out_area];
-      else get_out_goal_.pose.position.x = exit_area_coords[get_out_area];
+      else if (exit_area_types[get_out_area] == 1.0) get_out_goal_.pose.position.x = exit_area_coords[get_out_area];
+      else if (exit_area_types[get_out_area] == 2.0) get_out_goal_.pose.position = findNearestPoint(get_out_goal_.pose.position,
+         specific_area_coords[get_out_area][4], specific_area_coords[get_out_area][5], specific_area_coords[get_out_area][6],
+         specific_area_coords[get_out_area][7]);
     } else {
       setPositionNearWall(get_out_goal_);
     }
   }
   if (get_in_need_){
     if (get_in_area != (int)specific_area_coords.size()) {
-      if (exit_area_types[get_out_area] == 0.0) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
-      else nominal_goal_.pose.position.x = exit_area_coords[get_in_area];
+      if (exit_area_types[get_in_area] == 0.0) nominal_goal_.pose.position.y = exit_area_coords[get_in_area];
+      else if (exit_area_types[get_in_area] == 1.0) nominal_goal_.pose.position.x = exit_area_coords[get_in_area];
+      else if (exit_area_types[get_in_area] == 2.0) nominal_goal_.pose.position = findNearestPoint(get_in_goal_.pose.position,
+         specific_area_coords[get_in_area][4], specific_area_coords[get_in_area][5], specific_area_coords[get_in_area][6],
+         specific_area_coords[get_in_area][7]);
     } else {
       setPositionNearWall(nominal_goal_);
     }
