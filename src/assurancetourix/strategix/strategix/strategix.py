@@ -17,7 +17,7 @@ from strategix.exceptions import MatchStartedException
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
 
 
-class StrategixActionServer(Node):
+class Strategix(Node):
     def __init__(self):
         super().__init__("strategix_action_server")
         self.side = self.declare_parameter("side", "blue")
@@ -186,7 +186,7 @@ class StrategixActionServer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    strategix = StrategixActionServer()
+    strategix = Strategix()
     try:
         rclpy.spin(strategix)
     except KeyboardInterrupt:

@@ -6,7 +6,7 @@
 *.gch
 *.pgm
 *.urdf
-
+.vscode
 *.wbproj
 *.cache
 *.blend1
