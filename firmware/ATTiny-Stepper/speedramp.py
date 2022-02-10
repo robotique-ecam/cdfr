@@ -16,7 +16,7 @@ speed_delays = [(1 / x - impulsion_time) for x in speed_frequencies if x != 0]
 
 def find_prescaler(delay):
     for prescaler in range(prescaller_bitsize + 1):
-        clock = cpu_freq / (2 ** prescaler)
+        clock = cpu_freq / (2**prescaler)
         comparator = round(delay * clock)
         if comparator <= 255:
             return prescaler + 1, comparator
