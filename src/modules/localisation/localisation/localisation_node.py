@@ -14,7 +14,6 @@ from geometry_msgs.msg import TransformStamped, PoseStamped, Quaternion
 from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
-from .vlx.vlx_readjustment import VlxReadjustment
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import transform_to_kdl, do_transform_frame
@@ -61,12 +60,12 @@ class Localisation(rclpy.node.Node):
         )
         self.last_odom_update = 0
         self.get_logger().info(f"Default side is {self.side.value}")
-        self.vlx = VlxReadjustment(self)
         self.get_logger().info("Localisation node is ready")
 
     def _on_set_parameters(self, params):
         """Handle Parameter events especially for side"""
         result = SetParametersResult()
+        self.get_logger().warn(f"Something")
         try:
             for param in params:
                 if param.name == "side":
@@ -111,43 +110,15 @@ class Localisation(rclpy.node.Node):
 
     def allies_subscription_callback(self, msg):
         """Identity the robot marker in assurancetourix marker_array detection,
-        send the marker to vlx_readjustment in order to try to refine the position
-        at a stamp given by the marker"""
+        send the marker to correct odometry"""
         for ally_marker in msg.markers:
-            if (
-                ally_marker.text.lower() == self.robot
-                and (self.get_clock().now().to_msg().sec - self.last_odom_update) > 0.4
-            ):
-                if (
-                    is_simulation()
-                ):  # simulate marker delais (image analysis from assurancetourix)
-                    time.sleep(0.15)
-                if not (
-                    ally_marker.pose.position.x < 0.2
-                    or ally_marker.pose.position.x > 2.8
-                    or ally_marker.pose.position.y < 0.2
-                    or ally_marker.pose.position.y > 1.8
-                ):
-                    if self.vlx.continuous_sampling == 0:
-                        self.create_and_send_tf(
-                            ally_marker.pose.position.x,
-                            ally_marker.pose.position.y,
-                            ally_marker.pose.orientation,
-                            ally_marker.header.stamp,
-                        )
-                    else:
-                        self.vlx.try_to_readjust_with_vlx(
-                            ally_marker.pose.position.x,
-                            ally_marker.pose.position.y,
-                            ally_marker.pose.orientation,
-                            ally_marker.header.stamp,
-                        )
-                if self.vlx.continuous_sampling in [0, 1]:
-                    self.vlx.start_continuous_sampling_thread(0.65, 1)
-
-    def is_near_walls(self, pt):
-        """Return true if the robot if less than 30cm from the wall"""
-        return pt.x < 0.3 or pt.y < 0.3 or pt.x > 2.7 or pt.y > 1.7
+            if ally_marker.text.lower() == self.robot:
+                self.create_and_send_tf(
+                    ally_marker.pose.position.x,
+                    ally_marker.pose.position.y,
+                    ally_marker.pose.orientation,
+                    ally_marker.header.stamp,
+                )
 
     def create_and_send_tf(self, x, y, q, stamp):
         """Create and send tf to drive for it to re-adjust odometry"""
@@ -161,8 +132,7 @@ class Localisation(rclpy.node.Node):
 
     def odom_callback(self, msg):
         """Odom callback, computes the new pose of the robot relative to map,
-        send this new pose on odom_map_relative topic and start vlx routine
-        if this pose is near walls"""
+        send this new pose on odom_map_relative topic"""
         robot_tf = TransformStamped()
         robot_tf.transform.translation.x = msg.pose.pose.position.x
         robot_tf.transform.translation.y = msg.pose.pose.position.y
@@ -176,13 +146,6 @@ class Localisation(rclpy.node.Node):
         self.robot_pose.header.frame_id = "map"
         self.robot_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
         self.odom_map_relative_publisher_.publish(self.robot_pose)
-        if self.is_near_walls(self.robot_pose.pose.position):
-            if self.vlx.continuous_sampling == 2:
-                self.vlx.near_wall_routine(self.robot_pose)
-            else:
-                self.vlx.start_near_wall_routine(self.robot_pose)
-        elif self.vlx.continuous_sampling == 2:
-            self.vlx.stop_near_wall_routine()
 
 
 def main(args=None):
@@ -193,8 +156,5 @@ def main(args=None):
         rclpy.spin(localisation)
     except KeyboardInterrupt:
         pass
-    localisation.vlx.stop_continuous_sampling_thread()
-    if is_simulation():
-        localisation.vlx.sensors.node.destroy_node()
     localisation.destroy_node()
     rclpy.shutdown()
