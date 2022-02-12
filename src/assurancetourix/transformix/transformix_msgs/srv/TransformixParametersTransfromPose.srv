@@ -1,4 +1,0 @@
-geometry_msgs/TransformStamped transform_stamped
-geometry_msgs/PoseStamped pose_in
----
-geometry_msgs/PoseStamped pose_out
