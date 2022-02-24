@@ -20,9 +20,7 @@ class CarreFouille(Action):
         return (self.positions[0], self.offset)
 
     def start_actuator(self, robot):
-        # Lower arm
-        # color = robot.actuators.get_resistance_color()
-        # Raise arm
+        color = robot.actuators.getResistanceColor()
 
         if color == self.side:
             # Push carré
@@ -35,9 +33,7 @@ class CarreFouille(Action):
             # Push carré
 
         navigate_to_point((self.positions[3], self.offset), self.rotation, 2.0)
-        # Lower arm
-        # color = robot.actuators.get_resistance_color()
-        # Raise arm
+        color = robot.actuators.getResistanceColor()
 
         if color == self.side:
             # Push carré

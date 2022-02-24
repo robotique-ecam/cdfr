@@ -21,3 +21,6 @@ class RPiServos:
             self.i2c.write_byte(self.servos_addrs[servo], value)
         elif servo == "reef":
             self.i2c.write_byte(self.servos_addrs[servo], 1 << 7 | value)
+            
+    def read_value(self, servo: str) -> int:
+        return self.i2c.read_byte(self.servos_addrs[servo])

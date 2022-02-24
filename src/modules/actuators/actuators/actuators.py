@@ -4,6 +4,7 @@
 """Shared utils functions between asterix and obelix."""
 
 
+from numpy import interp
 from time import sleep
 
 from actuators.arbotix.arbotix import ArbotiX
@@ -192,3 +193,27 @@ class Actuators:
         """Slider position"""
         self.slider.set_position(position)
         self.robot_node.get_logger().info(f"Set slider at position {position}")
+
+    def getResistanceColor(self) -> str:
+        """Calculate 'carré de fouille' resistance. Servo must be connected to the Arduino Nano."""
+        # TODO: Rotate servo
+        self.robot_node.get_logger().info("Deployed resistance reader")
+        
+        # Convert value from (0, 255) to resistance value
+        value = self.rpi_servos.read_value("resistance")
+        value = interp(value, (0, 255), (0, 5))
+        resistance = value * 2200 / (5 - value)
+        
+        if abs(resistance - 470) < 100:
+            color = "yellow"
+        elif abs(resistance - 1000) < 100:
+            color = "blue"
+        else:
+            color = "none"
+        self.robot_node.get_logger().info("Resistance color:", color)
+
+        # TODO: Rotate servo
+        self.robot_node.get_logger().info("Retracted resistance reader")
+        
+        return color
+

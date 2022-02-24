@@ -33,8 +33,14 @@ PUMPS = {
     },
 }
 
+# Servo
+SERVO_MOTORS = {
+    "resistance": 6
+}
+
 actuators = Actuators(
     i2c_bus=3,
     pump_addr=[0x41, 0x40],
     PUMPS=PUMPS,
+    SERVO_MOTORS=SERVO_MOTORS
 )
