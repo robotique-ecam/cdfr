@@ -17,6 +17,7 @@ from tf2_ros import StaticTransformBroadcaster
 from localisation.utils import euler_to_quaternion, is_simulation
 from nav_msgs.msg import Odometry
 from tf2_kdl import transform_to_kdl, do_transform_frame
+from transformix_msgs.srv import InitialStaticTFsrv
 
 
 class Localisation(rclpy.node.Node):
@@ -26,8 +27,17 @@ class Localisation(rclpy.node.Node):
         """Init Localisation node"""
         super().__init__("localisation_node")
         self.robot = self.get_namespace().strip("/")
-        self.side = self.declare_parameter("side", "blue")
-        self.add_on_set_parameters_callback(self._on_set_parameters)
+
+        self.createSubscribers()
+
+        self.createPublishers()
+
+        self.createClients()
+
+        self.createServices()
+
+        self.side = "blue"
+
         self.robot_pose = PoseStamped()
         (
             self.robot_pose.pose.position.x,
@@ -35,11 +45,40 @@ class Localisation(rclpy.node.Node):
             theta,
         ) = self.fetchStartPosition()
         self.robot_pose.pose.orientation = euler_to_quaternion(theta)
+
         self._tf_brodcaster = StaticTransformBroadcaster(self)
         self._tf = TransformStamped()
         self._tf.header.frame_id = "map"
         self._tf.child_frame_id = "odom"
+        self.intial_tf_to_drive_request.final_set.data = False
         self.update_transform()
+
+        self.get_logger().info(f"Default side is {self.side}")
+        self.get_logger().info("Localisation node is ready")
+
+    def createServices(self):
+        self.initial_tf_service = self.create_service(
+            InitialStaticTFsrv,
+            "initial_side_selection",
+            self.initialSideSelectionCallback,
+        )
+        self.initial_tf_service_called = False
+
+    def createClients(self):
+        self.intial_tf_to_drive_client = self.create_client(
+            InitialStaticTFsrv, "intial_tf_to_drive"
+        )
+        self.intial_tf_to_drive_request = InitialStaticTFsrv.Request()
+
+    def createPublishers(self):
+        self.tf_publisher_ = self.create_publisher(
+            TransformStamped, "adjust_odometry", 10
+        )
+        self.odom_map_relative_publisher_ = self.create_publisher(
+            PoseStamped, "odom_map_relative", 10
+        )
+
+    def createSubscribers(self):
         self.subscription_ = self.create_subscription(
             MarkerArray,
             "/allies_positions_markers",
@@ -52,50 +91,37 @@ class Localisation(rclpy.node.Node):
             self.odom_callback,
             10,
         )
-        self.tf_publisher_ = self.create_publisher(
-            TransformStamped, "adjust_odometry", 10
-        )
-        self.odom_map_relative_publisher_ = self.create_publisher(
-            PoseStamped, "odom_map_relative", 10
-        )
-        self.last_odom_update = 0
-        self.get_logger().info(f"Default side is {self.side.value}")
-        self.get_logger().info("Localisation node is ready")
 
-    def _on_set_parameters(self, params):
-        """Handle Parameter events especially for side"""
-        result = SetParametersResult()
-        self.get_logger().warn(f"Something")
-        try:
-            for param in params:
-                if param.name == "side":
-                    self.get_logger().warn(f"Side changed {param.value}")
-                    self.side = param
-                else:
-                    setattr(self, param.name, param)
-            (
-                self.robot_pose.pose.position.x,
-                self.robot_pose.pose.position.y,
-                theta,
-            ) = self.fetchStartPosition()
-            self.robot_pose.pose.orientation = euler_to_quaternion(theta)
-            self.update_transform()
-            result.successful = True
-        except BaseException as e:
-            result.reason = e
-        return result
+    def initialSideSelectionCallback(self, request, response):
+        """Assurancetourix send the side of the team"""
+        response.acquittal.data = True
+        if request.final_set.data:
+            self.side = "blue"
+        else:
+            self.side = "yellow"
+        self.robot_pose = PoseStamped()
+        (
+            self.robot_pose.pose.position.x,
+            self.robot_pose.pose.position.y,
+            theta,
+        ) = self.fetchStartPosition()
+        self.robot_pose.pose.orientation = euler_to_quaternion(theta)
+        self.intial_tf_to_drive_request.final_set.data = True
+        self.update_transform()
+        self.get_logger().info(f"Final side selection is {self.side}")
+        return response
 
     def fetchStartPosition(self):
         """Fetch start position for side and robot"""
         if self.robot == "asterix":
-            if self.side.value == "blue":
+            if self.side == "blue":
                 return (0.29, 1.33, 0)
-            elif self.side.value == "yellow":
-                return (0.29, 1.33, 0)
+            elif self.side == "yellow":
+                return (1.5, 1.33, 0)
         elif self.robot == "obelix":
-            if self.side.value == "blue":
+            if self.side == "blue":
                 return (0.29, 1.33, 0)
-            elif self.side.value == "yellow":
+            elif self.side == "yellow":
                 return (3 - 0.29, 1.33, np.pi)
         return None
 
@@ -107,6 +133,49 @@ class Localisation(rclpy.node.Node):
         self._tf.transform.rotation = self.robot_pose.pose.orientation
         self._initial_tf = copy.deepcopy(self._tf)
         self._tf_brodcaster.sendTransform(self._tf)
+        self.intial_tf_to_drive_request.map_odom_static_tf = self._tf
+        if self.initial_tf_service_called:
+            self.get_logger().info("service cancellation")
+            self.destroy_timer(self.timer_check_tf_service)
+            self.future_tf_service.cancel()
+        self.future_tf_service = self.intial_tf_to_drive_client.call_async(
+            self.intial_tf_to_drive_request
+        )
+        self.initial_tf_service_called = True
+        self.timer_check_tf_service = self.create_timer(2.0, self.check_tf_service)
+
+    def check_tf_service(self):
+        self.get_logger().info("checks if service answered")
+        if self.future_tf_service.done():
+            try:
+                response = self.future_tf_service.result()
+            except Exception as e:
+                self.get_logger().info("Service call failed %r" % (e,))
+                self.get_logger().warn(
+                    "initial_tf sending to drive failed, retrying..."
+                )
+                self.future_tf_service = self.intial_tf_to_drive_client.call_async(
+                    self.intial_tf_to_drive_request
+                )
+
+            else:
+                if response.acquittal.data:
+                    self.get_logger().info("initial_tf successfuly sent to drive")
+                    self.destroy_timer(self.timer_check_tf_service)
+                    self.initial_tf_service_called = False
+                else:
+                    self.get_logger().warn(
+                        "initial_tf sending to drive failed, retrying..."
+                    )
+                    self.future_tf_service = self.intial_tf_to_drive_client.call_async(
+                        self.intial_tf_to_drive_request
+                    )
+            return
+        self.get_logger().info("service cancellation + recall")
+        self.future_tf_service.cancel()
+        self.future_tf_service = self.intial_tf_to_drive_client.call_async(
+            self.intial_tf_to_drive_request
+        )
 
     def allies_subscription_callback(self, msg):
         """Identity the robot marker in assurancetourix marker_array detection,
