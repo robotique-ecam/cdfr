@@ -25,13 +25,11 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_ros/static_transform_broadcaster.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
+#include <transformix_msgs/srv/initial_static_t_fsrv.hpp>
 
 #define LEFT 0
 #define RIGHT 1
@@ -101,6 +99,7 @@ private:
 
   // Steppers disable service
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_drivers;
+  rclcpp::Service<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr _initial_tf_service;
 
   rclcpp::TimerBase::SharedPtr diagnostics_timer_;
 
@@ -151,6 +150,9 @@ private:
   tf2::Vector3 get_tf2_vector(geometry_msgs::msg::Vector3 &p);
   void set_pose_from_tf_t_q(tf2::Vector3 &t, tf2::Quaternion &q, geometry_msgs::msg::PoseStamped &pose_out);
   double dummy_tree_digits_precision(double a);
+  void init_tf_callback(const std::shared_ptr<rmw_request_id_t> request_header, const transformix_msgs::srv::InitialStaticTFsrv::Request::SharedPtr request,
+                                    const transformix_msgs::srv::InitialStaticTFsrv::Response::SharedPtr response);
+
 };
 
 #endif /* DRIVE_NODE_HPP */
