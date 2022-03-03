@@ -197,6 +197,8 @@ class Actuators:
     def getResistanceColor(self) -> str:
         """Calculate 'carré de fouille' resistance. Servo must be connected to the Arduino Nano."""
         # TODO: Rotate servo
+        self.rpi_servos.set_angles("resistance", 10)
+        sleep(2)
         self.robot_node.get_logger().info("Deployed resistance reader")
         
         # Convert value from (0, 255) to resistance value
@@ -212,7 +214,8 @@ class Actuators:
             color = "none"
         self.robot_node.get_logger().info("Resistance color:", color)
 
-        # TODO: Rotate servo
+        sleep(1)
+        self.rpi_servos.set_angles("resistance", 110)
         self.robot_node.get_logger().info("Retracted resistance reader")
         
         return color
