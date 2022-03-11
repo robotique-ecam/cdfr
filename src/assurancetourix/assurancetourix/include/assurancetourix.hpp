@@ -25,6 +25,8 @@
 
 #include "std_msgs/msg/string.hpp"
 #include "std_srvs/srv/set_bool.hpp"
+
+#include <transformix_msgs/srv/initial_static_t_fsrv.hpp>
 #endif //CAMERA
 
 #ifdef SIMULATION
@@ -80,6 +82,19 @@ private:
   int is_goblet_at_position(geometry_msgs::msg::Point &position);
   void compass_orientation_callback();
   void set_auto_exposure();
+  void timer_side_service_asterix_callback();
+  void timer_side_service_obelix_callback();
+
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr _initial_tf_client_asterix_localisation;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf_asterix_localisation;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf_asterix_localisation;
+  bool spinning_localisation_side_asterix_request;
+
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr _initial_tf_client_obelix_localisation;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf_obelix_localisation;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf_obelix_localisation;
+  bool spinning_localisation_side_obelix_request;
+
 
   cv::VideoCapture _cap;
   struct Camera_settings {
@@ -91,7 +106,7 @@ private:
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr compass_pub;
 
-  rclcpp::TimerBase::SharedPtr timer_compass_;
+  rclcpp::TimerBase::SharedPtr timer_compass_, timer_side_selection_asterix_localisation, timer_side_selection_obelix_localisation;
 
   cv::Mat _frame, _anotated, raised_contrast, tmp;
 

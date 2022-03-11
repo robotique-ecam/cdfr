@@ -30,6 +30,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   init_camera_settings();
 
+  if (show_image) {
+    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
+  }
+
   timer_ = NULL;
 
   compass_pub = this->create_publisher<std_msgs::msg::String>("/compass", qos);
@@ -45,17 +49,35 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   RCLCPP_WARN(this->get_logger(), "Assurancetourix camera position guessing x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
     assurancetourix_to_map_transformation.transform.translation.y);
 
-  if (assurancetourix_to_map_transformation.transform.translation.x < 1.5) this->declare_parameter<std::string>("side", "blue");
-  else this->declare_parameter<std::string>("side", "yellow");
+  _initial_tf_client_asterix_localisation = this->create_client<transformix_msgs::srv::InitialStaticTFsrv>("/asterix/initial_side_selection");
+  request_initial_tf_asterix_localisation = std::make_shared<transformix_msgs::srv::InitialStaticTFsrv::Request>();
+  spinning_localisation_side_asterix_request = false;
+
+  _initial_tf_client_obelix_localisation = this->create_client<transformix_msgs::srv::InitialStaticTFsrv>("/obelix/initial_side_selection");
+  request_initial_tf_obelix_localisation = std::make_shared<transformix_msgs::srv::InitialStaticTFsrv::Request>();
+  spinning_localisation_side_obelix_request = false;
+
+  if (assurancetourix_to_map_transformation.transform.translation.x < 1.5){
+    RCLCPP_WARN(this->get_logger(), "Assurancetourix detected blue side");
+    this->declare_parameter<std::string>("side", "blue");
+    request_initial_tf_asterix_localisation->final_set.data = true;
+    request_initial_tf_obelix_localisation->final_set.data = true;
+  }
+  else {
+    RCLCPP_WARN(this->get_logger(), "Assurancetourix detected yellow side");
+    this->declare_parameter<std::string>("side", "yellow");
+    request_initial_tf_asterix_localisation->final_set.data = false;
+    request_initial_tf_obelix_localisation->final_set.data = false;
+  }
   this->get_parameter("side", side);
 
-  set_auto_exposure();
+  timer_side_selection_asterix_localisation = this->create_wall_timer(std::chrono::seconds(2), std::bind(&Assurancetourix::timer_side_service_asterix_callback, this));
+  timer_side_selection_obelix_localisation = this->create_wall_timer(std::chrono::seconds(2), std::bind(&Assurancetourix::timer_side_service_obelix_callback, this));
 
-  timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
+  //set_auto_exposure();
 
-  if (show_image) {
-    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-  }
+  //timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
+
   first_image_saved = false;
 
 #endif // CAMERA
@@ -144,6 +166,49 @@ visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualizati
 }
 
 #ifdef CAMERA
+
+void Assurancetourix::timer_side_service_asterix_callback(){
+  bool service_ready = _initial_tf_client_asterix_localisation->service_is_ready();
+  if (service_ready){
+    if (!spinning_localisation_side_asterix_request){
+      spinning_localisation_side_asterix_request = true;
+      future_initial_tf_asterix_localisation = _initial_tf_client_asterix_localisation->async_send_request(request_initial_tf_asterix_localisation);
+    }
+    if (future_initial_tf_asterix_localisation.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
+      if (future_initial_tf_asterix_localisation.get()->acquittal.data){
+        timer_side_selection_asterix_localisation = NULL;
+        RCLCPP_WARN(this->get_logger(), "asterix initial_tf service acquittal received, end of client operation");
+      } else {
+        RCLCPP_INFO(this->get_logger(), "asterix initial_tf service no acquittal in response, requesting again");
+        spinning_localisation_side_asterix_request = false;
+      }
+    } else {
+      RCLCPP_INFO(this->get_logger(), "asterix initial_tf service not responding, waiting again");
+    }
+  } else RCLCPP_INFO(this->get_logger(), "asterix initial_tf service service not ready");
+}
+
+void Assurancetourix::timer_side_service_obelix_callback(){
+  bool service_ready = _initial_tf_client_obelix_localisation->service_is_ready();
+  if (service_ready){
+    if (!spinning_localisation_side_obelix_request){
+      spinning_localisation_side_obelix_request = true;
+      future_initial_tf_obelix_localisation = _initial_tf_client_obelix_localisation->async_send_request(request_initial_tf_obelix_localisation);
+    }
+    if (future_initial_tf_obelix_localisation.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
+      if (future_initial_tf_obelix_localisation.get()->acquittal.data){
+        timer_side_selection_obelix_localisation = NULL;
+        RCLCPP_INFO(this->get_logger(), "obelix initial_tf service acquittal received, end of client operation");
+      } else {
+        RCLCPP_INFO(this->get_logger(), "obelix initial_tf service no acquittal in response, requesting again");
+        spinning_localisation_side_obelix_request = false;
+      }
+    } else {
+      RCLCPP_INFO(this->get_logger(), "obelix initial_tf service not responding, waiting again");
+    }
+  } else RCLCPP_INFO(this->get_logger(), "obelix initial_tf service service not ready");
+}
+
 void Assurancetourix::set_auto_exposure(){
   std_msgs::msg::ColorRGBA color;
   geometry_msgs::msg::Point white_paper_pos;

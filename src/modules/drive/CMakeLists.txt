@@ -44,7 +44,7 @@ set(dependencies
   "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
-  transformix_msgs
+  "transformix_msgs"
   "std_srvs"
   "diagnostic_msgs"
   "actuators_srvs"
