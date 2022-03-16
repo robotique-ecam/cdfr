@@ -39,6 +39,7 @@ using namespace std::chrono;
 
 class Geometrix;
 
+#ifdef CAMERA
 struct SideSelectionTransfer {
   rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr initial_tf_client;
   rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf;
@@ -47,6 +48,7 @@ struct SideSelectionTransfer {
   rclcpp::TimerBase::SharedPtr timer;
   std::string service_name;
 };
+#endif //CAMERA
 
 class Assurancetourix : public rclcpp::Node {
 public:
