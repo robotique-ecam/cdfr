@@ -39,6 +39,15 @@ using namespace std::chrono;
 
 class Geometrix;
 
+struct SideSelectionTransfer {
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr initial_tf_client;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf;
+  bool spinning_request;
+  rclcpp::TimerBase::SharedPtr timer;
+  std::string service_name;
+};
+
 class Assurancetourix : public rclcpp::Node {
 public:
   Assurancetourix();
@@ -82,19 +91,10 @@ private:
   int is_goblet_at_position(geometry_msgs::msg::Point &position);
   void compass_orientation_callback();
   void set_auto_exposure();
-  void timer_side_service_asterix_callback();
-  void timer_side_service_obelix_callback();
+  void init_side_selection_st(SideSelectionTransfer &st_side_selection, std::string  service_name);
+  void timer_side_client_callback(SideSelectionTransfer &st_side_selection);
 
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr _initial_tf_client_asterix_localisation;
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf_asterix_localisation;
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf_asterix_localisation;
-  bool spinning_localisation_side_asterix_request;
-
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr _initial_tf_client_obelix_localisation;
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf_obelix_localisation;
-  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf_obelix_localisation;
-  bool spinning_localisation_side_obelix_request;
-
+  SideSelectionTransfer side_selection_asterix_localisation, side_selection_obelix_localisation;
 
   cv::VideoCapture _cap;
   struct Camera_settings {
@@ -106,7 +106,7 @@ private:
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr _enable_aruco_detection;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr compass_pub;
 
-  rclcpp::TimerBase::SharedPtr timer_compass_, timer_side_selection_asterix_localisation, timer_side_selection_obelix_localisation;
+  rclcpp::TimerBase::SharedPtr timer_compass_;
 
   cv::Mat _frame, _anotated, raised_contrast, tmp;
 
