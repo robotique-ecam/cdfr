@@ -59,7 +59,7 @@ class Localisation(rclpy.node.Node):
     def createServices(self):
         self.initial_tf_service = self.create_service(
             InitialStaticTFsrv,
-            "initial_side_selection",
+            "localisation_side_selection",
             self.initialSideSelectionCallback,
         )
         self.initial_tf_service_called = False
@@ -135,17 +135,17 @@ class Localisation(rclpy.node.Node):
         self._tf_brodcaster.sendTransform(self._tf)
         self.intial_tf_to_drive_request.map_odom_static_tf = self._tf
         if self.initial_tf_service_called:
-            self.get_logger().info("service cancellation")
+            self.get_logger().info("drive initial_tf service cancellation")
             self.destroy_timer(self.timer_check_tf_service)
             self.future_tf_service.cancel()
         self.future_tf_service = self.intial_tf_to_drive_client.call_async(
             self.intial_tf_to_drive_request
         )
         self.initial_tf_service_called = True
+        self.get_logger().info("drive initial_tf service called")
         self.timer_check_tf_service = self.create_timer(2.0, self.check_tf_service)
 
     def check_tf_service(self):
-        self.get_logger().info("checks if service answered")
         if self.future_tf_service.done():
             try:
                 response = self.future_tf_service.result()
@@ -171,7 +171,7 @@ class Localisation(rclpy.node.Node):
                         self.intial_tf_to_drive_request
                     )
             return
-        self.get_logger().info("service cancellation + recall")
+        self.get_logger().info("drive initial_tf service cancellation + recall")
         self.future_tf_service.cancel()
         self.future_tf_service = self.intial_tf_to_drive_client.call_async(
             self.intial_tf_to_drive_request

@@ -97,6 +97,8 @@ private:
   void timer_side_client_callback(SideSelectionTransfer &st_side_selection);
 
   SideSelectionTransfer side_selection_asterix_localisation, side_selection_obelix_localisation;
+  SideSelectionTransfer side_selection_asterix_cetautomatix, side_selection_obelix_cetautomatix;
+  SideSelectionTransfer side_selection_asterix_strategix, side_selection_obelix_strategix;
 
   cv::VideoCapture _cap;
   struct Camera_settings {

@@ -59,10 +59,16 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   }
   this->get_parameter("side", side);
 
-  init_side_selection_st(side_selection_asterix_localisation, "/asterix/initial_side_selection");
-  init_side_selection_st(side_selection_obelix_localisation, "/obelix/initial_side_selection");
+  init_side_selection_st(side_selection_asterix_localisation, "/asterix/localisation_side_selection");
+  init_side_selection_st(side_selection_obelix_localisation, "/obelix/localisation_side_selection");
 
-  //set_auto_exposure();
+  init_side_selection_st(side_selection_asterix_cetautomatix, "/asterix/cetautomatix_side_selection");
+  init_side_selection_st(side_selection_obelix_cetautomatix, "/obelix/cetautomatix_side_selection");
+
+  init_side_selection_st(side_selection_asterix_strategix, "/asterix/strategix_side_selection");
+  init_side_selection_st(side_selection_obelix_strategix, "/obelix/strategix_side_selection");
+
+  set_auto_exposure();
 
   //timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
 
