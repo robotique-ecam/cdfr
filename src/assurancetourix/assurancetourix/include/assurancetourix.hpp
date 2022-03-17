@@ -98,7 +98,7 @@ private:
 
   SideSelectionTransfer side_selection_asterix_localisation, side_selection_obelix_localisation;
   SideSelectionTransfer side_selection_asterix_cetautomatix, side_selection_obelix_cetautomatix;
-  SideSelectionTransfer side_selection_asterix_strategix, side_selection_obelix_strategix;
+  SideSelectionTransfer side_selection_strategix;
 
   cv::VideoCapture _cap;
   struct Camera_settings {

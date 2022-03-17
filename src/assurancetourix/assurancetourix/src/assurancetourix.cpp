@@ -65,8 +65,7 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   init_side_selection_st(side_selection_asterix_cetautomatix, "/asterix/cetautomatix_side_selection");
   init_side_selection_st(side_selection_obelix_cetautomatix, "/obelix/cetautomatix_side_selection");
 
-  init_side_selection_st(side_selection_asterix_strategix, "/asterix/strategix_side_selection");
-  init_side_selection_st(side_selection_obelix_strategix, "/obelix/strategix_side_selection");
+  init_side_selection_st(side_selection_strategix, "/strategix/strategix_side_selection");
 
   set_auto_exposure();
 
