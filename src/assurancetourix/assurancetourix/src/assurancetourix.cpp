@@ -30,6 +30,10 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
 
   init_camera_settings();
 
+  if (show_image) {
+    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
+  }
+
   timer_ = NULL;
 
   compass_pub = this->create_publisher<std_msgs::msg::String>("/compass", qos);
@@ -45,17 +49,28 @@ Assurancetourix::Assurancetourix() : Node("assurancetourix") {
   RCLCPP_WARN(this->get_logger(), "Assurancetourix camera position guessing x: %f y: %f", assurancetourix_to_map_transformation.transform.translation.x,
     assurancetourix_to_map_transformation.transform.translation.y);
 
-  if (assurancetourix_to_map_transformation.transform.translation.x < 1.5) this->declare_parameter<std::string>("side", "blue");
-  else this->declare_parameter<std::string>("side", "yellow");
+  if (assurancetourix_to_map_transformation.transform.translation.x < 1.5){
+    RCLCPP_WARN(this->get_logger(), "Assurancetourix detected blue side");
+    this->declare_parameter<std::string>("side", "blue");
+  }
+  else {
+    RCLCPP_WARN(this->get_logger(), "Assurancetourix detected yellow side");
+    this->declare_parameter<std::string>("side", "yellow");
+  }
   this->get_parameter("side", side);
+
+  init_side_selection_st(side_selection_asterix_localisation, "/asterix/localisation_side_selection");
+  init_side_selection_st(side_selection_obelix_localisation, "/obelix/localisation_side_selection");
+
+  init_side_selection_st(side_selection_asterix_cetautomatix, "/asterix/cetautomatix_side_selection");
+  init_side_selection_st(side_selection_obelix_cetautomatix, "/obelix/cetautomatix_side_selection");
+
+  init_side_selection_st(side_selection_strategix, "/strategix/strategix_side_selection");
 
   set_auto_exposure();
 
-  timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
+  //timer_compass_ = this->create_wall_timer(std::chrono::seconds(15), std::bind(&Assurancetourix::compass_orientation_callback, this));
 
-  if (show_image) {
-    cv::namedWindow("anotated", cv::WINDOW_AUTOSIZE);
-  }
   first_image_saved = false;
 
 #endif // CAMERA
@@ -144,6 +159,41 @@ visualization_msgs::msg::Marker Assurancetourix::predict_enemies_pos(visualizati
 }
 
 #ifdef CAMERA
+
+void Assurancetourix::init_side_selection_st(SideSelectionTransfer &st_side_selection, std::string  service_name){
+  st_side_selection.initial_tf_client = this->create_client<transformix_msgs::srv::InitialStaticTFsrv>(service_name);
+  st_side_selection.request_initial_tf = std::make_shared<transformix_msgs::srv::InitialStaticTFsrv::Request>();
+  st_side_selection.spinning_request = false;
+  if (side.compare("blue") == 0){
+    st_side_selection.request_initial_tf->final_set.data = true;
+  } else {
+    st_side_selection.request_initial_tf->final_set.data = false;
+  }
+  st_side_selection.service_name = service_name;
+  st_side_selection.timer = this->create_wall_timer(std::chrono::seconds(2), [&]() -> void { Assurancetourix::timer_side_client_callback(st_side_selection); });
+}
+
+void Assurancetourix::timer_side_client_callback(SideSelectionTransfer &st_side_selection){
+  bool service_ready = st_side_selection.initial_tf_client->service_is_ready();
+  if (service_ready){
+    if (!st_side_selection.spinning_request){
+      st_side_selection.spinning_request = true;
+      st_side_selection.future_initial_tf = st_side_selection.initial_tf_client->async_send_request(st_side_selection.request_initial_tf);
+    }
+    if (st_side_selection.future_initial_tf.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
+      if (st_side_selection.future_initial_tf.get()->acquittal.data){
+        st_side_selection.timer = NULL;
+        RCLCPP_WARN(this->get_logger(), "%s service acquittal received, end of client operation", st_side_selection.service_name.c_str());
+      } else {
+        RCLCPP_INFO(this->get_logger(), "%s service no acquittal in response, requesting again", st_side_selection.service_name.c_str());
+        st_side_selection.spinning_request = false;
+      }
+    } else {
+      RCLCPP_INFO(this->get_logger(), "%s service not responding, waiting again", st_side_selection.service_name.c_str());
+    }
+  } else RCLCPP_INFO(this->get_logger(), "%s service service not ready", st_side_selection.service_name.c_str());
+}
+
 void Assurancetourix::set_auto_exposure(){
   std_msgs::msg::ColorRGBA color;
   geometry_msgs::msg::Point white_paper_pos;

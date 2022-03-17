@@ -22,6 +22,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(transformix_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(actuators_srvs REQUIRED)
@@ -43,6 +44,7 @@ set(dependencies
   "tf2_msgs"
   "tf2_ros"
   "tf2_geometry_msgs"
+  "transformix_msgs"
   "std_srvs"
   "diagnostic_msgs"
   "actuators_srvs"

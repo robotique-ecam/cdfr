@@ -60,6 +60,9 @@ Drive::Drive() : Node("drive_node") {
   _adjust_odometry_sub = this->create_subscription<geometry_msgs::msg::TransformStamped>(
       "adjust_odometry", qos, std::bind(&Drive::adjust_odometry_callback, this, std::placeholders::_1));
 
+  _initial_tf_service = this->create_service<transformix_msgs::srv::InitialStaticTFsrv>(
+          "intial_tf_to_drive", std::bind(&Drive::init_tf_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
   diagnostics_timer_ = this->create_wall_timer(1s, std::bind(&Drive::update_diagnostic, this));
 
 #ifdef USE_TIMER
@@ -67,6 +70,12 @@ Drive::Drive() : Node("drive_node") {
 #endif
 
   RCLCPP_INFO(this->get_logger(), "Drive node initialised");
+}
+
+void Drive::init_tf_callback(const std::shared_ptr<rmw_request_id_t> request_header, const transformix_msgs::srv::InitialStaticTFsrv::Request::SharedPtr request,
+                                  const transformix_msgs::srv::InitialStaticTFsrv::Response::SharedPtr response){
+  _map_to_odom_tf = request->map_odom_static_tf;
+  response->acquittal.data = true;
 }
 
 void Drive::init_parameters() {
@@ -122,13 +131,9 @@ void Drive::init_variables() {
   time_since_last_sync_ = get_sim_time();
 #endif /* SIMULATION */
 
-  tf2_ros::Buffer tfBuffer(std::make_shared<rclcpp::Clock>(), tf2::Duration(tf2::BUFFER_CORE_DEFAULT_CACHE_TIME));
-  tf2_ros::TransformListener tfListener(tfBuffer);
-  std::string errorMsg;
-  if(tfBuffer.canTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000)))
-  {
-    _map_to_odom_tf = tfBuffer.lookupTransform(odom_.header.frame_id, "map", std::chrono::system_clock::now(), std::chrono::milliseconds(10000));
-  }
+  _map_to_odom_tf.header.stamp = this->get_clock()->now();
+  _map_to_odom_tf.header.frame_id = "map";
+  _map_to_odom_tf.child_frame_id = "odom";
 
   geometry_msgs::msg::TransformStamped init_vector;
   init_vector.header.stamp = this->get_clock()->now();

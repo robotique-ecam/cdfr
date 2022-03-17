@@ -1,4 +1,0 @@
-std_msgs/String from_frame
-std_msgs/String to_frame
----
-geometry_msgs/TransformStamped transform_stamped
