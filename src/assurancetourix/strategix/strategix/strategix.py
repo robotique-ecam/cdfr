@@ -15,16 +15,19 @@ from strategix.actions import actions
 from strategix.action_objects import Phare, MancheAir, Gobelet
 from strategix.exceptions import MatchStartedException
 from strategix_msgs.srv import ChangeActionStatus, GetAvailableActions
+from transformix_msgs.srv import InitialStaticTFsrv
 
 
 class Strategix(Node):
     def __init__(self):
         super().__init__("strategix_action_server")
-        self.side = self.declare_parameter("side", "blue")
-        self.add_on_set_parameters_callback(self._on_set_parameters)
-        self.side_srv = self.create_service(
-            SetBool, "/strategix/side", self.side_callback
+        self.side = "blue"
+        self.side_selection_service = self.create_service(
+            InitialStaticTFsrv,
+            "/strategix/strategix_side_selection",
+            self.initialSideSelectionCallback,
         )
+        self.add_on_set_parameters_callback(self._on_set_parameters)
         self.todo_srv = self.create_service(
             GetAvailableActions, "/strategix/available", self.available_callback
         )
@@ -33,7 +36,7 @@ class Strategix(Node):
         )
         self.lcd_driver = self.create_publisher(Lcd, "/obelix/lcd", 1)
         self.score_publisher = self.create_publisher(UInt8, "/score", 1)
-        self.get_logger().info(f"Default side is {self.side.value}")
+        self.get_logger().info(f"Default side is {self.side}")
         self.get_logger().info("Strategix is ready")
 
     def _on_set_parameters(self, params):
@@ -61,7 +64,7 @@ class Strategix(Node):
             ):
                 if (
                     action_object.tags.get("ONLY_SIDE") is None
-                    or action_object.tags.get("ONLY_SIDE") == self.side.value
+                    or action_object.tags.get("ONLY_SIDE") == self.side
                 ):
                     if (
                         action_object.tags.get("ONLY_ROBOT") is None
@@ -95,14 +98,13 @@ class Strategix(Node):
             response.success = False
         return response
 
-    def side_callback(self, request, response):
-        """Callback function when a robot has to change its current action"""
-        try:
-            self.get_logger().info("Ask for side")
-            response.message = self.side.value
-            response.success = True
-        except BaseException:
-            self.get_logger().warn(f"Invalid call! {request.data}")
+    def initialSideSelectionCallback(self, request, response):
+        """Assurancetourix send the side of the team"""
+        if request.final_set.data:
+            self.side = "blue"
+        else:
+            self.side = "yellow"
+        response.acquittal.data = True
         return response
 
     def update_score(self):

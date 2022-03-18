@@ -15,6 +15,7 @@ from lcd_msgs.msg import Lcd
 from std_srvs.srv import SetBool, Trigger
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
+from transformix_msgs.srv import InitialStaticTFsrv
 from strategix_msgs.srv import GetAvailableActions, ChangeActionStatus
 from strategix.actions import actions
 from strategix.strategy_modes import get_time_coeff
@@ -50,10 +51,13 @@ class Robot(Node):
         self.stop_ros_service = self.create_service(
             Trigger, "stop", self.stop_robot_callback
         )
-        # Strategix client to get the side
-        self.get_side_request = SetBool.Request()
-        self.get_side_request.data = True
-        self.get_side_client = self.create_client(SetBool, "/strategix/side")
+        # Side selection service
+        self.side = "blue"
+        self.side_selection_service = self.create_service(
+            InitialStaticTFsrv,
+            "cetautomatix_side_selection",
+            self.initialSideSelectionCallback,
+        )
         # Strategix client to get available actions
         self.get_available_actions_request = GetAvailableActions.Request()
         self.get_available_actions_request.sender = self.name
@@ -125,6 +129,15 @@ class Robot(Node):
     def set_slider_position(self, position: int):
         """Set slider position with position in range 0 to 255."""
         self.actuators.setSliderPosition(position)
+        
+    def initialSideSelectionCallback(self, request, response):
+        """Assurancetourix callback for the side of the team"""
+        if request.final_set.data:
+            self.side = "blue"
+        else:
+            self.side = "yellow"
+        response.acquittal.data = True
+        return response
 
     def fetch_available_actions(self):
         """Fetch available actions from Strategix."""
@@ -187,11 +200,6 @@ class Robot(Node):
         """Start the actuator action after the robot has reached its destination."""
         self.get_logger().info(f"START ACTUATOR {self.current_action}")
         return actions.get(self.current_action).start_actuator(self)
-
-    def get_side(self):
-        """Fetch side from Strategix."""
-        response = self.synchronous_call(self.get_side_client, self.get_side_request)
-        return response.message
 
     def start_robot_callback(self, req, resp):
         """Start robot."""
