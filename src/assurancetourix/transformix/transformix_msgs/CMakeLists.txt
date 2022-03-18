@@ -24,9 +24,7 @@ find_package(geometry_msgs REQUIRED)
 
 set(
 srv_files
-"srv/TransformixParameters.srv"
-"srv/TransformixParametersTransformStamped.srv"
-"srv/TransformixParametersTransfromPose.srv"
+"srv/InitialStaticTFsrv.srv"
 )
 
 rosidl_generate_interfaces(

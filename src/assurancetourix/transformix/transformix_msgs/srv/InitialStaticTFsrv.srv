@@ -1,0 +1,4 @@
+std_msgs/Bool final_set
+geometry_msgs/TransformStamped map_odom_static_tf
+---
+std_msgs/Bool acquittal

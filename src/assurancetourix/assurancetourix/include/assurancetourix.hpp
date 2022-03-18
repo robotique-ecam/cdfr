@@ -25,6 +25,8 @@
 
 #include "std_msgs/msg/string.hpp"
 #include "std_srvs/srv/set_bool.hpp"
+
+#include <transformix_msgs/srv/initial_static_t_fsrv.hpp>
 #endif //CAMERA
 
 #ifdef SIMULATION
@@ -36,6 +38,17 @@ using namespace rclcpp;
 using namespace std::chrono;
 
 class Geometrix;
+
+#ifdef CAMERA
+struct SideSelectionTransfer {
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedPtr initial_tf_client;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedRequest request_initial_tf;
+  rclcpp::Client<transformix_msgs::srv::InitialStaticTFsrv>::SharedFuture future_initial_tf;
+  bool spinning_request;
+  rclcpp::TimerBase::SharedPtr timer;
+  std::string service_name;
+};
+#endif //CAMERA
 
 class Assurancetourix : public rclcpp::Node {
 public:
@@ -80,6 +93,12 @@ private:
   int is_goblet_at_position(geometry_msgs::msg::Point &position);
   void compass_orientation_callback();
   void set_auto_exposure();
+  void init_side_selection_st(SideSelectionTransfer &st_side_selection, std::string  service_name);
+  void timer_side_client_callback(SideSelectionTransfer &st_side_selection);
+
+  SideSelectionTransfer side_selection_asterix_localisation, side_selection_obelix_localisation;
+  SideSelectionTransfer side_selection_asterix_cetautomatix, side_selection_obelix_cetautomatix;
+  SideSelectionTransfer side_selection_strategix;
 
   cv::VideoCapture _cap;
   struct Camera_settings {

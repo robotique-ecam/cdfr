@@ -18,6 +18,7 @@
   <buildtool_depend>geometry_msgs</buildtool_depend>
   <buildtool_depend>tf2_ros</buildtool_depend>
   <buildtool_depend>tf2_geometry_msgs</buildtool_depend>
+  <buildtool_depend>transformix_msgs</buildtool_depend>
 
   <depend>libopencv-dev</depend>
 

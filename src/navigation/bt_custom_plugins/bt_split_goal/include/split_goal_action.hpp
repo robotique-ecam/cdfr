@@ -2,6 +2,9 @@
 #define SPLIT_GOAL_ACTION_HPP_
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point.hpp"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 #include "tf2_ros/buffer.h"
 
 #include "nav2_util/robot_utils.hpp"
@@ -51,6 +54,8 @@ private:
   int intoSpecificZone(geometry_msgs::msg::PoseStamped & pose);
   void setPositionNearWall(geometry_msgs::msg::PoseStamped & pose);
   void nominalSplitter();
+  geometry_msgs::msg::Point findNearestPoint(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2);
+  bool belowLine(geometry_msgs::msg::Point p, float x1, float y1, float x2, float y2);
 
   geometry_msgs::msg::PoseStamped goal_, get_out_goal_, get_in_goal_, nominal_goal_, current_pose_;
   bool get_out_need_, get_in_need_, nominal_need_;
@@ -61,13 +66,17 @@ private:
 
   double distance_from_walls_;
   std::vector<std::vector<float>> specific_area_coords;
-  std::vector<float> exit_area_coords;
+  std::vector<float> exit_area_coords, exit_area_types;
 
   int get_out_area, get_in_area;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr specific_area_visualization_pub;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr specific_exit_visualization_pub;
 
   float radius_accurate_;
   const float sqrt2by2 = 0.7071068,
-              quaternionDiff = 0.22;
+              quaternionDiff = 0.22,
+              q_z_45 = 0.3826834,
+              q_w_45 = 0.9238795;
 
 };
 

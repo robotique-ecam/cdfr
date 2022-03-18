@@ -48,11 +48,11 @@ fi
 
 if [ $robot = "asterix" ] || [ $robot = "obelix" ]; then
     print_info "Setting up $robot"
-    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix panoramix transformix transformix_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    generate_yamls && generate_urdfs && colcon build --symlink-install --cmake-args=" -DCMAKE_BUILD_TYPE=Release" --packages-skip assurancetourix panoramix transformix_msgs pharaon && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "assurancetourix" ]; then
     print_info "Setting up $robot"
-    colcon build --symlink-install --cmake-args " -DCAMERA=ON" --packages-select transformix_msgs transformix strategix_msgs strategix lcd_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
+    colcon build --symlink-install --cmake-args " -DCAMERA=ON" --packages-select transformix_msgs strategix_msgs strategix lcd_msgs pharaon panoramix assurancetourix localisation && print_success "Built packages for $robot" || print_failure "Packages build failed"
 
 elif [ $robot = "simulation" ]; then
     print_info "Setting up simulation environment"
