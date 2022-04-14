@@ -5,3 +5,5 @@ from .phare import Phare
 from .ecueil import Ecueil
 from .chenal import Chenal
 from .carre_fouille import CarreFouille
+from .echantillon import Echantillon
+from .distributeur import Distributeur

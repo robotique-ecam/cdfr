@@ -7,12 +7,11 @@ POSITIONS = [0.6675, 0.8525, 1.0375, 1.2225, 1.4075, 1.5925, 1.7775, 1.9625, 2.1
 
 class CarreFouille(Action):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(position=(1.5, 0), **kwargs)
         self.offset = 0.3
         self.rotation = 0
 
     def get_initial_position(self, robot):
-        self.side == robot.get_side()
         if self.side == "blue":
             self.positions = POSITIONS
         else:
