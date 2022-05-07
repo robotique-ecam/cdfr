@@ -15,9 +15,11 @@ from rcl_interfaces.msg import SetParametersResult
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import StaticTransformBroadcaster
 from localisation.utils import euler_to_quaternion, is_simulation
+from localisation.lh_tracker_geometry import LH_tracker_geometry
 from nav_msgs.msg import Odometry
 from tf2_kdl import transform_to_kdl, do_transform_frame
 from transformix_msgs.srv import InitialStaticTFsrv
+from lh_tracker_msgs.msg import LHtracker
 
 
 class Localisation(rclpy.node.Node):
@@ -26,7 +28,9 @@ class Localisation(rclpy.node.Node):
     def __init__(self):
         """Init Localisation node"""
         super().__init__("localisation_node")
-        self.robot = self.get_namespace().strip("/")
+        self.robot = "asterix" #self.get_namespace().strip("/")
+
+        self.lh_geometry = LH_tracker_geometry(self)
 
         self.createSubscribers()
 
@@ -63,6 +67,11 @@ class Localisation(rclpy.node.Node):
             self.initialSideSelectionCallback,
         )
         self.initial_tf_service_called = False
+        self.lh_tf_service = self.create_service(
+            InitialStaticTFsrv,
+            "tf_map_lh",
+            self.map_lh_tf_callback,
+        )
 
     def createClients(self):
         self.intial_tf_to_drive_client = self.create_client(
@@ -91,6 +100,14 @@ class Localisation(rclpy.node.Node):
             self.odom_callback,
             10,
         )
+
+    def map_lh_tf_callback(self, request, response):
+        response.acquittal.data = True
+        self.lh_geometry.final_tf = request.map_odom_static_tf
+        self.lh_geometry.calibration_done = True
+        self.lh_geometry.update_lines_origin()
+        self.get_logger().info(f"lh_map_tf received {self.lh_geometry.final_tf}")
+        return response
 
     def initialSideSelectionCallback(self, request, response):
         """Assurancetourix send the side of the team"""
