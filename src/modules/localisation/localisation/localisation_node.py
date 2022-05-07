@@ -28,7 +28,7 @@ class Localisation(rclpy.node.Node):
     def __init__(self):
         """Init Localisation node"""
         super().__init__("localisation_node")
-        self.robot = "asterix" #self.get_namespace().strip("/")
+        self.robot = self.get_namespace().strip("/")
 
         self.lh_geometry = LH_tracker_geometry(self)
 

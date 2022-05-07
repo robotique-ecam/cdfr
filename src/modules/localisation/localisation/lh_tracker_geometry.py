@@ -19,7 +19,7 @@ from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
 from datetime import datetime
 
 
-class LH_tracker_geometry():
+class LH_tracker_geometry:
     def __init__(self, parent_node):
         """Init LH_tracker_geometry node"""
         self.parent_node = parent_node
@@ -34,7 +34,9 @@ class LH_tracker_geometry():
         self.calibration_done = False
         self.final_tf = TransformStamped()
         self.tracker_pose = Point()
-        self.lh_est_pose_pb = self.parent_node.create_publisher(Marker, "lh_est_pose", 10)
+        self.lh_est_pose_pb = self.parent_node.create_publisher(
+            Marker, "lh_est_pose", 10
+        )
         self.subscription = self.parent_node.create_subscription(
             LHtracker, "lh_msgs", self.lh_sub_callback, 10
         )
@@ -43,7 +45,6 @@ class LH_tracker_geometry():
             self.sensors_est_position_pb = self.parent_node.create_publisher(
                 Marker, "sensors_est_position", 10
             )
-
 
     def init_est_marker(self):
         self.marker_estimated_pose = Marker()
@@ -175,7 +176,9 @@ class LH_tracker_geometry():
             self.sensors_est_position.points[3].x,
             self.sensors_est_position.points[3].y,
         ) = self.x_y_at_h(self.line_list.points[7])
-        self.sensors_est_position.header.stamp = self.parent_node.get_clock().now().to_msg()
+        self.sensors_est_position.header.stamp = (
+            self.parent_node.get_clock().now().to_msg()
+        )
         if self.line_and_sensors_position_viz:
             self.sensors_est_position_pb.publish(self.sensors_est_position)
 
@@ -225,12 +228,14 @@ class LH_tracker_geometry():
             self.marker_estimated_pose.pose.orientation.y = q[1]
             self.marker_estimated_pose.pose.orientation.z = q[2]
             self.marker_estimated_pose.pose.orientation.w = q[3]
-            self.marker_estimated_pose.header.stamp = self.parent_node.get_clock().now().to_msg()
+            self.marker_estimated_pose.header.stamp = (
+                self.parent_node.get_clock().now().to_msg()
+            )
             self.parent_node.create_and_send_tf(
                 self.marker_estimated_pose.pose.position.x,
                 self.marker_estimated_pose.pose.position.y,
                 self.marker_estimated_pose.pose.orientation,
-                self.marker_estimated_pose.header.stamp
+                self.marker_estimated_pose.header.stamp,
             )
             self.lh_est_pose_pb.publish(self.marker_estimated_pose)
 
@@ -387,9 +392,9 @@ class LH_tracker_geometry():
 
     def update_lines_origin(self):
         for i in range(4):
-            self.line_list.points[i*2].x = self.final_tf.transform.translation.x
-            self.line_list.points[i*2].y = self.final_tf.transform.translation.y
-            self.line_list.points[i*2].z = self.final_tf.transform.translation.z
+            self.line_list.points[i * 2].x = self.final_tf.transform.translation.x
+            self.line_list.points[i * 2].y = self.final_tf.transform.translation.y
+            self.line_list.points[i * 2].z = self.final_tf.transform.translation.z
 
 
 def main(args=None):
