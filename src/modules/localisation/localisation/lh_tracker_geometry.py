@@ -30,7 +30,7 @@ class LH_tracker_geometry:
         )._value
         self.parent_node.declare_parameter("lh_sensor_heigth", 0.415)
         self.sensor_height = self.parent_node.get_parameter("lh_sensor_heigth")._value
-        
+
         self.possible_pairs = [[0, 1], [2, 3], [4, 5], [6, 7]]
 
         self.geometry = LH2Geometry()
