@@ -13,8 +13,10 @@ class LH_tracker_serial(Node):
         """Init LH_tracker_serial node"""
         super().__init__("lh_tracker_serial")
         simulation = True if machine() != "aarch64" else False
+        self.declare_parameter("usb_uart_port", "/dev/ttyACM0")
+        usb_uart_port = self.get_parameter("usb_uart_port")._value
         if not simulation:
-            self.ser = Serial(port="/dev/ttyACM0", baudrate=1000000)
+            self.ser = Serial(port=usb_uart_port, baudrate=1000000)
             self.lh_pb = self.create_publisher(LHtracker, "lh_msgs", 10)
             self.start_loop()
         self.get_logger().info("lh_tracker_serial node is ready")

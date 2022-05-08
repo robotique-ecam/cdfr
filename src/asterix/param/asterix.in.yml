@@ -47,6 +47,10 @@ asterix:
       lh_sensor_heigth: 0.415
       lh_line_and_sensors_position_viz: false
 
+  lh_tracker_serial:
+    ros__parameters:
+      usb_uart_port: "/dev/ttyACM0"
+
 
   lcd_driver:
     ros__parameters:
