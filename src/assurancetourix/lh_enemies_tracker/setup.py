@@ -10,6 +10,7 @@ setup(
     packages=find_packages(),
     data_files=[
         (path.join("share", package_name), ["package.xml"]),
+        (path.join("share", package_name, "param"), glob("param/*")),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
     install_requires=["setuptools"],

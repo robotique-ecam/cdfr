@@ -24,11 +24,10 @@ class LH_enemies_tracker(Node):
     def __init__(self):
         """Init LH_tracker_geometry node"""
         super().__init__("lh_enemies_tracker")
-        self.sensor_height = 0.415
-
         self.possible_pairs = [[0, 1], [2, 3], [4, 5], [6, 7]]
         self.geometry = LH2Geometry()
 
+        self.get_yaml_params()
         self.init_est_marker()
         self.init_est_marker()
         self.init_line_list()
@@ -38,18 +37,15 @@ class LH_enemies_tracker(Node):
         self.avg_nb = 200
         self.global_index = 0
         self.calibration_done = False
-        self.initial_tf = self.kdl_to_transform(
-            PyKDL.Frame(
-                R=PyKDL.Rotation().EulerZYX(np.deg2rad(45), 0.0, 0.0),
-                V=PyKDL.Vector(x=1.5, y=0.1, z=self.sensor_height),
-            )
-        )
+
         self.saved_iteration_list = LHtracker()
 
         self.final_tf = TransformStamped()
 
         self.lh_lines_pb = self.create_publisher(MarkerArray, "enemies_lh_lines", 10)
-        self.lh_est_pose_pb = self.create_publisher(MarkerArray, "ennemies_positions_markers", 10)
+        self.lh_est_pose_pb = self.create_publisher(
+            MarkerArray, "ennemies_positions_markers", 10
+        )
         self.sensors_est_position_pb = self.create_publisher(
             MarkerArray, "enemies_sensors_est_position", 10
         )
@@ -61,7 +57,7 @@ class LH_enemies_tracker(Node):
         )
 
         self.lh_tf_to_asterix_client = self.create_client(
-            InitialStaticTFsrv, "asterix/tf_map_lh"
+            InitialStaticTFsrv, "/asterix/tf_map_lh"
         )
         self.lh_tf_to_asterix_request = InitialStaticTFsrv.Request()
         self.spinning_lh_tf_to_asterix_request = False
@@ -73,6 +69,26 @@ class LH_enemies_tracker(Node):
         self.spinning_lh_tf_to_obelix_request = False
 
         self.get_logger().info("lh_tracker_geometry node is ready")
+
+    def get_yaml_params(self):
+        self.declare_parameter("calibration_position_x", 1.5)
+        self.declare_parameter("calibration_position_y", 0.1)
+        self.declare_parameter("calibration_position_z", 0.415)
+        self.declare_parameter("calibration_theta_degrees", 45)
+        self.declare_parameter("enemies_sensor_height", 0.415)
+
+        calib_x = self.get_parameter("calibration_position_x")._value
+        calib_y = self.get_parameter("calibration_position_y")._value
+        calib_z = self.get_parameter("calibration_position_z")._value
+        calib_theta = self.get_parameter("calibration_theta_degrees")._value
+        self.sensor_height = self.get_parameter("enemies_sensor_height")._value
+
+        self.initial_tf = self.kdl_to_transform(
+            PyKDL.Frame(
+                R=PyKDL.Rotation().EulerZYX(np.deg2rad(calib_theta), 0.0, 0.0),
+                V=PyKDL.Vector(x=calib_x, y=calib_y, z=calib_z),
+            )
+        )
 
     def init_est_marker(self):
         self.marker_estimated_pose = MarkerArray()
@@ -87,6 +103,7 @@ class LH_enemies_tracker(Node):
             self.marker_estimated_pose.markers[i].color.a = 1.0
             self.marker_estimated_pose.markers[i].lifetime.sec = 5
             self.marker_estimated_pose.markers[i].color.r = 1.0
+            self.marker_estimated_pose.markers[i].pose.position.x = -1.0
 
     def init_line_list(self):
         self.line_list = MarkerArray()
@@ -217,7 +234,9 @@ class LH_enemies_tracker(Node):
             self.sensors_est_position.markers[enemy_id].points[3].x,
             self.sensors_est_position.markers[enemy_id].points[3].y,
         ) = self.x_y_at_h(self.line_list.markers[enemy_id].points[7])
-        self.sensors_est_position.markers[enemy_id].header.stamp = self.get_clock().now().to_msg()
+        self.sensors_est_position.markers[enemy_id].header.stamp = (
+            self.get_clock().now().to_msg()
+        )
         self.sensors_est_position_pb.publish(self.sensors_est_position)
 
         recovered_pairs = self.identify_pairs(sensors_id_list)
@@ -262,8 +281,12 @@ class LH_enemies_tracker(Node):
             self.tracker_pose.y = self.tracker_pose.y / avg_nb
             self.tracker_pose.z = np.arctan2(cos_sin_angles[1], cos_sin_angles[0])
 
-            self.marker_estimated_pose.markers[enemy_id].pose.position.x = self.tracker_pose.x
-            self.marker_estimated_pose.markers[enemy_id].pose.position.y = self.tracker_pose.y
+            self.marker_estimated_pose.markers[
+                enemy_id
+            ].pose.position.x = self.tracker_pose.x
+            self.marker_estimated_pose.markers[
+                enemy_id
+            ].pose.position.y = self.tracker_pose.y
             self.marker_estimated_pose.markers[enemy_id].pose.position.z = 0.0
             rot = PyKDL.Rotation().RotZ(self.tracker_pose.z)
             q = rot.GetQuaternion()
@@ -271,7 +294,9 @@ class LH_enemies_tracker(Node):
             self.marker_estimated_pose.markers[enemy_id].pose.orientation.y = q[1]
             self.marker_estimated_pose.markers[enemy_id].pose.orientation.z = q[2]
             self.marker_estimated_pose.markers[enemy_id].pose.orientation.w = q[3]
-            self.marker_estimated_pose.markers[enemy_id].header.stamp = self.get_clock().now().to_msg()
+            self.marker_estimated_pose.markers[enemy_id].header.stamp = (
+                self.get_clock().now().to_msg()
+            )
             self.lh_est_pose_pb.publish(self.marker_estimated_pose)
 
     def localisation_zero_first(self, sensors_id_list, enemy_id):
@@ -363,7 +388,9 @@ class LH_enemies_tracker(Node):
         index_sixth = sensors_id_list.index(6)
         index_seventh = sensors_id_list.index(7)
         point_sixth = self.sensors_est_position.markers[enemy_id].points[index_sixth]
-        point_seventh = self.sensors_est_position.markers[enemy_id].points[index_seventh]
+        point_seventh = self.sensors_est_position.markers[enemy_id].points[
+            index_seventh
+        ]
 
         vector_sixth_to_seven = PyKDL.Vector(
             x=(point_seventh.x - point_sixth.x),
@@ -500,27 +527,41 @@ class LH_enemies_tracker(Node):
 
             if self.final_tf.transform.translation.x != 0:
                 self.calibration_done = True
-                self.get_logger().info("Calibration done, sending tf to asterix and obelix")
+                self.get_logger().info(
+                    "Calibration done, sending tf to asterix and obelix"
+                )
 
                 self.lh_tf_to_asterix_request.map_odom_static_tf = self.final_tf
-                self.future_tf_service_asterix = self.lh_tf_to_asterix_client.call_async(
-                    self.lh_tf_to_asterix_request
+                self.future_tf_service_asterix = (
+                    self.lh_tf_to_asterix_client.call_async(
+                        self.lh_tf_to_asterix_request
+                    )
                 )
                 self.spinning_lh_tf_to_asterix_request = True
-                self.timer_check_tf_service_asterix = self.create_timer(2.0, self.check_tf_service_asterix)
+                self.timer_check_tf_service_asterix = self.create_timer(
+                    2.0, self.check_tf_service_asterix
+                )
 
                 self.lh_tf_to_obelix_request.map_odom_static_tf = self.final_tf
                 self.future_tf_service_obelix = self.lh_tf_to_obelix_client.call_async(
                     self.lh_tf_to_obelix_request
                 )
                 self.spinning_lh_tf_to_obelix_request = True
-                self.timer_check_tf_service_obelix = self.create_timer(2.0, self.check_tf_service_obelix)
+                self.timer_check_tf_service_obelix = self.create_timer(
+                    2.0, self.check_tf_service_obelix
+                )
 
                 for i in range(len(self.line_list.markers)):
                     for j in range(len(self.line_list.markers[i].points)):
-                        self.line_list.markers[i].points[j].x = self.final_tf.transform.translation.x
-                        self.line_list.markers[i].points[j].y = self.final_tf.transform.translation.y
-                        self.line_list.markers[i].points[j].z = self.final_tf.transform.translation.z
+                        self.line_list.markers[i].points[
+                            j
+                        ].x = self.final_tf.transform.translation.x
+                        self.line_list.markers[i].points[
+                            j
+                        ].y = self.final_tf.transform.translation.y
+                        self.line_list.markers[i].points[
+                            j
+                        ].z = self.final_tf.transform.translation.z
 
     def check_tf_service_asterix(self):
         if self.future_tf_service_asterix.done():
@@ -531,8 +572,10 @@ class LH_enemies_tracker(Node):
                 self.get_logger().warn(
                     "Asterix lh_tf sending to drive failed, retrying..."
                 )
-                self.future_tf_service_asterix = self.lh_tf_to_asterix_client.call_async(
-                    self.lh_tf_to_asterix_request
+                self.future_tf_service_asterix = (
+                    self.lh_tf_to_asterix_client.call_async(
+                        self.lh_tf_to_asterix_request
+                    )
                 )
 
             else:
@@ -544,8 +587,10 @@ class LH_enemies_tracker(Node):
                     self.get_logger().warn(
                         "Asterix lh_tf sending to drive failed, retrying..."
                     )
-                    self.future_tf_service_asterix = self.lh_tf_to_asterix_client.call_async(
-                        self.lh_tf_to_asterix_request
+                    self.future_tf_service_asterix = (
+                        self.lh_tf_to_asterix_client.call_async(
+                            self.lh_tf_to_asterix_request
+                        )
                     )
             return
         self.get_logger().info("Asterix lh_tf service cancellation + recall")
@@ -576,8 +621,10 @@ class LH_enemies_tracker(Node):
                     self.get_logger().warn(
                         "Obelix lh_tf sending to drive failed, retrying..."
                     )
-                    self.future_tf_service_obelix = self.lh_tf_to_obelix_client.call_async(
-                        self.lh_tf_to_obelix_request
+                    self.future_tf_service_obelix = (
+                        self.lh_tf_to_obelix_client.call_async(
+                            self.lh_tf_to_obelix_request
+                        )
                     )
             return
         self.get_logger().info("Obelix lh_tf service cancellation + recall")
