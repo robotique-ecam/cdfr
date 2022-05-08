@@ -24,5 +24,11 @@ def generate_launch_description():
                 output="screen",
                 parameters=[params],
             ),
+            Node(
+                package="micro_ros_agent",
+                executable="micro_ros_agent",
+                output="screen",
+                arguments=["udp4", "-p", "8888", "-v6"],
+            ),
         ],
     )
