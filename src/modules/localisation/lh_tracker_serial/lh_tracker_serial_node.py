@@ -5,16 +5,19 @@ from rclpy.node import Node
 from serial import Serial
 from lh_tracker_msgs.msg import LHtracker
 from lh_tracker_serial.pulse_data import Pulse_data
+from platform import machine
 
 
 class LH_tracker_serial(Node):
     def __init__(self):
         """Init LH_tracker_serial node"""
         super().__init__("lh_tracker_serial")
-        self.ser = Serial(port="/dev/ttyACM0", baudrate=1000000)
-        self.lh_pb = self.create_publisher(LHtracker, "lh_msgs", 10)
+        simulation = True if machine() != "aarch64" else False
+        if not simulation:
+            self.ser = Serial(port="/dev/ttyACM0", baudrate=1000000)
+            self.lh_pb = self.create_publisher(LHtracker, "lh_msgs", 10)
+            self.start_loop()
         self.get_logger().info("lh_tracker_serial node is ready")
-        self.start_loop()
 
     def start_loop(self):
         self.pulse_data = Pulse_data()
