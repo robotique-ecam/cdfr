@@ -42,12 +42,8 @@ class LH_enemies_tracker(Node):
 
         self.final_tf = TransformStamped()
 
-        self.lh_lines_pb = self.create_publisher(MarkerArray, "enemies_lh_lines", 10)
         self.lh_est_pose_pb = self.create_publisher(
             MarkerArray, "ennemies_positions_markers", 10
-        )
-        self.sensors_est_position_pb = self.create_publisher(
-            MarkerArray, "enemies_sensors_est_position", 10
         )
         self.subscription = self.create_subscription(
             LHtracker, "/first_enemy/lh_msgs", self.lh_sub_callback_first_enemy, 10
@@ -68,6 +64,14 @@ class LH_enemies_tracker(Node):
         self.lh_tf_to_obelix_request = InitialStaticTFsrv.Request()
         self.spinning_lh_tf_to_obelix_request = False
 
+        if self.lh_line_and_sensors_position_viz:
+            self.sensors_est_position_pb = self.create_publisher(
+                MarkerArray, "enemies_sensors_est_position", 10
+            )
+            self.lh_lines_pb = self.create_publisher(
+                MarkerArray, "enemies_lh_lines", 10
+            )
+
         self.get_logger().info("lh_tracker_geometry node is ready")
 
     def get_yaml_params(self):
@@ -76,12 +80,16 @@ class LH_enemies_tracker(Node):
         self.declare_parameter("calibration_position_z", 0.415)
         self.declare_parameter("calibration_theta_degrees", 45)
         self.declare_parameter("enemies_sensor_height", 0.415)
+        self.declare_parameter("lh_line_and_sensors_position_viz", True)
 
         calib_x = self.get_parameter("calibration_position_x")._value
         calib_y = self.get_parameter("calibration_position_y")._value
         calib_z = self.get_parameter("calibration_position_z")._value
         calib_theta = self.get_parameter("calibration_theta_degrees")._value
         self.sensor_height = self.get_parameter("enemies_sensor_height")._value
+        self.lh_line_and_sensors_position_viz = self.get_parameter(
+            "lh_line_and_sensors_position_viz"
+        )._value
 
         self.initial_tf = self.kdl_to_transform(
             PyKDL.Frame(
@@ -216,7 +224,8 @@ class LH_enemies_tracker(Node):
         self.line_list.markers[enemy_id].points[7].z = z4
 
         self.line_list.markers[enemy_id].header.stamp = self.get_clock().now().to_msg()
-        self.lh_lines_pb.publish(self.line_list)
+        if self.lh_line_and_sensors_position_viz:
+            self.lh_lines_pb.publish(self.line_list)
 
         (
             self.sensors_est_position.markers[enemy_id].points[0].x,
@@ -237,7 +246,8 @@ class LH_enemies_tracker(Node):
         self.sensors_est_position.markers[enemy_id].header.stamp = (
             self.get_clock().now().to_msg()
         )
-        self.sensors_est_position_pb.publish(self.sensors_est_position)
+        if self.lh_line_and_sensors_position_viz:
+            self.sensors_est_position_pb.publish(self.sensors_est_position)
 
         recovered_pairs = self.identify_pairs(sensors_id_list)
         avg_nb = 0
