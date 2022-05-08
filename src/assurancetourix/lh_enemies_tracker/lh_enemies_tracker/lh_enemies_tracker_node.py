@@ -578,9 +578,11 @@ class LH_enemies_tracker(Node):
             try:
                 response = self.future_tf_service_asterix.result()
             except Exception as e:
-                self.get_logger().info("Asterix lh_tf service call failed %r" % (e,))
+                self.get_logger().info(
+                    "Asterix map_lh_tf service call failed %r" % (e,)
+                )
                 self.get_logger().warn(
-                    "Asterix lh_tf sending to drive failed, retrying..."
+                    "map_lh_tf sending to Asterix failed, retrying..."
                 )
                 self.future_tf_service_asterix = (
                     self.lh_tf_to_asterix_client.call_async(
@@ -590,12 +592,12 @@ class LH_enemies_tracker(Node):
 
             else:
                 if response.acquittal.data:
-                    self.get_logger().info("Asterix lh_tf successfuly sent to drive")
+                    self.get_logger().info("map_lh_tf successfuly sent to Asterix")
                     self.destroy_timer(self.timer_check_tf_service_asterix)
                     self.spinning_lh_tf_to_asterix_request = False
                 else:
                     self.get_logger().warn(
-                        "Asterix lh_tf sending to drive failed, retrying..."
+                        "map_lh_tf sending to Asterix failed, retrying..."
                     )
                     self.future_tf_service_asterix = (
                         self.lh_tf_to_asterix_client.call_async(
@@ -603,7 +605,7 @@ class LH_enemies_tracker(Node):
                         )
                     )
             return
-        self.get_logger().info("Asterix lh_tf service cancellation + recall")
+        self.get_logger().info("Asterix map_lh_tf service cancellation + recall")
         self.future_tf_service_asterix.cancel()
         self.future_tf_service_asterix = self.lh_tf_to_asterix_client.call_async(
             self.lh_tf_to_asterix_request
@@ -614,9 +616,9 @@ class LH_enemies_tracker(Node):
             try:
                 response = self.future_tf_service_obelix.result()
             except Exception as e:
-                self.get_logger().info("Obelix lh_tf service call failed %r" % (e,))
+                self.get_logger().info("Obelix map_lh_tf service call failed %r" % (e,))
                 self.get_logger().warn(
-                    "Obelix lh_tf sending to drive failed, retrying..."
+                    "map_lh_tf sending to Obelix failed, retrying..."
                 )
                 self.future_tf_service_obelix = self.lh_tf_to_obelix_client.call_async(
                     self.lh_tf_to_obelix_request
@@ -624,12 +626,12 @@ class LH_enemies_tracker(Node):
 
             else:
                 if response.acquittal.data:
-                    self.get_logger().info("Obelix lh_tf successfuly sent to drive")
+                    self.get_logger().info("map_lh_tf successfuly sent to Obelix")
                     self.destroy_timer(self.timer_check_tf_service_obelix)
                     self.spinning_lh_tf_to_obelix_request = False
                 else:
                     self.get_logger().warn(
-                        "Obelix lh_tf sending to drive failed, retrying..."
+                        "map_lh_tf sending to Obelix failed, retrying..."
                     )
                     self.future_tf_service_obelix = (
                         self.lh_tf_to_obelix_client.call_async(
@@ -637,7 +639,7 @@ class LH_enemies_tracker(Node):
                         )
                     )
             return
-        self.get_logger().info("Obelix lh_tf service cancellation + recall")
+        self.get_logger().info("Obelix map_lh_tf service cancellation + recall")
         self.future_tf_service_obelix.cancel()
         self.future_tf_service_obelix = self.lh_tf_to_obelix_client.call_async(
             self.lh_tf_to_obelix_request
