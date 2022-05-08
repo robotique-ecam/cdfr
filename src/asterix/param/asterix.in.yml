@@ -44,20 +44,8 @@ asterix:
 
   localisation_node:
     ros__parameters:
-      vlx_min_measure: 48
-      vlx_max_measure: 600
-      vlx_lat_x: 72.0
-      vlx_lat_y: 124.0
-      vlx_face_x: 98.5
-      vlx_face_y: 54.5
-      vlx_i2c_bus: 4
-      vlx_addresses:
-        side_right: 48
-        front_right: 53
-        front_left: 52
-        side_left: 48
-        back_left: 55
-        back_right: 54
+      lh_sensor_heigth: 0.415
+      lh_line_and_sensors_position_viz: false
 
 
   lcd_driver:

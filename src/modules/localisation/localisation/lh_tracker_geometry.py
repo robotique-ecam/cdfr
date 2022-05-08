@@ -23,8 +23,14 @@ class LH_tracker_geometry:
     def __init__(self, parent_node):
         """Init LH_tracker_geometry node"""
         self.parent_node = parent_node
-        self.line_and_sensors_position_viz = False
-        self.sensor_height = 0.415
+
+        self.parent_node.declare_parameter("lh_line_and_sensors_position_viz", True)
+        self.line_and_sensors_position_viz = self.parent_node.get_parameter(
+            "lh_line_and_sensors_position_viz"
+        )._value
+        self.parent_node.declare_parameter("lh_sensor_heigth", 0.415)
+        self.sensor_height = self.parent_node.get_parameter("lh_sensor_heigth")._value
+        
         self.possible_pairs = [[0, 1], [2, 3], [4, 5], [6, 7]]
 
         self.geometry = LH2Geometry()
