@@ -103,6 +103,13 @@ def generate_robot_launch_description(robot_namespace: str, simulation=False):
                         remappings=remappings,
                     ),
                     Node(
+                        package="localisation",
+                        executable="lh_tracker_serial",
+                        output="screen",
+                        parameters=[params.name],
+                        remappings=remappings,
+                    ),
+                    Node(
                         package="cetautomatix",
                         executable="cetautomatix",
                         output="screen",
