@@ -6,7 +6,7 @@
 #define DYNA_CUBE1_ID 1
 #define DYNA_CUBE2_ID 2
 #define DYNA_HEX_ID 3
-#define RESISTANCE_SERVO_PIN 9
+#define RESISTANCE_SERVO_PIN 7
 
 bool received, requested;
 int received_val, requested_val;
