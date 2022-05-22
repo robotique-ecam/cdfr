@@ -31,6 +31,7 @@ setup(
     entry_points={
         "console_scripts": [
             "localisation = localisation.localisation_node:main",
+            "lh_tracker_serial = lh_tracker_serial.lh_tracker_serial_node:main",
         ],
     },
 )

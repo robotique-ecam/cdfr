@@ -1,0 +1,8 @@
+lh_enemies_tracker:
+  ros__parameters:
+    calibration_position_x: 1.5
+    calibration_position_y: 0.1
+    calibration_position_z: 0.415
+    calibration_theta_degrees: 45
+    enemies_sensor_height: 0.415
+    lh_line_and_sensors_position_viz: false
