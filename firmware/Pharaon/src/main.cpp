@@ -5,15 +5,13 @@
 #define DIS 11
 #define DIR 9
 #define STP 8
-#define stepSpeed 10
+#define stepSpeed 150
 #define LedData 13
 #define LedClock 12
 
-uint32_t stepsForUp = 165000;
 APA102<LedData, LedClock> ledStrip;
-uint32_t currentSteps = 0;
 int currentLed = 0;
-const int ledCount = 8;
+const int ledCount = 5;
 rgb_color colors[ledCount];
 bool deployed = false;
 
@@ -44,38 +42,44 @@ void loop() {
   if (Serial2.available()) {
     String data = Serial2.readStringUntil(";");
     // Serial.println("Data:" + data);
-    if (data == "deploy;") {
+    if (data == "deploy") {
       deploy();
+    }
+    else if (data == "stop"){
+      stop();
     }
   }
   if (Serial.available()) {
     String data2 = Serial.readStringUntil(";");
     // Serial.println("Data:" + data2);
-    if (data2 == "deploy;\n") {
+    if (data2 == "deploy") {
       deploy();
     }
+    else if (data2 == "stop"){
+      stop();
+    }
+    
   }
   if (digitalRead(buttonUP) == HIGH) {
-    deployed = false;
-    currentSteps = 0;
-    step(0);
+    deploy();
   }
   else if (digitalRead(buttonDOWN) == HIGH) {
-    deployed = false;
-    currentSteps = 0;
-    step(1);
+    stop();
   }
-  else if (currentSteps > 0) {
-    currentSteps--;
-    step(0);
-    if (currentSteps == 0) {
-      deployed = true;
-      Serial2.write("deployed;");
-      Serial.println("Finished deployment!");
-    }
-  } else {
-    digitalWrite(DIS, HIGH);
+
+  if (deployed) {
+    step(LOW);
   }
+}
+
+void deploy() {
+  Serial.println("Starting deployment...");
+  deployed = true;
+}
+
+void stop() {
+  Serial.println("Stopping deployment...");
+  deployed=false;
 }
 
 ISR(TIMER1_COMPA_vect){
@@ -86,17 +90,16 @@ ISR(TIMER1_COMPA_vect){
   }
 }
 
-void deploy() {
-  Serial.println("Starting deployment...");
-  currentSteps = stepsForUp;
-}
-
 void light() {
-  currentLed %= ledCount;
-  turn_off_all_leds();
-  colors[currentLed] = rgb_color(255,255,0);
+  uint8_t time = millis() >> 2;
+  for(uint16_t i = 0; i < ledCount; i++)
+  {
+    uint8_t x = time - i * 8;
+    colors[i].red = x;
+    colors[i].green = 255 - x;
+    colors[i].blue = x;
+  }
   ledStrip.write(colors, ledCount, 16);
-  currentLed++;
 }
 
 void step(int d) {

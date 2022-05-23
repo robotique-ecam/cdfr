@@ -7,14 +7,14 @@
 import rclpy
 from bluedot.btcomm import BluetoothClient
 from rclpy.node import Node
-from std_srvs.srv import Trigger
+from std_srvs.srv import SetBool
 
 
 class PharaonService(Node):
     def __init__(self):
         super().__init__("pharaon_service")
         self.srv = self.create_service(
-            Trigger, "/pharaon/deploy", self.activate_callback
+            SetBool, "/pharaon/deploy", self.activate_callback
         )
         self.bt = BluetoothClient("00:14:03:06:61:BA", self.data_received)
         self.get_logger().info("Pharaon has been started")
@@ -26,13 +26,14 @@ class PharaonService(Node):
     def activate_callback(self, request, response):
         """Callback called upon trigger."""
         try:
-            self.bt.send("deploy;")
+            task = "deploy" if request.data else "stop"
+            self.bt.send(task)
             response.success = True
-            response.message = "Pharaon requested to deploy"
+            response.message = f"Pharaon requested to {task}"
             self.get_logger().info(response.message)
         except BaseException as e:
             response.success = False
-            response.message = f"Pharaon failed to deploy with {e}"
+            response.message = f"Pharaon failed to {task} with {e}"
             self.get_logger().warn(response.message)
         return response
 

@@ -98,7 +98,8 @@ class Robot(Node):
                 self.get_enable_drivers_client, self.get_enable_drivers_request
             )
         # Pharaon trigger client
-        self.trigger_deploy_pharaon_request = Trigger.Request()
+        self.trigger_deploy_pharaon_request = SetBool.Request()
+        self.trigger_deploy_pharaon_request.data = True
         self.trigger_deploy_pharaon_client = self.create_client(
             Trigger, "/pharaon/deploy"
         )
