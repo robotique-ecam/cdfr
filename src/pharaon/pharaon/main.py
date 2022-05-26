@@ -8,6 +8,7 @@ import rclpy
 from bluedot.btcomm import BluetoothClient
 from rclpy.node import Node
 from std_srvs.srv import SetBool
+from time import sleep
 
 
 class PharaonService(Node):
@@ -16,8 +17,17 @@ class PharaonService(Node):
         self.srv = self.create_service(
             SetBool, "/pharaon/deploy", self.activate_callback
         )
-        self.bt = BluetoothClient("00:14:03:06:61:BA", self.data_received)
-        self.get_logger().info("Pharaon has been started")
+        self.connect_to_bt()
+        self.get_logger().info("Pharaon has been started!")
+        
+    def connect_to_bt(self):
+        while True:
+            try:
+                self.bt = BluetoothClient("00:14:03:06:61:BA", self.data_received)
+                break
+            except OSError:
+                self.get_logger().warn("Pharaon could not connect to Bluetooth device, retrying...")
+                sleep(5)
 
     def data_received(self, data):
         """Callback upon data received."""
