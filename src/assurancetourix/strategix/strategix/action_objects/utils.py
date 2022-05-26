@@ -1,8 +1,10 @@
 from action_msgs.msg import GoalStatus
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 from nav2_msgs.action import NavigateToPose
 from PyKDL import Rotation
+from tf2_kdl import transform_to_kdl, do_transform_frame
 import rclpy
+import numpy as np
 
 from rclpy.action import ActionClient
 from rclpy.node import Node
@@ -68,7 +70,7 @@ class Navigator(Node):
         if self.result_future.result():
             self.status = self.result_future.result().status
             if self.status != GoalStatus.STATUS_SUCCEEDED:
-                self.info("Goal with failed with status code: {0}".format(self.status))
+                self.info("Goal failed with status code: {0}".format(self.status))
                 return True
         else:
             # Timed out, still processing, not complete yet
@@ -106,12 +108,41 @@ def navigate_to_point(position, orientation, z=0.0):
     goal_pose.pose.position.x = position[0]
     goal_pose.pose.position.y = position[1]
     goal_pose.pose.position.z = z
-    q = Rotation.RotZ(orientation).GetQuaternion()
+    q = Rotation.RotZ(np.deg2rad(orientation)).GetQuaternion()
     goal_pose.pose.orientation.x = q[0]
     goal_pose.pose.orientation.y = q[1]
     goal_pose.pose.orientation.z = q[2]
     goal_pose.pose.orientation.w = q[3]
     navigator.goToPose(goal_pose)
+    
+    navigator.info(f"Goal objective updated to:")
+    navigator.info(f"Position x: {position[0]}, y: {position[1]}")
+    navigator.info(f"Orientation {orientation} degrees")
 
     while not navigator.isNavComplete():
         pass
+
+def get_transformed_position(object_position, object_orientation, robot_to_actuator):
+    """"Object position in (x, y), orientation in degrees and robot_to_actuator in (x, y)"""
+    actuator_to_robot = TransformStamped()
+    actuator_to_robot.transform.translation.x = -robot_to_actuator[0]
+    actuator_to_robot.transform.translation.y = -robot_to_actuator[1]
+
+    goal_pose = TransformStamped()
+    goal_pose.transform.translation.x = object_position[0]
+    goal_pose.transform.translation.y = object_position[1]
+
+    rot = Rotation.RotZ(np.deg2rad(object_orientation))
+
+    q = rot.GetQuaternion()
+
+    goal_pose.transform.rotation.x = q[0]
+    goal_pose.transform.rotation.y = q[1]
+    goal_pose.transform.rotation.z = q[2]
+    goal_pose.transform.rotation.w = q[3]
+
+    actuator_to_robot_kdl = transform_to_kdl(actuator_to_robot)
+
+    robot_goal_pose_kdl = do_transform_frame(actuator_to_robot_kdl, goal_pose)
+
+    return (robot_goal_pose_kdl.p.x(), robot_goal_pose_kdl.p.y())
