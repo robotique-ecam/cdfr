@@ -13,6 +13,7 @@ from platform import machine
 from rclpy.node import Node
 from lcd_msgs.msg import Lcd
 from std_srvs.srv import SetBool, Trigger
+from std_msgs.msg import UInt8, String
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_Goal
 from transformix_msgs.srv import InitialStaticTFsrv
@@ -77,6 +78,8 @@ class Robot(Node):
             self.odom_callback,
             10,
         )
+        # Score update publisher
+        self.score_publisher = self.create_publisher(UInt8, "/strategix/add_score", 1)
         # Py-Trees blackboard to send NavigateToPose actions
         self.blackboard = py_trees.blackboard.Client(name="NavigateToPose")
         self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
@@ -220,7 +223,12 @@ class Robot(Node):
         if hasattr(resp, "success"):
             resp.success = True
         return resp
-
+    
+    def add_score(self, number: int):
+        msg = UInt8()
+        msg.data = number
+        self.score_publisher.publish(msg)
+    
     def set_start_time(self):
         self.start_time = self.get_clock().now().nanoseconds * 1e-9
 

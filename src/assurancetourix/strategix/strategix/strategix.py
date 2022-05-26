@@ -34,7 +34,9 @@ class Strategix(Node):
         self.action_srv = self.create_service(
             ChangeActionStatus, "/strategix/action", self.action_callback
         )
-        self.lcd_driver = self.create_publisher(Lcd, "/obelix/lcd", 1)
+        self.score = 2 + 2 # Statuette put + Pharaon put
+        self.score_sub = self.create_subscription(UInt8, "/strategix/add_score", self.score_callback, 10)
+        self.lcd_driver = self.create_publisher(Lcd, "/asterix/lcd", 1)
         self.score_publisher = self.create_publisher(UInt8, "/score", 1)
         self.get_logger().info(f"Default side is {self.side}")
         self.get_logger().info("Strategix is ready")
@@ -107,15 +109,19 @@ class Strategix(Node):
         response.acquittal.data = True
         return response
 
+    def score_callback(self, msg):
+        """Score callback"""
+        self.score += msg.data
+        self.update_score()
+    
     def update_score(self):
         """Update global score."""
-        score = self.get_score()
         lcd_msg = Lcd()
         lcd_msg.line = 1
-        lcd_msg.text = f"Score: {score}"
-        self.get_logger().info(f"Score: {score}")
+        lcd_msg.text = f"Score: {self.score}"
+        self.get_logger().info(f"Score: {self.score}".ljust(16))
         score_msg = UInt8()
-        score_msg.data = score
+        score_msg.data = self.score
         self.score_publisher.publish(score_msg)
         self.lcd_driver.publish(lcd_msg)
 
