@@ -17,7 +17,12 @@ class PumpDriver:
         """Get outputs state from all drivers."""
         values = bytearray(self._len)
         for addr, i in zip(self._addrs, range(self._len)):
-            values[i] = self._i2c.read_byte(addr)
+            while True:
+                try:
+                    values[i] = self._i2c.read_byte(addr)
+                    break
+                except OSError: # Keep reading value until it doesn't fail
+                    pass
         return int.from_bytes(values, "big")
 
     def _set_state(self, value: int):

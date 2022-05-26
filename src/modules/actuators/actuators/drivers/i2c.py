@@ -26,11 +26,21 @@ class I2CDriver:
         """Read pump driver outputs state."""
         if self._i2c != self._bus_id:
             with self._mutex:
-                return self._i2c.read_byte(addr)
+                while True:
+                    try:
+                        ret = self._i2c.read_byte(addr)
+                        return ret
+                    except OSError: # Keep reading value until it doesn't fail
+                        pass
         return 0
 
     def write_byte(self, addr: int, value: int):
         """Write pump driver outputs state."""
         if self._i2c != self._bus_id:
             with self._mutex:
-                self._i2c.write_byte(addr, value)
+                while True:
+                    try:
+                        self._i2c.write_byte(addr, value)
+                        break
+                    except OSError: # Keep reading value until it doesn't fail
+                        pass
