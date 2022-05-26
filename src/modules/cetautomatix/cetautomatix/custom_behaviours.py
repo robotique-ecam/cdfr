@@ -119,6 +119,8 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot):
         super().__init__(name=name)
         self.robot = robot
+        self.visited = False
+        self.prev_input = False
 
     def setup(self, node):
         """Setup GPIOs if existing."""
@@ -129,11 +131,18 @@ class GoupilleWatchdog(py_trees.behaviour.Behaviour):
 
     def update(self):
         """Guard condition for goupille."""
-        if GPIO is None or self.robot.name == "asterix":
+        if GPIO is None: # Simulation setup, waiting for service
             if self.robot.triggered:
-                self.robot.set_start_time()
+                if not self.visited:
+                    self.visited = True
+                    self.robot.set_start_time()
                 return py_trees.common.Status.SUCCESS
-        elif not GPIO.input(17) or self.robot.triggered:
-            self.robot.set_start_time()
-            return py_trees.common.Status.SUCCESS
+        else:
+            input = GPIO.input(17)
+            if (not input and self.prev_input) or self.robot.triggered: # Triggered by service, or goupille removed
+                if not self.visited:
+                    self.visited = True
+                    self.robot.set_start_time()
+                return py_trees.common.Status.SUCCESS
+            self.prev_input = input
         return py_trees.common.Status.RUNNING

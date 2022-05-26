@@ -255,7 +255,9 @@ class Robot(Node):
                 self.actuators.drop(dyna)
 
     def set_start_time(self):
-        self.start_time = self.get_clock().now().nanoseconds * 1e-9
+        _time = self.get_clock().now().nanoseconds * 1e-9
+        self.start_time = _time
+        self.get_logger().info(f"Started robot at time {_time}")
 
     def odom_callback(self, msg):
         """Odom callback"""
