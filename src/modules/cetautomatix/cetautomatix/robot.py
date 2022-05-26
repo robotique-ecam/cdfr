@@ -85,6 +85,13 @@ class Robot(Node):
         self.blackboard.register_key(key="goal", access=py_trees.common.Access.WRITE)
         # LCD driver direct access
         self.lcd_driver_pub = self.create_publisher(Lcd, "/obelix/lcd", 1)
+        # Actuator test subscriber
+        self.actuator_test_sub = self.create_subscription(
+            String,
+            "actuator_test",
+            self.actuator_test_callback,
+            10,
+        )
         # Wait for Strategix as this can block the whole Behaviour Tree
         while not self.get_available_actions_client.wait_for_service(timeout_sec=5):
             self.get_logger().warn(
@@ -229,6 +236,24 @@ class Robot(Node):
         msg.data = number
         self.score_publisher.publish(msg)
     
+    def actuator_test_callback(self, msg):
+        """Test actuators."""
+        command = str(msg.data)
+        self.get_logger().info(f"Actuator test received: {command}")
+        if command == "resistance":
+            self.actuators.getResistanceColor()
+        elif command == "push":
+            self.actuators.pushResistance()
+            self.actuators.pushHex()
+        elif command.startswith("pickup_"):
+            dyna = int(command[7:])
+            if dyna in (1, 2, 3):
+                self.actuators.pickup(dyna)
+        elif command.startswith("drop_"):
+            dyna = int(command[5:])
+            if dyna in (1, 2, 3):
+                self.actuators.drop(dyna)
+
     def set_start_time(self):
         self.start_time = self.get_clock().now().nanoseconds * 1e-9
 
